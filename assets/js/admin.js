@@ -4,7 +4,7 @@
 	'use strict';
 
 	var $tabs = $( '.nav-tab-wrapper .nav-tab' ),
-		$panels = $( '.pixelgradelt_records-tab-panel' ),
+		$panels = $( '.pixelgradelt_retailer-tab-panel' ),
 		updateTabs;
 
 	updateTabs = function() {
@@ -30,14 +30,14 @@
 	}, 1 );
 
 	// Handle the checkbox for toggling plugins.
-	$( document ).on( 'change', '.pixelgradelt_records-status', function() {
+	$( document ).on( 'change', '.pixelgradelt_retailer-status', function() {
 		var $checkbox = $( this ),
 			$spinner = $( this ).siblings( '.spinner' ).addClass( 'is-active' );
 
-		wp.ajax.post( 'pixelgradelt_records_toggle_plugin', {
+		wp.ajax.post( 'pixelgradelt_retailer_toggle_plugin', {
 			plugin_file: $checkbox.val(),
 			status: $checkbox.prop( 'checked' ),
-			_wpnonce: $checkbox.siblings( '.pixelgradelt_records-status-nonce' ).val()
+			_wpnonce: $checkbox.siblings( '.pixelgradelt_retailer-status-nonce' ).val()
 		}).done(function() {
 			setTimeout( function() {
 				$spinner.removeClass( 'is-active' );
@@ -54,22 +54,22 @@
 	}
 
 	$( document )
-		.on( 'click.pixelgradelt_records', '.pixelgradelt_records-dropdown-toggle', function( e ) {
-			var $group = $( e.target ).closest( '.pixelgradelt_records-dropdown-group' ),
+		.on( 'click.pixelgradelt_retailer', '.pixelgradelt_retailer-dropdown-toggle', function( e ) {
+			var $group = $( e.target ).closest( '.pixelgradelt_retailer-dropdown-group' ),
 				isOpen = $group.hasClass( 'is-open' );
 
 			e.preventDefault();
 
 			toggleDropdown( $group, ! isOpen );
 		})
-		.on( 'click.pixelgradelt_records', function( e ) {
+		.on( 'click.pixelgradelt_retailer', function( e ) {
 			var $button = $( e.target ).closest( 'button' ),
-				$group = $( e.target ).closest( '.pixelgradelt_records-dropdown-group' );
+				$group = $( e.target ).closest( '.pixelgradelt_retailer-dropdown-group' );
 
-			if ( ! $button.hasClass( 'pixelgradelt_records-dropdown-toggle' ) ) {
-				toggleDropdown( $( '.pixelgradelt_records-dropdown-group' ), false );
+			if ( ! $button.hasClass( 'pixelgradelt_retailer-dropdown-toggle' ) ) {
+				toggleDropdown( $( '.pixelgradelt_retailer-dropdown-group' ), false );
 			} else {
-				toggleDropdown( $( '.pixelgradelt_records-dropdown-group' ).not( $group ), false );
+				toggleDropdown( $( '.pixelgradelt_retailer-dropdown-group' ).not( $group ), false );
 			}
 		});
 

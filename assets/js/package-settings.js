@@ -13,14 +13,14 @@
 			var model = this.model,
 				selection = this.selection;
 
-			this.$( '.pixelgradelt_records-release' ).each(function() {
+			this.$( '.pixelgradelt_retailer-release' ).each(function() {
 				new ReleaseButton({
 					el: this,
 					selection: selection
 				}).render();
 			});
 
-			this.views.add( '.pixelgradelt_records-releases', [
+			this.views.add( '.pixelgradelt_retailer-releases', [
 				new ReleaseActions({
 					package: this.model,
 					selection: this.selection
@@ -88,8 +88,8 @@
 
 	var ReleaseActions = wp.Backbone.View.extend({
 		tagName: 'div',
-		className: 'pixelgradelt_records-release-actions',
-		template: wp.template( 'pixelgradelt_records-release-actions' ),
+		className: 'pixelgradelt_retailer-release-actions',
+		template: wp.template( 'pixelgradelt_retailer-release-actions' ),
 
 		events: {
 			'click input': 'selectTextField'
@@ -119,7 +119,7 @@
 		}
 	});
 
-	$( '.pixelgradelt_records-package' ).each(function() {
+	$( '.pixelgradelt_retailer-package' ).each(function() {
 		new PackagePanel({
 			el: this,
 			model: new Backbone.Model({

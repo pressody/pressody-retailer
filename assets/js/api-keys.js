@@ -1,11 +1,11 @@
-/* global _pixelgradelt_recordsApiKeysData, _pixelgradelt_recordsApiKeySettings, wp */
+/* global _pixelgradelt_retailerApiKeysData, _pixelgradelt_retailerApiKeySettings, wp */
 
 (function( window, $, _, Backbone, wp, undefined ) {
 	'use strict';
 
 	var app = {},
-		data     = _pixelgradelt_recordsApiKeysData,
-		settings = _pixelgradelt_recordsApiKeySettings;
+		data     = _pixelgradelt_retailerApiKeysData,
+		settings = _pixelgradelt_retailerApiKeySettings;
 
 	_.extend( app, { collection: {}, controller: {}, model: {}, view: {} } );
 
@@ -17,7 +17,7 @@
 		createApiKey: function( name, user_id ) {
 			var self = this;
 
-			return wp.ajax.post( 'pixelgradelt_records_create_api_key', {
+			return wp.ajax.post( 'pixelgradelt_retailer_create_api_key', {
 				name: name,
 				user: user_id,
 				nonce: settings.createApiKeyNonce
@@ -27,7 +27,7 @@
 		},
 
 		deleteApiKey: function( model ) {
-			return wp.ajax.post( 'pixelgradelt_records_delete_api_key', {
+			return wp.ajax.post( 'pixelgradelt_retailer_delete_api_key', {
 				token: model.get( 'token' ),
 				nonce: settings.deleteApiKeyNonce
 			}).done(function( response ) {
@@ -58,7 +58,7 @@
 
 	app.view.ApiKeysTable = Backbone.View.extend({
 		initialBody: null,
-		template: wp.template( 'pixelgradelt_records-api-key-table' ),
+		template: wp.template( 'pixelgradelt_retailer-api-key-table' ),
 
 		initialize: function( options ) {
 			this.collection = options.collection;
@@ -84,7 +84,7 @@
 			}
 
 			new app.view.CreateApiKeyForm({
-				el: this.$( '.pixelgradelt_records-create-api-key-form' ),
+				el: this.$( '.pixelgradelt_retailer-create-api-key-form' ),
 				controller: this.controller
 			}).render();
 
@@ -103,7 +103,7 @@
 
 	app.view.ApiKeysTableRow = wp.Backbone.View.extend({
 		tagName: 'tr',
-		template: wp.template( 'pixelgradelt_records-api-key-table-row' ),
+		template: wp.template( 'pixelgradelt_retailer-api-key-table-row' ),
 
 		events: {
 			'click .js-revoke': 'revoke',
@@ -156,8 +156,8 @@
 
 		render: function() {
 			this.$button = this.$( '.button' );
-			this.$feedback = this.$( '.pixelgradelt_records-create-api-key-feedback' );
-			this.$name = this.$( '#pixelgradelt_records-create-api-key-name' );
+			this.$feedback = this.$( '.pixelgradelt_retailer-create-api-key-feedback' );
+			this.$name = this.$( '#pixelgradelt_retailer-create-api-key-name' );
 			this.$spinner = $( '<span class="spinner"></span>' ).insertAfter( this.$button );
 
 			this.toggleButtonState();
@@ -212,7 +212,7 @@
 	});
 
 	new app.view.ApiKeysTable({
-		el: document.getElementById( 'pixelgradelt_records-api-key-manager' ),
+		el: document.getElementById( 'pixelgradelt_retailer-api-key-manager' ),
 		collection: controller.get( 'apiKeys' ),
 		controller: controller
 	}).render();
