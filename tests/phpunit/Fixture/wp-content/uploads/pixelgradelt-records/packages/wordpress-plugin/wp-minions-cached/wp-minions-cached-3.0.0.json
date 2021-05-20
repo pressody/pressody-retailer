@@ -1,0 +1,45 @@
+{
+    "source": {
+        "type": "git",
+        "url": "https://github.com/10up/WP-Minions.git",
+        "reference": "fe37083445db4173ae24ee5dc193095298ff968b"
+    },
+    "require": {
+        "composer/installers": "~1.0"
+    },
+    "time": "2017-07-06T22:15:30+00:00",
+    "source_type": "packagist.org",
+    "source_name": "10up/wp-minions",
+    "authors": [
+        {
+            "name": "Pixelgrade",
+            "homepage": "https://pixelgrade.com"
+        }
+    ],
+    "description": "Custom release description.",
+    "homepage": "https://custom.com",
+    "license": "GPL-3.0-only",
+    "keywords": [
+        "custom1",
+        "custom2"
+    ],
+    "requires_at_least_wp": "5.5",
+    "tested_up_to_wp": "5.6",
+    "requires_php": "7.4",
+    "require_ltpackages": {
+        "local-plugin/automatewoo #102": {
+            "composer_package_name": "pixelgradelt_records/automatewoo",
+            "version_range": "*",
+            "stability": "stable",
+            "source_name": "local-plugin/automatewoo",
+            "managed_post_id": 102,
+            "pseudo_id": "local-plugin/automatewoo #102"
+        }
+    },
+    "dist": {
+        "type": "zip",
+        "url": "http://example.org/ltpackagist/9VJPW/wp-minions-cached/3.0.0",
+        "shasum": "a95d10ce78b9900b413716b0cb52344a5cc87303",
+        "artifactmtime": 1620293308
+    }
+}
