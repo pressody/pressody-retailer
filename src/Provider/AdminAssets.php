@@ -36,7 +36,7 @@ class AdminAssets extends AbstractHookProvider {
 			'pixelgradelt_retailer-admin',
 			$this->plugin->get_url( 'assets/js/admin.js' ),
 			[ 'jquery', 'wp-backbone', 'wp-util' ],
-			'20210210',
+			'20210510',
 			true
 		);
 
@@ -44,7 +44,7 @@ class AdminAssets extends AbstractHookProvider {
 			'pixelgradelt_retailer-api-keys',
 			$this->plugin->get_url( 'assets/js/api-keys.js' ),
 			[ 'wp-backbone', 'wp-util' ],
-			'20210210',
+			'20210510',
 			true
 		);
 
@@ -72,7 +72,7 @@ class AdminAssets extends AbstractHookProvider {
 			'pixelgradelt_retailer-admin',
 			$this->plugin->get_url( 'assets/css/admin.css' ),
 			[],
-			'20210210'
+			'20210510'
 		);
 	}
 }

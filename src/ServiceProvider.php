@@ -14,11 +14,15 @@ namespace PixelgradeLT\Retailer;
 use Cedaro\WP\Plugin\Provider\I18n;
 use Composer\Semver\VersionParser;
 use Pimple\Container as PimpleContainer;
+use Pimple\Psr11\ServiceLocator;
 use Pimple\ServiceIterator;
 use Pimple\ServiceProviderInterface;
+use PixelgradeLT\Retailer\Transformer\ComposerPackageTransformer;
+use PixelgradeLT\Retailer\Transformer\ComposerSolutionsRepositoryTransformer;
 use PixelgradeLT\Retailer\Logging\Handler\FileLogHandler;
 use PixelgradeLT\Retailer\Logging\Logger;
 use PixelgradeLT\Retailer\Logging\LogsManager;
+use PixelgradeLT\Retailer\Transformer\ComposerSolutionTransformer;
 use Psr\Log\LogLevel;
 use PixelgradeLT\Retailer\Authentication\ApiKey;
 use PixelgradeLT\Retailer\Authentication;
@@ -220,6 +224,22 @@ class ServiceProvider implements ServiceProviderInterface {
 				);
 		};
 
+		$container['route.composer.solutions'] = function ( $container ) {
+			return new Route\ComposerPackages(
+				$container['repository.solutions'],
+				$container['transformer.composer_repository']
+			);
+		};
+
+		$container['route.controllers'] = function ( $container ) {
+			return new ServiceLocator(
+				$container,
+				[
+					'composer_solutions' => 'route.composer.solutions',
+				]
+			);
+		};
+
 		$container['screen.edit_solution'] = function ( $container ) {
 			return new Screen\EditSolution(
 				$container['solution.manager'],
@@ -287,6 +307,19 @@ class ServiceProvider implements ServiceProviderInterface {
 
 		$container['storage.composer_working_directory'] = function ( $container ) {
 			return \path_join( $container['storage.working_directory'], 'composer/' );
+		};
+
+		$container['transformer.composer_package'] = function ( $container ) {
+			return new ComposerSolutionTransformer( $container['solution.factory'] );
+		};
+
+		$container['transformer.composer_repository'] = function ( $container ) {
+			return new ComposerSolutionsRepositoryTransformer(
+				$container['transformer.composer_package'],
+				$container['solution.manager'],
+				$container['version.parser'],
+				$container['logs.logger']
+			);
 		};
 
 		$container['version.parser'] = function () {

@@ -13,7 +13,6 @@ namespace PixelgradeLT\Retailer\Authentication;
 
 use PixelgradeLT\Retailer\Exception\AuthenticationException;
 use PixelgradeLT\Retailer\HTTP\Request;
-use WP_Error;
 
 /**
  * Authentication server interface.

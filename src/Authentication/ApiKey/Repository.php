@@ -32,7 +32,7 @@ class Repository implements ApiKeyRepository {
 	 *
 	 * @var Factory
 	 */
-	protected $factory;
+	protected Factory $factory;
 
 	/**
 	 * Create the API Key repository.
@@ -53,7 +53,7 @@ class Repository implements ApiKeyRepository {
 	 * @param string $token API Key token.
 	 * @return ApiKey|null
 	 */
-	public function find_by_token( string $token ) {
+	public function find_by_token( string $token ): ?ApiKey {
 		$meta_key = static::get_meta_key( $token );
 
 		$query = new WP_User_Query(

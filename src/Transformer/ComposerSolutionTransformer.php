@@ -19,7 +19,7 @@ use PixelgradeLT\Retailer\SolutionFactory;
  *
  * @since 0.1.0
  */
-class ComposerSolutionTransformerComposer implements ComposerPackageTransformer {
+class ComposerSolutionTransformer implements ComposerPackageTransformer {
 
 	/**
 	 * Package factory.
@@ -50,6 +50,10 @@ class ComposerSolutionTransformerComposer implements ComposerPackageTransformer 
 	 */
 	public function transform( Package $solution ): Package {
 		$builder = $this->factory->create( 'composer' )->with_package( $solution );
+
+		// For solution packages used in a Composer packages.json, we use the metapackage type.
+		// @link https://getcomposer.org/doc/04-schema.md#type
+		$builder->set_type( 'metapackage' );
 
 		$vendor = apply_filters( 'pixelgradelt_retailer_vendor', 'pixelgradelt_retailer' );
 		$name   = $this->normalize_package_name( $solution->get_slug() );

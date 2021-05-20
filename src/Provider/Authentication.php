@@ -81,7 +81,7 @@ class Authentication extends AbstractHookProvider {
 
 		// Allow cookie authentication to work for our requests.
 		$request_path = $this->get_request_path();
-		if ( 0 === strpos( $request_path, '/ltpackagist' ) ) {
+		if ( 0 === strpos( $request_path, '/ltsolutions' ) ) {
 			remove_filter( 'rest_authentication_errors', 'rest_cookie_check_errors', 100 );
 		}
 	}
@@ -168,7 +168,7 @@ class Authentication extends AbstractHookProvider {
 			return true;
 		}
 
-		if ( 0 === strpos( $request_path, '/ltpackagist' ) ) {
+		if ( 0 === strpos( $request_path, '/ltsolutions' ) ) {
 			return true;
 		}
 

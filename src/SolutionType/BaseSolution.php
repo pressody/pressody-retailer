@@ -11,8 +11,6 @@ declare ( strict_types=1 );
 
 namespace PixelgradeLT\Retailer\SolutionType;
 
-use PixelgradeLT\Retailer\Exception\InvalidPackage;
-use PixelgradeLT\Retailer\Exception\InvalidReleaseVersion;
 use PixelgradeLT\Retailer\Package;
 
 /**

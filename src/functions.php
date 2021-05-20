@@ -108,11 +108,11 @@ function get_solutions_permalink( array $args = null ): string {
 
 	$permalink = get_option( 'permalink_structure' );
 	if ( empty( $permalink ) ) {
-		$url = add_query_arg( 'pixelgradelt_retailer_route', 'composer_packages', home_url( '/' ) );
+		$url = add_query_arg( 'pixelgradelt_retailer_route', 'composer_solutions', home_url( '/' ) );
 	} else {
 		// Leave off the packages.json if 'base' arg is true.
 		$suffix = isset( $args['base'] ) && $args['base'] ? '' : 'packages.json';
-		$url    = sprintf( network_home_url( '/ltpackagist/%s' ), $suffix );
+		$url    = sprintf( network_home_url( '/ltsolutions/%s' ), $suffix );
 	}
 
 	return $url;

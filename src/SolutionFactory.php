@@ -63,7 +63,6 @@ final class SolutionFactory {
 	 * @return BaseSolutionBuilder Solution builder instance.
 	 */
 	public function create( string $solution_type ): BaseSolutionBuilder {
-
 		return new BaseSolutionBuilder( new BaseSolution(), $this->solution_manager, $this->logger );
 	}
 }

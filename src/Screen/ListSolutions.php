@@ -117,55 +117,10 @@ class ListSolutions extends AbstractHookProvider {
 			return $columns;
 		}
 
-		// Insert after the title a column for package source details.
-		$columns = ArrayHelpers::insertAfterKey( $columns, 'title', [ 'package_source' => esc_html__( 'Package Source', 'pixelgradelt_retailer' ) ] );
-
 		return $columns;
 	}
 
 	protected function populate_custom_columns( string $column, int $post_id ): void {
-		// Package Source column
-		if ( 'package_source' === $column ) {
-			$source_output = '—';
-			// Add details to the title regarding the package configured source.
-			$package_data = $this->package_manager->get_solution_id_data( $post_id );
-			if ( ! empty( $package_data ) && ! empty( $package_data['source_type'] ) ) {
-				switch ( $package_data['source_type'] ) {
-					case 'packagist.org':
-						$source_output = 'Packagist.org - ' . $package_data['source_name'];
-						break;
-					case 'wpackagist.org':
-						$source_output = 'WPackagist.org - ' . $package_data['source_name'];
-						break;
-					case 'vcs':
-						if ( false !== strpos( $package_data['vcs_url'], 'github.com' ) ) {
-							$source_output = 'Github - ';
-						} else {
-							$source_output = 'VCS - ';
-						}
 
-						$source_output .= $package_data['source_name'];
-						break;
-					case 'local.plugin':
-						$source_output = 'Local Plugin - ' . $package_data['slug'];
-						break;
-					case 'local.theme':
-						$source_output = 'Local Theme - ' . $package_data['slug'];
-						break;
-					case 'local.manual':
-						if ( SolutionTypes::THEME === $package_data['type'] ) {
-							$source_output = 'Manual Theme - ' . $package_data['slug'];
-						} else {
-							$source_output = 'Manual Plugin - ' . $package_data['slug'];
-						}
-						break;
-					default:
-						// Nothing
-						break;
-				}
-			}
-
-			echo $source_output;
-		}
 	}
 }

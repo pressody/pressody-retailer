@@ -10,7 +10,7 @@
  * Plugin Name: PixelgradeLT Retailer
  * Plugin URI: https://github.com/pixelgradelt/pixelgradelt-retailer
  * Description: Define and manage PixelgradeLT solutions to be purchased and used on customers' websites. Ensures the connection with WooCommerce.
- * Version: 0.1.0
+ * Version: 0.4.0
  * Author: Pixelgrade
  * Author URI: https://pixelgrade.com/
  * License: GPL-2.0-or-later
@@ -37,7 +37,7 @@ if ( ! \defined( 'ABSPATH' ) ) {
  *
  * @var string
  */
-const VERSION = '0.1.0';
+const VERSION = '0.4.0';
 
 // Load the Composer autoloader.
 if ( file_exists( __DIR__ . '/vendor/autoload.php' ) ) {

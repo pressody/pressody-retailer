@@ -53,8 +53,8 @@ class RewriteRules extends AbstractHookProvider {
 	 */
 	public function register_rewrite_rules() {
 		add_rewrite_rule(
-			'ltpackagist/packages.json$',
-			'index.php?pixelgradelt_retailer_route=composer_packages',
+			'ltsolutions/packages.json$',
+			'index.php?pixelgradelt_retailer_route=composer_solutions',
 			'top'
 		);
 	}
@@ -71,8 +71,8 @@ class RewriteRules extends AbstractHookProvider {
 	 */
 	public function register_external_rewrite_rules( WP_Rewrite $wp_rewrite ) {
 		$wp_rewrite->add_external_rule(
-			'ltpackagist/packages.json$',
-			'index.php?pixelgradelt_retailer_route=composer_packages'
+			'ltsolutions/packages.json$',
+			'index.php?pixelgradelt_retailer_route=composer_solutions'
 		);
 	}
 

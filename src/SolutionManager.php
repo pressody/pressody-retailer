@@ -370,60 +370,15 @@ class SolutionManager {
 		$data['is_managed']      = true;
 		$data['managed_post_id'] = $post_ID;
 
-		$data['name']        = $this->get_post_package_name( $post_ID );
-		$data['type']        = $this->get_post_package_type( $post_ID );
-		$data['slug']        = $this->get_post_package_slug( $post_ID );
-		$data['keywords']    = $this->get_post_package_keywords( $post_ID );
-		$data['description'] = get_post_meta( $post_ID, '_package_details_description', true );
-		$data['homepage']    = get_post_meta( $post_ID, '_package_details_homepage', true );
+		$data['name']        = $this->get_post_solution_name( $post_ID );
+		$data['type']        = $this->get_post_solution_type( $post_ID );
+		$data['slug']        = $this->get_post_solution_slug( $post_ID );
+		$data['keywords']    = $this->get_post_solution_keywords( $post_ID );
+		$data['description'] = get_post_meta( $post_ID, '_solution_details_description', true );
+		$data['homepage']    = get_post_meta( $post_ID, '_solution_details_homepage', true );
 
-		switch ( $data['source_type'] ) {
-			case 'packagist.org':
-			case 'wpackagist.org':
-				break;
-			case 'vcs':
-				$data['vcs_url'] = get_post_meta( $post_ID, '_package_vcs_url', true );
-				break;
-			case 'local.plugin':
-				$data['local_plugin_file'] = get_post_meta( $post_ID, '_package_local_plugin_file', true );
-
-				// Determine if plugin is actually (still) installed.
-				$data['local_installed'] = false;
-				$installed_plugins       = get_plugins();
-				if ( in_array( $data['local_plugin_file'], array_keys( $installed_plugins ) ) ) {
-					$data['local_installed'] = true;
-				}
-				break;
-			case 'local.theme':
-				$data['local_theme_slug'] = get_post_meta( $post_ID, '_package_local_theme_slug', true );
-
-				// Determine if theme is actually (still) installed.
-				$data['local_installed'] = false;
-				$installed_themes        = search_theme_directories();
-				if ( is_array( $installed_themes ) && in_array( $data['local_theme_slug'], array_keys( $installed_themes ) ) ) {
-					$data['local_installed'] = true;
-				}
-				break;
-			case 'local.manual':
-				break;
-			default:
-				// Nothing
-				break;
-		}
-
-		if ( in_array( $data['source_type'], [ 'packagist.org', 'wpackagist.org', 'vcs', ] ) ) {
-			$data['source_version_range'] = trim( get_post_meta( $post_ID, '_package_source_version_range', true ) );
-			$data['source_stability']     = trim( get_post_meta( $post_ID, '_package_source_stability', true ) );
-
-			// Get the source version/release packages data (fetched from the external repo) we have stored.
-			$source_cached_release_packages = get_post_meta( $post_ID, '_package_source_cached_release_packages', true );
-			if ( ! empty( $source_cached_release_packages[ $data['source_name'] ] ) ) {
-				$data['source_cached_release_packages'] = $source_cached_release_packages[ $data['source_name'] ];
-			}
-		}
-
-		$data['required_packages'] = $this->get_post_package_required_packages( $post_ID );
-		$data['composer_require']  = $this->get_post_package_composer_require( $post_ID );
+		$data['required_packages'] = $this->get_post_solution_required_solutions( $post_ID );
+		$data['composer_require']  = $this->get_post_solution_composer_require( $post_ID );
 
 		return $data;
 	}
@@ -454,7 +409,7 @@ class SolutionManager {
 	 *
 	 * @return array The found package data.
 	 */
-	public function get_managed_package_data_by( array $args ): array {
+	public function get_solution_data_by( array $args ): array {
 		$found_package_id = $this->get_solution_ids_by( $args );
 		if ( empty( $found_package_id ) ) {
 			return [];
@@ -466,187 +421,7 @@ class SolutionManager {
 		return $this->get_solution_id_data( $found_package_id );
 	}
 
-	/**
-	 * Given an external (packagist.org, wpackagist.org, or vcs) managed package post ID, fetch the remote releases data.
-	 *
-	 * @param int $post_ID
-	 *
-	 * @throws \Exception
-	 * @return array
-	 */
-	public function fetch_external_package_remote_releases( int $post_ID ): array {
-		$releases = [];
-
-		$post = get_post( $post_ID );
-		if ( empty( $post ) || ! in_array( $post->post_status, [ 'publish', 'draft', 'private', ] ) ) {
-			return [];
-		}
-
-		$package_data = $this->get_solution_id_data( $post_ID );
-		if ( empty( $package_data['source_type'] ) || ! in_array( $package_data['source_type'], [
-				'packagist.org',
-				'wpackagist.org',
-				'vcs',
-			] ) ) {
-			return [];
-		}
-
-		$client = $this->get_composer_client();
-
-		$version_range = ! empty( $package_data['source_version_range'] ) ? $package_data['source_version_range'] : '*';
-		$stability     = ! empty( $package_data['source_stability'] ) ? $package_data['source_stability'] : 'stable';
-
-		try {
-			switch ( $package_data['source_type'] ) {
-				case 'packagist.org':
-					// Pass along a Satis configuration to get packages.
-					$releases = $client->getPackages( [
-						// The packagist.org repository is available by default.
-						'require'                       => [
-							$package_data['source_name'] => $version_range,
-						],
-						'minimum-stability-per-package' => [
-							$package_data['source_name'] => $stability,
-						],
-					] );
-					break;
-				case 'wpackagist.org':
-					// Pass along a Satis configuration to get packages.
-					$releases = $client->getPackages( [
-						'repositories'                  => [
-							[
-								// Disable the default packagist.org repo so we don't mistakenly fetch from there.
-								'packagist.org' => false,
-							],
-							[
-								'type' => 'composer',
-								'url'  => 'https://wpackagist.org',
-								'only' => [
-									'wpackagist-plugin/*',
-									'wpackagist-theme/*',
-								],
-							],
-						],
-						'require'                       => [
-							$package_data['source_name'] => $version_range,
-						],
-						'minimum-stability-per-package' => [
-							$package_data['source_name'] => $stability,
-						],
-					] );
-					break;
-				case 'vcs':
-					if ( empty( $package_data['vcs_url'] ) ) {
-						break;
-					}
-					// Pass along a Satis configuration to get packages.
-					$releases = $client->getPackages( [
-						'repositories'                  => [
-							[
-								// Disable the default packagist.org repo so we don't mistakenly fetch from there.
-								'packagist.org' => false,
-							],
-							[
-								'type' => 'vcs',
-								'url'  => $package_data['vcs_url'],
-							],
-						],
-						'require'                       => [
-							$package_data['source_name'] => $version_range,
-						],
-						'minimum-stability-per-package' => [
-							$package_data['source_name'] => $stability,
-						],
-					] );
-					break;
-				default:
-					break;
-			}
-		} catch ( \Exception $e ) {
-			$this->logger->error(
-				'Error fetching external packages with the Composer Client for package "{package}" (source type {source_type}).',
-				[
-					'exception'   => $e,
-					'package'     => $package_data['source_name'],
-					'source_type' => $package_data['source_type'],
-				]
-			);
-		}
-
-		if ( ! empty( $releases ) ) {
-			$releases = $client->standardizePackagesForJson( $releases, $stability );
-		}
-
-		return $releases;
-	}
-
-	public function get_managed_installed_plugins( array $query_args = [] ): array {
-		$all_plugins_files = array_keys( get_plugins() );
-
-		// Get all package posts that use installed plugins.
-		$query       = new \WP_Query( array_merge( [
-			'post_type'        => static::POST_TYPE,
-			'fields'           => 'ids',
-			'post_status'      => [ 'publish', 'draft', 'private', ],
-			'meta_query'       => [
-				[
-					'key'     => '_package_source_type',
-					'value'   => 'local.plugin',
-					'compare' => '=',
-				],
-			],
-			'nopaging'         => true,
-			'no_found_rows'    => true,
-			'suppress_filters' => true,
-		], $query_args ) );
-		$package_ids = $query->get_posts();
-
-		// Go through all posts and gather all the plugin_file values.
-		$used_plugin_files = [];
-		foreach ( $package_ids as $package_id ) {
-			$plugin_file = get_post_meta( $package_id, '_package_local_plugin_file', true );
-			if ( ! empty( $plugin_file ) && in_array( $plugin_file, $all_plugins_files ) ) {
-				$used_plugin_files[] = $plugin_file;
-			}
-		}
-
-		return $used_plugin_files;
-	}
-
-	public function get_managed_installed_themes( array $query_args = [] ): array {
-		$all_theme_slugs = array_keys( wp_get_themes() );
-
-		// Get all package posts that use installed themes.
-		$query       = new \WP_Query( array_merge( [
-			'post_type'        => static::POST_TYPE,
-			'fields'           => 'ids',
-			'post_status'      => [ 'publish', 'draft', 'private', ],
-			'meta_query'       => [
-				[
-					'key'     => '_package_source_type',
-					'value'   => 'local.theme',
-					'compare' => '=',
-				],
-			],
-			'nopaging'         => true,
-			'no_found_rows'    => true,
-			'suppress_filters' => true,
-		], $query_args ) );
-		$package_ids = $query->get_posts();
-
-		// Go through all posts and gather all the theme_slug values.
-		$used_theme_slugs = [];
-		foreach ( $package_ids as $package_id ) {
-			$theme_slug = get_post_meta( $package_id, '_package_local_theme_slug', true );
-			if ( ! empty( $theme_slug ) && in_array( $theme_slug, $all_theme_slugs ) ) {
-				$used_theme_slugs[] = $theme_slug;
-			}
-		}
-
-		return $used_theme_slugs;
-	}
-
-	public function get_post_package_name( int $post_ID ): string {
+	public function get_post_solution_name( int $post_ID ): string {
 		$post = get_post( $post_ID );
 		if ( empty( $post ) ) {
 			return '';
@@ -655,7 +430,7 @@ class SolutionManager {
 		return $post->post_title;
 	}
 
-	public function get_post_package_type( int $post_ID ): string {
+	public function get_post_solution_type( int $post_ID ): string {
 		/** @var \WP_Error|\WP_Term[] $package_type */
 		$package_type = wp_get_post_terms( $post_ID, static::TYPE_TAXONOMY );
 		if ( is_wp_error( $package_type ) || empty( $package_type ) ) {
@@ -666,7 +441,7 @@ class SolutionManager {
 		return $package_type->slug;
 	}
 
-	public function get_post_package_slug( int $post_ID ): string {
+	public function get_post_solution_slug( int $post_ID ): string {
 		$post = get_post( $post_ID );
 		if ( empty( $post ) ) {
 			return '';
@@ -675,7 +450,7 @@ class SolutionManager {
 		return $post->post_name;
 	}
 
-	public function get_post_package_keywords( int $post_ID ): array {
+	public function get_post_solution_keywords( int $post_ID ): array {
 		$keywords = wp_get_post_terms( $post_ID, static::KEYWORD_TAXONOMY );
 		if ( is_wp_error( $keywords ) || empty( $keywords ) ) {
 			return [];
@@ -693,7 +468,7 @@ class SolutionManager {
 		return $keywords;
 	}
 
-	public function set_post_package_keywords( int $post_ID, array $keywords ): bool {
+	public function set_post_solution_keywords( int $post_ID, array $keywords ): bool {
 		$result = wp_set_post_terms( $post_ID, $keywords, static::KEYWORD_TAXONOMY );
 		if ( false === $result || is_wp_error( $result ) ) {
 			return false;
@@ -702,8 +477,8 @@ class SolutionManager {
 		return true;
 	}
 
-	public function get_post_package_required_packages( int $post_ID, string $pseudo_id_delimiter = ' #', string $container_id = '' ): array {
-		$required_packages = carbon_get_post_meta( $post_ID, 'package_required_packages', $container_id );
+	public function get_post_solution_required_solutions( int $post_ID, string $pseudo_id_delimiter = ' #', string $container_id = '' ): array {
+		$required_packages = carbon_get_post_meta( $post_ID, 'solution_required_solutions', $container_id );
 		if ( empty( $required_packages ) || ! is_array( $required_packages ) ) {
 			return [];
 		}
@@ -732,16 +507,50 @@ class SolutionManager {
 		return $required_packages;
 	}
 
-	public function set_post_package_required_packages( int $post_ID, array $required_packages, string $container_id = '' ) {
-		carbon_set_post_meta( $post_ID, 'package_required_packages', $required_packages, $container_id );
+	public function set_post_solution_required_solutions( int $post_ID, array $required_packages, string $container_id = '' ) {
+		carbon_set_post_meta( $post_ID, 'solution_required_solutions', $required_packages, $container_id );
 	}
 
-	public function get_post_package_composer_require( int $post_ID, string $pseudo_id_delimiter = ' #', string $container_id = '' ): array {
-		// We don't currently allow defining a per-package Composer require list.
+	public function get_post_solution_required_parts( int $post_ID, string $pseudo_id_delimiter = ' #', string $container_id = '' ): array {
+		$required_parts = carbon_get_post_meta( $post_ID, 'solution_required_parts', $container_id );
+		if ( empty( $required_parts ) || ! is_array( $required_parts ) ) {
+			return [];
+		}
+
+		// Make sure only the fields we are interested in are left.
+		$accepted_keys = array_fill_keys( [ 'pseudo_id', 'version_range', 'stability' ], '' );
+		foreach ( $required_parts as $key => $required_part ) {
+			$required_parts[ $key ] = array_replace( $accepted_keys, array_intersect_key( $required_part, $accepted_keys ) );
+
+			if ( empty( $required_part['pseudo_id'] ) || false === strpos( $required_part['pseudo_id'], $pseudo_id_delimiter ) ) {
+				unset( $required_parts[ $key ] );
+				continue;
+			}
+
+			// We will now split the pseudo_id in its components (source_name and post_id with the delimiter in between).
+			[ $source_name, $post_id ] = explode( $pseudo_id_delimiter, $required_part['pseudo_id'] );
+			if ( empty( $post_id ) ) {
+				unset( $required_parts[ $key ] );
+				continue;
+			}
+
+			$required_parts[ $key ]['source_name']     = $source_name;
+			$required_parts[ $key ]['managed_post_id'] = intval( $post_id );
+		}
+
+		return $required_parts;
+	}
+
+	public function set_post_solution_required_parts( int $post_ID, array $required_parts, string $container_id = '' ) {
+		carbon_set_post_meta( $post_ID, 'solution_required_parts', $required_parts, $container_id );
+	}
+
+	public function get_post_solution_composer_require( int $post_ID, string $pseudo_id_delimiter = ' #', string $container_id = '' ): array {
+		// We don't currently allow defining a per-solution Composer require list.
 		return [];
 	}
 
-	public function set_post_package_composer_require( int $post_ID, array $composer_require, string $container_id = '' ) {
+	public function set_post_solution_composer_require( int $post_ID, array $composer_require, string $container_id = '' ) {
 		// Nothing right now.
 		//		carbon_set_post_meta( $post_ID, 'package_composer_require', $composer_require, $container_id );
 	}
@@ -749,11 +558,11 @@ class SolutionManager {
 	/**
 	 * Given a package, dry-run a composer require of it (including its required packages) and see if all goes well.
 	 *
-	 * @param Package $package
+	 * @param Package $solution
 	 *
 	 * @return bool
 	 */
-	public function dry_run_package_require( Package $package ): bool {
+	public function dry_run_solution_require( Package $solution ): bool {
 		$client = $this->get_composer_client();
 
 		try {
@@ -784,22 +593,22 @@ class SolutionManager {
 				'only-best-candidates'          => true,
 				'require'                       => [
 					// Any package version.
-					$package->get_name() => '*',
+					$solution->get_name() => '*',
 				],
 				'minimum-stability-per-package' => [
 					// The loosest stability.
-					$package->get_name() => 'dev',
+					$solution->get_name() => 'dev',
 				],
 				// Since we are just simulating, it doesn't make sense to check the platform requirements (like PHP version, PHP extensions, etc).
 				'ignore-platform-reqs'          => true,
 			] );
 		} catch ( \Exception $e ) {
 			$this->logger->error(
-				'Error during Composer require dry-run for package "{package}" (type {type}).' . PHP_EOL . $e->getMessage(),
+				'Error during Composer require dry-run for solution "{package}" (type {type}).' . PHP_EOL . $e->getMessage(),
 				[
 					'exception' => $e,
-					'package'   => $package->get_name(),
-					'type'      => $package->get_type(),
+					'package'   => $solution->get_name(),
+					'type'      => $solution->get_type(),
 				]
 			);
 

@@ -358,7 +358,7 @@ class BaseSolutionBuilder {
 		$package_data = $this->solution_manager->get_solution_id_data( $post_id );
 		// If we couldn't fetch package data by the post ID, try via the args.
 		if ( empty( $package_data ) ) {
-			$package_data = $this->solution_manager->get_managed_package_data_by( $args );
+			$package_data = $this->solution_manager->get_solution_data_by( $args );
 		}
 		// No data, no play.
 		if ( empty( $package_data ) ) {
@@ -503,7 +503,7 @@ class BaseSolutionBuilder {
 			}
 
 			/**
-			 * Construct the Composer-like package name (the same way @see ComposerSolutionTransformerComposer::transform() does it).
+			 * Construct the Composer-like package name (the same way @see ComposerSolutionTransformer::transform() does it).
 			 */
 			$vendor = apply_filters( 'pixelgradelt_retailer_vendor', 'pixelgradelt_retailer', $required_package, $package_data );
 			$name   = $this->normalize_package_name( $package_data['slug'] );

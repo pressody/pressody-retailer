@@ -1,6 +1,6 @@
 <?php
 /**
- * Composer repository transformer.
+ * Composer solutions repository transformer.
  *
  * @since   0.1.0
  * @license GPL-2.0-or-later
@@ -19,11 +19,11 @@ use PixelgradeLT\Retailer\Repository\PackageRepository;
 use PixelgradeLT\Retailer\VersionParser;
 
 /**
- * Composer repository transformer class.
+ * Composer solutions repository transformer class.
  *
  * @since 0.1.0
  */
-class ComposerRepositoryTransformer implements PackageRepositoryTransformer {
+class ComposerSolutionsRepositoryTransformer implements PackageRepositoryTransformer {
 
 	/**
 	 * Composer package transformer.
@@ -118,46 +118,39 @@ class ComposerRepositoryTransformer implements PackageRepositoryTransformer {
 	protected function transform_item( Package $package ): array {
 		$data = [];
 
-		foreach ( $package->get_releases() as $release ) {
-			$version = $release->get_version();
-			$meta    = $release->get_meta();
+		// Since solutions are Composer metapackages, they don't have releases. So we will simulate one.
+		// @link https://getcomposer.org/doc/04-schema.md#type
 
-			// This order is important since we go from lower to higher importance. Each one overwrites the previous.
-			// Start with the hard-coded requires, if any.
-			$require = [];
-			// Merge the release require, if any.
-			if ( ! empty( $meta['require'] ) ) {
-				$require = array_merge( $require, $meta['require'] );
-			}
-			// Merge the managed required packages, if any.
-			if ( ! empty( $meta['require_ltpackages'] ) ) {
-				$require = array_merge( $require, $this->composer_transformer->transform_required_packages( $meta['require_ltpackages'] ) );
-			}
-			// We want to enforce a certain composer/installers require.
-			$require = array_merge( $require, [ 'composer/installers' => '^1.0', ] );
+		$version = '1.0.0';
+		$meta    = [];
 
-			// Finally, allow others to have a say.
-			$require = apply_filters( 'pixelgradelt_retailer_composer_package_require', $require, $package, $release );
-
-			// We don't need the artifactmtime in the dist since that is only for internal use.
-			if ( isset( $meta['dist']['artifactmtime'] ) ) {
-				unset( $meta['dist']['artifactmtime'] );
-			}
-
-			$data[ $version ] = [
-				'name'               => $package->get_name(),
-				'version'            => $version,
-				'version_normalized' => $this->version_parser->normalize( $version ),
-				'dist'               => $meta['dist'],
-				'require'            => $require,
-				'type'               => $package->get_type(),
-				'authors'            => $meta['authors'],
-				'description'        => $meta['description'],
-				'keywords'           => $meta['keywords'],
-				'homepage'           => $meta['homepage'],
-				'license'            => $meta['license'],
-			];
+		// This order is important since we go from lower to higher importance. Each one overwrites the previous.
+		// Start with the hard-coded requires, if any.
+		$require = [];
+		// Merge the package require, if any.
+		if ( ! empty( $meta['require'] ) ) {
+			$require = array_merge( $require, $meta['require'] );
 		}
+		// Merge the managed required packages, if any.
+		if ( ! empty( $meta['require_ltpackages'] ) ) {
+			$require = array_merge( $require, $this->composer_transformer->transform_required_packages( $meta['require_ltpackages'] ) );
+		}
+
+		// Finally, allow others to have a say.
+		$require = apply_filters( 'pixelgradelt_retailer_composer_solution_require', $require, $package );
+
+		$data[ $version ] = [
+			'name'               => $package->get_name(),
+			'version'            => $version,
+			'version_normalized' => $this->version_parser->normalize( $version ),
+			// No `dist` required.
+			'require'            => $require,
+			'type'               => $package->get_type(),
+			'description'        => $package->get_description(),
+			'keywords'           => $package->get_keywords(),
+			'homepage'           => $package->get_homepage(),
+			'license'            => $package->get_license(),
+		];
 
 		return $data;
 	}

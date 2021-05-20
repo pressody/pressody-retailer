@@ -166,24 +166,24 @@ class SolutionPostType extends AbstractHookProvider {
 				'orderby' => 'term_id',
 				'order'   => 'ASC',
 		) );
-		$current_solution_type_name = '';
+		$current_solution_type = '';
 
 		if ( ! is_wp_error( $solution_type ) ) {
-			if ( isset( $solution_type[0] ) && isset( $solution_type[0]->name ) ) {
-				$current_solution_type_name = $solution_type[0]->name;
+			if ( isset( $solution_type[0] ) && isset( $solution_type[0]->slug ) ) {
+				$current_solution_type = $solution_type[0]->slug;
 			}
 		}
 
 		// Use the default type, if nothing else.
-		if ( empty( $current_solution_type_name ) ) {
-			$current_solution_type_name = SolutionTypes::BASIC;
+		if ( empty( $current_solution_type ) ) {
+			$current_solution_type = SolutionTypes::BASIC;
 		}
 
 		foreach ( $terms as $term ) { ?>
 			<label title="<?php esc_attr_e( $term->name ); ?>">
 				<input type="radio"
 				       name="<?php esc_attr_e( $this->solution_manager::TYPE_TAXONOMY_SINGULAR ); ?>"
-				       value="<?php esc_attr_e( $term->name ); ?>" <?php checked( $term->name, $current_solution_type_name ); ?>>
+				       value="<?php esc_attr_e( $term->slug ); ?>" <?php checked( $term->slug, $current_solution_type ); ?>>
 				<span><?php esc_html_e( $term->name ); ?></span>
 			</label><br>
 			<?php
@@ -214,7 +214,7 @@ class SolutionPostType extends AbstractHookProvider {
 			$solution_type = SolutionTypes::BASIC;
 		}
 
-		$term = get_term_by( 'name', $solution_type, $this->solution_manager::TYPE_TAXONOMY );
+		$term = get_term_by( 'slug', $solution_type, $this->solution_manager::TYPE_TAXONOMY );
 		if ( ! empty( $term ) && ! is_wp_error( $term ) ) {
 			wp_set_object_terms( $post_id, $term->term_id, $this->solution_manager::TYPE_TAXONOMY, false );
 		}

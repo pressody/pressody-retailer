@@ -173,6 +173,13 @@ class Settings extends AbstractHookProvider {
 		);
 
 		add_settings_section(
+				'ltrecords',
+				esc_html__( 'LT Records Communication', 'pixelgradelt_retailer' ),
+				'__return_null',
+				'pixelgradelt_retailer'
+		);
+
+		add_settings_section(
 				'access',
 				esc_html__( 'Access', 'pixelgradelt_retailer' ),
 				[ $this, 'render_section_access_description' ],
@@ -201,6 +208,30 @@ class Settings extends AbstractHookProvider {
 				'pixelgradelt_retailer',
 				'default'
 		);
+
+		add_settings_field(
+				'ltrecords-packages-repo-endpoint',
+				'<label for="pixelgradelt_retailer-ltrecords-packages-repo-endpoint">' . esc_html__( 'Packages Repository Endpoint', 'pixelgradelt_retailer' ) . '</label>',
+				[ $this, 'render_field_ltrecords_packages_repo_endpoint' ],
+				'pixelgradelt_retailer',
+				'ltrecords'
+		);
+
+		add_settings_field(
+				'ltrecords-parts-repo-endpoint',
+				'<label for="pixelgradelt_retailer-ltrecords-parts-repo-endpoint">' . esc_html__( 'Parts Repository Endpoint', 'pixelgradelt_retailer' ) . '</label>',
+				[ $this, 'render_field_ltrecords_parts_repo_endpoint' ],
+				'pixelgradelt_retailer',
+				'ltrecords'
+		);
+
+		add_settings_field(
+				'ltrecords-api-key',
+				'<label for="pixelgradelt_retailer-ltrecords-api-key">' . esc_html__( 'Access API Key', 'pixelgradelt_retailer' ) . '</label>',
+				[ $this, 'render_field_ltrecords_api_key' ],
+				'pixelgradelt_retailer',
+				'ltrecords'
+		);
 	}
 
 	/**
@@ -221,6 +252,18 @@ class Settings extends AbstractHookProvider {
 			$value['github-oauth-token'] = trim( $value['github-oauth-token'] );
 		}
 
+		if ( ! empty( $value['ltrecords-packages-repo-endpoint'] ) ) {
+			$value['ltrecords-packages-repo-endpoint'] = esc_url( $value['ltrecords-packages-repo-endpoint'] );
+		}
+
+		if ( ! empty( $value['ltrecords-parts-repo-endpoint'] ) ) {
+			$value['ltrecords-parts-repo-endpoint'] = esc_url( $value['ltrecords-parts-repo-endpoint'] );
+		}
+
+		if ( ! empty( $value['ltrecords-api-key'] ) ) {
+			$value['ltrecords-api-key'] = trim( $value['ltrecords-api-key'] );
+		}
+
 		return (array) apply_filters( 'pixelgradelt_retailer_sanitize_settings', $value );
 	}
 
@@ -230,9 +273,9 @@ class Settings extends AbstractHookProvider {
 	 * @since 0.1.0
 	 */
 	public function render_screen() {
-		$packages_permalink = esc_url( get_solutions_permalink() );
-		$packages           = array_map( [ $this->composer_transformer, 'transform' ], $this->solutions->all() );
-		$system_checks      = [];
+		$solutions_permalink = esc_url( get_solutions_permalink() );
+		$solutions           = array_map( [ $this->composer_transformer, 'transform' ], $this->solutions->all() );
+		$system_checks       = [];
 
 		include $this->plugin->get_path( 'views/screen-settings.php' );
 		include $this->plugin->get_path( 'views/templates.php' );
@@ -246,7 +289,7 @@ class Settings extends AbstractHookProvider {
 	public function render_section_access_description() {
 		printf(
 				'<p>%s</p>',
-				esc_html__( 'API Keys are used to access your PixelgradeLT Retailer repository and download packages. Your personal API keys appear below or you can create keys for other users by editing their accounts.', 'pixelgradelt_retailer' )
+				esc_html__( 'API Keys are used to access your PixelgradeLT Retailer repository. Your personal API keys appear below or you can create keys for other users by editing their accounts.', 'pixelgradelt_retailer' )
 		);
 
 		printf(
@@ -297,6 +340,56 @@ class Settings extends AbstractHookProvider {
 				Since most packages on Packagist.org have their source on Github, and you may be using actual Github repos as sources, <strong>you should definitely generate a token and save it here.</strong><br>
 				Learn more about <strong>the steps to take <a
 							href="https://getcomposer.org/doc/articles/authentication-for-private-packages.md#github-oauth">here</a>.</strong> <strong>Be careful about the permissions you grant on the generated token!</strong></span>
+		</p>
+		<?php
+	}
+
+	/**
+	 * Display a field for defining the LT Records Packages Repository endpoint.
+	 *
+	 * @since 0.1.0
+	 */
+	public function render_field_ltrecords_packages_repo_endpoint() {
+		$value = $this->get_setting( 'ltrecords-packages-repo-endpoint', '' );
+		?>
+		<p>
+			<input type="password" size="80" name="pixelgradelt_retailer[ltrecords-packages-repo-endpoint]"
+			       id="pixelgradelt_retailer-ltrecords-packages-repo-endpoint"
+			       value="<?php echo esc_attr( $value ); ?>"><br/>
+			<span class="description">Provide here the LT Records Packages Repository endpoint URL.</span>
+		</p>
+		<?php
+	}
+
+	/**
+	 * Display a field for defining the LT Records Parts Repository endpoint.
+	 *
+	 * @since 0.1.0
+	 */
+	public function render_field_ltrecords_parts_repo_endpoint() {
+		$value = $this->get_setting( 'ltrecords-parts-repo-endpoint', '' );
+		?>
+		<p>
+			<input type="password" size="80" name="pixelgradelt_retailer[ltrecords-parts-repo-endpoint]"
+			       id="pixelgradelt_retailer-ltrecords-parts-repo-endpoint"
+			       value="<?php echo esc_attr( $value ); ?>"><br/>
+			<span class="description">Provide here the LT Records Parts Repository endpoint URL.</span>
+		</p>
+		<?php
+	}
+
+	/**
+	 * Display a field for defining the LT Records API Key.
+	 *
+	 * @since 0.1.0
+	 */
+	public function render_field_ltrecords_api_key() {
+		$value = $this->get_setting( 'ltrecords-api-key', '' );
+		?>
+		<p>
+			<input type="password" size="80" name="pixelgradelt_retailer[ltrecords-api-key]"
+			       id="pixelgradelt_retailer-ltrecords-api-key" value="<?php echo esc_attr( $value ); ?>"><br/>
+			<span class="description">Provide here a valid LT Records API key for Retailer to use to access the repositories above.</span>
 		</p>
 		<?php
 	}
