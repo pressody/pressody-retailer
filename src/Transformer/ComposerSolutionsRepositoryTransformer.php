@@ -65,7 +65,7 @@ class ComposerRepositoryTransformer implements PackageRepositoryTransformer {
 	 */
 	public function __construct(
 		ComposerPackageTransformer $composer_transformer,
-		SolutionManager$package_manager,
+		SolutionManager $package_manager,
 		VersionParser $version_parser,
 		LoggerInterface $logger
 	) {
@@ -90,7 +90,7 @@ class ComposerRepositoryTransformer implements PackageRepositoryTransformer {
 
 		foreach ( $repository->all() as $package ) {
 			// We will not include packages without releases or packages that are not public (except for admin users).
-			if ( ! $package->has_releases() || ! ( current_user_can( Capabilities::MANAGE_OPTIONS ) || $this->solution_manager->is_solution_public( $package ) ) ) {
+			if ( ! ( current_user_can( Capabilities::MANAGE_OPTIONS ) || $this->solution_manager->is_solution_public( $package ) ) ) {
 				continue;
 			}
 
