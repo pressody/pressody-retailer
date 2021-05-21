@@ -118,32 +118,6 @@ class BaseSolutionBuilder {
 	}
 
 	/**
-	 * Set the source type.
-	 *
-	 * @since 0.1.0
-	 *
-	 * @param string $source_type Package source type.
-	 *
-	 * @return $this
-	 */
-	public function set_source_type( string $source_type ): self {
-		return $this->set( 'source_type', $source_type );
-	}
-
-	/**
-	 * Set the source name (in the form vendor/name).
-	 *
-	 * @since 0.1.0
-	 *
-	 * @param string $source_name Package source name.
-	 *
-	 * @return $this
-	 */
-	public function set_source_name( string $source_name ): self {
-		return $this->set( 'source_name', $source_name );
-	}
-
-	/**
 	 * Set the slug.
 	 *
 	 * @since 0.1.0
@@ -167,6 +141,32 @@ class BaseSolutionBuilder {
 	 */
 	public function set_description( string $description ): self {
 		return $this->set( 'description', $description );
+	}
+
+	/**
+	 * Set the homepage URL.
+	 *
+	 * @since 0.1.0
+	 *
+	 * @param string $url URL.
+	 *
+	 * @return $this
+	 */
+	public function set_homepage( string $url ): self {
+		return $this->set( 'homepage', $url );
+	}
+
+	/**
+	 * Set the package license.
+	 *
+	 * @since 0.1.0
+	 *
+	 * @param string $license
+	 *
+	 * @return $this
+	 */
+	public function set_license( string $license ): self {
+		return $this->set( 'license', $license );
 	}
 
 	/**
@@ -263,19 +263,6 @@ class BaseSolutionBuilder {
 	}
 
 	/**
-	 * Set the homepage URL.
-	 *
-	 * @since 0.1.0
-	 *
-	 * @param string $url URL.
-	 *
-	 * @return $this
-	 */
-	public function set_homepage( string $url ): self {
-		return $this->set( 'homepage', $url );
-	}
-
-	/**
 	 * Set if this package is managed by us.
 	 *
 	 * @since 0.1.0
@@ -330,16 +317,42 @@ class BaseSolutionBuilder {
 	}
 
 	/**
-	 * Set the managed required packages if this package is managed by us.
+	 * Set the required solutions.
 	 *
 	 * @since 0.1.0
 	 *
-	 * @param array $required_packages
+	 * @param array $required_solutions
 	 *
 	 * @return $this
 	 */
-	public function set_required_packages( array $required_packages ): self {
-		return $this->set( 'required_packages', $this->normalize_required_packages( $required_packages ) );
+	public function set_required_solutions( array $required_solutions ): self {
+		return $this->set( 'required_solutions', $this->normalize_required_solutions( $required_solutions ) );
+	}
+
+	/**
+	 * Set the excluded solutions.
+	 *
+	 * @since 0.1.0
+	 *
+	 * @param array $excluded_solutions
+	 *
+	 * @return $this
+	 */
+	public function set_excluded_solutions( array $excluded_solutions ): self {
+		return $this->set( 'excluded_solutions', $this->normalize_required_solutions( $excluded_solutions ) );
+	}
+
+	/**
+	 * Set the required LT Records Parts.
+	 *
+	 * @since 0.1.0
+	 *
+	 * @param array $required_ltrecords_parts
+	 *
+	 * @return $this
+	 */
+	public function set_required_ltrecords_parts( array $required_ltrecords_parts ): self {
+		return $this->set( 'required_ltrecords_parts', $this->normalize_required_ltrecords_parts( $required_ltrecords_parts ) );
 	}
 
 	/**
@@ -368,8 +381,11 @@ class BaseSolutionBuilder {
 			return $this;
 		}
 
-		// Since we have data, it is a managed package.
+		// Since we have data, it is a managed package (all solutions are managed, yep)
 		$this->set_is_managed( true );
+
+		// Set other package details.
+		$this->set_license( 'GPL-2.0-or-later' );
 		$this->set_visibility( $this->solution_manager->get_solution_visibility( $this->solution ) );
 
 		$this->from_package_data( $package_data );
@@ -423,15 +439,41 @@ class BaseSolutionBuilder {
 			$this->set_composer_require( $package_data['composer_require'] );
 		}
 
-		if ( ! empty( $package_data['required_packages'] ) ) {
+		if ( ! empty( $package_data['required_solutions'] ) ) {
 			// We need to normalize before the merge since we need the keys to be in the same format.
 			// A bit inefficient, I know.
-			$package_data['required_packages'] = $this->normalize_required_packages( $package_data['required_packages'] );
-			// We will merge the required packages into the existing ones.
-			$this->set_required_packages(
+			$package_data['required_solutions'] = $this->normalize_required_solutions( $package_data['required_solutions'] );
+			// We will merge the required solutions into the existing ones.
+			$this->set_required_solutions(
 				ArrayHelpers::array_merge_recursive_distinct(
-					$this->solution->get_required_packages(),
-					$package_data['required_packages']
+					$this->solution->get_required_solutions(),
+					$package_data['required_solutions']
+				)
+			);
+		}
+
+		if ( ! empty( $package_data['excluded_solutions'] ) ) {
+			// We need to normalize before the merge since we need the keys to be in the same format.
+			// A bit inefficient, I know.
+			$package_data['excluded_solutions'] = $this->normalize_required_solutions( $package_data['excluded_solutions'] );
+			// We will merge the required solutions into the existing ones.
+			$this->set_excluded_solutions(
+				ArrayHelpers::array_merge_recursive_distinct(
+					$this->solution->get_excluded_solutions(),
+					$package_data['excluded_solutions']
+				)
+			);
+		}
+
+		if ( ! empty( $package_data['required_ltrecords_parts'] ) ) {
+			// We need to normalize before the merge since we need the keys to be in the same format.
+			// A bit inefficient, I know.
+			$package_data['required_ltrecords_parts'] = $this->normalize_required_ltrecords_parts( $package_data['required_ltrecords_parts'] );
+			// We will merge the required solutions into the existing ones.
+			$this->set_required_ltrecords_parts(
+				ArrayHelpers::array_merge_recursive_distinct(
+					$this->solution->get_required_ltrecords_parts(),
+					$package_data['required_ltrecords_parts']
 				)
 			);
 		}
@@ -440,75 +482,117 @@ class BaseSolutionBuilder {
 	}
 
 	/**
-	 * Make sure that the managed required packages are in a format expected by BasePackage.
+	 * Make sure that the required solutions are in a format expected by BaseSolution.
 	 *
 	 * @since 0.1.0
 	 *
-	 * @param array $required_packages
+	 * @param array $required_solutions
 	 *
 	 * @return array
 	 */
-	protected function normalize_required_packages( array $required_packages ): array {
-		if ( empty( $required_packages ) ) {
+	protected function normalize_required_solutions( array $required_solutions ): array {
+		if ( empty( $required_solutions ) ) {
 			return [];
 		}
 
 		$normalized = [];
-		// The pseudo_id is completely unique to a package since it encloses the source_name (source_type or vendor and package name/slug),
-		// and the post ID. Totally unique.
+		// The pseudo_id is completely unique to a solution since it encloses the title and the post ID. Totally unique.
 		// We will rely on this uniqueness to make sure the only one required package remains of each entity.
-		// Subsequent required package data referring to the same managed package post will overwrite previous ones.
-		foreach ( $required_packages as $required_package ) {
-			if ( empty( $required_package['pseudo_id'] )
-			     || empty( $required_package['source_name'] )
-			     || empty( $required_package['managed_post_id'] )
+		// Subsequent required solution data referring to the same solution post will overwrite previous ones.
+		foreach ( $required_solutions as $required_solution ) {
+			if ( empty( $required_solution['pseudo_id'] )
+			     || empty( $required_solution['managed_post_id'] )
 			) {
 				$this->logger->error(
 					'Invalid required package details for package "{package}".',
 					[
 						'package'          => $this->solution->get_name(),
-						'required_package' => $required_package,
+						'required_package' => $required_solution,
 					]
 				);
 
 				continue;
 			}
 
-			$normalized[ $required_package['pseudo_id'] ] = [
-				'composer_package_name' => ! empty( $required_package['composer_package_name'] ) ? $required_package['composer_package_name'] : false,
-				'version_range'         => ! empty( $required_package['version_range'] ) ? $required_package['version_range'] : '*',
-				'stability'             => ! empty( $required_package['stability'] ) ? $required_package['stability'] : 'stable',
-				'source_name'           => $required_package['source_name'],
-				'managed_post_id'       => $required_package['managed_post_id'],
-				'pseudo_id'             => $required_package['pseudo_id'],
+			$normalized[ $required_solution['pseudo_id'] ] = [
+				'composer_package_name' => ! empty( $required_solution['composer_package_name'] ) ? $required_solution['composer_package_name'] : false,
+				'version_range'         => ! empty( $required_solution['version_range'] ) ? $required_solution['version_range'] : '*',
+				'stability'             => ! empty( $required_solution['stability'] ) ? $required_solution['stability'] : 'stable',
+				'managed_post_id'       => $required_solution['managed_post_id'],
+				'pseudo_id'             => $required_solution['pseudo_id'],
 			];
 
-			if ( ! empty( $required_package['composer_package_name'] ) ) {
+			if ( ! empty( $required_solution['composer_package_name'] ) ) {
 				continue;
 			}
 
-			$package_data = $this->solution_manager->get_solution_id_data( $required_package['managed_post_id'] );
+			$package_data = $this->solution_manager->get_solution_id_data( $required_solution['managed_post_id'] );
 			if ( empty( $package_data ) ) {
 				// Something is wrong. We will not include this required package.
 				$this->logger->error(
-					'Error getting managed required package data with post ID #{managed_post_id} for package "{package}".',
+					'Error getting required package data with post ID #{managed_post_id} for package "{package}".',
 					[
-						'managed_post_id' => $required_package['managed_post_id'],
+						'managed_post_id' => $required_solution['managed_post_id'],
 						'package'         => $this->solution->get_name(),
 					]
 				);
 
-				unset( $normalized[ $required_package['pseudo_id'] ] );
+				unset( $normalized[ $required_solution['pseudo_id'] ] );
 				continue;
 			}
 
 			/**
 			 * Construct the Composer-like package name (the same way @see ComposerSolutionTransformer::transform() does it).
 			 */
-			$vendor = apply_filters( 'pixelgradelt_retailer_vendor', 'pixelgradelt_retailer', $required_package, $package_data );
+			$vendor = apply_filters( 'pixelgradelt_retailer_vendor', 'pixelgradelt_retailer', $required_solution, $package_data );
 			$name   = $this->normalize_package_name( $package_data['slug'] );
 
-			$normalized[ $required_package['pseudo_id'] ]['composer_package_name'] = $vendor . '/' . $name;
+			$normalized[ $required_solution['pseudo_id'] ]['composer_package_name'] = $vendor . '/' . $name;
+		}
+
+		return $normalized;
+	}
+
+	/**
+	 * Make sure that the required LT Records Parts are in a format expected by BaseSolution.
+	 *
+	 * @since 0.1.0
+	 *
+	 * @param array $required_parts
+	 *
+	 * @return array
+	 */
+	protected function normalize_required_ltrecords_parts( array $required_parts ): array {
+		if ( empty( $required_parts ) ) {
+			return [];
+		}
+
+		$normalized = [];
+		// The pseudo_id is completely unique to a solution since it encloses the title and the post ID. Totally unique.
+		// We will rely on this uniqueness to make sure the only one required package remains of each entity.
+		// Subsequent required solution data referring to the same solution post will overwrite previous ones.
+		foreach ( $required_parts as $required_part ) {
+			if ( empty( $required_part['package_name'] ) ) {
+				$this->logger->error(
+					'Invalid required LT Records Part details for solution "{solution}" #{solution_post_id}.',
+					[
+						'solution'         => $this->solution->get_name(),
+						'solution_post_id' => $this->solution->get_managed_post_id(),
+						'required_part'    => $required_part,
+					]
+				);
+
+				continue;
+			}
+
+			// Since we deal with the Composer package name from the start,
+			// the `package_name` is the same as `composer_package_name`, but we need both to keep the logic humming.
+			$normalized[ $required_part['package_name'] ] = [
+				'package_name'          => $required_part['package_name'],
+				'composer_package_name' => $required_part['package_name'],
+				'version_range'         => ! empty( $required_part['version_range'] ) ? $required_part['version_range'] : '*',
+				'stability'             => ! empty( $required_part['stability'] ) ? $required_part['stability'] : 'stable',
+			];
 		}
 
 		return $normalized;
@@ -552,7 +636,9 @@ class BaseSolutionBuilder {
 			->set_managed_post_id( $solution->get_managed_post_id() )
 			->set_visibility( $solution->get_visibility() )
 			->set_composer_require( $solution->get_composer_require() )
-			->set_required_packages( $solution->get_required_packages() );
+			->set_required_solutions( $solution->get_required_solutions() )
+			->set_excluded_solutions( $solution->get_excluded_solutions() )
+			->set_required_ltrecords_parts( $solution->get_required_ltrecords_parts() );
 
 		return $this;
 	}

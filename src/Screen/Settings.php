@@ -353,7 +353,7 @@ class Settings extends AbstractHookProvider {
 		$value = $this->get_setting( 'ltrecords-packages-repo-endpoint', '' );
 		?>
 		<p>
-			<input type="password" size="80" name="pixelgradelt_retailer[ltrecords-packages-repo-endpoint]"
+			<input type="url" size="80" name="pixelgradelt_retailer[ltrecords-packages-repo-endpoint]"
 			       id="pixelgradelt_retailer-ltrecords-packages-repo-endpoint"
 			       value="<?php echo esc_attr( $value ); ?>"><br/>
 			<span class="description">Provide here the LT Records Packages Repository endpoint URL.</span>
@@ -370,7 +370,7 @@ class Settings extends AbstractHookProvider {
 		$value = $this->get_setting( 'ltrecords-parts-repo-endpoint', '' );
 		?>
 		<p>
-			<input type="password" size="80" name="pixelgradelt_retailer[ltrecords-parts-repo-endpoint]"
+			<input type="url" size="80" name="pixelgradelt_retailer[ltrecords-parts-repo-endpoint]"
 			       id="pixelgradelt_retailer-ltrecords-parts-repo-endpoint"
 			       value="<?php echo esc_attr( $value ); ?>"><br/>
 			<span class="description">Provide here the LT Records Parts Repository endpoint URL.</span>
@@ -387,7 +387,7 @@ class Settings extends AbstractHookProvider {
 		$value = $this->get_setting( 'ltrecords-api-key', '' );
 		?>
 		<p>
-			<input type="password" size="80" name="pixelgradelt_retailer[ltrecords-api-key]"
+			<input type="text" size="80" name="pixelgradelt_retailer[ltrecords-api-key]"
 			       id="pixelgradelt_retailer-ltrecords-api-key" value="<?php echo esc_attr( $value ); ?>"><br/>
 			<span class="description">Provide here a valid LT Records API key for Retailer to use to access the repositories above.</span>
 		</p>

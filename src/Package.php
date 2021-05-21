@@ -134,7 +134,7 @@ interface Package {
 	 *
 	 * @return array
 	 */
-	public function get_required_packages(): array;
+	public function get_required_solutions(): array;
 
 	/**
 	 * Whether the package has any managed required packages.
@@ -143,5 +143,5 @@ interface Package {
 	 *
 	 * @return bool
 	 */
-	public function has_required_packages(): bool;
+	public function has_required_solutions(): bool;
 }

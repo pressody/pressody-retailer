@@ -377,8 +377,10 @@ class SolutionManager {
 		$data['description'] = get_post_meta( $post_ID, '_solution_details_description', true );
 		$data['homepage']    = get_post_meta( $post_ID, '_solution_details_homepage', true );
 
-		$data['required_packages'] = $this->get_post_solution_required_solutions( $post_ID );
-		$data['composer_require']  = $this->get_post_solution_composer_require( $post_ID );
+		$data['required_solutions']       = $this->get_post_solution_required_solutions( $post_ID );
+		$data['excluded_solutions']       = $this->get_post_solution_excluded_solutions( $post_ID );
+		$data['required_ltrecords_parts'] = $this->get_post_solution_required_parts( $post_ID );
+		$data['composer_require']         = $this->get_post_solution_composer_require( $post_ID );
 
 		return $data;
 	}
@@ -478,38 +480,73 @@ class SolutionManager {
 	}
 
 	public function get_post_solution_required_solutions( int $post_ID, string $pseudo_id_delimiter = ' #', string $container_id = '' ): array {
-		$required_packages = carbon_get_post_meta( $post_ID, 'solution_required_solutions', $container_id );
-		if ( empty( $required_packages ) || ! is_array( $required_packages ) ) {
+		$required_solutions = carbon_get_post_meta( $post_ID, 'solution_required_solutions', $container_id );
+		if ( empty( $required_solutions ) || ! is_array( $required_solutions ) ) {
 			return [];
 		}
 
 		// Make sure only the fields we are interested in are left.
-		$accepted_keys = array_fill_keys( [ 'pseudo_id', 'version_range', 'stability' ], '' );
-		foreach ( $required_packages as $key => $required_package ) {
-			$required_packages[ $key ] = array_replace( $accepted_keys, array_intersect_key( $required_package, $accepted_keys ) );
+		$accepted_keys = array_fill_keys( [ 'pseudo_id', ], '' );
+		foreach ( $required_solutions as $key => $required_solution ) {
+			$required_solutions[ $key ] = array_replace( $accepted_keys, array_intersect_key( $required_solution, $accepted_keys ) );
 
-			if ( empty( $required_package['pseudo_id'] ) || false === strpos( $required_package['pseudo_id'], $pseudo_id_delimiter ) ) {
-				unset( $required_packages[ $key ] );
+			if ( empty( $required_solution['pseudo_id'] ) || false === strpos( $required_solution['pseudo_id'], $pseudo_id_delimiter ) ) {
+				unset( $required_solutions[ $key ] );
 				continue;
 			}
 
-			// We will now split the pseudo_id in its components (source_name and post_id with the delimiter in between).
-			[ $source_name, $post_id ] = explode( $pseudo_id_delimiter, $required_package['pseudo_id'] );
+			// We will now split the pseudo_id in its components (slug and post_id with the delimiter in between).
+			[ $slug, $post_id ] = explode( $pseudo_id_delimiter, $required_solution['pseudo_id'] );
 			if ( empty( $post_id ) ) {
-				unset( $required_packages[ $key ] );
+				unset( $required_solutions[ $key ] );
 				continue;
 			}
 
-			$required_packages[ $key ]['source_name']     = $source_name;
-			$required_packages[ $key ]['managed_post_id'] = intval( $post_id );
+			$required_solutions[ $key ]['slug']            = $slug;
+			$required_solutions[ $key ]['managed_post_id'] = intval( $post_id );
 		}
 
-		return $required_packages;
+		return $required_solutions;
 	}
 
-	public function set_post_solution_required_solutions( int $post_ID, array $required_packages, string $container_id = '' ) {
-		carbon_set_post_meta( $post_ID, 'solution_required_solutions', $required_packages, $container_id );
+	public function set_post_solution_required_solutions( int $post_ID, array $required_solutions, string $container_id = '' ) {
+		carbon_set_post_meta( $post_ID, 'solution_required_solutions', $required_solutions, $container_id );
 	}
+
+	public function get_post_solution_excluded_solutions( int $post_ID, string $pseudo_id_delimiter = ' #', string $container_id = '' ): array {
+		$excluded_solutions = carbon_get_post_meta( $post_ID, 'solution_excluded_solutions', $container_id );
+		if ( empty( $excluded_solutions ) || ! is_array( $excluded_solutions ) ) {
+			return [];
+		}
+
+		// Make sure only the fields we are interested in are left.
+		$accepted_keys = array_fill_keys( [ 'pseudo_id', ], '' );
+		foreach ( $excluded_solutions as $key => $excluded_solution ) {
+			$excluded_solutions[ $key ] = array_replace( $accepted_keys, array_intersect_key( $excluded_solution, $accepted_keys ) );
+
+			if ( empty( $excluded_solution['pseudo_id'] ) || false === strpos( $excluded_solution['pseudo_id'], $pseudo_id_delimiter ) ) {
+				unset( $excluded_solutions[ $key ] );
+				continue;
+			}
+
+			// We will now split the pseudo_id in its components (slug and post_id with the delimiter in between).
+			[ $slug, $post_id ] = explode( $pseudo_id_delimiter, $excluded_solution['pseudo_id'] );
+			if ( empty( $post_id ) ) {
+				unset( $excluded_solutions[ $key ] );
+				continue;
+			}
+
+			$excluded_solutions[ $key ]['slug']            = $slug;
+			$excluded_solutions[ $key ]['managed_post_id'] = intval( $post_id );
+		}
+
+		return $excluded_solutions;
+	}
+
+	public function set_post_solution_excluded_solutions( int $post_ID, array $excluded_solutions, string $container_id = '' ) {
+		carbon_set_post_meta( $post_ID, 'solution_excluded_solutions', $excluded_solutions, $container_id );
+	}
+
 
 	public function get_post_solution_required_parts( int $post_ID, string $pseudo_id_delimiter = ' #', string $container_id = '' ): array {
 		$required_parts = carbon_get_post_meta( $post_ID, 'solution_required_parts', $container_id );
@@ -518,24 +555,13 @@ class SolutionManager {
 		}
 
 		// Make sure only the fields we are interested in are left.
-		$accepted_keys = array_fill_keys( [ 'pseudo_id', 'version_range', 'stability' ], '' );
+		$accepted_keys = array_fill_keys( [ 'package_name', 'version_range', 'stability' ], '' );
 		foreach ( $required_parts as $key => $required_part ) {
 			$required_parts[ $key ] = array_replace( $accepted_keys, array_intersect_key( $required_part, $accepted_keys ) );
 
-			if ( empty( $required_part['pseudo_id'] ) || false === strpos( $required_part['pseudo_id'], $pseudo_id_delimiter ) ) {
+			if ( empty( $required_part['package_name'] ) ) {
 				unset( $required_parts[ $key ] );
-				continue;
 			}
-
-			// We will now split the pseudo_id in its components (source_name and post_id with the delimiter in between).
-			[ $source_name, $post_id ] = explode( $pseudo_id_delimiter, $required_part['pseudo_id'] );
-			if ( empty( $post_id ) ) {
-				unset( $required_parts[ $key ] );
-				continue;
-			}
-
-			$required_parts[ $key ]['source_name']     = $source_name;
-			$required_parts[ $key ]['managed_post_id'] = intval( $post_id );
 		}
 
 		return $required_parts;
@@ -556,7 +582,7 @@ class SolutionManager {
 	}
 
 	/**
-	 * Given a package, dry-run a composer require of it (including its required packages) and see if all goes well.
+	 * Given a solution, dry-run a composer require of it (including its required packages) and see if all goes well.
 	 *
 	 * @param Package $solution
 	 *
@@ -564,6 +590,24 @@ class SolutionManager {
 	 */
 	public function dry_run_solution_require( Package $solution ): bool {
 		$client = $this->get_composer_client();
+
+		$option = get_option( 'pixelgradelt_retailer' );
+		if ( empty( $option['ltrecords-parts-repo-endpoint'] ) || empty( $option['ltrecords-api-key'] ) ) {
+			$this->logger->error(
+				'Error during Composer require dry-run for solution "{package}" #{post_id}.' . PHP_EOL
+				. esc_html__( 'Missing LT Records Repo URL and/or LT Records API key in Settings > LT Retailer.', 'pixelgradelt_retailer' ),
+				[
+					'package' => $solution->get_name(),
+					'post_id' => $solution->get_managed_post_id(),
+				]
+			);
+
+			return false;
+		}
+
+		$ltrecords_repo_url = $option['ltrecords-packages-repo-endpoint'];
+		$ltrecords_api_key  = $option['ltrecords-api-key'];
+		$ltrecords_api_pwd  = 'pixelgradelt_records';
 
 		try {
 			$client->getPackages( [
@@ -577,9 +621,24 @@ class SolutionManager {
 								'verify_peer' => ! is_debug_mode(),
 							],
 							'http' => [
-								'header' => ! empty( $_ENV['PHP_AUTH_USER'] ) ? [
-									'Authorization: Basic ' . base64_encode( $_ENV['PHP_AUTH_USER'] . ':' . Server::AUTH_PWD ),
+								'header' => ! empty( $_ENV['LTRETAILER_PHP_AUTH_USER'] ) ? [
+									'Authorization: Basic ' . base64_encode( $_ENV['LTRETAILER_PHP_AUTH_USER'] . ':' . Server::AUTH_PWD ),
 								] : [],
+							],
+						],
+					],
+					[
+						// The LT Records Repo (includes all LT Records packages and parts).
+						'type'    => 'composer',
+						'url'     => esc_url( $ltrecords_repo_url ),
+						'options' => [
+							'ssl'  => [
+								'verify_peer' => ! is_debug_mode(),
+							],
+							'http' => [
+								'header' => [
+									'Authorization: Basic ' . base64_encode( $ltrecords_api_key . ':' . $ltrecords_api_pwd ),
+								],
 							],
 						],
 					],
@@ -604,11 +663,11 @@ class SolutionManager {
 			] );
 		} catch ( \Exception $e ) {
 			$this->logger->error(
-				'Error during Composer require dry-run for solution "{package}" (type {type}).' . PHP_EOL . $e->getMessage(),
+				'Error during Composer require dry-run for solution "{package}" #{post_id}.' . PHP_EOL . $e->getMessage(),
 				[
 					'exception' => $e,
 					'package'   => $solution->get_name(),
-					'type'      => $solution->get_type(),
+					'post_id'   => $solution->get_managed_post_id(),
 				]
 			);
 
@@ -669,9 +728,9 @@ class SolutionManager {
 	 *
 	 * @since 0.1.0
 	 *
-	 * @throws \UnexpectedValueException
 	 * @param string $version
 	 *
+	 * @throws \UnexpectedValueException
 	 * @return string
 	 */
 	public function normalize_version( string $version ): string {

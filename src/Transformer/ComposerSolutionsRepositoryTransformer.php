@@ -131,9 +131,22 @@ class ComposerSolutionsRepositoryTransformer implements PackageRepositoryTransfo
 		if ( ! empty( $meta['require'] ) ) {
 			$require = array_merge( $require, $meta['require'] );
 		}
-		// Merge the managed required packages, if any.
-		if ( ! empty( $meta['require_ltpackages'] ) ) {
-			$require = array_merge( $require, $this->composer_transformer->transform_required_packages( $meta['require_ltpackages'] ) );
+		// Merge the required solutions, if any.
+		if ( ! empty( $package->get_required_solutions() ) ) {
+			$require = array_merge( $require, $this->composer_transformer->transform_required_packages( $package->get_required_solutions() ) );
+		}
+		// Exclude the excluded solutions, if any.
+		// We will actually use the Composer replace functionality since it does what we want:
+		// tells the solver that the current package will replace those packages, thus they should not be installed.
+		// @link https://getcomposer.org/doc/04-schema.md#replace
+		$replace = [];
+		if ( ! empty( $package->get_excluded_solutions() ) ) {
+			$replace = array_merge( $replace, $this->composer_transformer->transform_required_packages( $package->get_excluded_solutions() ) );
+		}
+
+		// Merge the required LT Records parts, if any.
+		if ( ! empty( $package->get_required_ltrecords_parts() ) ) {
+			$require = array_merge( $require, $this->composer_transformer->transform_required_packages( $package->get_required_ltrecords_parts() ) );
 		}
 
 		// Finally, allow others to have a say.
@@ -145,6 +158,7 @@ class ComposerSolutionsRepositoryTransformer implements PackageRepositoryTransfo
 			'version_normalized' => $this->version_parser->normalize( $version ),
 			// No `dist` required.
 			'require'            => $require,
+			'replace'            => $replace,
 			'type'               => $package->get_type(),
 			'description'        => $package->get_description(),
 			'keywords'           => $package->get_keywords(),

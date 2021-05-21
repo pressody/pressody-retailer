@@ -178,7 +178,7 @@ class HealthCheck extends AbstractHookProvider {
 		if ( empty( $user ) ) {
 			$this->send_json_error(
 				'missing_user',
-				'The authorization header check failed; The PHP_AUTH_USER variable was missing.'
+				'The authorization header check failed; The PHP_AUTH_USER was missing or invalid.'
 			);
 		}
 

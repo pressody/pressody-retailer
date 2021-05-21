@@ -303,7 +303,7 @@ class BasePackageBuilderTest extends TestCase {
 		$this->assertSame( $expected['managed_post_id_hash'], $package->managed_post_id_hash );
 		$this->assertSame( $expected['visibility'], $package->visibility );
 		$this->assertSame( $expected['composer_require'], $package->composer_require );
-		$this->assertSame( $expected['required_packages'], $package->required_packages );
+		$this->assertSame( $expected['required_packages'], $package->required_solutions );
 	}
 
 	public function test_from_package_data_do_not_overwrite() {
@@ -378,7 +378,7 @@ class BasePackageBuilderTest extends TestCase {
 	}
 
 	public function test_from_package_data_merge_required_packages() {
-		$initial_package                    = new class extends BaseSolution {
+		$initial_package                     = new class extends BaseSolution {
 			public function __get( $name ) {
 				return $this->$name;
 			}
@@ -387,9 +387,9 @@ class BasePackageBuilderTest extends TestCase {
 				$this->$name = $value;
 			}
 		};
-		$initial_package->name              = 'Theme';
-		$initial_package->slug              = 'theme-slug';
-		$initial_package->required_packages = [
+		$initial_package->name               = 'Theme';
+		$initial_package->slug               = 'theme-slug';
+		$initial_package->required_solutions = [
 			'some_pseudo_id' => [
 				'composer_package_name' => 'pixelgrade/test',
 				'version_range'         => '*',
@@ -434,11 +434,11 @@ class BasePackageBuilderTest extends TestCase {
 
 		$package = $this->builder->with_package( $initial_package )->from_package_data( $package_data )->build();
 
-		$this->assertSame( $expected, $package->required_packages );
+		$this->assertSame( $expected, $package->required_solutions );
 	}
 
 	public function test_from_package_data_merge_overwrite_required_packages() {
-		$initial_package                    = new class extends BaseSolution {
+		$initial_package                     = new class extends BaseSolution {
 			public function __get( $name ) {
 				return $this->$name;
 			}
@@ -447,9 +447,9 @@ class BasePackageBuilderTest extends TestCase {
 				$this->$name = $value;
 			}
 		};
-		$initial_package->name              = 'Theme';
-		$initial_package->slug              = 'theme-slug';
-		$initial_package->required_packages = [
+		$initial_package->name               = 'Theme';
+		$initial_package->slug               = 'theme-slug';
+		$initial_package->required_solutions = [
 			'some_pseudo_id' => [
 				'composer_package_name' => 'pixelgrade/test',
 				'version_range'         => '*',
@@ -502,7 +502,7 @@ class BasePackageBuilderTest extends TestCase {
 
 		$package = $this->builder->with_package( $initial_package )->from_package_data( $package_data )->build();
 
-		$this->assertSame( $expected, $package->required_packages );
+		$this->assertSame( $expected, $package->required_solutions );
 	}
 
 	public function test_from_header_data_plugin() {
@@ -722,7 +722,7 @@ class BasePackageBuilderTest extends TestCase {
 		$expected->managed_post_id_hash = 'asdasd12';
 		$expected->visibility           = 'draft';
 		$expected->composer_require     = [ 'test/test' => '*' ];
-		$expected->required_packages    = [
+		$expected->required_solutions    = [
 			'some_pseudo_id' => [
 				'composer_package_name' => 'pixelgrade/test',
 				'version_range'         => '*',
@@ -753,6 +753,6 @@ class BasePackageBuilderTest extends TestCase {
 		$this->assertSame( $expected->managed_post_id_hash, $package->managed_post_id_hash );
 		$this->assertSame( $expected->visibility, $package->visibility );
 		$this->assertSame( $expected->composer_require, $package->composer_require );
-		$this->assertSame( $expected->required_packages, $package->required_packages );
+		$this->assertSame( $expected->required_solutions, $package->required_solutions );
 	}
 }

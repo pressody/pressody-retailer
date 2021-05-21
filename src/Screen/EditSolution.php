@@ -18,7 +18,10 @@ use Cedaro\WP\Plugin\AbstractHookProvider;
 use PixelgradeLT\Retailer\Transformer\ComposerPackageTransformer;
 use PixelgradeLT\Retailer\SolutionManager;
 use PixelgradeLT\Retailer\Repository\PackageRepository;
+use PixelgradeLT\Retailer\Utils\JSONCleaner;
 use function PixelgradeLT\Retailer\get_solutions_permalink;
+use function PixelgradeLT\Retailer\is_debug_mode;
+use function PixelgradeLT\Retailer\is_dev_url;
 
 /**
  * Edit Solution screen provider class.
@@ -58,6 +61,13 @@ class EditSolution extends AbstractHookProvider {
 			'warning' => [],
 			'info'    => [],
 	];
+
+	/**
+	 * Local cache of LT Records parts.
+	 *
+	 * @var array|null
+	 */
+	protected ?array $ltrecords_parts = null;
 
 	/**
 	 * Constructor.
@@ -109,8 +119,10 @@ class EditSolution extends AbstractHookProvider {
 		$this->add_action( 'carbon_fields_register_fields', 'attach_post_meta_fields' );
 
 		// Check that the package can be resolved with the required packages.
-		$this->add_action( 'carbon_fields_post_meta_container_saved', 'check_required_packages', 20, 2 );
+		$this->add_action( 'carbon_fields_post_meta_container_saved', 'check_required', 20, 2 );
 
+		// We get early so we can show error messages.
+		$this->add_action( 'plugins_loaded', 'get_ltrecords_parts', 20 );
 		// Show edit post screen error messages.
 		$this->add_action( 'edit_form_top', 'check_solution_post', 5 );
 		$this->add_action( 'edit_form_top', 'show_user_messages', 50 );
@@ -300,18 +312,17 @@ The slug/name must be lowercased and consist of words separated by <code>-</code
 		         ->set_priority( 'core' )
 		         ->add_fields( [
 				         Field::make( 'html', 'parts_dependencies_configuration_html', __( 'Required Parts Description', 'pixelgradelt_records' ) )
-				              ->set_html( sprintf( '<p class="description">%s</p>', __( 'Here you edit and configure <strong>the list of parts</strong> this solution depends on.<br>
+				              ->set_html( sprintf( '<p class="description">%s</p>', __( 'Here you edit and configure <strong>the list of LT Records parts</strong> this solution depends on.<br>
 For each required part you can <strong>specify a version range</strong> to better control the part releases/versions required. Set to <code>*</code> to <strong>use the latest available required-part release that matches all constraints</strong> (other parts present on a site might impose stricter limits).<br>
 Learn more about Composer <a href="https://getcomposer.org/doc/articles/versions.md#writing-version-constraints" target="_blank">versions</a> or <a href="https://semver.mwl.be/?package=madewithlove%2Fhtaccess-cli&constraint=%3C1.2%20%7C%7C%20%3E1.6&stability=stable" target="_blank">play around</a> with version ranges.', 'pixelgradelt_records' ) ) ),
 
 				         Field::make( 'complex', 'solution_required_parts', __( 'Required Parts', 'pixelgradelt_records' ) )
 				              ->set_help_text( __( 'The order is not important, from a logic standpoint. Also, if you add <strong>the same part multiple times</strong> only the last one will take effect since it will overwrite the previous ones.<br>
-<strong>FYI:</strong> Each required part label is comprised of the standardized <code>source_name</code> and the <code>#post_id</code>.', 'pixelgradelt_records' ) )
+<strong>FYI:</strong> Each required part label is comprised of the standardized <code>package_name</code> and the <code>#post_id</code>.', 'pixelgradelt_records' ) )
 				              ->set_classes( 'solution-required-solutions solution-required-parts' )
 				              ->set_collapsed( true )
 				              ->add_fields( [
-						              Field::make( 'select', 'pseudo_id', __( 'Choose one of the parts', 'pixelgradelt_records' ) )
-						                   ->set_help_text( __( 'Parts that are already required by this solution are NOT part of the list of choices.', 'pixelgradelt_records' ) )
+						              Field::make( 'select', 'package_name', __( 'Choose one of the LT Records Parts', 'pixelgradelt_records' ) )
 						                   ->set_options( [ $this, 'get_available_required_parts_options' ] )
 						                   ->set_default_value( null )
 						                   ->set_required( true )
@@ -333,8 +344,8 @@ Learn more about Composer <a href="https://getcomposer.org/doc/articles/versions
 						                   ->set_width( 25 ),
 				              ] )
 				              ->set_header_template( '
-								    <% if (pseudo_id) { %>
-								        <%- pseudo_id %> (version range: <%= version_range %><% if ("stable" !== stability) { %>@<%= stability %><% } %>)
+								    <% if (package_name) { %>
+								        <%- package_name %> (version range: <%= version_range %><% if ("stable" !== stability) { %>@<%= stability %><% } %>)
 								    <% } %>
 								' ),
 		         ] );
@@ -350,12 +361,11 @@ Learn more about Composer <a href="https://getcomposer.org/doc/articles/versions
 
 				         Field::make( 'complex', 'solution_required_solutions', __( 'Required Solutions', 'pixelgradelt_retailer' ) )
 				              ->set_help_text( __( 'These are solutions that are <strong>automatically included in a site\'s composition</strong> together with the current solution. The order is not important, from a logic standpoint.<br>
-<strong>FYI:</strong> Each required solution label is comprised of the standardized <code>name</code> and the <code>#post_id</code>.', 'pixelgradelt_retailer' ) )
+<strong>FYI:</strong> Each required solution label is comprised of the solution <code>slug</code> and the <code>#post_id</code>.', 'pixelgradelt_retailer' ) )
 				              ->set_classes( 'solution-required-solutions' )
 				              ->set_collapsed( true )
 				              ->add_fields( [
 						              Field::make( 'select', 'pseudo_id', __( 'Choose one of the configured solutions', 'pixelgradelt_retailer' ) )
-						                   ->set_help_text( __( 'Solutions that are already required or excluded by this solution are NOT part of the list of choices.', 'pixelgradelt_retailer' ) )
 						                   ->set_options( [ $this, 'get_available_required_solutions_options' ] )
 						                   ->set_default_value( null )
 						                   ->set_required( true )
@@ -368,12 +378,11 @@ Learn more about Composer <a href="https://getcomposer.org/doc/articles/versions
 								' ),
 				         Field::make( 'complex', 'solution_excluded_solutions', __( 'Excluded Solutions', 'pixelgradelt_retailer' ) )
 				              ->set_help_text( __( 'These are solutions that are <strong>automatically removed from a site\'s composition</strong> when the current solution is included. The order is not important, from a logic standpoint.<br>
-<strong>FYI:</strong> Each excluded solution label is comprised of the standardized <code>name</code> and the <code>#post_id</code>.', 'pixelgradelt_retailer' ) )
+<strong>FYI:</strong> Each excluded solution label is comprised of the solution <code>slug</code> and the <code>#post_id</code>.', 'pixelgradelt_retailer' ) )
 				              ->set_classes( 'solution-required-solutions' )
 				              ->set_collapsed( true )
 				              ->add_fields( [
 						              Field::make( 'select', 'pseudo_id', __( 'Choose one of the configured solutions', 'pixelgradelt_retailer' ) )
-						                   ->set_help_text( __( 'Solutions that are already required or excluded by this solution are NOT part of the list of choices.', 'pixelgradelt_retailer' ) )
 						                   ->set_options( [ $this, 'get_available_required_solutions_options' ] )
 						                   ->set_default_value( null )
 						                   ->set_required( true )
@@ -453,12 +462,13 @@ Learn more about Composer <a href="https://getcomposer.org/doc/articles/versions
 	}
 
 	/**
-	 * Check if the package can be resolved by Composer with the required packages. Show a warning message if it can't be.
+	 * Check if the package can be resolved by Composer with the required solutions, excluded solutions, and required parts.
+	 * Show a warning message if it can't be.
 	 *
 	 * @param int                           $post_ID
 	 * @param Container\Post_Meta_Container $meta_container
 	 */
-	protected function check_required_packages( int $post_ID, Container\Post_Meta_Container $meta_container ) {
+	protected function check_required( int $post_ID, Container\Post_Meta_Container $meta_container ) {
 		// At the moment, we are only interested in the source_configuration container.
 		// This way we avoid running this logic unnecessarily for other containers.
 		if ( empty( $meta_container->get_id() ) || 'carbon_fields_container_dependencies_configuration_' . $this->solution_manager::POST_TYPE !== $meta_container->get_id() ) {
@@ -504,7 +514,7 @@ Learn more about Composer <a href="https://getcomposer.org/doc/articles/versions
 		$solutions_ids = $this->solution_manager->get_solution_ids_by( [ 'exclude_post_ids' => $exclude_post_ids, ] );
 
 		foreach ( $solutions_ids as $post_id ) {
-			$solution_pseudo_id = $this->solution_manager->get_post_solution_name( $post_id ) . $pseudo_id_delimiter . $post_id;
+			$solution_pseudo_id = $this->solution_manager->get_post_solution_slug( $post_id ) . $pseudo_id_delimiter . $post_id;
 
 			$options[ $solution_pseudo_id ] = sprintf( __( '%s - #%s', 'pixelgradelt_retailer' ), $this->solution_manager->get_post_solution_name( $post_id ), $post_id );
 		}
@@ -512,12 +522,13 @@ Learn more about Composer <a href="https://getcomposer.org/doc/articles/versions
 		ksort( $options );
 
 		// Prepend an empty option.
-		$options = [ null => esc_html__( 'Pick the solution, carefully..', 'pixelgradelt_retailer' ) ] + $options;
+		$options = [ null => esc_html__( 'Pick a solution, carefully..', 'pixelgradelt_retailer' ) ] + $options;
 
 		return $options;
 	}
 
 	/**
+	 * Generate a list of select options from the LT Records available parts.
 	 *
 	 * @since 0.1.0
 	 *
@@ -526,27 +537,100 @@ Learn more about Composer <a href="https://getcomposer.org/doc/articles/versions
 	public function get_available_required_parts_options(): array {
 		$options = [];
 
-		$pseudo_id_delimiter = ' #';
-
-		// We exclude the current part post ID, of course.
-		$exclude_post_ids = [ get_the_ID(), ];
-		// We can't exclude the currently required parts because if we use carbon_get_post_meta()
-		// to fetch the current complex field value, we enter an infinite loop since that requires the field options.
-		// And to replicate the Carbon Fields logic to parse complex fields datastore is not fun.
-		$package_ids = $this->solution_manager->get_solution_ids_by( [ 'exclude_post_ids' => $exclude_post_ids, ] );
-
-		foreach ( $package_ids as $post_id ) {
-			$package_pseudo_id = $this->solution_manager->get_post_solution_name( $post_id ) . $pseudo_id_delimiter . $post_id;
-
-			$options[ $package_pseudo_id ] = sprintf( __( '%s - %s', 'pixelgradelt_records' ), $this->solution_manager->get_post_solution_name( $post_id ), $package_pseudo_id );
+		foreach ( $this->get_ltrecords_parts() as $package_name ) {
+			$options[ $package_name ] = $package_name;
 		}
 
 		ksort( $options );
 
 		// Prepend an empty option.
-		$options = [ null => esc_html__( 'Pick your required part, carefully..', 'pixelgradelt_records' ) ] + $options;
+		$options = [ null => esc_html__( 'Pick a part, carefully..', 'pixelgradelt_retailer' ) ] + $options;
 
 		return $options;
+	}
+
+	/**
+	 * @param bool $skip_cache
+	 *
+	 * @return array
+	 */
+	protected function get_ltrecords_parts( bool $skip_cache = false ): array {
+		// First, try to get the parts from the instance property.
+		if ( ! is_null( $this->ltrecords_parts ) && ! $skip_cache ) {
+			return $this->ltrecords_parts;
+		}
+
+		// Second, use the transient cache.
+		if ( ! $skip_cache ) {
+			$cached_parts = get_transient( 'pixelgradelt_retailer_ltrecords_parts' );
+			if ( false !== $cached_parts ) {
+				$this->ltrecords_parts = $cached_parts;
+				return $cached_parts;
+			}
+		}
+
+		// Third, we need to fetch from the remote endpoint.
+		$this->ltrecords_parts = $this->fetch_ltrecords_parts();
+		// Cache the results in a short-lived transient.
+		set_transient( 'pixelgradelt_retailer_ltrecords_parts', $this->ltrecords_parts, time() + MINUTE_IN_SECONDS * 15 );
+
+		return $this->ltrecords_parts;
+	}
+
+	/**
+	 * Fetch the parts list (only package-names) from the repo setup in the LT Retailer settings.
+	 *
+	 * @return array
+	 */
+	protected function fetch_ltrecords_parts(): array {
+		$parts = [];
+
+		$option = get_option( 'pixelgradelt_retailer' );
+		if ( empty( $option['ltrecords-parts-repo-endpoint'] ) || empty( $option['ltrecords-api-key'] ) ) {
+			$this->add_user_message( 'error', sprintf(
+					'<p>%s</p>',
+					esc_html__( 'You need to provide a LT Records parts endpoint and a LT Records API key in Settings > LT Retailer.', 'pixelgradelt_retailer' )
+			) );
+
+			return $parts;
+		}
+
+		$ltrecords_parts_repo_url = $option['ltrecords-parts-repo-endpoint'];
+		$ltrecords_api_key = $option['ltrecords-api-key'];
+		$ltrecords_api_pwd = 'pixelgradelt_records';
+
+		$request_args = [
+				'headers' => [
+						'Authorization' => 'Basic ' . base64_encode( $ltrecords_api_key . ':' . $ltrecords_api_pwd ),
+				],
+				'timeout' => 5,
+				'sslverify' => ! ( is_debug_mode() || is_dev_url( $ltrecords_parts_repo_url ) ),
+		];
+
+		$response = wp_remote_get( $ltrecords_parts_repo_url, $request_args );
+		if ( is_wp_error( $response ) || wp_remote_retrieve_response_code( $response ) !== 200  ) {
+			$this->add_user_message( 'error', sprintf(
+					'<p>%s</p>',
+					esc_html__( 'Something went wrong and we couldn\'t get the LT Records parts from the provided endpoint.', 'pixelgradelt_retailer' )
+			) );
+
+			return $parts;
+		}
+
+		// We get back the entire repo with it's Composer-specific structure.
+		// Retain only the parts package-names list.
+		$repo = json_decode( wp_remote_retrieve_body( $response ), true );
+		if ( ! empty( $repo['packages'] ) && is_array( $repo['packages'] ) ) {
+			foreach ( $repo['packages'] as $package_name => $package_releases ) {
+				if ( empty( $package_releases ) ) {
+					continue;
+				}
+
+				$parts[] = $package_name;
+			}
+		}
+
+		return $parts;
 	}
 
 	/**

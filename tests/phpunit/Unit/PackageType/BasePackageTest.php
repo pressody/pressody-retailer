@@ -146,7 +146,7 @@ class BasePackageTest extends TestCase {
 	}
 
 	public function test_required_packages() {
-		$expected                         = [
+		$expected                          = [
 			'some_pseudo_id' => [
 				'composer_package_name' => 'pixelgrade/test',
 				'version_range'         => '*',
@@ -155,10 +155,10 @@ class BasePackageTest extends TestCase {
 				'managed_post_id'       => 123,
 			],
 		];
-		$this->package->required_packages = $expected;
+		$this->package->required_solutions = $expected;
 
-		$this->assertSame( $expected, $this->package->get_required_packages() );
-		$this->assertTrue( $this->package->has_required_packages() );
+		$this->assertSame( $expected, $this->package->get_required_solutions() );
+		$this->assertTrue( $this->package->has_required_solutions() );
 	}
 
 	public function test_has_source_constraint() {

@@ -85,14 +85,14 @@ class BaseSolution implements \ArrayAccess, Package {
 	protected bool $is_managed = false;
 
 	/**
-	 * Managed package post ID if this is a managed package.
+	 * Package post ID if this is a managed package.
 	 *
 	 * @var int
 	 */
 	protected int $managed_post_id = 0;
 
 	/**
-	 * Managed package visibility.
+	 * Package visibility.
 	 *
 	 * @var string
 	 */
@@ -108,11 +108,25 @@ class BaseSolution implements \ArrayAccess, Package {
 	protected array $composer_require = [];
 
 	/**
-	 * Managed packages required by this package.
+	 * Solutions required by this solution.
 	 *
 	 * @var array
 	 */
-	protected array $required_packages = [];
+	protected array $required_solutions = [];
+
+	/**
+	 * Solutions excluded by this solution.
+	 *
+	 * @var array
+	 */
+	protected array $excluded_solutions = [];
+
+	/**
+	 * LT Records Parts required by this solution.
+	 *
+	 * @var array
+	 */
+	protected array $required_ltrecords_parts = [];
 
 	/**
 	 * Magic setter.
@@ -270,25 +284,69 @@ class BaseSolution implements \ArrayAccess, Package {
 	}
 
 	/**
-	 * Retrieve the managed required packages.
+	 * Retrieve the required solutions.
 	 *
 	 * @since 0.1.0
 	 *
 	 * @return array
 	 */
-	public function get_required_packages(): array {
-		return $this->required_packages;
+	public function get_required_solutions(): array {
+		return $this->required_solutions;
 	}
 
 	/**
-	 * Whether the package has any managed required packages.
+	 * Whether the solution has any required solutions.
 	 *
 	 * @since 0.1.0
 	 *
 	 * @return bool
 	 */
-	public function has_required_packages(): bool {
-		return ! empty( $this->required_packages );
+	public function has_required_solutions(): bool {
+		return ! empty( $this->required_solutions );
+	}
+
+	/**
+	 * Retrieve the excluded solutions.
+	 *
+	 * @since 0.1.0
+	 *
+	 * @return array
+	 */
+	public function get_excluded_solutions(): array {
+		return $this->excluded_solutions;
+	}
+
+	/**
+	 * Whether the solution has any excluded solutions.
+	 *
+	 * @since 0.1.0
+	 *
+	 * @return bool
+	 */
+	public function has_excluded_solutions(): bool {
+		return ! empty( $this->excluded_solutions );
+	}
+
+	/**
+	 * Retrieve the required LT Records Parts.
+	 *
+	 * @since 0.1.0
+	 *
+	 * @return array
+	 */
+	public function get_required_ltrecords_parts(): array {
+		return $this->required_ltrecords_parts;
+	}
+
+	/**
+	 * Whether the solution has any required LT Records Parts.
+	 *
+	 * @since 0.1.0
+	 *
+	 * @return bool
+	 */
+	public function has_required_ltrecords_parts(): bool {
+		return ! empty( $this->required_ltrecords_parts );
 	}
 
 	/**

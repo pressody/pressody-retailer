@@ -63,9 +63,9 @@ class ComposerSolutionTransformer implements ComposerPackageTransformer {
 	}
 
 	/**
-	 * Transform a package's required packages into a Composer require list.
+	 * Transform a solution's required packages (other solutions, parts) into a Composer require list.
 	 *
-	 * @since 0.8.0
+	 * @since 0.1.0
 	 *
 	 * @param array $required_ltpackages
 	 * @return array

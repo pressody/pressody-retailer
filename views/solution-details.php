@@ -59,7 +59,7 @@ $solution_visibility = $solution->get_visibility();
 		<th><?php esc_html_e( 'Required Packages', 'pixelgradelt_retailer' ); ?></th>
 		<td class="pixelgradelt_retailer-required-packages">
 			<?php
-			if ( $solution->has_required_packages() ) {
+			if ( $solution->has_required_solutions() ) {
 				$requires = array_map(
 						function( $required_package ) {
 							$solution_name = $required_package['composer_package_name'] . ':' . $required_package['version_range'];
@@ -72,7 +72,7 @@ $solution_visibility = $solution->get_visibility();
 									esc_html( $solution_name ),
 							);
 						},
-						$solution->get_required_packages()
+						$solution->get_required_solutions()
 				);
 
 				echo wp_kses(

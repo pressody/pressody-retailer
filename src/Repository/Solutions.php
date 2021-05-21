@@ -91,7 +91,7 @@ class Solutions extends AbstractRepository implements PackageRepository {
 	 */
 	protected function build( int $post_id ): Package {
 		return $this->factory->create( SolutionTypes::BASIC )
-			// Then add managed data, if this plugin is managed.
+			// Then add the data from the Solution Manager.
 			->from_manager( $post_id )
 			->build();
 	}

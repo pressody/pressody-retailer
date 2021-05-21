@@ -40,7 +40,7 @@ class ListSolutions extends AbstractHookProvider {
 	public function __construct(
 		SolutionManager $package_manager
 	) {
-		$this->package_manager   = $package_manager;
+		$this->package_manager = $package_manager;
 	}
 
 	/**
@@ -58,7 +58,7 @@ class ListSolutions extends AbstractHookProvider {
 
 		// Add custom columns to post list.
 		$this->add_action( 'manage_' . $this->package_manager::POST_TYPE . '_posts_columns', 'add_custom_columns' );
-		$this->add_action( 'manage_' . $this->package_manager::POST_TYPE . '_posts_custom_column', 'populate_custom_columns', 10, 2);
+		$this->add_action( 'manage_' . $this->package_manager::POST_TYPE . '_posts_custom_column', 'populate_custom_columns', 10, 2 );
 	}
 
 	/**
@@ -71,18 +71,31 @@ class ListSolutions extends AbstractHookProvider {
 			return;
 		}
 
-		$taxonomy = get_taxonomy( $this->package_manager::TYPE_TAXONOMY );
-
+		$type_taxonomy = get_taxonomy( $this->package_manager::TYPE_TAXONOMY );
 		wp_dropdown_categories( array(
-			'show_option_all' => sprintf( __( 'All %s', 'pixelgradelt_retailer' ), $taxonomy->label ),
+			'show_option_all' => sprintf( __( 'All %s', 'pixelgradelt_retailer' ), $type_taxonomy->label ),
 			'orderby'         => 'term_id',
 			'order'           => 'ASC',
 			'hide_empty'      => false,
 			'hide_if_empty'   => true,
-			'selected'        => filter_input( INPUT_GET, $taxonomy->query_var, FILTER_SANITIZE_STRING ),
+			'selected'        => filter_input( INPUT_GET, $type_taxonomy->query_var, FILTER_SANITIZE_STRING ),
 			'hierarchical'    => false,
-			'name'            => $taxonomy->query_var,
-			'taxonomy'        => $taxonomy->name,
+			'name'            => $type_taxonomy->query_var,
+			'taxonomy'        => $type_taxonomy->name,
+			'value_field'     => 'slug',
+		) );
+
+		$category_taxonomy = get_taxonomy( $this->package_manager::CATEGORY_TAXONOMY );
+		wp_dropdown_categories( array(
+			'show_option_all' => sprintf( __( 'All %s', 'pixelgradelt_retailer' ), $category_taxonomy->label ),
+			'orderby'         => 'term_id',
+			'order'           => 'ASC',
+			'hide_empty'      => false,
+			'hide_if_empty'   => true,
+			'selected'        => filter_input( INPUT_GET, $category_taxonomy->query_var, FILTER_SANITIZE_STRING ),
+			'hierarchical'    => true,
+			'name'            => $category_taxonomy->query_var,
+			'taxonomy'        => $category_taxonomy->name,
 			'value_field'     => 'slug',
 		) );
 	}
