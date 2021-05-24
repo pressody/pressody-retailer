@@ -316,11 +316,11 @@ class Settings extends AbstractHookProvider {
 		?>
 		<p>
 			<input type="text" name="pixelgradelt_retailer[vendor]" id="pixelgradelt_retailer-vendor"
-			       value="<?php echo esc_attr( $value ); ?>" placeholder="pixelgradelt_retailer"><br/>
-			<span class="description">The default is <code>pixelgradelt_retailer</code><br>
+			       value="<?php echo esc_attr( $value ); ?>" placeholder="pixelgradelt-retailer"><br/>
+			<span class="description">The default is <code>pixelgradelt-retailer</code><br>
 			This is the general vendor that will be used when exposing all the packages for consumption.<br>
 				<strong>For example:</strong> you have a managed package with the source on Packagist.org (say <a
-						href="https://packagist.org/packages/yoast/wordpress-seo"><code>yoast/wordpress-seo</code></a>). You will expose it under a package name in the form <code>vendor/post_slug</code> (say <code>pixelgradelt_retailer/yoast-wordpress-seo</code>).</span>
+						href="https://packagist.org/packages/yoast/wordpress-seo"><code>yoast/wordpress-seo</code></a>). You will expose it under a package name in the form <code>vendor/post_slug</code> (say <code>pixelgradelt-retailer/yoast-wordpress-seo</code>).</span>
 		</p>
 		<?php
 	}

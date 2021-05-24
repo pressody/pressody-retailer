@@ -112,7 +112,7 @@ class HealthCheck extends AbstractHookProvider {
 	 *
 	 * @throws \UnexpectedValueException If the response could not be handled or parsed.
 	 * @throws \RuntimeException If the authorization check fails.
-	 * @return boolean True if authorization headers are supported.
+	 * @return bool True if authorization headers are supported.
 	 */
 	public static function check_authorization_header() {
 		$url = add_query_arg(

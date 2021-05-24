@@ -544,7 +544,7 @@ class BaseSolutionBuilder {
 			/**
 			 * Construct the Composer-like package name (the same way @see ComposerSolutionTransformer::transform() does it).
 			 */
-			$vendor = apply_filters( 'pixelgradelt_retailer_vendor', 'pixelgradelt_retailer', $required_solution, $package_data );
+			$vendor = apply_filters( 'pixelgradelt_retailer_vendor', 'pixelgradelt-retailer', $required_solution, $package_data );
 			$name   = $this->normalize_package_name( $package_data['slug'] );
 
 			$normalized[ $required_solution['pseudo_id'] ]['composer_package_name'] = $vendor . '/' . $name;

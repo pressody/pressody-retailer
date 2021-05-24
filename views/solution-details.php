@@ -59,20 +59,29 @@ $solution_visibility = $solution->get_visibility();
 		<th><?php esc_html_e( 'Required Packages', 'pixelgradelt_retailer' ); ?></th>
 		<td class="pixelgradelt_retailer-required-packages">
 			<?php
-			if ( $solution->has_required_solutions() ) {
+			$requires = [];
+			$requires += $solution->get_required_solutions();
+			$requires += $solution->get_required_ltrecords_parts();
+
+			if ( ! empty( $requires) ) {
 				$requires = array_map(
 						function( $required_package ) {
 							$solution_name = $required_package['composer_package_name'] . ':' . $required_package['version_range'];
 							if ( 'stable' !== $required_package['stability'] ) {
 								$solution_name .= '@' . $required_package['stability'];
 							}
+
+							$edit_link = '#';
+							if ( ! empty( $required_package['managed_post_id'] ) ) {
+								$edit_link = get_edit_post_link( $required_package['managed_post_id'] );
+							}
 							return sprintf(
 									'<a href="%1$s" target="_blank" class="button pixelgradelt_retailer-required-package">%2$s</a>',
-									esc_url( get_edit_post_link( $required_package['managed_post_id'] ) ),
+									esc_url( $edit_link ),
 									esc_html( $solution_name ),
 							);
 						},
-						$solution->get_required_solutions()
+						$requires
 				);
 
 				echo wp_kses(

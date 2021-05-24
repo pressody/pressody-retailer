@@ -55,7 +55,7 @@ class ComposerSolutionTransformer implements ComposerPackageTransformer {
 		// @link https://getcomposer.org/doc/04-schema.md#type
 		$builder->set_type( 'metapackage' );
 
-		$vendor = apply_filters( 'pixelgradelt_retailer_vendor', 'pixelgradelt_retailer' );
+		$vendor = apply_filters( 'pixelgradelt_retailer_vendor', 'pixelgradelt-retailer' );
 		$name   = $this->normalize_package_name( $solution->get_slug() );
 		$builder->set_name( $vendor . '/' . $name );
 
