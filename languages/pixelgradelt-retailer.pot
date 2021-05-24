@@ -1,152 +1,603 @@
-# Copyright (C) 2021 Cedaro
+# Copyright (C) 2021 Pixelgrade
 # This file is distributed under the GPL-2.0-or-later.
 msgid ""
 msgstr ""
-"Project-Id-Version: PixelgradeLT Retailer 0.7.1\n"
-"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/pixelgradelt-records\n"
-"POT-Creation-Date: 2021-02-04 15:48:08+00:00\n"
-"MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=utf-8\n"
-"Content-Transfer-Encoding: 8bit\n"
-"PO-Revision-Date: 2021-MO-DA HO:MI+ZONE\n"
+"Project-Id-Version: PixelgradeLT Retailer 0.6.0\n"
+"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/pixelgradelt-retailer\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"POT-Creation-Date: 2021-05-24T10:15:13+00:00\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"X-Generator: WP-CLI 2.5.0\n"
+"X-Domain: pixelgradelt_retailer\n"
 
-#. Plugin Name of the plugin/theme
+#. Plugin Name of the plugin
+#: src/Integration/Members.php:44
+#: src/Screen/Settings.php:99
 msgid "PixelgradeLT Retailer"
 msgstr ""
 
-#: src/Integration/Members.php:63
-msgid "Download Packages"
+#. Plugin URI of the plugin
+msgid "https://github.com/pixelgradelt/pixelgradelt-retailer"
 msgstr ""
 
-#: src/Integration/Members.php:71
-msgid "View Packages"
+#. Description of the plugin
+msgid "Define and manage PixelgradeLT solutions to be purchased and used on customers' websites. Ensures the connection with WooCommerce."
 msgstr ""
 
-#: src/Integration/Members.php:79
+#. Author of the plugin
+msgid "Pixelgrade"
+msgstr ""
+
+#. Author URI of the plugin
+msgid "https://pixelgrade.com/"
+msgstr ""
+
+#. translators: %s: documentation URL
+#: src/functions.php:159
+msgid "PixelgradeLT Retailer is missing required dependencies. <a href=\"%s\" target=\"_blank\" rel=\"noopener noreferer\">Learn more.</a>"
+msgstr ""
+
+#: src/Integration/Members.php:64
+msgid "View Solutions"
+msgstr ""
+
+#: src/Integration/Members.php:72
 msgid "Manage Options"
+msgstr ""
+
+#: src/Integration/Members.php:80
+msgid "Manage Solution Types"
+msgstr ""
+
+#: src/Integration/Members.php:88
+msgid "Manage Solution Categories"
+msgstr ""
+
+#: src/Logging/Handler/FileLogHandler.php:402
+#: src/Logging/Handler/FileLogHandler.php:424
+msgid "This method should not be called before plugins_loaded."
+msgstr ""
+
+#. translators: 1: class name 2: WC_Log_Handler_Interface
+#: src/Logging/Logger.php:84
+msgid "The provided handler %1$s does not implement %2$s."
+msgstr ""
+
+#. translators: 1: WC_Logger::log 2: level
+#: src/Logging/Logger.php:109
+msgid "%1$s was called with an invalid level \"%2$s\"."
 msgstr ""
 
 #: src/Provider/AdminAssets.php:58
 msgid "Are you sure you want to delete this API Key?"
 msgstr ""
 
-#: src/Screen/EditUser.php:113
+#: src/Provider/HealthCheck.php:61
+msgid "Health Check"
+msgstr ""
+
+#. translators: %s: permalink screen URL
+#: src/Provider/HealthCheck.php:101
+msgid "PixelgradeLT Retailer requires pretty permalinks to be enabled. <a href=\"%s\">Enable permalinks</a>."
+msgstr ""
+
+#: src/Screen/EditSolution.php:211
+msgid "Add solution title"
+msgstr ""
+
+#: src/Screen/EditSolution.php:226
+msgid ""
+"<strong>The post slug is, at the same time, the Composer PROJECT NAME.</strong><br>\n"
+"In the end this will be joined with the vendor name (like so: <code>vendor/slug</code>) to form the package name to be used in composer.json.<br>\n"
+"The slug/name must be lowercased and consist of words separated by <code>-</code> or <code>_</code>. It also must respect <a href=\"https://regexr.com/5sr9h\" target=\"_blank\">this regex</a>"
+msgstr ""
+
+#: src/Screen/EditSolution.php:285
+#: src/SolutionManager.php:138
+msgid "Solution Type"
+msgstr ""
+
+#: src/Screen/EditSolution.php:295
+msgid "General Configuration"
+msgstr ""
+
+#: src/Screen/EditSolution.php:300
+msgid "Section Description"
+msgstr ""
+
+#: src/Screen/EditSolution.php:301
+msgid "Configure details about <strong>the solution itself,</strong> as it will be exposed for consumption."
+msgstr ""
+
+#: src/Screen/EditSolution.php:303
+msgid "Short Description"
+msgstr ""
+
+#: src/Screen/EditSolution.php:304
+msgid "Description"
+msgstr ""
+
+#: src/Screen/EditSolution.php:305
+msgid "Solution Homepage URL"
+msgstr ""
+
+#: src/Screen/EditSolution.php:306
+msgid "This could be a URL to a page that presents details about this solution."
+msgstr ""
+
+#: src/Screen/EditSolution.php:355
+msgid "Dependencies Configuration"
+msgstr ""
+
+#: src/Screen/EditSolution.php:360
+msgid "Dependencies Description"
+msgstr ""
+
+#: src/Screen/EditSolution.php:361
+msgid "Here you edit and configure <strong>the list of other solutions</strong> the current solution depends on (requires) or excludes."
+msgstr ""
+
+#: src/Screen/EditSolution.php:363
+msgid "Required Solutions"
+msgstr ""
+
+#: src/Screen/EditSolution.php:364
+msgid ""
+"These are solutions that are <strong>automatically included in a site's composition</strong> together with the current solution. The order is not important, from a logic standpoint.<br>\n"
+"<strong>FYI:</strong> Each required solution label is comprised of the solution <code>slug</code> and the <code>#post_id</code>."
+msgstr ""
+
+#: src/Screen/EditSolution.php:369
+#: src/Screen/EditSolution.php:387
+msgid "Choose one of the configured solutions"
+msgstr ""
+
+#: src/Screen/EditSolution.php:380
+msgid "Replaced Solutions"
+msgstr ""
+
+#: src/Screen/EditSolution.php:381
+msgid ""
+"These are solutions that are <strong>automatically ignored from a site's composition</strong> when the current solution is included. The order is not important, from a logic standpoint.<br>\n"
+"These apply the Composer <code>replace</code> logic, meaning that the current solution already includes the replaced solutions. Learn more about it <a href=\"https://getcomposer.org/doc/04-schema.md#replace\" target=\"_blank\">here</a>.<br>\n"
+"<strong>FYI:</strong> Each replaced solution label is comprised of the solution <code>slug</code> and the <code>#post_id</code>."
+msgstr ""
+
+#: src/Screen/EditSolution.php:406
+msgid "Current Solution State Details"
+msgstr ""
+
+#: src/Screen/EditSolution.php:528
+msgid "%s - #%s"
+msgstr ""
+
+#: src/Screen/EditSolution.php:534
+msgid "Pick a solution, carefully.."
+msgstr ""
+
+#: src/Screen/EditSolution.php:556
+msgid "Pick a part, carefully.."
+msgstr ""
+
+#: src/Screen/EditSolution.php:601
+msgid "You need to provide a LT Records parts endpoint and a LT Records API key in Settings > LT Retailer."
+msgstr ""
+
+#: src/Screen/EditSolution.php:623
+msgid "Something went wrong and we couldn't get the LT Records parts from the provided endpoint."
+msgstr ""
+
+#: src/Screen/EditSolution.php:659
+msgid "You MUST set a unique name (title) for creating a new package."
+msgstr ""
+
+#: src/Screen/EditSolution.php:672
+msgid "You MUST choose a %s for creating a new solution."
+msgstr ""
+
+#: src/Screen/EditSolution.php:745
+msgid "Please bear in mind that Publish/Update may take a while since we do some heavy lifting behind the scenes.<br>Exercise patience 🦉"
+msgstr ""
+
+#: src/Screen/EditUser.php:110
 msgid "PixelgradeLT Retailer API Keys"
 msgstr ""
 
-#: src/Screen/Settings.php:164
+#. translators: %s: <code>pixelgradelt_retailer</code>
+#: src/Screen/EditUser.php:115
+#: src/Screen/Settings.php:298
+msgid "The password for all API Keys is %s. Use the API key as the username."
+msgstr ""
+
+#: src/Screen/ListSolutions.php:76
+#: src/Screen/ListSolutions.php:90
+msgid "All %s"
+msgstr ""
+
+#: src/Screen/Settings.php:100
+msgid "LT Retailer"
+msgstr ""
+
+#: src/Screen/Settings.php:170
 msgid "General"
 msgstr ""
 
-#: src/Screen/Settings.php:171
+#: src/Screen/Settings.php:177
+msgid "LT Records Communication"
+msgstr ""
+
+#: src/Screen/Settings.php:184
 msgid "Access"
 msgstr ""
 
-#: src/Screen/Settings.php:178 src/Screen/Settings.php:200
-#: views/packages.php:129
-msgid "Themes"
-msgstr ""
-
-#: src/Screen/Settings.php:192
+#: src/Screen/Settings.php:198
 msgid "Vendor"
 msgstr ""
 
-#: src/Screen/Settings.php:255
-msgid ""
-"API Keys are used to access your PixelgradeLT Retailer repository and download "
-"packages. Your personal API keys appear below or you can create keys for "
-"other users by editing their accounts."
+#: src/Screen/Settings.php:206
+msgid "Github OAuth Token"
 msgstr ""
 
-#: src/Screen/Settings.php:261
-#. translators: %s: <code>pixelgradelt-records</code>
-msgid "The password for all API Keys is %s."
+#: src/Screen/Settings.php:214
+msgid "Packages Repository Endpoint"
 msgstr ""
 
-#: src/Screen/Settings.php:268
+#: src/Screen/Settings.php:222
+msgid "Parts Repository Endpoint"
+msgstr ""
+
+#: src/Screen/Settings.php:230
+msgid "Access API Key"
+msgstr ""
+
+#: src/Screen/Settings.php:292
+msgid "API Keys are used to access your PixelgradeLT Retailer repository. Your personal API keys appear below or you can create keys for other users by editing their accounts."
+msgstr ""
+
+#: src/Screen/Settings.php:305
 msgid "Read more about securing your PixelgradeLT Retailer repository."
 msgstr ""
 
-#: src/Screen/Settings.php:280
-msgid "Choose themes to make available in your PixelgradeLT Retailer repository."
+#: src/SolutionManager.php:89
+msgid "LT Solutions"
 msgstr ""
 
-#: src/functions.php:155
-#. translators: %s: documentation URL
-msgid ""
-"PixelgradeLT Retailer is missing required dependencies. <a href=\"%s\" "
-"target=\"_blank\" rel=\"noopener noreferer\">Learn more.</a>"
+#: src/SolutionManager.php:90
+msgid "LT Solution"
 msgstr ""
 
-#: views/packages.php:44
-msgid "Homepage"
+#: src/SolutionManager.php:91
+msgctxt "Admin Menu text"
+msgid "LT Solutions"
 msgstr ""
 
-#: views/packages.php:50
-msgid "Authors"
+#: src/SolutionManager.php:92
+msgctxt "LT Solution"
+msgid "Add New"
 msgstr ""
 
-#: views/packages.php:54
-msgid "Releases"
+#: src/SolutionManager.php:93
+msgid "Add New LT Solution"
 msgstr ""
 
-#: views/packages.php:96
-msgid "Package Type"
+#: src/SolutionManager.php:94
+msgid "New LT Solution"
 msgstr ""
 
-#: views/packages.php:107
-msgid "Whitelisting Packages"
+#: src/SolutionManager.php:95
+msgid "Edit LT Solution"
 msgstr ""
 
-#: views/packages.php:109
-msgid ""
-"Plugins and themes need to be whitelisted to make them available as "
-"Composer packages."
+#: src/SolutionManager.php:96
+msgid "View LT Solution"
 msgstr ""
 
-#: views/packages.php:112
-msgid "Read more about whitelisting plugins and themes."
+#: src/SolutionManager.php:97
+msgid "All Solutions"
 msgstr ""
 
-#: views/packages.php:115
-msgid "Plugins"
+#: src/SolutionManager.php:98
+msgid "Search Solutions"
 msgstr ""
 
-#: views/packages.php:121
-#. translators: %s: Plugins screen URL
-msgid ""
-"Plugins can be whitelisted by visiting the <a href=\"%s\"><em>Plugins "
-"&rarr; Installed Plugins</em></a> screen and toggling the checkbox for each "
-"plugin in the \"PixelgradeLT Retailer\" column."
+#: src/SolutionManager.php:99
+msgid "No solutions found."
 msgstr ""
 
-#: views/packages.php:135
-#. translators: %s: PixelgradeLT Retailer settings screen URL
-msgid ""
-"Themes can be toggled on the <a href=\"%s\"><em>Settings &rarr; "
-"PixelgradeLT Retailer</em></a> screen."
+#: src/SolutionManager.php:100
+msgid "No solutions found in Trash."
 msgstr ""
 
-#: views/screen-settings.php:18
+#: src/SolutionManager.php:101
+msgid "Uploaded to this solution"
+msgstr ""
+
+#: src/SolutionManager.php:102
+msgid "Filter solutions list"
+msgstr ""
+
+#: src/SolutionManager.php:103
+msgid "Solutions list navigation"
+msgstr ""
+
+#: src/SolutionManager.php:104
+msgid "LT Solutions list"
+msgstr ""
+
+#: src/SolutionManager.php:109
+msgid "Solutions to be purchased and used to determine the PixelgradeLT parts delivered to PixelgradeLT users."
+msgstr ""
+
+#: src/SolutionManager.php:137
+msgid "Solution Types"
+msgstr ""
+
+#: src/SolutionManager.php:139
+msgctxt "LT Solution Type"
+msgid "Add New"
+msgstr ""
+
+#: src/SolutionManager.php:140
+msgid "Add New Solution Type"
+msgstr ""
+
+#: src/SolutionManager.php:141
+msgid "Update Solution Type"
+msgstr ""
+
+#: src/SolutionManager.php:142
+msgid "New Solution Type Name"
+msgstr ""
+
+#: src/SolutionManager.php:143
+msgid "Edit Solution Type"
+msgstr ""
+
+#: src/SolutionManager.php:144
+msgid "All Solution Types"
+msgstr ""
+
+#: src/SolutionManager.php:145
+msgid "Search Solution Types"
+msgstr ""
+
+#: src/SolutionManager.php:146
+msgid "Parent Solution Type"
+msgstr ""
+
+#: src/SolutionManager.php:147
+msgid "Parent Solution Type:"
+msgstr ""
+
+#: src/SolutionManager.php:148
+msgid "No solution types found."
+msgstr ""
+
+#: src/SolutionManager.php:149
+msgid "No solution types."
+msgstr ""
+
+#: src/SolutionManager.php:150
+msgid "Solution Types list navigation"
+msgstr ""
+
+#: src/SolutionManager.php:151
+msgid "Solution Types list"
+msgstr ""
+
+#: src/SolutionManager.php:152
+msgid "&larr; Go to Solution Types"
+msgstr ""
+
+#: src/SolutionManager.php:179
+msgid "Solution Categories"
+msgstr ""
+
+#: src/SolutionManager.php:180
+msgid "Solution Category"
+msgstr ""
+
+#: src/SolutionManager.php:181
+msgctxt "LT Solution Category"
+msgid "Add New"
+msgstr ""
+
+#: src/SolutionManager.php:182
+msgid "Add New Solution Category"
+msgstr ""
+
+#: src/SolutionManager.php:183
+msgid "Update Solution Category"
+msgstr ""
+
+#: src/SolutionManager.php:184
+msgid "New Solution Category Name"
+msgstr ""
+
+#: src/SolutionManager.php:185
+msgid "Edit Solution Category"
+msgstr ""
+
+#: src/SolutionManager.php:186
+msgid "All Solution Categories"
+msgstr ""
+
+#: src/SolutionManager.php:187
+msgid "Search Solution Categories"
+msgstr ""
+
+#: src/SolutionManager.php:188
+msgid "Parent Solution Category"
+msgstr ""
+
+#: src/SolutionManager.php:189
+msgid "Parent Solution Category:"
+msgstr ""
+
+#: src/SolutionManager.php:190
+msgid "No solution categories found."
+msgstr ""
+
+#: src/SolutionManager.php:191
+msgid "No solution categories."
+msgstr ""
+
+#: src/SolutionManager.php:192
+msgid "Solution Categories list navigation"
+msgstr ""
+
+#: src/SolutionManager.php:193
+msgid "Solution Categories list"
+msgstr ""
+
+#: src/SolutionManager.php:194
+msgid "&larr; Go to Solution Categories"
+msgstr ""
+
+#: src/SolutionManager.php:221
+msgid "Solution Keywords"
+msgstr ""
+
+#: src/SolutionManager.php:222
+msgid "Solution Keyword"
+msgstr ""
+
+#: src/SolutionManager.php:223
+msgctxt "LT Solution Keyword"
+msgid "Add New"
+msgstr ""
+
+#: src/SolutionManager.php:224
+msgid "Add New Solution Keyword"
+msgstr ""
+
+#: src/SolutionManager.php:225
+msgid "Update Solution Keyword"
+msgstr ""
+
+#: src/SolutionManager.php:226
+msgid "New Solution Keyword Name"
+msgstr ""
+
+#: src/SolutionManager.php:227
+msgid "Edit Solution Keyword"
+msgstr ""
+
+#: src/SolutionManager.php:228
+msgid "All Solution Keywords"
+msgstr ""
+
+#: src/SolutionManager.php:229
+msgid "Search Solution Keywords"
+msgstr ""
+
+#: src/SolutionManager.php:230
+msgid "No solution keywords found."
+msgstr ""
+
+#: src/SolutionManager.php:231
+msgid "No solution keywords."
+msgstr ""
+
+#: src/SolutionManager.php:232
+msgid "Separate keywords with commas."
+msgstr ""
+
+#: src/SolutionManager.php:233
+msgid "Choose from the most used keywords."
+msgstr ""
+
+#: src/SolutionManager.php:234
+msgid "Most used."
+msgstr ""
+
+#: src/SolutionManager.php:235
+msgid "Solution Keywords list navigation"
+msgstr ""
+
+#: src/SolutionManager.php:236
+msgid "Solution Keywords list"
+msgstr ""
+
+#: src/SolutionManager.php:237
+msgid "&larr; Go to Solution Keywords"
+msgstr ""
+
+#: src/SolutionManager.php:598
+msgid "Missing LT Records Repo URL and/or LT Records API key in Settings > LT Retailer."
+msgstr ""
+
+#: views/screen-settings.php:26
 msgid "Settings"
 msgstr ""
 
-#: views/screen-settings.php:19
-msgid "Packages"
+#: views/screen-settings.php:27
+msgid "Solutions"
 msgstr ""
 
-#: views/screen-settings.php:24
-msgid "Your PixelgradeLT Retailer repository is available at:"
+#: views/screen-settings.php:28
+msgid "Status"
 msgstr ""
 
 #: views/screen-settings.php:33
-#. translators: 1: <code>repositories</code>, 2: <code>composer.json</code>
-msgid "Add it to the %1$s list in your %2$s:"
+msgid "Your PixelgradeLT Retailer repository is available at:"
 msgstr ""
 
-#: views/templates.php:17 views/templates.php:37
+#. translators: 1: <code>repositories</code>, 2: <code>composer.json</code>
+#: views/screen-settings.php:42
+msgid "Add it to the %1$s list in your project's %2$s, like so:"
+msgstr ""
+
+#: views/solution-details.php:41
+msgid "Homepage"
+msgstr ""
+
+#: views/solution-details.php:49
+msgid "Authors"
+msgstr ""
+
+#: views/solution-details.php:59
+msgid "Required Packages"
+msgstr ""
+
+#: views/solution-details.php:98
+#: views/solution-details.php:134
+msgid "None"
+msgstr ""
+
+#: views/solution-details.php:104
+msgid "Replaced Packages"
+msgstr ""
+
+#: views/solution-details.php:140
+msgid "Package Type"
+msgstr ""
+
+#: views/solutions.php:33
+msgid ""
+"These are <strong>all the solutions</strong> that PixelgradeLT Retailer makes available as Composer packages, regardless of their configuration.<br>\n"
+"This view is primarily available to assist in <strong>double-checking that things work properly.</strong><br>\n"
+"If you want to <strong>dig deeper,</strong> check <a href=\"%s\" target=\"_blank\">the actual JSON</a> of the PixelgradeLT Retailer repo."
+msgstr ""
+
+#: views/solutions.php:45
+msgid "No solutions defined"
+msgstr ""
+
+#: views/solutions.php:47
+msgid "Go to <code>LT Solutions > Add New</code> and start managing your first solution."
+msgstr ""
+
+#: views/status.php:30
+msgid "These are a series of system checks to reassure or warn you of <strong>how fit is the webserver for running PixelgradeLT Retailer.</strong>"
+msgstr ""
+
+#: views/templates.php:17
+#: views/templates.php:37
 msgid "Name"
 msgstr ""
 
@@ -194,8 +645,8 @@ msgstr ""
 msgid "Require"
 msgstr ""
 
-#: views/templates.php:93
 #. translators: %s: <code>composer.json</code>
+#: views/templates.php:93
 msgid "Copy and paste into %s"
 msgstr ""
 
@@ -203,28 +654,7 @@ msgstr ""
 msgid "CLI Command"
 msgstr ""
 
-#: views/templates.php:108
 #. translators: %s: version number
+#: views/templates.php:108
 msgid "Download %s"
-msgstr ""
-
-#. Plugin URI of the plugin/theme
-msgid "https://github.com/pixelgradelt/pixelgradelt-records"
-msgstr ""
-
-#. Description of the plugin/theme
-msgid "Generate a Composer repository from installed WordPress plugins and themes."
-msgstr ""
-
-#. Author of the plugin/theme
-msgid "Cedaro"
-msgstr ""
-
-#. Author URI of the plugin/theme
-msgid "https://www.cedaro.com/"
-msgstr ""
-
-#: views/packages.php:77
-msgctxt "latest version"
-msgid "Latest"
 msgstr ""
