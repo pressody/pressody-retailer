@@ -15,6 +15,7 @@ use Carbon_Fields\Carbon_Fields;
 use Carbon_Fields\Container;
 use Carbon_Fields\Field;
 use Cedaro\WP\Plugin\AbstractHookProvider;
+use Mockery\Exception;
 use PixelgradeLT\Retailer\Transformer\ComposerPackageTransformer;
 use PixelgradeLT\Retailer\SolutionManager;
 use PixelgradeLT\Retailer\Repository\PackageRepository;
@@ -376,9 +377,10 @@ Learn more about Composer <a href="https://getcomposer.org/doc/articles/versions
 								        <%- pseudo_id %>
 								    <% } %>
 								' ),
-				         Field::make( 'complex', 'solution_excluded_solutions', __( 'Excluded Solutions', 'pixelgradelt_retailer' ) )
-				              ->set_help_text( __( 'These are solutions that are <strong>automatically removed from a site\'s composition</strong> when the current solution is included. The order is not important, from a logic standpoint.<br>
-<strong>FYI:</strong> Each excluded solution label is comprised of the solution <code>slug</code> and the <code>#post_id</code>.', 'pixelgradelt_retailer' ) )
+				         Field::make( 'complex', 'solution_replaced_solutions', __( 'Replaced Solutions', 'pixelgradelt_retailer' ) )
+				              ->set_help_text( __( 'These are solutions that are <strong>automatically ignored from a site\'s composition</strong> when the current solution is included. The order is not important, from a logic standpoint.<br>
+These apply the Composer <code>replace</code> logic, meaning that the current solution already includes the replaced solutions. Learn more about it <a href="https://getcomposer.org/doc/04-schema.md#replace" target="_blank">here</a>.<br>
+<strong>FYI:</strong> Each replaced solution label is comprised of the solution <code>slug</code> and the <code>#post_id</code>.', 'pixelgradelt_retailer' ) )
 				              ->set_classes( 'solution-required-solutions' )
 				              ->set_collapsed( true )
 				              ->add_fields( [
@@ -462,7 +464,7 @@ Learn more about Composer <a href="https://getcomposer.org/doc/articles/versions
 	}
 
 	/**
-	 * Check if the package can be resolved by Composer with the required solutions, excluded solutions, and required parts.
+	 * Check if the package can be resolved by Composer with the required solutions, replaced solutions, and required parts.
 	 * Show a warning message if it can't be.
 	 *
 	 * @param int                           $post_ID
@@ -485,10 +487,17 @@ Learn more about Composer <a href="https://getcomposer.org/doc/articles/versions
 		// Transform the package in the Composer format.
 		$package = $this->composer_transformer->transform( $package );
 
-		if ( false === $this->solution_manager->dry_run_solution_require( $package ) ) {
+		if ( true !== ( $result = $this->solution_manager->dry_run_solution_require( $package ) ) ) {
+			$message = '<p>';
+			$message .= 'We could not resolve the solution dependencies. <strong>You should give the required parts and solutions a further look and then hit Update!</strong><br>';
+			if ( $result instanceof \Exception ) {
+				$message .= '<pre>' . $result->getMessage() . '</pre><br>';
+			}
+			$message .= 'There should be additional information in the PixelgradeLT Retailer logs.';
+			$message .= '</p>';
 			update_post_meta( $post_ID, '_package_require_dry_run_result', [
 					'type'    => 'error',
-					'message' => '<p>We could not resolve the solution dependencies. <strong>You should give the required parts and solutions a further look and then hit Update!</strong><br>There should be additional information in the PixelgradeLT Retailer logs.</p>',
+					'message' => $message,
 			] );
 		} else {
 			update_post_meta( $post_ID, '_package_require_dry_run_result', '' );

@@ -92,6 +92,42 @@ $solution_visibility = $solution->get_visibility();
 		</td>
 	</tr>
 	<tr>
+		<th><?php esc_html_e( 'Replaced Packages', 'pixelgradelt_retailer' ); ?></th>
+		<td class="pixelgradelt_retailer-required-packages pixelgradelt_retailer-replaced-packages">
+			<?php
+			if ( $solution->has_replaced_solutions() ) {
+				$replaces = array_map(
+						function( $replaced_package ) {
+							$solution_name = $replaced_package['composer_package_name'] . ':' . $replaced_package['version_range'];
+							if ( 'stable' !== $replaced_package['stability'] ) {
+								$solution_name .= '@' . $replaced_package['stability'];
+							}
+							return sprintf(
+									'<a href="%1$s" target="_blank" class="button pixelgradelt_retailer-required-package pixelgradelt_retailer-replaced-package">%2$s</a>',
+									esc_url( get_edit_post_link( $replaced_package['managed_post_id'] ) ),
+									esc_html( $solution_name ),
+							);
+						},
+						$solution->get_replaced_solutions()
+				);
+
+				echo wp_kses(
+						implode( ' ', array_filter( $replaces ) ),
+						[
+								'a' => [
+										'class'        => true,
+										'href'         => true,
+										'target'       => true,
+								],
+						]
+				);
+			} else {
+				esc_html_e( 'None', 'pixelgradelt_retailer' );
+			}
+			?>
+		</td>
+	</tr>
+	<tr>
 		<th><?php esc_html_e( 'Package Type', 'pixelgradelt_retailer' ); ?></th>
 		<td><code><?php echo esc_html( $solution->get_type() ); ?></code></td>
 	</tr>

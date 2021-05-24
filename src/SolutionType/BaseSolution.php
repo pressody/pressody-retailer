@@ -115,11 +115,11 @@ class BaseSolution implements \ArrayAccess, Package {
 	protected array $required_solutions = [];
 
 	/**
-	 * Solutions excluded by this solution.
+	 * Solutions repalced by this solution.
 	 *
 	 * @var array
 	 */
-	protected array $excluded_solutions = [];
+	protected array $replaced_solutions = [];
 
 	/**
 	 * LT Records Parts required by this solution.
@@ -306,25 +306,25 @@ class BaseSolution implements \ArrayAccess, Package {
 	}
 
 	/**
-	 * Retrieve the excluded solutions.
+	 * Retrieve the replaced solutions.
 	 *
 	 * @since 0.1.0
 	 *
 	 * @return array
 	 */
-	public function get_excluded_solutions(): array {
-		return $this->excluded_solutions;
+	public function get_replaced_solutions(): array {
+		return $this->replaced_solutions;
 	}
 
 	/**
-	 * Whether the solution has any excluded solutions.
+	 * Whether the solution has any replaced solutions.
 	 *
 	 * @since 0.1.0
 	 *
 	 * @return bool
 	 */
-	public function has_excluded_solutions(): bool {
-		return ! empty( $this->excluded_solutions );
+	public function has_replaced_solutions(): bool {
+		return ! empty( $this->replaced_solutions );
 	}
 
 	/**

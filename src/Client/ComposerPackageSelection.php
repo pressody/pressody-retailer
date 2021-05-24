@@ -227,7 +227,7 @@ class ComposerPackageSelection {
 				$solver          = null;
 				// @todo Investigate if we could be much more elegant by using the solver result instead of selecting links for root and deps.
 			} catch ( SolverProblemsException $e ) {
-				$message = 'Could not solve root package dependencies. Here are the reasons: ' . PHP_EOL;
+				$message = 'Could not solve the root package dependencies. Here are the reasons: ' . PHP_EOL;
 				$message .= $e->getPrettyString( $repositorySet, $request, $pool, $this->io->isVerbose() );
 
 				throw new \Exception( $message, 0, $e );

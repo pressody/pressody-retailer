@@ -378,7 +378,7 @@ class SolutionManager {
 		$data['homepage']    = get_post_meta( $post_ID, '_solution_details_homepage', true );
 
 		$data['required_solutions']       = $this->get_post_solution_required_solutions( $post_ID );
-		$data['excluded_solutions']       = $this->get_post_solution_excluded_solutions( $post_ID );
+		$data['replaced_solutions']       = $this->get_post_solution_replaced_solutions( $post_ID );
 		$data['required_ltrecords_parts'] = $this->get_post_solution_required_parts( $post_ID );
 		$data['composer_require']         = $this->get_post_solution_composer_require( $post_ID );
 
@@ -513,38 +513,38 @@ class SolutionManager {
 		carbon_set_post_meta( $post_ID, 'solution_required_solutions', $required_solutions, $container_id );
 	}
 
-	public function get_post_solution_excluded_solutions( int $post_ID, string $pseudo_id_delimiter = ' #', string $container_id = '' ): array {
-		$excluded_solutions = carbon_get_post_meta( $post_ID, 'solution_excluded_solutions', $container_id );
-		if ( empty( $excluded_solutions ) || ! is_array( $excluded_solutions ) ) {
+	public function get_post_solution_replaced_solutions( int $post_ID, string $pseudo_id_delimiter = ' #', string $container_id = '' ): array {
+		$replaced_solutions = carbon_get_post_meta( $post_ID, 'solution_replaced_solutions', $container_id );
+		if ( empty( $replaced_solutions ) || ! is_array( $replaced_solutions ) ) {
 			return [];
 		}
 
 		// Make sure only the fields we are interested in are left.
 		$accepted_keys = array_fill_keys( [ 'pseudo_id', ], '' );
-		foreach ( $excluded_solutions as $key => $excluded_solution ) {
-			$excluded_solutions[ $key ] = array_replace( $accepted_keys, array_intersect_key( $excluded_solution, $accepted_keys ) );
+		foreach ( $replaced_solutions as $key => $replaced_solution ) {
+			$replaced_solutions[ $key ] = array_replace( $accepted_keys, array_intersect_key( $replaced_solution, $accepted_keys ) );
 
-			if ( empty( $excluded_solution['pseudo_id'] ) || false === strpos( $excluded_solution['pseudo_id'], $pseudo_id_delimiter ) ) {
-				unset( $excluded_solutions[ $key ] );
+			if ( empty( $replaced_solution['pseudo_id'] ) || false === strpos( $replaced_solution['pseudo_id'], $pseudo_id_delimiter ) ) {
+				unset( $replaced_solutions[ $key ] );
 				continue;
 			}
 
 			// We will now split the pseudo_id in its components (slug and post_id with the delimiter in between).
-			[ $slug, $post_id ] = explode( $pseudo_id_delimiter, $excluded_solution['pseudo_id'] );
+			[ $slug, $post_id ] = explode( $pseudo_id_delimiter, $replaced_solution['pseudo_id'] );
 			if ( empty( $post_id ) ) {
-				unset( $excluded_solutions[ $key ] );
+				unset( $replaced_solutions[ $key ] );
 				continue;
 			}
 
-			$excluded_solutions[ $key ]['slug']            = $slug;
-			$excluded_solutions[ $key ]['managed_post_id'] = intval( $post_id );
+			$replaced_solutions[ $key ]['slug']            = $slug;
+			$replaced_solutions[ $key ]['managed_post_id'] = intval( $post_id );
 		}
 
-		return $excluded_solutions;
+		return $replaced_solutions;
 	}
 
-	public function set_post_solution_excluded_solutions( int $post_ID, array $excluded_solutions, string $container_id = '' ) {
-		carbon_set_post_meta( $post_ID, 'solution_excluded_solutions', $excluded_solutions, $container_id );
+	public function set_post_solution_replaced_solutions( int $post_ID, array $replaced_solutions, string $container_id = '' ) {
+		carbon_set_post_meta( $post_ID, 'solution_replaced_solutions', $replaced_solutions, $container_id );
 	}
 
 
@@ -586,9 +586,9 @@ class SolutionManager {
 	 *
 	 * @param Package $solution
 	 *
-	 * @return bool
+	 * @return \Exception|bool
 	 */
-	public function dry_run_solution_require( Package $solution ): bool {
+	public function dry_run_solution_require( Package $solution ) {
 		$client = $this->get_composer_client();
 
 		$option = get_option( 'pixelgradelt_retailer' );
@@ -610,7 +610,7 @@ class SolutionManager {
 		$ltrecords_api_pwd  = 'pixelgradelt_records';
 
 		try {
-			$client->getPackages( [
+			$packages = $client->getPackages( [
 				'repositories'                  => [
 					[
 						// Our very own Composer repo.
@@ -671,7 +671,7 @@ class SolutionManager {
 				]
 			);
 
-			return false;
+			return $e;
 		}
 
 		return true;

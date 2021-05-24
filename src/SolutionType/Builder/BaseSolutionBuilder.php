@@ -330,16 +330,16 @@ class BaseSolutionBuilder {
 	}
 
 	/**
-	 * Set the excluded solutions.
+	 * Set the replaced solutions.
 	 *
 	 * @since 0.1.0
 	 *
-	 * @param array $excluded_solutions
+	 * @param array $replaced_solutions
 	 *
 	 * @return $this
 	 */
-	public function set_excluded_solutions( array $excluded_solutions ): self {
-		return $this->set( 'excluded_solutions', $this->normalize_required_solutions( $excluded_solutions ) );
+	public function set_replaced_solutions( array $replaced_solutions ): self {
+		return $this->set( 'replaced_solutions', $this->normalize_required_solutions( $replaced_solutions ) );
 	}
 
 	/**
@@ -452,15 +452,15 @@ class BaseSolutionBuilder {
 			);
 		}
 
-		if ( ! empty( $package_data['excluded_solutions'] ) ) {
+		if ( ! empty( $package_data['replaced_solutions'] ) ) {
 			// We need to normalize before the merge since we need the keys to be in the same format.
 			// A bit inefficient, I know.
-			$package_data['excluded_solutions'] = $this->normalize_required_solutions( $package_data['excluded_solutions'] );
-			// We will merge the required solutions into the existing ones.
-			$this->set_excluded_solutions(
+			$package_data['replaced_solutions'] = $this->normalize_required_solutions( $package_data['replaced_solutions'] );
+			// We will merge the replaced solutions into the existing ones.
+			$this->set_replaced_solutions(
 				ArrayHelpers::array_merge_recursive_distinct(
-					$this->solution->get_excluded_solutions(),
-					$package_data['excluded_solutions']
+					$this->solution->get_replaced_solutions(),
+					$package_data['replaced_solutions']
 				)
 			);
 		}
@@ -637,7 +637,7 @@ class BaseSolutionBuilder {
 			->set_visibility( $solution->get_visibility() )
 			->set_composer_require( $solution->get_composer_require() )
 			->set_required_solutions( $solution->get_required_solutions() )
-			->set_excluded_solutions( $solution->get_excluded_solutions() )
+			->set_replaced_solutions( $solution->get_replaced_solutions() )
 			->set_required_ltrecords_parts( $solution->get_required_ltrecords_parts() );
 
 		return $this;
