@@ -295,6 +295,19 @@ class BaseSolution implements \ArrayAccess, Package {
 	}
 
 	/**
+	 * Retrieve the required packages.
+	 *
+	 * This is an alias for get_required_solution()
+	 *
+	 * @since 0.1.0
+	 *
+	 * @return array
+	 */
+	public function get_required_packages(): array {
+		return $this->get_required_solutions();
+	}
+
+	/**
 	 * Whether the solution has any required solutions.
 	 *
 	 * @since 0.1.0

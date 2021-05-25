@@ -1,21 +1,18 @@
-/* Plugins Screen
-------------------------------------------------------------------------------*/
-
-.column-pixelgradelt_retailer input[type="checkbox"] {
-	float: left;
-	margin-top: 4px;
-}
-
-.column-pixelgradelt_retailer .spinner {
-	float: left;
-}
-
-
 /* Settings Screen
 ------------------------------------------------------------------------------*/
 
+.pixelgradelt_retailer-screen {
+	display: flex;
+	flex-wrap: nowrap;
+}
+
+.pixelgradelt_retailer-screen-content {
+	width: 100%;
+}
+
 .js .pixelgradelt_retailer-tab-panel {
 	display: none;
+	margin-top: 1em;
 }
 
 .pixelgradelt_retailer-tab-panel.is-active {
@@ -26,20 +23,63 @@
 	color: #ff0000;
 }
 
-.pixelgradelt_retailer-repository-snippet {
+.pixelgradelt_retailer-composer-snippet {
 	background: #333;
 	color: #fff;
 	line-height: 1.2;
 	padding: 10px;
 }
 
-.pixelgradelt_retailer-repository-snippet code {
+.pixelgradelt_retailer-composer-snippet code {
 	background: transparent;
 }
 
+.pixelgradelt_retailer-screen-sidebar {
+	background: #fff;
+	color: #1e1e1e;
+	display: none;
+	flex: 0 0 350px;
+	overflow-y: scroll;
+	position: fixed;
+	top: 32px;
+	right: 0;
+	bottom: 0;
+	width: 350px;
+	z-index: 10;
+}
 
-/* Packages Tab
------------------------------------------------------------------------------ */
+.pixelgradelt_retailer-screen-sidebar .components-panel__header {
+	background: #fff;
+	border-top-width: 0;
+	padding-right: 4px;
+	position: sticky;
+	top: 0;
+	z-index: 2;
+}
+
+.pixelgradelt_retailer-screen-sidebar .components-tab-panel__tabs {
+	background: #fff;
+	border-bottom: 1px solid #ddd;
+	position: sticky;
+	top: 49px;
+	z-index: 1;
+}
+
+.pixelgradelt_retailer-screen-sidebar .components-tab-panel__tab-content {
+	padding: 16px;
+}
+
+.pixelgradelt_retailer-screen-sidebar .components-tab-panel__tab-content > :first-child {
+	margin-top: 0;
+}
+
+.sidebar-is-open .pixelgradelt_retailer-screen-content {
+	margin-right: 370px;
+}
+
+.sidebar-is-open .pixelgradelt_retailer-screen-sidebar {
+	display: block;
+}
 
 .pixelgradelt_retailer-card {
 	background: #fff;
@@ -51,8 +91,28 @@
 	position: relative;
 }
 
+
+/* Repository Tab
+----------------------------------------------------------------------------- */
+
+.pixelgradelt_retailer-repository .components-placeholder {
+	margin-top: 20px;
+	padding: 0.7em 2em 1em;
+	max-width: 620px;
+
+	box-shadow: inset 0 0 0 1px #ccd0d4;
+}
+
+.pixelgradelt_retailer-repository > .components-button.is-pressed {
+	padding-right: 12px;
+}
+
 .pixelgradelt_retailer-package {
 	margin-top: 20px;
+}
+
+.pixelgradelt_retailer-package thead .components-button {
+	float: right;
 }
 
 .pixelgradelt_retailer-package .error-message {
@@ -69,7 +129,8 @@
 	width: 150px;
 }
 
-.pixelgradelt_retailer-release.button {
+.pixelgradelt_retailer-release.button,
+.pixelgradelt_retailer-required-package.button {
 	height: 24px;
 	margin-bottom: 3px;
 	margin-top: 3px;
@@ -81,12 +142,6 @@
 	background: #f9f9f9;
 	border: 1px solid #dedede;
 	margin-top: 1em;
-}
-
-.pixelgradelt_retailer-release-actions input {
-	background: #fff;
-	max-width: 100%;
-	width: 35em;
 }
 
 .pixelgradelt_retailer-release-actions td,
@@ -106,6 +161,20 @@
 .pixelgradelt_retailer-release-actions tr:last-child td,
 .pixelgradelt_retailer-release-actions tr:last-child th {
 	padding-bottom: 10px;
+}
+
+.pixelgradelt_retailer-release-actions .components-base-control {
+	width: 35em;
+}
+
+.pixelgradelt_retailer-release-actions .components-base-control__field {
+	margin-bottom: 1px;
+}
+
+.pixelgradelt_retailer-release-actions .components-text-control__input {
+	background: #fff;
+	max-width: 100%;
+	width: 35em;
 }
 
 @media screen and ( max-width: 782px ) {
@@ -158,7 +227,7 @@
 
 .pixelgradelt_retailer-api-key-table .column-token input {
 	font-family: monospace;
-	max-width: 300px;
+	max-width: 282px;
 }
 
 .screen-profile .pixelgradelt_retailer-api-key-table .column-user,
@@ -168,158 +237,25 @@
 	display: none;
 }
 
+.pixelgradelt_retailer-api-key-form .components-base-control {
+	width: 25em;
+}
 
-/* Dropdown Group
+.pixelgradelt_retailer-api-key-form .components-base-control__field {
+	margin-bottom: 1px;
+}
+
+.pixelgradelt_retailer-api-key-form .components-text-control__input {
+	height: 36px;
+}
+
+/* Composer Tab
 ----------------------------------------------------------------------------- */
 
-.pixelgradelt_retailer-dropdown-group {
-	display: inline-flex;
-	position: relative;
-}
-
-.pixelgradelt_retailer-dropdown-group > .button {
-	position: relative;
-	z-index: 2;
-}
-
-.pixelgradelt_retailer-dropdown-group > .button:first-child {
-	border-top-right-radius: 0;
-	border-bottom-right-radius: 0;
-	border-right-width: 0;
-}
-
-.pixelgradelt_retailer-dropdown-group > .pixelgradelt_retailer-dropdown-toggle {
-	align-items: center;
-	background: transparent;
-	border-radius: 4px;
-	border-width: 0;
-	color: #68717a;
-	cursor: pointer;
-	display: flex;
-	padding: 8px 4px;
-	position: relative;
-}
-
-.pixelgradelt_retailer-dropdown-group > .pixelgradelt_retailer-dropdown-toggle svg {
-	fill: currentColor;
-	transform: rotate(90deg);
-}
-
-.pixelgradelt_retailer-dropdown-group > .pixelgradelt_retailer-dropdown-toggle:focus,
-.pixelgradelt_retailer-dropdown-group > .pixelgradelt_retailer-dropdown-toggle:hover {
-	box-shadow: inset 0 0 0 1px #e2e4e7, inset 0 0 0 2px #fff, 0 1px 1px rgba( 25, 30, 35, .2 );
-	color: #191e23;
-}
-
-.pixelgradelt_retailer-dropdown-group > .pixelgradelt_retailer-dropdown-toggle:focus {
-	background: #edeff0;
-	box-shadow: inset 0 0 0 1px #555d66, inset 0 0 0 2px #fff;
-	outline: none;
-}
-
-.pixelgradelt_retailer-dropdown-group-items {
-	background-color: #fff;
-	border: 1px solid #ddd;
-	box-shadow: 1px 0 4px rgba( 0, 0, 0, 0.15 );
-	display: none;
-	list-style: none;
-	margin: 0;
-	max-width: 100%;
-	min-width: 180px;
-	padding: 5px 0;
-	position: absolute;
-	top: calc( 100% + 15px );
-	left: -15px;
-	z-index: 1;
-}
-
-.pixelgradelt_retailer-dropdown-group-items:after,
-.pixelgradelt_retailer-dropdown-group-items:before {
-	content: "";
-	display: block;
-	height: 0;
-	line-height: 0;
-	width: 0;
-}
-
-.pixelgradelt_retailer-dropdown-group-items:after {
-	border-color: #fff transparent;
-	border-style: solid inset;
-	border-width: 0 8px 8px 8px;
-	position: absolute;
-	top: -8px;
-	left: 19px;
-}
-
-.pixelgradelt_retailer-dropdown-group-items:before {
-	border-color: #e2e4e7 transparent;
-	border-style: solid inset;
-	border-width: 0 10px 10px 10px;
-	position: absolute;
-	top: -10px;
-	left: 17px;
-}
-
-.pixelgradelt_retailer-dropdown-group-items li {
-	display: block;
-	margin: 0;
-	padding: 5px 15px;
-	text-align: left;
-}
-
-.pixelgradelt_retailer-dropdown-group-items li a,
-.pixelgradelt_retailer-dropdown-group-items li button,
-.pixelgradelt_retailer-dropdown-group-items li button.button-link {
-	display: block;
-	line-height: 2;
-	margin: -5px -15px;
-	padding: 5px 15px;
-	text-align: left;
-	text-decoration: none;
-}
-
-.pixelgradelt_retailer-dropdown-group-items li a:hover,
-.pixelgradelt_retailer-dropdown-group-items li button:hover,
-.pixelgradelt_retailer-dropdown-group-items li button.button-link:hover {
-	background-color: #f8f8f8;
-}
-
-.pixelgradelt_retailer-dropdown-group-items li button,
-.pixelgradelt_retailer-dropdown-group-items li button.button-link {
-	width: calc(100% + 30px);
-}
-
-.pixelgradelt_retailer-dropdown-group-items ul {
-	margin: 0;
-}
-
-.pixelgradelt_retailer-dropdown-group-items.right {
-	right: -15px;
-	left: auto;
-}
-
-.pixelgradelt_retailer-dropdown-group-items.right:after {
-	right: 19px;
-	left: auto;
-}
-
-.pixelgradelt_retailer-dropdown-group-items.right:before {
-	right: 17px;
-	left: auto;
-}
-
-.pixelgradelt_retailer-dropdown-group.is-open {
-	z-index: 10;
-}
-
-.pixelgradelt_retailer-dropdown-group.is-open > .button {
-	border-bottom-left-radius: 0;
-	border-bottom-right-radius: 0;
-	border-bottom-width: 0;
-}
-
-.pixelgradelt_retailer-dropdown-group.is-open .pixelgradelt_retailer-dropdown-group-items {
-	display: block;
+input.pixelgradelt_retailer-cli-field {
+	background: #f6f6f6;
+	font-family: monospace;
+	max-width: 720px;
 }
 
 /* Edit package screen
@@ -328,6 +264,16 @@
 	float: left;
 	margin-right: 15px;
 }
+
+.pixelgradelt_retailer-solution-preview .components-placeholder {
+	margin-top: 20px;
+	padding: 0.7em 2em 1em;
+
+	box-shadow: inset 0 0 0 1px #ccd0d4;
+}
+
+/* Other
+----------------------------------------------------------------------------- */
 
 .cf-complex__group--collapsed .cf-complex__group-head {
 	border-bottom: 1px solid #e2e4e7;

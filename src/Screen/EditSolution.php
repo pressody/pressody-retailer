@@ -15,14 +15,13 @@ use Carbon_Fields\Carbon_Fields;
 use Carbon_Fields\Container;
 use Carbon_Fields\Field;
 use Cedaro\WP\Plugin\AbstractHookProvider;
-use Mockery\Exception;
 use PixelgradeLT\Retailer\Transformer\ComposerPackageTransformer;
 use PixelgradeLT\Retailer\SolutionManager;
 use PixelgradeLT\Retailer\Repository\PackageRepository;
-use PixelgradeLT\Retailer\Utils\JSONCleaner;
 use function PixelgradeLT\Retailer\get_solutions_permalink;
 use function PixelgradeLT\Retailer\is_debug_mode;
 use function PixelgradeLT\Retailer\is_dev_url;
+use function PixelgradeLT\Retailer\preload_rest_data;
 
 /**
  * Edit Solution screen provider class.
@@ -144,7 +143,6 @@ class EditSolution extends AbstractHookProvider {
 		}
 
 		add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_assets' ] );
-		add_action( 'admin_footer', [ $this, 'print_templates' ] );
 	}
 
 	/**
@@ -155,15 +153,22 @@ class EditSolution extends AbstractHookProvider {
 	public function enqueue_assets() {
 		wp_enqueue_script( 'pixelgradelt_retailer-admin' );
 		wp_enqueue_style( 'pixelgradelt_retailer-admin' );
-	}
 
-	/**
-	 * Print Underscore.js templates.
-	 *
-	 * @since 0.1.0
-	 */
-	public function print_templates() {
-		include $this->plugin->get_path( 'views/templates.php' );
+		wp_enqueue_script( 'pixelgradelt_retailer-edit-solution' );
+
+		wp_localize_script(
+				'pixelgradelt_retailer-edit-solution',
+				'_pixelgradeltRetailerEditSolutionData',
+				[
+						'editedPostId' => get_the_ID(),
+				]
+		);
+
+		$preload_paths = [
+				'/pixelgradelt_retailer/v1/solutions',
+		];
+
+		preload_rest_data( $preload_paths );
 	}
 
 	/**
@@ -307,38 +312,38 @@ The slug/name must be lowercased and consist of words separated by <code>-</code
 		         ] );
 
 		// Register the metabox for managing the parts the current solution depends on (dependencies that will translate in composer requires).
-		Container::make( 'post_meta', 'carbon_fields_container_part_dependencies_configuration', esc_html__( 'Required Parts Configuration', 'pixelgradelt_records' ) )
+		Container::make( 'post_meta', 'carbon_fields_container_part_dependencies_configuration', esc_html__( 'Required Parts Configuration', 'pixelgradelt_retailer' ) )
 		         ->where( 'post_type', '=', $this->solution_manager::POST_TYPE )
 		         ->set_context( 'normal' )
 		         ->set_priority( 'core' )
 		         ->add_fields( [
-				         Field::make( 'html', 'parts_dependencies_configuration_html', __( 'Required Parts Description', 'pixelgradelt_records' ) )
+				         Field::make( 'html', 'parts_dependencies_configuration_html', __( 'Required Parts Description', 'pixelgradelt_retailer' ) )
 				              ->set_html( sprintf( '<p class="description">%s</p>', __( 'Here you edit and configure <strong>the list of LT Records parts</strong> this solution depends on.<br>
 For each required part you can <strong>specify a version range</strong> to better control the part releases/versions required. Set to <code>*</code> to <strong>use the latest available required-part release that matches all constraints</strong> (other parts present on a site might impose stricter limits).<br>
-Learn more about Composer <a href="https://getcomposer.org/doc/articles/versions.md#writing-version-constraints" target="_blank">versions</a> or <a href="https://semver.mwl.be/?package=madewithlove%2Fhtaccess-cli&constraint=%3C1.2%20%7C%7C%20%3E1.6&stability=stable" target="_blank">play around</a> with version ranges.', 'pixelgradelt_records' ) ) ),
+Learn more about Composer <a href="https://getcomposer.org/doc/articles/versions.md#writing-version-constraints" target="_blank">versions</a> or <a href="https://semver.mwl.be/?package=madewithlove%2Fhtaccess-cli&constraint=%3C1.2%20%7C%7C%20%3E1.6&stability=stable" target="_blank">play around</a> with version ranges.', 'pixelgradelt_retailer' ) ) ),
 
-				         Field::make( 'complex', 'solution_required_parts', __( 'Required Parts', 'pixelgradelt_records' ) )
+				         Field::make( 'complex', 'solution_required_parts', __( 'Required Parts', 'pixelgradelt_retailer' ) )
 				              ->set_help_text( __( 'The order is not important, from a logic standpoint. Also, if you add <strong>the same part multiple times</strong> only the last one will take effect since it will overwrite the previous ones.<br>
-<strong>FYI:</strong> Each required part label is comprised of the standardized <code>package_name</code> and the <code>#post_id</code>.', 'pixelgradelt_records' ) )
+<strong>FYI:</strong> Each required part label is comprised of the standardized <code>package_name</code> and the <code>#post_id</code>.', 'pixelgradelt_retailer' ) )
 				              ->set_classes( 'solution-required-solutions solution-required-parts' )
 				              ->set_collapsed( true )
 				              ->add_fields( [
-						              Field::make( 'select', 'package_name', __( 'Choose one of the LT Records Parts', 'pixelgradelt_records' ) )
+						              Field::make( 'select', 'package_name', __( 'Choose one of the LT Records Parts', 'pixelgradelt_retailer' ) )
 						                   ->set_options( [ $this, 'get_available_required_parts_options' ] )
 						                   ->set_default_value( null )
 						                   ->set_required( true )
 						                   ->set_width( 50 ),
-						              Field::make( 'text', 'version_range', __( 'Version Range', 'pixelgradelt_records' ) )
+						              Field::make( 'text', 'version_range', __( 'Version Range', 'pixelgradelt_retailer' ) )
 						                   ->set_default_value( '*' )
 						                   ->set_required( true )
 						                   ->set_width( 25 ),
-						              Field::make( 'select', 'stability', __( 'Stability', 'pixelgradelt_records' ) )
+						              Field::make( 'select', 'stability', __( 'Stability', 'pixelgradelt_retailer' ) )
 						                   ->set_options( [
-								                   'stable' => esc_html__( 'Stable', 'pixelgradelt_records' ),
-								                   'rc'     => esc_html__( 'RC', 'pixelgradelt_records' ),
-								                   'beta'   => esc_html__( 'Beta', 'pixelgradelt_records' ),
-								                   'alpha'  => esc_html__( 'Alpha', 'pixelgradelt_records' ),
-								                   'dev'    => esc_html__( 'Dev', 'pixelgradelt_records' ),
+								                   'stable' => esc_html__( 'Stable', 'pixelgradelt_retailer' ),
+								                   'rc'     => esc_html__( 'RC', 'pixelgradelt_retailer' ),
+								                   'beta'   => esc_html__( 'Beta', 'pixelgradelt_retailer' ),
+								                   'alpha'  => esc_html__( 'Alpha', 'pixelgradelt_retailer' ),
+								                   'dev'    => esc_html__( 'Dev', 'pixelgradelt_retailer' ),
 						                   ] )
 						                   ->set_required( true )
 						                   ->set_default_value( 'stable' )
@@ -435,31 +440,10 @@ These apply the Composer <code>replace</code> logic, meaning that the current so
 	 * @param \WP_Post $post
 	 */
 	public function display_solution_current_state_meta_box( \WP_Post $post ) {
-		$solution_data = $this->solution_manager->get_solution_id_data( (int) $post->ID );
-		if ( empty( $solution_data ) || empty( $solution_data['slug'] ) || empty( $solution_data['type'] ) ) {
-			echo '<div class="cf-container"><div class="cf-field"><p>No current solution details. Probably you need to do some configuring first.</p></div></div>';
-
-			return;
-		}
-
-		$solution = $this->solutions->first_where( [
-				'slug' => $solution_data['slug'],
-				'type' => $solution_data['type'],
-		] );
-		if ( empty( $solution ) ) {
-			echo '<div class="cf-container"><div class="cf-field"><p>No current solution details. Probably you need to do some configuring first.</p></div></div>';
-
-			return;
-		}
-
-		// Transform the package in the Composer format.
-		// This variable will be available to the view.
-		$solution = $this->composer_transformer->transform( $solution );
-
 		// Wrap it for spacing.
 		echo '<div class="cf-container"><div class="cf-field">';
 		echo '<p>This is <strong>the same info</strong> shown in the full solution-details list available <a href="' . esc_url( admin_url( 'options-general.php?page=pixelgradelt_retailer#pixelgradelt_retailer-solutions' ) ) . '">here</a>. <strong>The definitive source of truth is the packages JSON</strong> available <a href="' . esc_url( get_solutions_permalink() ) . '">here</a>.</p>';
-		require $this->plugin->get_path( 'views/solution-details.php' );
+		require $this->plugin->get_path( 'views/solution-preview.php' );
 		echo '</div></div>';
 	}
 
@@ -606,7 +590,7 @@ These apply the Composer <code>replace</code> logic, meaning that the current so
 
 		$ltrecords_parts_repo_url = $option['ltrecords-parts-repo-endpoint'];
 		$ltrecords_api_key = $option['ltrecords-api-key'];
-		$ltrecords_api_pwd = 'pixelgradelt_records';
+		$ltrecords_api_pwd = 'pixelgradelt_retailer';
 
 		$request_args = [
 				'headers' => [

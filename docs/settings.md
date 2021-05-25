@@ -4,7 +4,7 @@ At _Settings &rarr; PixelgradeLT Retailer_, you'll find the settings page:
 
 ## Vendor
 
-When requiring a package from PixelgradeLT Retailer, the default would be a package name like `pixelgradelt-records/genesis`.
+When requiring a package from PixelgradeLT Retailer, the default would be a package name like `pixelgradelt-retailer/genesis`.
 
 The "Vendor" field allows this to be changed; a value of `mypremiumcode` would mean the `require` package name would be like `mypremiumcode/genesis`.
 

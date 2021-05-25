@@ -14,59 +14,52 @@ namespace PixelgradeLT\Retailer;
 use PixelgradeLT\Retailer\SolutionType\BaseSolution;
 
 /**
- * @global BaseSolution[] $solutions
- * @global string         $solutions_permalink
- * @global array          $system_checks
+ * @global string $packages_permalink
+ * @global array $system_checks
+ * @global string $active_tab
+ * @global array $tabs
  */
 
 ?>
-<div class="wrap">
-	<h1><?php echo esc_html( get_admin_page_title() ); ?></h1>
-	<h2 class="nav-tab-wrapper">
-		<a href="#pixelgradelt_retailer-settings" class="nav-tab nav-tab-active"><?php esc_html_e( 'Settings', 'pixelgradelt_retailer' ); ?></a>
-		<a href="#pixelgradelt_retailer-solutions" class="nav-tab"><?php esc_html_e( 'Solutions', 'pixelgradelt_retailer' ); ?></a>
-		<a href="#pixelgradelt_retailer-status" class="nav-tab"><?php esc_html_e( 'Status', 'pixelgradelt_retailer' ); ?></a>
-	</h2>
 
-	<div id="pixelgradelt_retailer-settings" class="pixelgradelt_retailer-tab-panel is-active">
-		<p>
-			<?php esc_html_e( 'Your PixelgradeLT Retailer repository is available at:', 'pixelgradelt_retailer' ); ?>
-			<a href="<?php echo esc_url( $solutions_permalink ); ?>"><?php echo esc_html( $solutions_permalink ); ?></a>
-		</p>
-		<p>
+<div class="pixelgradelt_retailer-screen">
+	<div class="pixelgradelt_retailer-screen-content wrap">
+		<h1><?php echo esc_html( get_admin_page_title() ); ?></h1>
+		<h2 class="nav-tab-wrapper">
 			<?php
-			// phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound -- Need to update global variable.
-			$allowed_html = [ 'code' => [] ];
-			printf(
-				/* translators: 1: <code>repositories</code>, 2: <code>composer.json</code> */
-				esc_html__( 'Add it to the %1$s list in your project\'s %2$s, like so:', 'pixelgradelt_retailer' ),
-				'<code>repositories</code>',
-				'<code>composer.json</code>'
-			);
+			foreach ( $tabs as $tab_id => $tab_data ) {
+				if ( ! current_user_can( $tab_data['capability'] ) ) {
+					continue;
+				}
+
+				printf(
+						'<a href="#pixelgradelt_retailer-%1$s" class="nav-tab%2$s">%3$s</a>',
+						esc_attr( $tab_id ),
+						$active_tab === $tab_id ? ' nav-tab-active' : '',
+						esc_html( $tab_data['name'] )
+				);
+			}
 			?>
-		</p>
+		</h2>
 
-		<pre class="pixelgradelt_retailer-repository-snippet"><code>{
-	"repositories": [
-		{
-			"type": "composer",
-			"url": "<?php echo esc_url( get_solutions_permalink( [ 'base' => true ] ) ); ?>"
+		<?php
+		foreach ( $tabs as $tab_id => $tab_data ) {
+			if ( ! current_user_can( $tab_data['capability'] ) ) {
+				continue;
+			}
+
+			printf(
+					'<div id="pixelgradelt_retailer-%1$s" class="pixelgradelt_retailer-%1$s pixelgradelt_retailer-tab-panel%2$s">',
+					esc_attr( $tab_id ),
+					$active_tab === $tab_id ? ' is-active' : ''
+			);
+
+			require $this->plugin->get_path( "views/tabs/{$tab_id}.php" );
+
+			echo '</div>';
 		}
-	]
-}</code></pre>
-
-		<form action="<?php echo esc_url( admin_url( 'options.php' ) ); ?>" method="post">
-			<?php settings_fields( 'pixelgradelt_retailer' ); ?>
-			<?php do_settings_sections( 'pixelgradelt_retailer' ); ?>
-			<?php submit_button(); ?>
-		</form>
+		?>
 	</div>
 
-	<div id="pixelgradelt_retailer-solutions" class="pixelgradelt_retailer-tab-panel">
-		<?php require $this->plugin->get_path( 'views/solutions.php' ); ?>
-	</div>
-
-	<div id="pixelgradelt_retailer-status" class="pixelgradelt_retailer-tab-panel">
-		<?php require $this->plugin->get_path( 'views/status.php' ); ?>
-	</div>
+	<div id="pixelgradelt_retailer-screen-sidebar" class="pixelgradelt_retailer-screen-sidebar"></div>
 </div>

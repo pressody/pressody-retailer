@@ -34,7 +34,7 @@ use Monolog\Processor\PsrLogMessageProcessor;
  */
 add_action( 'pixelgradelt_retailer_compose', function( $plugin, $container ) {
 	$container['logger'] = function() {
-		$logger = new Logger( 'pixelgradelt-records' );
+		$logger = new Logger( 'pixelgradelt-retailer' );
 		$logger->pushHandler( new ErrorLogHandler( ErrorLogHandler::OPERATING_SYSTEM, LOGGER::WARNING ) );
 		$logger->pushProcessor( new PsrLogMessageProcessor );
 

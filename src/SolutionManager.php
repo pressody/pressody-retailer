@@ -607,7 +607,7 @@ class SolutionManager {
 
 		$ltrecords_repo_url = $option['ltrecords-packages-repo-endpoint'];
 		$ltrecords_api_key  = $option['ltrecords-api-key'];
-		$ltrecords_api_pwd  = 'pixelgradelt_records';
+		$ltrecords_api_pwd  = 'pixelgradelt_retailer';
 
 		try {
 			$packages = $client->getPackages( [

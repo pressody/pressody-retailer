@@ -43,9 +43,9 @@ class Plugin extends BasePlugin implements Composable {
 			->register_hooks( $container->get( 'hooks.i18n' ) )
 			->register_hooks( $container->get( 'hooks.capabilities' ) )
 			->register_hooks( $container->get( 'hooks.rewrite_rules' ) )
-			->register_hooks( $container->get( 'hooks.ajax.api_key' ) )
 			->register_hooks( $container->get( 'hooks.health_check' ) )
 			->register_hooks( $container->get( 'hooks.request_handler' ) )
+			->register_hooks( $container->get( 'hooks.rest' ) )
 			// Register the post type early.
 			->register_hooks( $container->get( 'hooks.solution_post_type' ) )
 			->register_hooks( $container->get( 'client.composer.custom_token_auth' ) )

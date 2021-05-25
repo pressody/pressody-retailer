@@ -95,13 +95,6 @@ class ServiceProvider implements ServiceProviderInterface {
 			return new Provider\AdminAssets();
 		};
 
-		$container['hooks.ajax.api_key'] = function ( $container ) {
-			return new Provider\ApiKeyAjax(
-				$container['api_key.factory'],
-				$container['api_key.repository']
-			);
-		};
-
 		$container['hooks.authentication'] = function ( $container ) {
 			return new Provider\Authentication(
 				$container['authentication.servers'],
@@ -138,6 +131,10 @@ class ServiceProvider implements ServiceProviderInterface {
 				$container['http.request'],
 				$container['route.controllers']
 			);
+		};
+
+		$container['hooks.rest'] = function( $container ) {
+			return new Provider\REST( $container['rest.controllers'] );
 		};
 
 		$container['hooks.rewrite_rules'] = function () {
@@ -222,6 +219,34 @@ class ServiceProvider implements ServiceProviderInterface {
 					$container['solution.factory'],
 					$container['solution.manager']
 				);
+		};
+
+		$container['rest.controller.api_keys'] = function( $container ) {
+			return new REST\ApiKeysController(
+				'pixelgradelt_retailer/v1',
+				'apikeys',
+				$container['api_key.factory'],
+				$container['api_key.repository']
+			);
+		};
+
+		$container['rest.controller.solutions'] = function( $container ) {
+			return new REST\SolutionsController(
+				'pixelgradelt_retailer/v1',
+				'solutions',
+				$container['repository.solutions'],
+				$container['transformer.composer_package']
+			);
+		};
+
+		$container['rest.controllers'] = function( $container ) {
+			return new ServiceIterator(
+				$container,
+				[
+					'api_keys' => 'rest.controller.api_keys',
+					'solutions' => 'rest.controller.solutions',
+				]
+			);
 		};
 
 		$container['route.composer.solutions'] = function ( $container ) {

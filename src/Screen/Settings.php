@@ -20,6 +20,7 @@ use PixelgradeLT\Retailer\Repository\PackageRepository;
 use PixelgradeLT\Retailer\Transformer\ComposerPackageTransformer;
 
 use function PixelgradeLT\Retailer\get_solutions_permalink;
+use function PixelgradeLT\Retailer\preload_rest_data;
 
 /**
  * Settings screen provider class.
@@ -125,29 +126,39 @@ class Settings extends AbstractHookProvider {
 	public function enqueue_assets() {
 		wp_enqueue_script( 'pixelgradelt_retailer-admin' );
 		wp_enqueue_style( 'pixelgradelt_retailer-admin' );
-		wp_enqueue_script( 'pixelgradelt_retailer-package-settings' );
+		wp_enqueue_script( 'pixelgradelt_retailer-access' );
+		wp_enqueue_script( 'pixelgradelt_retailer-repository' );
 
-		$api_keys = $this->api_keys->find_for_user( wp_get_current_user() );
-
-		$items = array_map(
-				function ( ApiKey $api_key ) {
-					$data                   = $api_key->to_array();
-					$data['user_edit_link'] = esc_url( get_edit_user_link( $api_key->get_user()->ID ) );
-
-					return $data;
-				},
-				$api_keys
-		);
-
-		wp_enqueue_script( 'pixelgradelt_retailer-api-keys' );
 		wp_localize_script(
-				'pixelgradelt_retailer-api-keys',
-				'_pixelgradelt_retailerApiKeysData',
+				'pixelgradelt_retailer-access',
+				'_pixelgradeltRetailerAccessData',
 				[
-						'items'  => $items,
-						'userId' => get_current_user_id(),
+						'editedUserId' => get_current_user_id(),
 				]
 		);
+
+		wp_localize_script(
+				'pixelgradelt_retailer-repository',
+				'_pixelgradeltRetailerRepositoryData',
+				[
+						'addNewSolutionUrl' => admin_url('post-new.php?post_type=ltsolution'),
+				]
+		);
+
+		$preload_paths = [
+				'/pixelgradelt_retailer/v1/solutions',
+		];
+
+		if ( current_user_can( Capabilities::MANAGE_OPTIONS ) ) {
+			$preload_paths = array_merge(
+					$preload_paths,
+					[
+							'/pixelgradelt_retailer/v1/apikeys?user=' . get_current_user_id(),
+					]
+			);
+		}
+
+		preload_rest_data( $preload_paths );
 	}
 
 	/**
@@ -176,13 +187,6 @@ class Settings extends AbstractHookProvider {
 				'ltrecords',
 				esc_html__( 'LT Records Communication', 'pixelgradelt_retailer' ),
 				'__return_null',
-				'pixelgradelt_retailer'
-		);
-
-		add_settings_section(
-				'access',
-				esc_html__( 'Access', 'pixelgradelt_retailer' ),
-				[ $this, 'render_section_access_description' ],
 				'pixelgradelt_retailer'
 		);
 	}
@@ -273,37 +277,36 @@ class Settings extends AbstractHookProvider {
 	 * @since 0.1.0
 	 */
 	public function render_screen() {
-		$solutions_permalink = esc_url( get_solutions_permalink() );
-		$solutions           = array_map( [ $this->composer_transformer, 'transform' ], $this->solutions->all() );
-		$system_checks       = [];
+		$solutions_permalink     = esc_url( get_solutions_permalink() );
+
+		$tabs = [
+				'repository' => [
+						'name'       => esc_html__( 'Repository', 'pixelgradelt_retailer' ),
+						'capability' => Capabilities::VIEW_SOLUTIONS,
+				],
+				'access'     => [
+						'name'       => esc_html__( 'Access', 'pixelgradelt_retailer' ),
+						'capability' => Capabilities::MANAGE_OPTIONS,
+						'is_active'  => false,
+				],
+				'composer'   => [
+						'name'       => esc_html__( 'Composer', 'pixelgradelt_retailer' ),
+						'capability' => Capabilities::VIEW_SOLUTIONS,
+				],
+				'settings'   => [
+						'name'       => esc_html__( 'Settings', 'pixelgradelt_retailer' ),
+						'capability' => Capabilities::MANAGE_OPTIONS,
+				],
+				'system-status'   => [
+						'name'       => esc_html__( 'System Status', 'pixelgradelt_retailer' ),
+						'capability' => Capabilities::MANAGE_OPTIONS,
+				],
+		];
+
+		// By default, the Repository tabs is active.
+		$active_tab = 'repository';
 
 		include $this->plugin->get_path( 'views/screen-settings.php' );
-		include $this->plugin->get_path( 'views/templates.php' );
-	}
-
-	/**
-	 * Display the access section description.
-	 *
-	 * @since 0.1.0
-	 */
-	public function render_section_access_description() {
-		printf(
-				'<p>%s</p>',
-				esc_html__( 'API Keys are used to access your PixelgradeLT Retailer repository. Your personal API keys appear below or you can create keys for other users by editing their accounts.', 'pixelgradelt_retailer' )
-		);
-
-		printf(
-				'<p><strong>%s</strong></p>',
-				/* translators: %s: <code>pixelgradelt_retailer</code> */
-				sprintf( esc_html__( 'The password for all API Keys is %s. Use the API key as the username.', 'pixelgradelt_retailer' ), '<code>pixelgradelt_retailer</code>' )
-		);
-
-		echo '<div id="pixelgradelt_retailer-api-key-manager"></div>';
-
-		printf(
-				'<p><a href="https://github.com/pixelgradelt/pixelgradelt-retailer/blob/develop/docs/security.md" target="_blank" rel="noopener noreferer"><em>%s</em></a></p>',
-				esc_html__( 'Read more about securing your PixelgradeLT Retailer repository.', 'pixelgradelt_retailer' )
-		);
 	}
 
 	/**

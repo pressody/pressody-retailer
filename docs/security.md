@@ -22,13 +22,13 @@ aUEZYqq6pXlMjdg8swe0rQgMCZAPJNaR
 
 API Keys are associated with the user they're created for and inherit the users' capabilities &mdash; a key doesn't provide access to protected resources if the user can't access those resources. API Keys are read-only and limited to accessing PixelgradeLT Retailer resources, so if one where to become compromised, an attacker could only view and download whitelisted packages.
 
-To use an API Key with Basic authentication, the API Key should be provided as the username with a password of `pixelgradelt-records`:
+To use an API Key with Basic authentication, the API Key should be provided as the username with a password of `pixelgradelt-retailer`:
 
 __Example Request__
 
 ```shell
 $ curl https://retailer.pixelgradelt.com/ltpackagist/packages.json \
-   -u aUEZYqq6pXlMjdg8swe0rQgMCZAPJNaR:pixelgradelt-records
+   -u aUEZYqq6pXlMjdg8swe0rQgMCZAPJNaR:pixelgradelt-retailer
 ```
 
 ### Revoking Keys

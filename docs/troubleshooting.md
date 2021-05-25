@@ -11,7 +11,7 @@ RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
 </IfModule>
 ```
 
-*This __must__ be in the site root `.htaccess` (not the `wp-content/uploads/pixelgradelt-records-xxxx/.htaccess`), and it __must__ come before the WordPress rewrites.*
+*This __must__ be in the site root `.htaccess` (not the `wp-content/uploads/pixelgradelt-retailer-xxxx/.htaccess`), and it __must__ come before the WordPress rewrites.*
 
 ## Rewrite Rules
 

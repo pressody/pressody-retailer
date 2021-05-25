@@ -12,12 +12,12 @@ declare ( strict_types = 1 );
 namespace PixelgradeLT\Retailer\Screen;
 
 use Cedaro\WP\Plugin\AbstractHookProvider;
-use PixelgradeLT\Retailer\Authentication\ApiKey\ApiKey;
 use PixelgradeLT\Retailer\Authentication\ApiKey\ApiKeyRepository;
 use PixelgradeLT\Retailer\Capabilities;
 use WP_User;
 
 use function PixelgradeLT\Retailer\get_edited_user_id;
+use function PixelgradeLT\Retailer\preload_rest_data;
 
 /**
  * Edit User screen provider class.
@@ -67,7 +67,6 @@ class EditUser extends AbstractHookProvider {
 		add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_assets' ] );
 		add_action( 'edit_user_profile', [ $this, 'render_api_keys_section' ] );
 		add_action( 'show_user_profile', [ $this, 'render_api_keys_section' ] );
-		add_action( 'admin_footer', [ $this, 'print_templates' ] );
 	}
 
 	/**
@@ -79,24 +78,19 @@ class EditUser extends AbstractHookProvider {
 		wp_enqueue_script( 'pixelgradelt_retailer-admin' );
 		wp_enqueue_style( 'pixelgradelt_retailer-admin' );
 
-		$user_id  = get_edited_user_id();
-		$user     = get_user_by( 'id', $user_id );
-		$api_keys = $this->api_keys->find_for_user( $user );
+		wp_enqueue_script( 'pixelgradelt_retailer-access' );
 
-		$items = array_map(
-			function( ApiKey $api_key ) {
-					return $api_key->to_array();
-			},
-			$api_keys
+		wp_localize_script(
+			'pixelgradelt_retailer-access',
+			'_pixelgradeltRetailerAccessData',
+			[
+				'editedUserId' => get_edited_user_id(),
+			]
 		);
 
-		wp_enqueue_script( 'pixelgradelt_retailer-api-keys' );
-		wp_localize_script(
-			'pixelgradelt_retailer-api-keys',
-			'_pixelgradelt_retailerApiKeysData',
+		preload_rest_data(
 			[
-				'items'  => $items,
-				'userId' => $user_id,
+				'/pixelgradelt_retailer/v1/apikeys?user=' . get_edited_user_id(),
 			]
 		);
 	}
@@ -116,14 +110,5 @@ class EditUser extends AbstractHookProvider {
 		);
 
 		echo '<div id="pixelgradelt_retailer-api-key-manager"></div>';
-	}
-
-	/**
-	 * Print Underscore.js templates.
-	 *
-	 * @since 0.1.0
-	 */
-	public function print_templates() {
-		include $this->plugin->get_path( 'views/templates.php' );
 	}
 }

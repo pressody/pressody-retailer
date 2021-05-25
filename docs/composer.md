@@ -1,6 +1,6 @@
 # Using Composer with PixelgradeLT Retailer
 
-Once PixelgradeLT Retailer is installed and configured you can include the PixelgradeLT Retailer repository in the list of repositories in your `composer.json` or `satis.json`, then require the packages using `pixelgradelt_records` (or your custom setting) as the vendor:
+Once PixelgradeLT Retailer is installed and configured you can include the PixelgradeLT Retailer repository in the list of repositories in your `composer.json` or `satis.json`, then require the packages using `pixelgradelt_retailer` (or your custom setting) as the vendor:
 
 ```json
 {
