@@ -22,8 +22,16 @@ require_once dirname( __DIR__, 2 ) . '/vendor/antecedent/patchwork/Patchwork.php
 $suite = new TestSuite();
 
 $GLOBALS['wp_tests_options'] = [
-	'active_plugins'  => [ 'pixelgradelt_retailer/pixelgradelt-retailer.php' ],
+	'active_plugins'  => [ 'pixelgradelt-retailer/pixelgradelt-retailer.php' ],
 	'timezone_string' => 'Europe/Bucharest',
+	// We need this so the EditSolution `solution_required_parts` CarbonFields field will not strip values as non-existent.
+	// @see EditSolution::get_ltrecords_parts()
+	'_pixelgradelt_retailer_ltrecords_parts_timeout' => time() + 60*60,
+	'_pixelgradelt_retailer_ltrecords_parts' => [
+		'pixelgradelt-records/part_yet-another',
+		'pixelgradelt-records/part_another-test',
+		'pixelgradelt-records/part_test-test'
+	],
 ];
 
 $suite->addFilter( 'muplugins_loaded', function() {

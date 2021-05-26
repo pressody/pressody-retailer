@@ -124,33 +124,30 @@ class ComposerSolutionsRepositoryTransformer implements PackageRepositoryTransfo
 		$version = '1.0.0';
 		$meta    = [];
 
-		// This order is important since we go from lower to higher importance. Each one overwrites the previous.
 		// Start with the hard-coded requires, if any.
+		// This order is important since we go from lower to higher importance. Each one overwrites the previous.
 		$require = [];
 		// Merge the package require, if any.
 		if ( ! empty( $meta['require'] ) ) {
 			$require = array_merge( $require, $meta['require'] );
 		}
 		// Merge the required solutions, if any.
-		if ( ! empty( $package->get_required_solutions() ) ) {
+		if ( $package->has_required_solutions() ) {
 			$require = array_merge( $require, $this->composer_transformer->transform_required_packages( $package->get_required_solutions() ) );
-		}
-		// Replace the replaced solutions, if any.
-		// We will actually use the Composer replace functionality since it does what we want:
-		// tells the solver that the current package will replace those packages, thus they should not be installed.
-		// @link https://getcomposer.org/doc/04-schema.md#replace
-		$replace = [];
-		if ( ! empty( $package->get_replaced_solutions() ) ) {
-			$replace = array_merge( $replace, $this->composer_transformer->transform_required_packages( $package->get_replaced_solutions() ) );
 		}
 
 		// Merge the required LT Records parts, if any.
-		if ( ! empty( $package->get_required_ltrecords_parts() ) ) {
+		if ( $package->has_required_ltrecords_parts() ) {
 			$require = array_merge( $require, $this->composer_transformer->transform_required_packages( $package->get_required_ltrecords_parts() ) );
 		}
 
 		// Finally, allow others to have a say.
 		$require = apply_filters( 'pixelgradelt_retailer_composer_solution_require', $require, $package );
+
+		$excluded_solutions = [];
+		if ( $package->has_excluded_solutions() ) {
+			$excluded_solutions = array_merge( $excluded_solutions, $this->composer_transformer->transform_required_packages( $package->get_excluded_solutions() ) );
+		}
 
 		$data[ $version ] = [
 			'name'               => $package->get_name(),
@@ -158,12 +155,14 @@ class ComposerSolutionsRepositoryTransformer implements PackageRepositoryTransfo
 			'version_normalized' => $this->version_parser->normalize( $version ),
 			// No `dist` required.
 			'require'            => $require,
-			'replace'            => $replace,
 			'type'               => $package->get_type(),
 			'description'        => $package->get_description(),
 			'keywords'           => $package->get_keywords(),
 			'homepage'           => $package->get_homepage(),
 			'license'            => $package->get_license(),
+			'extra' => [
+				'exclude_ltsolutions' => $excluded_solutions,
+			],
 		];
 
 		return $data;

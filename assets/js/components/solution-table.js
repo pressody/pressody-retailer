@@ -14,7 +14,7 @@ function SolutionTable( props ) {
 		homepage,
 		releases,
 		requiredPackages,
-		replacedPackages,
+		excludedPackages,
 		slug,
 		type,
 		visibility,
@@ -54,9 +54,9 @@ function SolutionTable( props ) {
 					</td>
 				</tr>
 				<tr>
-					<th>${ __( 'Replaced Packages', 'pixelgradelt_retailer' ) }</th>
-					<td className="pixelgradelt_retailer-required-packages pixelgradelt_retailer-replaced-packages">
-						<${ SolutionRequiredPackages } requiredPackages=${ replacedPackages } />
+					<th>${ __( 'Excluded Solutions', 'pixelgradelt_retailer' ) }</th>
+					<td className="pixelgradelt_retailer-required-packages pixelgradelt_retailer-excluded-solutions">
+						<${ SolutionRequiredPackages } requiredPackages=${ excludedPackages } />
 					</td>
 				</tr>
 				<tr>

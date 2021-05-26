@@ -1,14 +1,14 @@
 <?php
 declare ( strict_types=1 );
 
-namespace PixelgradeLT\Retailer\Tests\Unit\PackageType;
+namespace PixelgradeLT\Retailer\Tests\Unit\SolutionType;
 
-use PixelgradeLT\Retailer\Solution;
+use PixelgradeLT\Retailer\Package;
 use PixelgradeLT\Retailer\SolutionType\BaseSolution;
 use PixelgradeLT\Retailer\SolutionType\SolutionTypes;
 use PixelgradeLT\Retailer\Tests\Unit\TestCase;
 
-class BasePackageTest extends TestCase {
+class BaseSolutionTest extends TestCase {
 	protected $package = null;
 
 	public function setUp(): void {
@@ -22,7 +22,7 @@ class BasePackageTest extends TestCase {
 	}
 
 	public function test_implements_package_interface() {
-		$this->assertInstanceOf( Solution::class, $this->package );
+		$this->assertInstanceOf( Package::class, $this->package );
 	}
 
 	public function test_name() {
@@ -33,24 +33,10 @@ class BasePackageTest extends TestCase {
 	}
 
 	public function test_type() {
-		$expected            = SolutionTypes::PLUGIN;
+		$expected            = SolutionTypes::BASIC;
 		$this->package->type = $expected;
 
 		$this->assertSame( $expected, $this->package->get_type() );
-	}
-
-	public function test_source_type() {
-		$expected                   = 'local.plugin';
-		$this->package->source_type = $expected;
-
-		$this->assertSame( $expected, $this->package->get_source_type() );
-	}
-
-	public function test_source_name() {
-		$expected                   = 'local/plugin';
-		$this->package->source_name = $expected;
-
-		$this->assertSame( $expected, $this->package->get_source_name() );
 	}
 
 	public function test_slug() {
@@ -102,27 +88,6 @@ class BasePackageTest extends TestCase {
 		$this->assertSame( $expected, $this->package->get_keywords() );
 	}
 
-	public function test_requires_at_least_wp() {
-		$expected                            = '5.6.2';
-		$this->package->requires_at_least_wp = $expected;
-
-		$this->assertSame( $expected, $this->package->get_requires_at_least_wp() );
-	}
-
-	public function test_tested_up_to_wp() {
-		$expected                       = '5.6.2';
-		$this->package->tested_up_to_wp = $expected;
-
-		$this->assertSame( $expected, $this->package->get_tested_up_to_wp() );
-	}
-
-	public function test_requires_php() {
-		$expected                    = '8.0.1';
-		$this->package->requires_php = $expected;
-
-		$this->assertSame( $expected, $this->package->get_requires_php() );
-	}
-
 	public function test_is_managed() {
 		$expected                  = true;
 		$this->package->is_managed = $expected;
@@ -138,20 +103,12 @@ class BasePackageTest extends TestCase {
 		$this->assertSame( $expected, $this->package->get_managed_post_id() );
 	}
 
-	public function test_managed_post_id_hash() {
-		$expected                       = 'we6d2';
-		$this->package->managed_post_id_hash = $expected;
-
-		$this->assertSame( $expected, $this->package->get_managed_post_id_hash() );
-	}
-
-	public function test_required_packages() {
+	public function test_required_solutions() {
 		$expected                          = [
 			'some_pseudo_id' => [
 				'composer_package_name' => 'pixelgrade/test',
 				'version_range'         => '*',
 				'stability'             => 'stable',
-				'source_name'           => 'local-plugin/test',
 				'managed_post_id'       => 123,
 			],
 		];
@@ -159,10 +116,5 @@ class BasePackageTest extends TestCase {
 
 		$this->assertSame( $expected, $this->package->get_required_solutions() );
 		$this->assertTrue( $this->package->has_required_solutions() );
-	}
-
-	public function test_has_source_constraint() {
-
-		$this->assertFalse( $this->package->has_source_constraint() );
 	}
 }

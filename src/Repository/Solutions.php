@@ -2,12 +2,12 @@
 /**
  * Solutions repository.
  *
- * @package PixelgradeLT
+ * @since   0.1.0
  * @license GPL-2.0-or-later
- * @since 0.1.0
+ * @package PixelgradeLT
  */
 
-declare ( strict_types = 1 );
+declare ( strict_types=1 );
 
 namespace PixelgradeLT\Retailer\Repository;
 
@@ -63,7 +63,7 @@ class Solutions extends AbstractRepository implements PackageRepository {
 		$items = [];
 
 		$args = [
-			'package_type'        => [ SolutionTypes::BASIC ],
+			'solution_type' => 'all',
 		];
 		foreach ( $this->solution_manager->get_solution_ids_by( $args ) as $post_id ) {
 			$post = get_post( $post_id );
@@ -85,14 +85,13 @@ class Solutions extends AbstractRepository implements PackageRepository {
 	 *
 	 * @since 0.1.0
 	 *
-	 * @param int    $post_id
+	 * @param int $post_id
 	 *
 	 * @return Package
 	 */
 	protected function build( int $post_id ): Package {
 		return $this->factory->create( SolutionTypes::BASIC )
-			// Then add the data from the Solution Manager.
-			->from_manager( $post_id )
-			->build();
+		                     ->from_manager( $post_id )
+		                     ->build();
 	}
 }

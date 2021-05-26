@@ -99,6 +99,13 @@ class BaseSolution implements \ArrayAccess, Package {
 	protected string $visibility = '';
 
 	/**
+	 * LT Records Parts required by this solution.
+	 *
+	 * @var array
+	 */
+	protected array $required_ltrecords_parts = [];
+
+	/**
 	 * A Composer config `require` entry.
 	 *
 	 * This will be merged with the required packages and other hard-coded packages to generate the final require config.
@@ -119,14 +126,7 @@ class BaseSolution implements \ArrayAccess, Package {
 	 *
 	 * @var array
 	 */
-	protected array $replaced_solutions = [];
-
-	/**
-	 * LT Records Parts required by this solution.
-	 *
-	 * @var array
-	 */
-	protected array $required_ltrecords_parts = [];
+	protected array $excluded_solutions = [];
 
 	/**
 	 * Magic setter.
@@ -273,6 +273,28 @@ class BaseSolution implements \ArrayAccess, Package {
 	}
 
 	/**
+	 * Retrieve the required LT Records Parts.
+	 *
+	 * @since 0.1.0
+	 *
+	 * @return array
+	 */
+	public function get_required_ltrecords_parts(): array {
+		return $this->required_ltrecords_parts;
+	}
+
+	/**
+	 * Whether the solution has any required LT Records Parts.
+	 *
+	 * @since 0.1.0
+	 *
+	 * @return bool
+	 */
+	public function has_required_ltrecords_parts(): bool {
+		return ! empty( $this->required_ltrecords_parts );
+	}
+
+	/**
 	 * Retrieve the Composer config `require` entry.
 	 *
 	 * @since 0.1.0
@@ -319,47 +341,25 @@ class BaseSolution implements \ArrayAccess, Package {
 	}
 
 	/**
-	 * Retrieve the replaced solutions.
+	 * Retrieve the excluded solutions.
 	 *
 	 * @since 0.1.0
 	 *
 	 * @return array
 	 */
-	public function get_replaced_solutions(): array {
-		return $this->replaced_solutions;
+	public function get_excluded_solutions(): array {
+		return $this->excluded_solutions;
 	}
 
 	/**
-	 * Whether the solution has any replaced solutions.
+	 * Whether the solution has any excluded solutions.
 	 *
 	 * @since 0.1.0
 	 *
 	 * @return bool
 	 */
-	public function has_replaced_solutions(): bool {
-		return ! empty( $this->replaced_solutions );
-	}
-
-	/**
-	 * Retrieve the required LT Records Parts.
-	 *
-	 * @since 0.1.0
-	 *
-	 * @return array
-	 */
-	public function get_required_ltrecords_parts(): array {
-		return $this->required_ltrecords_parts;
-	}
-
-	/**
-	 * Whether the solution has any required LT Records Parts.
-	 *
-	 * @since 0.1.0
-	 *
-	 * @return bool
-	 */
-	public function has_required_ltrecords_parts(): bool {
-		return ! empty( $this->required_ltrecords_parts );
+	public function has_excluded_solutions(): bool {
+		return ! empty( $this->excluded_solutions );
 	}
 
 	/**

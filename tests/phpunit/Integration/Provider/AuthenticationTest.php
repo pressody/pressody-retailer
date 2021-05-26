@@ -13,7 +13,6 @@ use WP_Error;
 
 use function Patchwork\{always, redefine, restore};
 use function PixelgradeLT\Retailer\get_solutions_permalink;
-use function PixelgradeLT\Retailer\get_parts_permalink;
 use function PixelgradeLT\Retailer\plugin;
 
 class AuthenticationTest extends TestCase {
@@ -110,7 +109,7 @@ class AuthenticationTest extends TestCase {
 		$this->assertSame( 0, $user->ID );
 
 		$this->expectException( AuthenticationException::class );
-		$this->go_to( get_parts_permalink() );
+		$this->go_to( get_solutions_permalink() );
 	}
 
 	public function test_authentication_fails_with_missing_key() {
@@ -158,7 +157,6 @@ class AuthenticationTest extends TestCase {
 		$provider  = new Authentication( $servers, new Request() );
 		add_filter( 'user_has_cap', [ $provider, 'maybe_allow_public_access' ] );
 
-		$this->assertTrue( current_user_can( Caps::DOWNLOAD_PACKAGES ) );
 		$this->assertTrue( current_user_can( Caps::VIEW_SOLUTIONS ) );
 	}
 

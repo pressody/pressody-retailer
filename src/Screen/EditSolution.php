@@ -382,11 +382,11 @@ Learn more about Composer <a href="https://getcomposer.org/doc/articles/versions
 								        <%- pseudo_id %>
 								    <% } %>
 								' ),
-				         Field::make( 'complex', 'solution_replaced_solutions', __( 'Replaced Solutions', 'pixelgradelt_retailer' ) )
-				              ->set_help_text( __( 'These are solutions that are <strong>automatically ignored from a site\'s composition</strong> when the current solution is included. The order is not important, from a logic standpoint.<br>
-These apply the Composer <code>replace</code> logic, meaning that the current solution already includes the replaced solutions. Learn more about it <a href="https://getcomposer.org/doc/04-schema.md#replace" target="_blank">here</a>.<br>
+				         Field::make( 'complex', 'solution_excluded_solutions', __( 'Excluded Solutions', 'pixelgradelt_retailer' ) )
+				              ->set_help_text( __( 'These are solutions that are <strong>automatically removed from a site\'s composition</strong> when the current solution is included. The order is not important, from a logic standpoint.<br>
+The excluded solutions only take effect in <strong>a purchase context (add to cart, etc.), not in a Composer context. When a solution is selected, its excluded solutions (and those of its required solutions) are removed from the customer\'s site selection.</strong><br>
 <strong>FYI:</strong> Each replaced solution label is comprised of the solution <code>slug</code> and the <code>#post_id</code>.', 'pixelgradelt_retailer' ) )
-				              ->set_classes( 'solution-required-solutions' )
+				              ->set_classes( 'solution-required-solutions solution-excluded-solutions' )
 				              ->set_collapsed( true )
 				              ->add_fields( [
 						              Field::make( 'select', 'pseudo_id', __( 'Choose one of the configured solutions', 'pixelgradelt_retailer' ) )
@@ -448,7 +448,7 @@ These apply the Composer <code>replace</code> logic, meaning that the current so
 	}
 
 	/**
-	 * Check if the package can be resolved by Composer with the required solutions, replaced solutions, and required parts.
+	 * Check if the package can be resolved by Composer with the required solutions, excluded solutions, and required parts.
 	 * Show a warning message if it can't be.
 	 *
 	 * @param int                           $post_ID
@@ -553,19 +553,33 @@ These apply the Composer <code>replace</code> logic, meaning that the current so
 			return $this->ltrecords_parts;
 		}
 
-		// Second, use the transient cache.
+		$parts = [];
+
+		// Second, use the cache.
 		if ( ! $skip_cache ) {
-			$cached_parts = get_transient( 'pixelgradelt_retailer_ltrecords_parts' );
-			if ( false !== $cached_parts ) {
-				$this->ltrecords_parts = $cached_parts;
-				return $cached_parts;
+			$parts   = get_option( '_pixelgradelt_retailer_ltrecords_parts' );
+			$timeout = get_option( '_pixelgradelt_retailer_ltrecords_parts_timeout' );
+			// If the cache isn't expired, use it.
+			if ( $timeout > time() ) {
+				$this->ltrecords_parts = $parts;
+
+				return $this->ltrecords_parts;
 			}
 		}
 
 		// Third, we need to fetch from the remote endpoint.
-		$this->ltrecords_parts = $this->fetch_ltrecords_parts();
-		// Cache the results in a short-lived transient.
-		set_transient( 'pixelgradelt_retailer_ltrecords_parts', $this->ltrecords_parts, time() + MINUTE_IN_SECONDS * 15 );
+		$remote_parts = $this->fetch_ltrecords_parts();
+		// If we have received remote parts, use them.
+		// Otherwise, we will keep the already cached data (if we haven't been instructed to skip the cache).
+		if ( ! empty( $remote_parts ) ) {
+			$parts = $remote_parts;
+			// Cache the results in an option with an expiration timestamp.
+			// Like a transient but without the automatic delete logic since we want to keep existing data if we are not able to fetch.
+			update_option( '_pixelgradelt_retailer_ltrecords_parts', $parts, true );
+			update_option( '_pixelgradelt_retailer_ltrecords_parts_timeout', time() + MINUTE_IN_SECONDS * 15, true );
+		}
+
+		$this->ltrecords_parts = $parts;
 
 		return $this->ltrecords_parts;
 	}
@@ -589,19 +603,19 @@ These apply the Composer <code>replace</code> logic, meaning that the current so
 		}
 
 		$ltrecords_parts_repo_url = $option['ltrecords-parts-repo-endpoint'];
-		$ltrecords_api_key = $option['ltrecords-api-key'];
-		$ltrecords_api_pwd = 'pixelgradelt_retailer';
+		$ltrecords_api_key        = $option['ltrecords-api-key'];
+		$ltrecords_api_pwd        = 'pixelgradelt_retailer';
 
 		$request_args = [
-				'headers' => [
+				'headers'   => [
 						'Authorization' => 'Basic ' . base64_encode( $ltrecords_api_key . ':' . $ltrecords_api_pwd ),
 				],
-				'timeout' => 5,
+				'timeout'   => 5,
 				'sslverify' => ! ( is_debug_mode() || is_dev_url( $ltrecords_parts_repo_url ) ),
 		];
 
 		$response = wp_remote_get( $ltrecords_parts_repo_url, $request_args );
-		if ( is_wp_error( $response ) || wp_remote_retrieve_response_code( $response ) !== 200  ) {
+		if ( is_wp_error( $response ) || wp_remote_retrieve_response_code( $response ) !== 200 ) {
 			$this->add_user_message( 'error', sprintf(
 					'<p>%s</p>',
 					esc_html__( 'Something went wrong and we couldn\'t get the LT Records parts from the provided endpoint.', 'pixelgradelt_retailer' )

@@ -54,7 +54,7 @@ class SolutionPostType extends AbstractHookProvider {
 		$this->add_action( 'init', 'register_solution_category_taxonomy', 12 );
 		$this->add_action( 'init', 'register_solution_type_taxonomy', 14 );
 		$this->add_action( 'init', 'insert_solution_type_taxonomy_terms', 16 );
-		$this->add_action( 'init', 'register_package_keyword_taxonomy', 18 );
+		$this->add_action( 'init', 'register_solution_keyword_taxonomy', 18 );
 
 		$this->add_action( 'save_post_' . $this->solution_manager::POST_TYPE, 'save_solution_type_meta_box' );
 	}
@@ -135,7 +135,7 @@ class SolutionPostType extends AbstractHookProvider {
 	 *
 	 * @since 0.1.0
 	 */
-	protected function register_package_keyword_taxonomy() {
+	protected function register_solution_keyword_taxonomy() {
 		if ( taxonomy_exists( $this->solution_manager::KEYWORD_TAXONOMY ) ) {
 			register_taxonomy_for_object_type(
 					$this->solution_manager::KEYWORD_TAXONOMY,

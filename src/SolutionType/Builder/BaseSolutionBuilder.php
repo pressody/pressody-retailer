@@ -131,6 +131,55 @@ class BaseSolutionBuilder {
 	}
 
 	/**
+	 * Set the authors.
+	 *
+	 * @since 0.1.0
+	 *
+	 * @param array $authors Authors.
+	 *
+	 * @return $this
+	 */
+	public function set_authors( array $authors ): self {
+		return $this->set( 'authors', $this->normalize_authors( $authors ) );
+	}
+
+	protected function normalize_authors( array $authors ): array {
+		$authors = array_map( function ( $author ) {
+			if ( is_string( $author ) && ! empty( $author ) ) {
+				return [ 'name' => trim( $author ) ];
+			}
+
+			if ( is_array( $author ) ) {
+				// Make sure only the fields we are interested in are left.
+				$accepted_keys = array_fill_keys( [ 'name', 'email', 'homepage', 'role' ], '' );
+				$author        = array_replace( $accepted_keys, array_intersect_key( $author, $accepted_keys ) );
+
+				// Remove falsy author entries.
+				$author = array_filter( $author );
+
+				// We need the name not to be empty.
+				if ( empty( $author['name'] ) ) {
+					return false;
+				}
+
+				return $author;
+			}
+
+			// We have an invalid author.
+			return false;
+
+		}, $authors );
+
+		// Filter out falsy authors.
+		$authors = array_filter( $authors );
+
+		// We don't keep the array keys.
+		$authors = array_values( $authors );
+
+		return $authors;
+	}
+
+	/**
 	 * Set the description.
 	 *
 	 * @since 0.1.0
@@ -166,7 +215,54 @@ class BaseSolutionBuilder {
 	 * @return $this
 	 */
 	public function set_license( string $license ): self {
-		return $this->set( 'license', $license );
+		return $this->set( 'license', $this->normalize_license( $license ) );
+	}
+
+	/**
+	 * We want to try and normalize the license to the SPDX format.
+	 *
+	 * @link https://spdx.org/licenses/
+	 *
+	 * @param string $license
+	 *
+	 * @return string
+	 */
+	protected function normalize_license( string $license ): string {
+		$license = trim( $license );
+
+		$tmp_license = strtolower( $license );
+
+		if ( empty( $tmp_license ) ) {
+			// Default to the WordPress license.
+			return 'GPL-2.0-or-later';
+		}
+
+		// Handle the `GPL-2.0-or-later` license.
+		if ( preg_match( '#(GNU\s*-?)?(General Public License|GPL)(\s*[-_v]*\s*)(2[.-]?0?\s*-?)(or\s*-?later|\+)#i', $tmp_license ) ) {
+			return 'GPL-2.0-or-later';
+		}
+
+		// Handle the `GPL-2.0-only` license.
+		if ( preg_match( '#(GNU\s*-?)?(General Public License|GPL)(\s*[-_v]*\s*)(2[.-]?0?\s*-?)(only)?#i', $tmp_license ) ) {
+			return 'GPL-2.0-only';
+		}
+
+		// Handle the `GPL-3.0-or-later` license.
+		if ( preg_match( '#(GNU\s*-?)?(General Public License|GPL)(\s*[-_v]*\s*)(3[.-]?0?\s*-?)(or\s*-?later|\+)#i', $tmp_license ) ) {
+			return 'GPL-3.0-or-later';
+		}
+
+		// Handle the `GPL-3.0-only` license.
+		if ( preg_match( '#(GNU\s*-?)?(General Public License|GPL)(\s*[-_v]*\s*)(3[.-]?0?\s*-?)(only)?#i', $tmp_license ) ) {
+			return 'GPL-3.0-only';
+		}
+
+		// Handle the `MIT` license.
+		if ( preg_match( '#(The\s*)?(MIT\s*)(License)?#i', $tmp_license ) ) {
+			return 'MIT';
+		}
+
+		return $license;
 	}
 
 	/**
@@ -302,6 +398,19 @@ class BaseSolutionBuilder {
 	}
 
 	/**
+	 * Set the required LT Records Parts.
+	 *
+	 * @since 0.1.0
+	 *
+	 * @param array $required_ltrecords_parts
+	 *
+	 * @return $this
+	 */
+	public function set_required_ltrecords_parts( array $required_ltrecords_parts ): self {
+		return $this->set( 'required_ltrecords_parts', $this->normalize_required_ltrecords_parts( $required_ltrecords_parts ) );
+	}
+
+	/**
 	 * Set the (Composer) require list if this package is managed by us.
 	 *
 	 * This will be merged with the required packages and other hard-coded packages to generate the final require config.
@@ -330,29 +439,16 @@ class BaseSolutionBuilder {
 	}
 
 	/**
-	 * Set the replaced solutions.
+	 * Set the excluded solutions.
 	 *
 	 * @since 0.1.0
 	 *
-	 * @param array $replaced_solutions
+	 * @param array $excluded_solutions
 	 *
 	 * @return $this
 	 */
-	public function set_replaced_solutions( array $replaced_solutions ): self {
-		return $this->set( 'replaced_solutions', $this->normalize_required_solutions( $replaced_solutions ) );
-	}
-
-	/**
-	 * Set the required LT Records Parts.
-	 *
-	 * @since 0.1.0
-	 *
-	 * @param array $required_ltrecords_parts
-	 *
-	 * @return $this
-	 */
-	public function set_required_ltrecords_parts( array $required_ltrecords_parts ): self {
-		return $this->set( 'required_ltrecords_parts', $this->normalize_required_ltrecords_parts( $required_ltrecords_parts ) );
+	public function set_excluded_solutions( array $excluded_solutions ): self {
+		return $this->set( 'excluded_solutions', $this->normalize_required_solutions( $excluded_solutions ) );
 	}
 
 	/**
@@ -415,6 +511,10 @@ class BaseSolutionBuilder {
 			$this->set_type( $package_data['type'] );
 		}
 
+		if ( empty( $this->solution->get_authors() ) && ! empty( $package_data['authors'] ) ) {
+			$this->set_authors( $package_data['authors'] );
+		}
+
 		if ( empty( $this->solution->get_homepage() ) && ! empty( $package_data['homepage'] ) ) {
 			$this->set_homepage( $package_data['homepage'] );
 		}
@@ -423,12 +523,25 @@ class BaseSolutionBuilder {
 			$this->set_description( $package_data['description'] );
 		}
 
+		if ( empty( $this->solution->get_license() ) && ! empty( $package_data['license'] ) ) {
+			// Make sure that the license is a single string, not an array of strings.
+			// Packagist.org offers a list of license in case a project is dual or triple licensed.
+			if ( is_array( $package_data['license'] ) ) {
+				$package_data['license'] = reset( $package_data['license'] );
+			}
+			$this->set_license( $package_data['license'] );
+		}
+
 		if ( empty( $this->solution->get_keywords() ) && ! empty( $package_data['keywords'] ) ) {
 			$this->set_keywords( $package_data['keywords'] );
 		}
 
 		if ( isset( $package_data['is_managed'] ) ) {
 			$this->set_is_managed( $package_data['is_managed'] );
+		}
+
+		if ( empty( $this->solution->get_managed_post_id() ) && ! empty( $package_data['managed_post_id'] ) ) {
+			$this->set_managed_post_id( $package_data['managed_post_id'] );
 		}
 
 		if ( empty( $this->solution->get_visibility() ) && ! empty( $package_data['visibility'] ) ) {
@@ -452,15 +565,15 @@ class BaseSolutionBuilder {
 			);
 		}
 
-		if ( ! empty( $package_data['replaced_solutions'] ) ) {
+		if ( ! empty( $package_data['excluded_solutions'] ) ) {
 			// We need to normalize before the merge since we need the keys to be in the same format.
 			// A bit inefficient, I know.
-			$package_data['replaced_solutions'] = $this->normalize_required_solutions( $package_data['replaced_solutions'] );
-			// We will merge the replaced solutions into the existing ones.
-			$this->set_replaced_solutions(
+			$package_data['excluded_solutions'] = $this->normalize_required_solutions( $package_data['excluded_solutions'] );
+			// We will merge the excluded solutions into the existing ones.
+			$this->set_excluded_solutions(
 				ArrayHelpers::array_merge_recursive_distinct(
-					$this->solution->get_replaced_solutions(),
-					$package_data['replaced_solutions']
+					$this->solution->get_excluded_solutions(),
+					$package_data['excluded_solutions']
 				)
 			);
 		}
@@ -629,15 +742,17 @@ class BaseSolutionBuilder {
 			->set_name( $solution->get_name() )
 			->set_slug( $solution->get_slug() )
 			->set_type( $solution->get_type() )
+			->set_authors( $solution->get_authors() )
 			->set_homepage( $solution->get_homepage() )
 			->set_description( $solution->get_description() )
 			->set_keywords( $solution->get_keywords() )
+			->set_license( $solution->get_license() )
 			->set_is_managed( $solution->is_managed() )
 			->set_managed_post_id( $solution->get_managed_post_id() )
 			->set_visibility( $solution->get_visibility() )
 			->set_composer_require( $solution->get_composer_require() )
 			->set_required_solutions( $solution->get_required_solutions() )
-			->set_replaced_solutions( $solution->get_replaced_solutions() )
+			->set_excluded_solutions( $solution->get_excluded_solutions() )
 			->set_required_ltrecords_parts( $solution->get_required_ltrecords_parts() );
 
 		return $this;

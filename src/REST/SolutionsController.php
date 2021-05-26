@@ -221,7 +221,7 @@ class SolutionsController extends WP_REST_Controller {
 
 		$data['releases']         = [];
 		$data['requiredPackages'] = $this->prepare_required_packages_for_response( $package, $request );
-		$data['replacedPackages'] = $this->prepare_replaced_packages_for_response( $package, $request );
+		$data['excludedPackages'] = $this->prepare_excluded_packages_for_response( $package, $request );
 
 		$data = $this->filter_response_by_context( $data, $request['context'] );
 
@@ -273,10 +273,10 @@ class SolutionsController extends WP_REST_Controller {
 	 *
 	 * @return array
 	 */
-	protected function prepare_replaced_packages_for_response( Package $package, WP_REST_Request $request ): array {
-		$replacedPackages = [];
+	protected function prepare_excluded_packages_for_response( Package $package, WP_REST_Request $request ): array {
+		$excludedPackages = [];
 
-		foreach ( $package->get_replaced_solutions() as $replacedPackage ) {
+		foreach ( $package->get_excluded_solutions() as $replacedPackage ) {
 			$package_name = $replacedPackage['composer_package_name'] . ':' . $replacedPackage['version_range'];
 			if ( 'stable' !== $replacedPackage['stability'] ) {
 				$package_name .= '@' . $replacedPackage['stability'];
@@ -287,7 +287,7 @@ class SolutionsController extends WP_REST_Controller {
 				$edit_link = get_edit_post_link( $replacedPackage['managed_post_id'] );
 			}
 
-			$replacedPackages[] = [
+			$excludedPackages[] = [
 				'name'        => $replacedPackage['composer_package_name'],
 				'version'     => $replacedPackage['version_range'],
 				'stability'   => $replacedPackage['stability'],
@@ -296,7 +296,7 @@ class SolutionsController extends WP_REST_Controller {
 			];
 		}
 
-		return array_values( $replacedPackages );
+		return array_values( $excludedPackages );
 	}
 
 	/**

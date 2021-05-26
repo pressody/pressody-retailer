@@ -128,7 +128,7 @@ interface Package {
 	public function get_composer_require(): array;
 
 	/**
-	 * Retrieve the managed required packages.
+	 * Retrieve the managed required solutions.
 	 *
 	 * @since 0.8.0
 	 *
