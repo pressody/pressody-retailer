@@ -28,19 +28,19 @@ class ListSolutions extends AbstractHookProvider {
 	 *
 	 * @var SolutionManager
 	 */
-	protected SolutionManager $package_manager;
+	protected SolutionManager $solution_manager;
 
 	/**
 	 * Constructor.
 	 *
 	 * @since 0.1.0
 	 *
-	 * @param SolutionManager $package_manager Packages manager.
+	 * @param SolutionManager $solution_manager Solutions manager.
 	 */
 	public function __construct(
-		SolutionManager $package_manager
+		SolutionManager $solution_manager
 	) {
-		$this->package_manager = $package_manager;
+		$this->solution_manager = $solution_manager;
 	}
 
 	/**
@@ -57,8 +57,8 @@ class ListSolutions extends AbstractHookProvider {
 		$this->add_action( 'restrict_manage_posts', 'output_admin_list_filters' );
 
 		// Add custom columns to post list.
-		$this->add_action( 'manage_' . $this->package_manager::POST_TYPE . '_posts_columns', 'add_custom_columns' );
-		$this->add_action( 'manage_' . $this->package_manager::POST_TYPE . '_posts_custom_column', 'populate_custom_columns', 10, 2 );
+		$this->add_action( 'manage_' . $this->solution_manager::POST_TYPE . '_posts_columns', 'add_custom_columns' );
+		$this->add_action( 'manage_' . $this->solution_manager::POST_TYPE . '_posts_custom_column', 'populate_custom_columns', 10, 2 );
 	}
 
 	/**
@@ -67,11 +67,11 @@ class ListSolutions extends AbstractHookProvider {
 	 * @param string $post_type The current post type.
 	 */
 	protected function output_admin_list_filters( string $post_type ) {
-		if ( $this->package_manager::POST_TYPE !== $post_type ) {
+		if ( $this->solution_manager::POST_TYPE !== $post_type ) {
 			return;
 		}
 
-		$type_taxonomy = get_taxonomy( $this->package_manager::TYPE_TAXONOMY );
+		$type_taxonomy = get_taxonomy( $this->solution_manager::TYPE_TAXONOMY );
 		wp_dropdown_categories( array(
 			'show_option_all' => sprintf( __( 'All %s', 'pixelgradelt_retailer' ), $type_taxonomy->label ),
 			'orderby'         => 'term_id',
@@ -85,7 +85,7 @@ class ListSolutions extends AbstractHookProvider {
 			'value_field'     => 'slug',
 		) );
 
-		$category_taxonomy = get_taxonomy( $this->package_manager::CATEGORY_TAXONOMY );
+		$category_taxonomy = get_taxonomy( $this->solution_manager::CATEGORY_TAXONOMY );
 		wp_dropdown_categories( array(
 			'show_option_all' => sprintf( __( 'All %s', 'pixelgradelt_retailer' ), $category_taxonomy->label ),
 			'orderby'         => 'term_id',
@@ -107,7 +107,7 @@ class ListSolutions extends AbstractHookProvider {
 	 */
 	public function load_screen() {
 		$screen = get_current_screen();
-		if ( $this->package_manager::POST_TYPE !== $screen->post_type ) {
+		if ( $this->solution_manager::POST_TYPE !== $screen->post_type ) {
 			return;
 		}
 
@@ -126,14 +126,64 @@ class ListSolutions extends AbstractHookProvider {
 
 	protected function add_custom_columns( array $columns ): array {
 		$screen = get_current_screen();
-		if ( $this->package_manager::POST_TYPE !== $screen->post_type ) {
+		if ( $this->solution_manager::POST_TYPE !== $screen->post_type ) {
 			return $columns;
 		}
+
+		// Insert after the title columns for dependencies.
+		$columns = ArrayHelpers::insertAfterKey( $columns, 'title',
+			[
+				'solution_required_parts' => esc_html__( 'Required Parts', 'pixelgradelt_retailer' ),
+				'solution_required_solutions' => esc_html__( 'Required Solutions', 'pixelgradelt_retailer' ),
+				'solution_excluded_solutions' => esc_html__( 'Excluded Solutions', 'pixelgradelt_retailer' ),
+			]
+		);
 
 		return $columns;
 	}
 
 	protected function populate_custom_columns( string $column, int $post_id ): void {
+		if ( ! in_array( $column, [ 'solution_required_parts', 'solution_required_solutions', 'solution_excluded_solutions', ] ) ) {
+			return;
+		}
 
+		$output = '—';
+
+		$solution_data = $this->solution_manager->get_solution_id_data( $post_id );
+		if ( 'solution_required_parts' === $column && ! empty( $solution_data['required_ltrecords_parts'] ) ) {
+			$list = [];
+			foreach ( $solution_data['required_ltrecords_parts'] as $part_details ) {
+				$item = $part_details['package_name'] . ':' . $part_details['version_range'];
+				if ( 'stable' !== $part_details['stability'] ) {
+					$item .= '@' . $part_details['stability'];
+				}
+
+				$list[] = $item;
+			}
+
+			$output = implode( '<br>' . PHP_EOL, $list );
+		}
+
+		if ( 'solution_required_solutions' === $column && ! empty( $solution_data['required_solutions'] ) ) {
+			$list = [];
+			foreach ( $solution_data['required_solutions'] as $solution_details ) {
+
+				$list[] = '<a class="package-list_link" href="' . esc_url( get_edit_post_link( $solution_details['managed_post_id'] ) ) . '" title="Edit Required LT Solution">' . $solution_details['pseudo_id'] . '</a>';
+			}
+
+			$output = implode( '<br>' . PHP_EOL, $list );
+		}
+
+		if ( 'solution_excluded_solutions' === $column && ! empty( $solution_data['excluded_solutions'] ) ) {
+			$list = [];
+			foreach ( $solution_data['excluded_solutions'] as $solution_details ) {
+
+				$list[] = '<a class="package-list_link" href="' . esc_url( get_edit_post_link( $solution_details['managed_post_id'] ) ) . '" title="Edit Excluded LT Solution">' . $solution_details['pseudo_id'] . '</a>';
+			}
+
+			$output = implode( '<br>' . PHP_EOL, $list );
+		}
+
+		echo $output;
 	}
 }
