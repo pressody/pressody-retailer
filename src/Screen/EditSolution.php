@@ -579,6 +579,10 @@ The excluded solutions only take effect in <strong>a purchase context (add to ca
 			update_option( '_pixelgradelt_retailer_ltrecords_parts_timeout', time() + MINUTE_IN_SECONDS * 15, true );
 		}
 
+		if ( empty( $parts ) ) {
+			$parts = [];
+		}
+
 		$this->ltrecords_parts = $parts;
 
 		return $this->ltrecords_parts;
@@ -604,7 +608,7 @@ The excluded solutions only take effect in <strong>a purchase context (add to ca
 
 		$ltrecords_parts_repo_url = $option['ltrecords-parts-repo-endpoint'];
 		$ltrecords_api_key        = $option['ltrecords-api-key'];
-		$ltrecords_api_pwd        = 'pixelgradelt_retailer';
+		$ltrecords_api_pwd        = 'pixelgradelt_records';
 
 		$request_args = [
 				'headers'   => [
