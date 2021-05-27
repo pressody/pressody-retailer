@@ -44,7 +44,7 @@ function setPostId( postId ) {
 
 function* getSolutions() {
 	const postId = select( STORE_KEY ).getPostId();
-	const solutions = yield apiFetch( { path: `/pixelgradelt_retailer/v1/solutions?post=${ postId }` } );
+	const solutions = yield apiFetch( { path: `/pixelgradelt_retailer/v1/solutions?postId=${ postId }` } );
 	dispatch( STORE_KEY ).setSolutions( solutions.sort( compareByName ) );
 }
 

@@ -253,7 +253,7 @@ function is_dev_url( string $url ): bool {
  *
  * @param array $paths Array of REST paths.
  */
-function preload_rest_data( $paths ) {
+function preload_rest_data( array $paths ) {
 	$preload_data = array_reduce(
 		$paths,
 		'rest_preload_api_request',

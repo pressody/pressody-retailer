@@ -92,6 +92,28 @@ class SolutionsController extends WP_REST_Controller {
 				'schema' => [ $this, 'get_public_item_schema' ],
 			]
 		);
+
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/(?P<id>[\d]+)',
+			[
+				'args'   => array(
+					'id' => array(
+						'description' => __( 'The solution post ID.', 'woocommerce' ),
+						'type'        => 'integer',
+					),
+				),
+				[
+					'methods'             => WP_REST_Server::READABLE,
+					'callback'            => [ $this, 'get_item' ],
+					'permission_callback' => [ $this, 'get_item_permissions_check' ],
+					'args'                => array(
+						'context' => $this->get_context_param( array( 'default' => 'view' ) ),
+					),
+				],
+				'schema' => [ $this, 'get_public_item_schema' ],
+			]
+		);
 	}
 
 	/**
@@ -127,18 +149,13 @@ class SolutionsController extends WP_REST_Controller {
 	public function get_items( $request ) {
 		$items = [];
 
-		$post = null;
-		if ( ! empty( $request['post'] ) ) {
-			$post = get_post( $request['post'] );
-		}
-
 		$repository = $this->repository->with_filter(
-			function ( $package ) use ( $request, $post ) {
+			function ( $package ) use ( $request ) {
 				if ( ! in_array( $package->get_type(), $request['type'], true ) ) {
 					return false;
 				}
 
-				if ( ! empty( $post ) && $package->get_managed_post_id() !== $post->ID ) {
+				if ( ! empty( $request['postId'] ) && ! in_array( $package->get_managed_post_id(), $request['postId'] ) ) {
 					return false;
 				}
 
@@ -155,6 +172,47 @@ class SolutionsController extends WP_REST_Controller {
 	}
 
 	/**
+	 * Check if a given request has access to view the resource.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param WP_REST_Request $request Full details about the request.
+	 *
+	 * @return true|WP_Error True if the request has read access, WP_Error object otherwise.
+	 */
+	public function get_item_permissions_check( $request ) {
+		if ( ! current_user_can( Capabilities::VIEW_SOLUTION, $request->get_param('id') ) ) {
+			return new WP_Error(
+				'rest_cannot_read',
+				esc_html__( 'Sorry, you are not allowed to view the requested solution.', 'pixelgradelt_retailer' ),
+				[ 'status' => rest_authorization_required_code() ]
+			);
+		}
+
+		return true;
+	}
+
+	/**
+	 * Retrieve a single package.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param WP_REST_Request $request Full data about the request.
+	 *
+	 * @return WP_Error|WP_REST_Response
+	 */
+	public function get_item( $request ) {
+		$package = $this->repository->first_where( [ 'managed_post_id' => $request->get_param('id') ] );
+		if ( empty( $package ) ) {
+			return new WP_Error( 'pixelgradelt_retailer_rest_invalid_id', __( 'Invalid solution post ID.', 'pixelgradelt_retailer' ), array( 'status' => 404 ) );
+		}
+
+		$data = $this->prepare_item_for_response( $package, $request );
+
+		return rest_ensure_response( $data );
+	}
+
+	/**
 	 * Retrieve the query parameters for collections of packages.
 	 *
 	 * @since 1.0.0
@@ -166,11 +224,14 @@ class SolutionsController extends WP_REST_Controller {
 			'context' => $this->get_context_param( [ 'default' => 'view' ] ),
 		];
 
-		$params['post'] = [
-			'description'       => esc_html__( 'Limit results to a solution by its post ID.', 'pixelgradelt_retailer' ),
-			'type'              => 'integer',
-			'default'           => 0,
-			'sanitize_callback' => 'absint',
+		$params['postId'] = [
+			'description'       => esc_html__( 'Limit results to solutions by one or more (managed) post IDs.', 'pixelgradelt_retailer' ),
+			'type'              => 'array',
+			'items'             => [
+				'type' => 'integer',
+			],
+			'default'           => [],
+			'sanitize_callback' => 'wp_parse_id_list',
 		];
 
 		$params['type'] = [
