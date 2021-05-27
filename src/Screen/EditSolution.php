@@ -324,6 +324,7 @@ Learn more about Composer <a href="https://getcomposer.org/doc/articles/versions
 
 				         Field::make( 'complex', 'solution_required_parts', __( 'Required Parts', 'pixelgradelt_retailer' ) )
 				              ->set_help_text( __( 'The order is not important, from a logic standpoint. Also, if you add <strong>the same part multiple times</strong> only the last one will take effect since it will overwrite the previous ones.<br>
+LT Records Parts don\'t have a <code>stability</code> field because we want to <strong>control the stability at a composition level</strong> (the global site level).<br>
 <strong>FYI:</strong> Each required part label is comprised of the standardized <code>package_name</code> and the <code>#post_id</code>.', 'pixelgradelt_retailer' ) )
 				              ->set_classes( 'solution-required-solutions solution-required-parts' )
 				              ->set_collapsed( true )
@@ -337,21 +338,10 @@ Learn more about Composer <a href="https://getcomposer.org/doc/articles/versions
 						                   ->set_default_value( '*' )
 						                   ->set_required( true )
 						                   ->set_width( 25 ),
-						              Field::make( 'select', 'stability', __( 'Stability', 'pixelgradelt_retailer' ) )
-						                   ->set_options( [
-								                   'stable' => esc_html__( 'Stable', 'pixelgradelt_retailer' ),
-								                   'rc'     => esc_html__( 'RC', 'pixelgradelt_retailer' ),
-								                   'beta'   => esc_html__( 'Beta', 'pixelgradelt_retailer' ),
-								                   'alpha'  => esc_html__( 'Alpha', 'pixelgradelt_retailer' ),
-								                   'dev'    => esc_html__( 'Dev', 'pixelgradelt_retailer' ),
-						                   ] )
-						                   ->set_required( true )
-						                   ->set_default_value( 'stable' )
-						                   ->set_width( 25 ),
 				              ] )
 				              ->set_header_template( '
 								    <% if (package_name) { %>
-								        <%- package_name %> (version range: <%= version_range %><% if ("stable" !== stability) { %>@<%= stability %><% } %>)
+								        <%- package_name %> (version range: <%= version_range %>)
 								    <% } %>
 								' ),
 		         ] );

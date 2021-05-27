@@ -419,6 +419,44 @@ class SolutionsController extends WP_REST_Controller {
 						],
 					],
 				],
+				'excludedPackages' => [
+					'description' => esc_html__( 'A list of excluded packages.', 'pixelgradelt_retailer' ),
+					'type'        => 'array',
+					'context'     => [ 'view', 'edit' ],
+					'readonly'    => true,
+					'items'       => [
+						'type'       => 'object',
+						'readonly'   => true,
+						'properties' => [
+							'name' => [
+								'description' => __( 'Composer package name.', 'pixelgradelt_retailer' ),
+								'type'        => 'string',
+								'context'     => [ 'view', 'edit' ],
+								'readonly'    => true,
+							],
+							'version' => [
+								'description' => esc_html__( 'The excluded package version constraint.', 'pixelgradelt_retailer' ),
+								'type'        => 'string',
+								'readonly'    => true,
+							],
+							'stability' => [
+								'description' => esc_html__( 'The excluded package stability constraint.', 'pixelgradelt_retailer' ),
+								'type'        => 'string',
+								'readonly'    => true,
+							],
+							'editLink' => [
+								'description' => esc_html__( 'The excluded package post edit link.', 'pixelgradelt_retailer' ),
+								'type'        => 'string',
+								'readonly'    => true,
+							],
+							'displayName' => [
+								'description' => esc_html__( 'The excluded package display name/string.', 'pixelgradelt_retailer' ),
+								'type'        => 'string',
+								'readonly'    => true,
+							],
+						],
+					],
+				],
 				'slug'        => [
 					'description' => esc_html__( 'The package slug.', 'pixelgradelt_retailer' ),
 					'type'        => 'string',

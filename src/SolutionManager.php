@@ -556,13 +556,17 @@ class SolutionManager {
 		}
 
 		// Make sure only the fields we are interested in are left.
-		$accepted_keys = array_fill_keys( [ 'package_name', 'version_range', 'stability' ], '' );
+		$accepted_keys = array_fill_keys( [ 'package_name', 'version_range', ], '' );
 		foreach ( $required_parts as $key => $required_part ) {
 			$required_parts[ $key ] = array_replace( $accepted_keys, array_intersect_key( $required_part, $accepted_keys ) );
 
 			if ( empty( $required_part['package_name'] ) ) {
 				unset( $required_parts[ $key ] );
 			}
+
+			// Since we don't manage the part stability, we will fill in the default one.
+			// Parts don't have a stability options because we want to manage this at a global level (at a composition level).
+			$required_parts[ $key ]['stability'] = 'stable';
 		}
 
 		return $required_parts;

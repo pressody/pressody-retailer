@@ -153,12 +153,7 @@ class ListSolutions extends AbstractHookProvider {
 		if ( 'solution_required_parts' === $column && ! empty( $solution_data['required_ltrecords_parts'] ) ) {
 			$list = [];
 			foreach ( $solution_data['required_ltrecords_parts'] as $part_details ) {
-				$item = $part_details['package_name'] . ':' . $part_details['version_range'];
-				if ( 'stable' !== $part_details['stability'] ) {
-					$item .= '@' . $part_details['stability'];
-				}
-
-				$list[] = $item;
+				$list[] = $part_details['package_name'] . ':' . $part_details['version_range'];
 			}
 
 			$output = implode( '<br>' . PHP_EOL, $list );
