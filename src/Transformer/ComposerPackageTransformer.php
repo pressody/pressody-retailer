@@ -24,7 +24,7 @@ interface ComposerPackageTransformer {
 	 *
 	 * @since 0.1.0
 	 *
-	 * @param Package $solution Package.
+	 * @param Package $package Package.
 	 */
-	public function transform( Package $solution );
+	public function transform( Package $package );
 }

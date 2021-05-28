@@ -728,6 +728,27 @@ class SolutionManager {
 		}
 	}
 
+	public function solution_name_to_composer_package_name( string $name ): ?string {
+		/**
+		 * Construct the Composer-like package name (the same way @see ComposerSolutionTransformer::transform() does it).
+		 */
+		$vendor = apply_filters( 'pixelgradelt_retailer_vendor', 'pixelgradelt-retailer' );
+
+		if ( empty( $vendor) || empty( $name ) ) {
+			// Something is wrong. We will not include this required package.
+			$this->logger->error(
+				'Error generating the solution Composer package name for solution with name "{name}".',
+				[
+					'name'         => $name,
+				]
+			);
+
+			return null;
+		}
+
+		return $vendor . '/' . $name;
+	}
+
 	/**
 	 * Normalize a version string according to Composer logic.
 	 *

@@ -1,6 +1,6 @@
 <?php
 /**
- * Solution repository interface.
+ * Package repository interface.
  *
  * @package PixelgradeLT
  * @license GPL-2.0-or-later
@@ -14,7 +14,7 @@ namespace PixelgradeLT\Retailer\Repository;
 use PixelgradeLT\Retailer\Package;
 
 /**
- * Solution repository interface.
+ * Package repository interface.
  *
  * @since 0.1.0
  */

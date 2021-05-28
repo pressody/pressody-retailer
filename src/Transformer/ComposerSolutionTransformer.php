@@ -44,19 +44,19 @@ class ComposerSolutionTransformer implements ComposerPackageTransformer {
 	 *
 	 * @since 0.1.0
 	 *
-	 * @param Package $solution Solution.
+	 * @param Package $package Solution.
 	 *
 	 * @return Package
 	 */
-	public function transform( Package $solution ): Package {
-		$builder = $this->factory->create( 'composer' )->with_package( $solution );
+	public function transform( Package $package ): Package {
+		$builder = $this->factory->create( 'composer' )->with_package( $package );
 
-		// For solution packages used in a Composer packages.json, we use the metapackage type.
+		// For solution packages used in a Composer packages.json, we use the `metapackage` type.
 		// @link https://getcomposer.org/doc/04-schema.md#type
 		$builder->set_type( 'metapackage' );
 
 		$vendor = apply_filters( 'pixelgradelt_retailer_vendor', 'pixelgradelt-retailer' );
-		$name   = $this->normalize_package_name( $solution->get_slug() );
+		$name   = $this->normalize_package_name( $package->get_slug() );
 		$builder->set_name( $vendor . '/' . $name );
 
 		return $builder->build();

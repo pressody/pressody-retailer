@@ -108,13 +108,6 @@ abstract class AbstractRepository implements PackageRepository {
 	 * @return array
 	 */
 	protected function parse_args( array $args ): array {
-		// If a plugin file is passed as the slug value, convert it to a
-		// basename argument.
-		if ( isset( $args['slug'] ) && is_plugin_file( $args['slug'] ) ) {
-			$args['basename'] = $args['slug'];
-			unset( $args['slug'] );
-		}
-
 		return $args;
 	}
 

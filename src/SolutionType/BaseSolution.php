@@ -108,7 +108,7 @@ class BaseSolution implements \ArrayAccess, Package {
 	/**
 	 * A Composer config `require` entry.
 	 *
-	 * This will be merged with the required packages and other hard-coded packages to generate the final require config.
+	 * This will be merged with the required solutions and other hard-coded packages to generate the final require config.
 	 *
 	 * @var array
 	 */
@@ -122,11 +122,18 @@ class BaseSolution implements \ArrayAccess, Package {
 	protected array $required_solutions = [];
 
 	/**
-	 * Solutions repalced by this solution.
+	 * Solutions excluded when this solution is included/required in a composition.
 	 *
 	 * @var array
 	 */
 	protected array $excluded_solutions = [];
+
+	/**
+	 * The Composer package name (including vendor).
+	 *
+	 * @var string
+	 */
+	protected string $composer_package_name = '';
 
 	/**
 	 * Magic setter.
@@ -360,6 +367,17 @@ class BaseSolution implements \ArrayAccess, Package {
 	 */
 	public function has_excluded_solutions(): bool {
 		return ! empty( $this->excluded_solutions );
+	}
+
+	/**
+	 * Retrieve the Composer package name.
+	 *
+	 * @since 0.1.0
+	 *
+	 * @return string
+	 */
+	public function get_composer_package_name(): string {
+		return $this->composer_package_name;
 	}
 
 	/**

@@ -119,6 +119,24 @@ interface Package {
 	public function get_visibility(): string;
 
 	/**
+	 * Retrieve the required LT Records Parts.
+	 *
+	 * @since 0.1.0
+	 *
+	 * @return array
+	 */
+	public function get_required_ltrecords_parts(): array;
+
+	/**
+	 * Whether the solution has any required LT Records Parts.
+	 *
+	 * @since 0.1.0
+	 *
+	 * @return bool
+	 */
+	public function has_required_ltrecords_parts(): bool;
+
+	/**
 	 * Retrieve the Composer config `require` entry.
 	 *
 	 * @since 0.9.0
@@ -144,4 +162,31 @@ interface Package {
 	 * @return bool
 	 */
 	public function has_required_solutions(): bool;
+
+	/**
+	 * Retrieve the excluded solutions.
+	 *
+	 * @since 0.1.0
+	 *
+	 * @return array
+	 */
+	public function get_excluded_solutions(): array;
+
+	/**
+	 * Whether the solution has any excluded solutions.
+	 *
+	 * @since 0.1.0
+	 *
+	 * @return bool
+	 */
+	public function has_excluded_solutions(): bool;
+
+	/**
+	 * Retrieve the Composer package name.
+	 *
+	 * @since 0.1.0
+	 *
+	 * @return string
+	 */
+	public function get_composer_package_name(): string;
 }

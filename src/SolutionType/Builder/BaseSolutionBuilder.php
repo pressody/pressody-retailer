@@ -13,6 +13,7 @@ namespace PixelgradeLT\Retailer\SolutionType\Builder;
 
 use PixelgradeLT\Retailer\Package;
 use PixelgradeLT\Retailer\SolutionManager;
+use PixelgradeLT\Retailer\SolutionType\BaseSolution;
 use PixelgradeLT\Retailer\Utils\ArrayHelpers;
 use Psr\Log\LoggerInterface;
 use ReflectionClass;
@@ -452,6 +453,19 @@ class BaseSolutionBuilder {
 	}
 
 	/**
+	 * Set the Composer package name.
+	 *
+	 * @since 0.1.0
+	 *
+	 * @param string $composer_package_name Composer package name (including vendor).
+	 *
+	 * @return $this
+	 */
+	public function set_composer_package_name( string $composer_package_name ): self {
+		return $this->set( 'composer_package_name', $composer_package_name );
+	}
+
+	/**
 	 * Fill (missing) package details from the PackageManager if this is a managed package (via CPT).
 	 *
 	 * @since 0.1.0
@@ -485,6 +499,8 @@ class BaseSolutionBuilder {
 		$this->set_visibility( $this->solution_manager->get_solution_visibility( $this->solution ) );
 
 		$this->from_package_data( $package_data );
+
+		$this->set_composer_package_name( $this->solution_manager->solution_name_to_composer_package_name( $this->normalize_package_name( $this->solution->get_slug() ) ) );
 
 		return $this;
 	}
@@ -591,6 +607,10 @@ class BaseSolutionBuilder {
 			);
 		}
 
+		if ( empty( $this->solution->get_composer_package_name ) && ! empty( $package_data['composer_package_name'] ) ) {
+			$this->set_composer_package_name( $package_data['composer_package_name'] );
+		}
+
 		return $this;
 	}
 
@@ -654,14 +674,10 @@ class BaseSolutionBuilder {
 				continue;
 			}
 
-			/**
-			 * Construct the Composer-like package name (the same way @see ComposerSolutionTransformer::transform() does it).
-			 */
-			$vendor = apply_filters( 'pixelgradelt_retailer_vendor', 'pixelgradelt-retailer', $required_solution, $package_data );
-			$name   = $this->normalize_package_name( $package_data['slug'] );
-
-			$normalized[ $required_solution['pseudo_id'] ]['composer_package_name'] = $vendor . '/' . $name;
+			$normalized[ $required_solution['pseudo_id'] ]['composer_package_name'] = $this->solution_manager->solution_name_to_composer_package_name( $this->normalize_package_name( $package_data['slug'] ) );
 		}
+
+		ksort( $normalized );
 
 		return $normalized;
 	}
@@ -708,6 +724,8 @@ class BaseSolutionBuilder {
 			];
 		}
 
+		ksort( $normalized );
+
 		return $normalized;
 	}
 
@@ -722,7 +740,7 @@ class BaseSolutionBuilder {
 	 *
 	 * @return string
 	 */
-	protected function normalize_package_name( $name ): string {
+	protected function normalize_package_name( string $name ): string {
 		$name = strtolower( $name );
 
 		return preg_replace( '/[^a-z0-9_\-\.]+/i', '', $name );
@@ -733,27 +751,28 @@ class BaseSolutionBuilder {
 	 *
 	 * @since 0.1.0
 	 *
-	 * @param Package $solution Solution.
+	 * @param Package $package Solution.
 	 *
 	 * @return $this
 	 */
-	public function with_package( Package $solution ): self {
+	public function with_package( Package $package ): self {
 		$this
-			->set_name( $solution->get_name() )
-			->set_slug( $solution->get_slug() )
-			->set_type( $solution->get_type() )
-			->set_authors( $solution->get_authors() )
-			->set_homepage( $solution->get_homepage() )
-			->set_description( $solution->get_description() )
-			->set_keywords( $solution->get_keywords() )
-			->set_license( $solution->get_license() )
-			->set_is_managed( $solution->is_managed() )
-			->set_managed_post_id( $solution->get_managed_post_id() )
-			->set_visibility( $solution->get_visibility() )
-			->set_composer_require( $solution->get_composer_require() )
-			->set_required_solutions( $solution->get_required_solutions() )
-			->set_excluded_solutions( $solution->get_excluded_solutions() )
-			->set_required_ltrecords_parts( $solution->get_required_ltrecords_parts() );
+			->set_name( $package->get_name() )
+			->set_slug( $package->get_slug() )
+			->set_type( $package->get_type() )
+			->set_authors( $package->get_authors() )
+			->set_homepage( $package->get_homepage() )
+			->set_description( $package->get_description() )
+			->set_keywords( $package->get_keywords() )
+			->set_license( $package->get_license() )
+			->set_is_managed( $package->is_managed() )
+			->set_managed_post_id( $package->get_managed_post_id() )
+			->set_visibility( $package->get_visibility() )
+			->set_composer_require( $package->get_composer_require() )
+			->set_required_solutions( $package->get_required_solutions() )
+			->set_excluded_solutions( $package->get_excluded_solutions() )
+			->set_required_ltrecords_parts( $package->get_required_ltrecords_parts() )
+			->set_composer_package_name( $package->get_composer_package_name() );
 
 		return $this;
 	}

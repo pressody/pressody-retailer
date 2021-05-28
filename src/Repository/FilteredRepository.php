@@ -47,7 +47,7 @@ class FilteredRepository extends AbstractRepository implements PackageRepository
 	}
 
 	/**
-	 * Retrieve all packages in the repository.
+	 * Retrieve all packages in the repository, filtered by the provided callback.
 	 *
 	 * @since 0.1.0
 	 *

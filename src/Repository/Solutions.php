@@ -21,7 +21,7 @@ use PixelgradeLT\Retailer\SolutionType\SolutionTypes;
  *
  * @since 0.1.0
  */
-class Solutions extends AbstractRepository implements PackageRepository {
+class Solutions extends AbstractRepository implements SolutionRepository {
 	/**
 	 * Package factory.
 	 *
@@ -71,7 +71,7 @@ class Solutions extends AbstractRepository implements PackageRepository {
 				continue;
 			}
 
-			$package = $this->build( $post_id );
+			$package = $this->build( $post->ID );
 			$items[] = $package;
 		}
 
@@ -81,7 +81,7 @@ class Solutions extends AbstractRepository implements PackageRepository {
 	}
 
 	/**
-	 * Build an external plugin.
+	 * Build a solution.
 	 *
 	 * @since 0.1.0
 	 *
@@ -93,5 +93,27 @@ class Solutions extends AbstractRepository implements PackageRepository {
 		return $this->factory->create( SolutionTypes::BASIC )
 		                     ->from_manager( $post_id )
 		                     ->build();
+	}
+
+	/**
+	 * Retrieve the repository solution factory.
+	 *
+	 * @since 0.8.0
+	 *
+	 * @return SolutionFactory
+	 */
+	public function get_factory(): SolutionFactory {
+		return $this->factory;
+	}
+
+	/**
+	 * Retrieve the repository solutions manager.
+	 *
+	 * @since 0.8.0
+	 *
+	 * @return SolutionManager
+	 */
+	public function get_solution_manager(): SolutionManager {
+		return $this->solution_manager;
 	}
 }
