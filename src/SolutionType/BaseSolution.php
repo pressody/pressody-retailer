@@ -71,6 +71,13 @@ class BaseSolution implements \ArrayAccess, Package {
 	protected string $license = '';
 
 	/**
+	 * Solution categories.
+	 *
+	 * @var string[]
+	 */
+	protected array $categories = [];
+
+	/**
 	 * Solution keywords.
 	 *
 	 * @var string[]
@@ -222,6 +229,17 @@ class BaseSolution implements \ArrayAccess, Package {
 	 */
 	public function get_license(): string {
 		return $this->license;
+	}
+
+	/**
+	 * Retrieve the categories.
+	 *
+	 * @since 0.1.0
+	 *
+	 * @return string[]
+	 */
+	public function get_categories(): array {
+		return $this->categories;
 	}
 
 	/**

@@ -372,6 +372,8 @@ class SolutionsController extends WP_REST_Controller {
 			'description' => $item->get_description(),
 			'homepage'    => $item->get_homepage(),
 			'authors'     => $item->get_authors(),
+			'keywords'    => $item->get_keywords(),
+			'categories'  => $item->get_categories(),
 			'type'        => $item->get_type(),
 			'visibility'  => $item->get_visibility(),
 			'editLink'    => get_edit_post_link( $item->get_managed_post_id(),$request['context'] ),
@@ -513,6 +515,15 @@ class SolutionsController extends WP_REST_Controller {
 					'type'        => 'string',
 					'format'      => 'uri',
 					'context'     => [ 'view', 'edit', 'embed' ],
+					'readonly'    => true,
+				],
+				'keywords'         => [
+					'description' => esc_html__( 'The package keywords.', 'pixelgradelt_records' ),
+					'type'        => 'array',
+					'items'             => [
+						'type' => 'string',
+					],
+					'context'     => [ 'view', 'edit' ],
 					'readonly'    => true,
 				],
 				'name'             => [

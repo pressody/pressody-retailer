@@ -83,6 +83,15 @@ interface Package {
 	public function get_license(): string;
 
 	/**
+	 * Retrieve the categories.
+	 *
+	 * @since 0.1.0
+	 *
+	 * @return string[]
+	 */
+	public function get_categories(): array;
+
+	/**
 	 * Retrieve the keywords.
 	 *
 	 * @since 0.1.0

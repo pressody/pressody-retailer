@@ -1,7 +1,8 @@
 import { html, i18n } from '../utils/index.js';
 import Releases from './releases.js';
 import PackageAuthors from './package-authors.js';
-import SolutionRequiredPackages from './solution-required-solutions.js'
+import SolutionRequiredPackages from './solution-required-solutions.js';
+import PackageKeywords from './package-keywords.js';
 
 const { __ } = i18n;
 
@@ -12,6 +13,8 @@ function SolutionTable( props ) {
 		description,
 		name,
 		homepage,
+		categories,
+		keywords,
 		releases,
 		requiredPackages,
 		excludedPackages,
@@ -58,6 +61,18 @@ function SolutionTable( props ) {
 					<th>${ __( 'Excluded Solutions', 'pixelgradelt_retailer' ) }</th>
 					<td className="pixelgradelt_retailer-required-packages pixelgradelt_retailer-excluded-solutions">
 						<${ SolutionRequiredPackages } requiredPackages=${ excludedPackages } />
+					</td>
+				</tr>
+				<tr>
+					<th>${ __( 'Categories', 'pixelgradelt_retailer' ) }</th>
+					<td className="package-keywords__list package-categories__list">
+						<${ PackageKeywords } keywords=${ categories } />
+					</td>
+				</tr>
+				<tr>
+					<th>${ __( 'Keywords', 'pixelgradelt_retailer' ) }</th>
+					<td className="package-keywords__list">
+						<${ PackageKeywords } keywords=${ keywords } />
 					</td>
 				</tr>
 				<tr>

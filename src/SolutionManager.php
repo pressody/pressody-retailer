@@ -373,6 +373,7 @@ class SolutionManager {
 		$data['name']        = $this->get_post_solution_name( $post_ID );
 		$data['type']        = $this->get_post_solution_type( $post_ID );
 		$data['slug']        = $this->get_post_solution_slug( $post_ID );
+		$data['categories']  = $this->get_post_solution_categories( $post_ID );
 		$data['keywords']    = $this->get_post_solution_keywords( $post_ID );
 		$data['description'] = get_post_meta( $post_ID, '_solution_details_description', true );
 		$data['homepage']    = get_post_meta( $post_ID, '_solution_details_homepage', true );
@@ -450,6 +451,24 @@ class SolutionManager {
 		}
 
 		return $post->post_name;
+	}
+
+	public function get_post_solution_categories( int $post_ID ): array {
+		$categories = wp_get_post_terms( $post_ID, static::CATEGORY_TAXONOMY );
+		if ( is_wp_error( $categories ) || empty( $categories ) ) {
+			return [];
+		}
+
+		// We need to return the keywords slugs, not the WP_Term list.
+		$categories = array_map( function ( $term ) {
+			if ( $term instanceof \WP_Term ) {
+				$term = $term->slug;
+			}
+
+			return $term;
+		}, $categories );
+
+		return $categories;
 	}
 
 	public function get_post_solution_keywords( int $post_ID ): array {

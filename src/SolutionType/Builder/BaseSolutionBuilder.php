@@ -267,6 +267,19 @@ class BaseSolutionBuilder {
 	}
 
 	/**
+	 * Set the categories.
+	 *
+	 * @since 0.1.0
+	 *
+	 * @param string|string[] $categories
+	 *
+	 * @return $this
+	 */
+	public function set_categories( $categories ): self {
+		return $this->set( 'categories', $this->normalize_keywords( $categories ) );
+	}
+
+	/**
 	 * Set the keywords.
 	 *
 	 * @since 0.1.0
@@ -548,6 +561,10 @@ class BaseSolutionBuilder {
 			$this->set_license( $package_data['license'] );
 		}
 
+		if ( empty( $this->solution->get_categories() ) && ! empty( $package_data['categories'] ) ) {
+			$this->set_categories( $package_data['categories'] );
+		}
+
 		if ( empty( $this->solution->get_keywords() ) && ! empty( $package_data['keywords'] ) ) {
 			$this->set_keywords( $package_data['keywords'] );
 		}
@@ -763,6 +780,7 @@ class BaseSolutionBuilder {
 			->set_authors( $package->get_authors() )
 			->set_homepage( $package->get_homepage() )
 			->set_description( $package->get_description() )
+			->set_categories( $package->get_categories() )
 			->set_keywords( $package->get_keywords() )
 			->set_license( $package->get_license() )
 			->set_is_managed( $package->is_managed() )
