@@ -374,6 +374,7 @@ class SolutionsController extends WP_REST_Controller {
 			'authors'     => $item->get_authors(),
 			'type'        => $item->get_type(),
 			'visibility'  => $item->get_visibility(),
+			'editLink'    => get_edit_post_link( $item->get_managed_post_id(),$request['context'] ),
 		];
 
 		$data['composer'] = [
@@ -412,7 +413,7 @@ class SolutionsController extends WP_REST_Controller {
 
 			$edit_link = '#';
 			if ( ! empty( $requiredPackage['managed_post_id'] ) ) {
-				$edit_link = get_edit_post_link( $requiredPackage['managed_post_id'] );
+				$edit_link = get_edit_post_link( $requiredPackage['managed_post_id'], $request['context'] );
 			}
 
 			$requiredPackages[] = [
@@ -446,7 +447,7 @@ class SolutionsController extends WP_REST_Controller {
 
 			$edit_link = '#';
 			if ( ! empty( $replacedPackage['managed_post_id'] ) ) {
-				$edit_link = get_edit_post_link( $replacedPackage['managed_post_id'] );
+				$edit_link = get_edit_post_link( $replacedPackage['managed_post_id'], $request['context'] );
 			}
 
 			$excludedPackages[] = [
@@ -477,26 +478,26 @@ class SolutionsController extends WP_REST_Controller {
 				'authors'          => [
 					'description' => esc_html__( 'The package authors details.', 'pixelgradelt_retailer' ),
 					'type'        => 'array',
-					'context'     => [ 'view', 'edit' ],
+					'context'     => [ 'view', 'edit', 'embed' ],
 					'readonly'    => true,
 				],
 				'composer'         => [
 					'description' => esc_html__( 'Package data formatted for Composer.', 'pixelgradelt_retailer' ),
 					'type'        => 'object',
-					'context'     => [ 'view', 'edit' ],
+					'context'     => [ 'view', 'edit', 'embed' ],
 					'readonly'    => true,
 					'properties'  => [
 						'name' => [
 							'description' => __( 'Composer package name.', 'pixelgradelt_retailer' ),
 							'type'        => 'string',
-							'context'     => [ 'view', 'edit' ],
+							'context'     => [ 'view', 'edit', 'embed' ],
 							'readonly'    => true,
 						],
 						'type' => [
 							'description' => __( 'Composer package type.', 'pixelgradelt_retailer' ),
 							'type'        => 'string',
 							'enum'        => [ 'wordpress-plugin', 'wordpress-theme' ],
-							'context'     => [ 'view', 'edit' ],
+							'context'     => [ 'view', 'edit', 'embed' ],
 							'readonly'    => true,
 						],
 					],
@@ -511,7 +512,7 @@ class SolutionsController extends WP_REST_Controller {
 					'description' => esc_html__( 'The package URL.', 'pixelgradelt_retailer' ),
 					'type'        => 'string',
 					'format'      => 'uri',
-					'context'     => [ 'view', 'edit' ],
+					'context'     => [ 'view', 'edit', 'embed' ],
 					'readonly'    => true,
 				],
 				'name'             => [
@@ -523,7 +524,7 @@ class SolutionsController extends WP_REST_Controller {
 				'releases'         => [
 					'description' => esc_html__( 'A list of package releases.', 'pixelgradelt_retailer' ),
 					'type'        => 'array',
-					'context'     => [ 'view', 'edit' ],
+					'context'     => [ 'view', 'edit', 'embed' ],
 					'readonly'    => true,
 					'items'       => [
 						'type'       => 'object',
@@ -533,11 +534,13 @@ class SolutionsController extends WP_REST_Controller {
 								'description' => esc_html__( 'A URL to download the release.', 'pixelgradelt_retailer' ),
 								'type'        => 'string',
 								'format'      => 'uri',
+								'context'     => [ 'view', 'edit', 'embed' ],
 								'readonly'    => true,
 							],
 							'version' => [
 								'description' => esc_html__( 'The release version.', 'pixelgradelt_retailer' ),
 								'type'        => 'string',
+								'context'     => [ 'view', 'edit', 'embed' ],
 								'readonly'    => true,
 							],
 						],
@@ -546,7 +549,7 @@ class SolutionsController extends WP_REST_Controller {
 				'requiredPackages' => [
 					'description' => esc_html__( 'A list of required packages.', 'pixelgradelt_retailer' ),
 					'type'        => 'array',
-					'context'     => [ 'view', 'edit' ],
+					'context'     => [ 'view', 'edit', 'embed' ],
 					'readonly'    => true,
 					'items'       => [
 						'type'       => 'object',
@@ -555,27 +558,32 @@ class SolutionsController extends WP_REST_Controller {
 							'name'        => [
 								'description' => __( 'Composer package name.', 'pixelgradelt_retailer' ),
 								'type'        => 'string',
-								'context'     => [ 'view', 'edit' ],
+								'context'     => [ 'view', 'edit', 'embed' ],
 								'readonly'    => true,
 							],
 							'version'     => [
 								'description' => esc_html__( 'The required package version constraint.', 'pixelgradelt_retailer' ),
 								'type'        => 'string',
+								'context'     => [ 'view', 'edit', 'embed' ],
 								'readonly'    => true,
 							],
 							'stability'   => [
 								'description' => esc_html__( 'The required package stability constraint.', 'pixelgradelt_retailer' ),
 								'type'        => 'string',
+								'context'     => [ 'view', 'edit', 'embed' ],
 								'readonly'    => true,
 							],
 							'editLink'    => [
 								'description' => esc_html__( 'The required package post edit link.', 'pixelgradelt_retailer' ),
 								'type'        => 'string',
+								'format'      => 'uri',
+								'context'     => [ 'view', 'edit' ],
 								'readonly'    => true,
 							],
 							'displayName' => [
 								'description' => esc_html__( 'The required package display name/string.', 'pixelgradelt_retailer' ),
 								'type'        => 'string',
+								'context'     => [ 'view', 'edit', 'embed' ],
 								'readonly'    => true,
 							],
 						],
@@ -599,21 +607,26 @@ class SolutionsController extends WP_REST_Controller {
 							'version'     => [
 								'description' => esc_html__( 'The excluded package version constraint.', 'pixelgradelt_retailer' ),
 								'type'        => 'string',
+								'context'     => [ 'view', 'edit' ],
 								'readonly'    => true,
 							],
 							'stability'   => [
 								'description' => esc_html__( 'The excluded package stability constraint.', 'pixelgradelt_retailer' ),
 								'type'        => 'string',
+								'context'     => [ 'view', 'edit' ],
 								'readonly'    => true,
 							],
 							'editLink'    => [
 								'description' => esc_html__( 'The excluded package post edit link.', 'pixelgradelt_retailer' ),
 								'type'        => 'string',
+								'format'      => 'uri',
+								'context'     => [ 'view', 'edit' ],
 								'readonly'    => true,
 							],
 							'displayName' => [
 								'description' => esc_html__( 'The excluded package display name/string.', 'pixelgradelt_retailer' ),
 								'type'        => 'string',
+								'context'     => [ 'view', 'edit' ],
 								'readonly'    => true,
 							],
 						],
@@ -639,6 +652,13 @@ class SolutionsController extends WP_REST_Controller {
 					'description' => esc_html__( 'The package visibility (public, draft, private, etc.)', 'pixelgradelt_retailer' ),
 					'type'        => 'string',
 					'context'     => [ 'view', 'edit', 'embed' ],
+					'readonly'    => true,
+				],
+				'editLink'    => [
+					'description' => esc_html__( 'The package post edit link.', 'pixelgradelt_records' ),
+					'type'        => 'string',
+					'format'      => 'uri',
+					'context'     => [ 'view', 'edit' ],
 					'readonly'    => true,
 				],
 			],

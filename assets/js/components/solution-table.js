@@ -18,13 +18,14 @@ function SolutionTable( props ) {
 		slug,
 		type,
 		visibility,
+		editLink,
 	} = props;
 
 	return html`
 		<table className="pixelgradelt_retailer-package widefat">
 			<thead>
 				<tr>
-					<th colSpan="2">${ composer.name } ${ 'public' !== visibility ? '(' + visibility[0].toUpperCase() + visibility.slice(1) + ')' : '' }</th>
+					<th colSpan="2">${ composer.name } ${ 'public' !== visibility ? '(' + visibility[0].toUpperCase() + visibility.slice(1) + ')' : '' } <a className="edit-package" href=${ editLink }>Edit solution</a></th>
 				</tr>
 			</thead>
 			<tbody>
