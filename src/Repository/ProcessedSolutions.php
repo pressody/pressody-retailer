@@ -2,12 +2,12 @@
 /**
  * Processed solutions repository.
  *
- * @package PixelgradeLT
+ * @since   0.8.0
  * @license GPL-2.0-or-later
- * @since 0.8.0
+ * @package PixelgradeLT
  */
 
-declare ( strict_types = 1 );
+declare ( strict_types=1 );
 
 namespace PixelgradeLT\Retailer\Repository;
 
@@ -56,7 +56,7 @@ class ProcessedSolutions extends AbstractRepository implements PackageRepository
 		SolutionManager $solution_manager
 	) {
 
-		$this->repository = $repository;
+		$this->repository       = $repository;
 		$this->factory          = $factory;
 		$this->solution_manager = $solution_manager;
 	}
@@ -76,14 +76,21 @@ class ProcessedSolutions extends AbstractRepository implements PackageRepository
 	}
 
 	/**
+	 * Given a flat list of solutions, process them and return the resulting list.
+	 *
+	 * These is the logic that we currently apply:
+	 *  - Apply the solutions exclusion logic for each solution in the list;
+	 *
 	 * @param Package[] $solutions A flat list of solutions with their Composer package name as keys.
+	 *
+	 * @return Package[] The processed flat list of solutions.
 	 */
 	protected function process_solutions( array $solutions ): array {
 		if ( empty( $solutions ) || ! is_array( $solutions ) ) {
 			return [];
 		}
 
-		while( $solution = current( $solutions ) ) {
+		while ( $solution = current( $solutions ) ) {
 
 			if ( ! $solution instanceof Package ) {
 				// Save the current key, jump to the next list item, and them unset.
@@ -94,8 +101,8 @@ class ProcessedSolutions extends AbstractRepository implements PackageRepository
 				continue;
 			}
 
+			$did_exclude = false;
 			if ( $solution->has_excluded_solutions() ) {
-				$did_exclude = false;
 				foreach ( $solution->get_excluded_solutions() as $excluded_solution ) {
 					if ( is_array( $excluded_solution )
 					     && ! empty( $excluded_solution['composer_package_name'] )
@@ -106,14 +113,15 @@ class ProcessedSolutions extends AbstractRepository implements PackageRepository
 						$did_exclude = true;
 					}
 				}
-
-				if ( $did_exclude ) {
-					// Since we don't know where in the list the excluded solution were located, we start over.
-					reset( $solutions );
-				}
 			}
 
-			next( $solutions );
+			if ( $did_exclude ) {
+				// Since we don't know where in the list the excluded solutions were located, we start over.
+				// We are not dealing with humongous lists, so it's a worthy compromise.
+				reset( $solutions );
+			} else {
+				next( $solutions );
+			}
 		}
 
 		return $solutions;

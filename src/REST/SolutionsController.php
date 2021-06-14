@@ -94,19 +94,19 @@ class SolutionsController extends WP_REST_Controller {
 			]
 		);
 
-//		register_rest_route(
-//			$this->namespace,
-//			'/' . $this->rest_base . '/processed',
-//			[
-//				[
-//					'methods'             => WP_REST_Server::READABLE,
-//					'callback'            => [ $this, 'get_processed_items' ],
-//					'permission_callback' => [ $this, 'get_items_permissions_check' ],
-//					'args'                => $this->get_collection_params(),
-//				],
-//				'schema' => [ $this, 'get_public_item_schema' ],
-//			]
-//		);
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/processed',
+			[
+				[
+					'methods'             => WP_REST_Server::READABLE,
+					'callback'            => [ $this, 'get_processed_items' ],
+					'permission_callback' => [ $this, 'get_items_permissions_check' ],
+					'args'                => $this->get_collection_params(),
+				],
+				'schema' => [ $this, 'get_public_item_schema' ],
+			]
+		);
 
 		register_rest_route(
 			$this->namespace,

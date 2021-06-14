@@ -12,7 +12,6 @@ declare ( strict_types=1 );
 namespace PixelgradeLT\Retailer\Screen;
 
 use Cedaro\WP\Plugin\AbstractHookProvider;
-use PixelgradeLT\Retailer\Authentication\ApiKey\ApiKey;
 use PixelgradeLT\Retailer\Authentication\ApiKey\ApiKeyRepository;
 use PixelgradeLT\Retailer\Capabilities;
 use PixelgradeLT\Retailer\Provider\HealthCheck;
@@ -339,7 +338,7 @@ class Settings extends AbstractHookProvider {
 		<p>
 			<input type="password" size="80" name="pixelgradelt_retailer[github-oauth-token]"
 			       id="pixelgradelt_retailer-github-oauth-token" value="<?php echo esc_attr( $value ); ?>"><br/>
-			<span class="description">Github has a rate limit of 60 requests/hour on their API for requests not using an OAuth Token.<br>
+			<span class="description">Github has <strong>a rate limit of 60 requests/hour</strong> on their API for <strong>requests not using an OAuth Token.</strong><br>
 				Since most packages on Packagist.org have their source on Github, and you may be using actual Github repos as sources, <strong>you should definitely generate a token and save it here.</strong><br>
 				Learn more about <strong>the steps to take <a
 							href="https://getcomposer.org/doc/articles/authentication-for-private-packages.md#github-oauth">here</a>.</strong> <strong>Be careful about the permissions you grant on the generated token!</strong></span>
@@ -392,7 +391,7 @@ class Settings extends AbstractHookProvider {
 		<p>
 			<input type="text" size="80" name="pixelgradelt_retailer[ltrecords-api-key]"
 			       id="pixelgradelt_retailer-ltrecords-api-key" value="<?php echo esc_attr( $value ); ?>"><br/>
-			<span class="description">Provide here a valid LT Records API key for Retailer to use to access the repositories above.</span>
+			<span class="description">Provide here <strong>a valid LT Records API key</strong> for LT Retailer to use to access the repositories above.</span>
 		</p>
 		<?php
 	}

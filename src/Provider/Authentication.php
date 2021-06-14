@@ -168,7 +168,13 @@ class Authentication extends AbstractHookProvider {
 			return true;
 		}
 
+		// This isa request for the solutions composer repo.
 		if ( 0 === strpos( $request_path, '/ltsolutions' ) ) {
+			return true;
+		}
+
+		// This is a REST API request of ours.
+		if ( 0 === strpos( $request_path, '/wp-json/pixelgradelt_retailer/' ) ) {
 			return true;
 		}
 
@@ -200,8 +206,7 @@ class Authentication extends AbstractHookProvider {
 	/**
 	 * Sets and returns all the capabilities the current user has and should have.
 	 *
-	 * Appends `allcaps` with pixelgradelt_retailer_download_packages
-	 * as well as pixelgradelt_retailer_view_packages if there are no servers,
+	 * Appends `allcaps` with pixelgradelt_retailer_view_solutions if there are no servers,
 	 * meaning that authentication should be skipped.
 	 *
 	 * @since 0.1.0

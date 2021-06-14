@@ -67,8 +67,8 @@ function generate_random_string( int $length = 12 ): string {
  * Retrieve the authorization header.
  *
  * On certain systems and configurations, the Authorization header will be
- * stripped out by the server or PHP. Typically this is then used to
- * generate `PHP_AUTH_USER`/`PHP_AUTH_PASS` but not passed on. We use
+ * stripped out by the server or PHP. Typically, this is then used to
+ * generate `PHP_AUTH_USER`/`PHP_AUTH_USER` but not passed on. We use
  * `getallheaders` here to try and grab it out instead.
  *
  * From https://github.com/WP-API/OAuth1
@@ -80,9 +80,9 @@ function get_authorization_header(): ?string {
 		return stripslashes( $_SERVER['HTTP_AUTHORIZATION'] );
 	}
 
-	if ( \function_exists( 'getallheaders' ) ) {
+	if ( \function_exists( '\getallheaders' ) ) {
 		// Check for the authorization header case-insensitively.
-		foreach ( getallheaders() as $key => $value ) {
+		foreach ( \getallheaders() as $key => $value ) {
 			if ( 'authorization' === strtolower( $key ) ) {
 				return $value;
 			}

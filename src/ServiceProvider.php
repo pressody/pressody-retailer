@@ -17,6 +17,7 @@ use Pimple\Container as PimpleContainer;
 use Pimple\Psr11\ServiceLocator;
 use Pimple\ServiceIterator;
 use Pimple\ServiceProviderInterface;
+use PixelgradeLT\Retailer\Authentication\ApiKey\Server;
 use PixelgradeLT\Retailer\Transformer\ComposerPackageTransformer;
 use PixelgradeLT\Retailer\Transformer\ComposerSolutionsRepositoryTransformer;
 use PixelgradeLT\Retailer\Logging\Handler\FileLogHandler;
