@@ -186,7 +186,7 @@ class SolutionsController extends WP_REST_Controller {
 			}
 		);
 
-		foreach ( $repository->all() as $slug => $package ) {
+		foreach ( $repository->all() as $package ) {
 			$data    = $this->prepare_item_for_response( $package, $request );
 			$items[] = $this->prepare_response_for_collection( $data );
 		}
@@ -251,11 +251,16 @@ class SolutionsController extends WP_REST_Controller {
 			}
 		);
 
+		$solutionsContext = [];
+		if ( ! empty( $request['solutionsContext'] ) && is_array( $request['solutionsContext'] ) ) {
+			$solutionsContext = $request['solutionsContext'];
+		}
+
 		// Make a processed repository out of the filtered repository.
-		$processed_repository = new ProcessedSolutions( $filtered_repository, $this->repository->get_factory(), $this->repository->get_solution_manager() );
+		$processed_repository = new ProcessedSolutions( $filtered_repository, $solutionsContext, $this->repository->get_factory(), $this->repository->get_solution_manager() );
 
 		// Prepare the processed solutions for response.
-		foreach ( $processed_repository->all() as $slug => $package ) {
+		foreach ( $processed_repository->all() as $package ) {
 			$data    = $this->prepare_item_for_response( $package, $request );
 			$items[] = $this->prepare_response_for_collection( $data );
 		}
@@ -264,7 +269,7 @@ class SolutionsController extends WP_REST_Controller {
 	}
 
 	/**
-	 * Retrieve a single package.
+	 * Retrieve a single solution.
 	 *
 	 * @since 1.0.0
 	 *
@@ -284,7 +289,7 @@ class SolutionsController extends WP_REST_Controller {
 	}
 
 	/**
-	 * Retrieve the query parameters for collections of packages.
+	 * Retrieve the query parameters for collections of solutions.
 	 *
 	 * @since 1.0.0
 	 *
@@ -293,6 +298,11 @@ class SolutionsController extends WP_REST_Controller {
 	public function get_collection_params(): array {
 		$params = [
 			'context' => $this->get_context_param( [ 'default' => 'view' ] ),
+			'solutionsContext' => [
+				'description'       => esc_html__( 'Details about the solutions to limit the response by (enforced by post IDs, post slugs, package names). These details are related to the user actions in adding to a site\'s composition (a series of solutions); things like the timestamps of when a solution was added. Each solution details should sit under the solution\'s package name key.', 'pixelgradelt_retailer' ),
+				'type'              => 'object',
+				'default'           => [],
+			],
 		];
 
 		$params['postId'] = [
