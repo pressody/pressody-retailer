@@ -459,16 +459,23 @@ class SolutionManager {
 			return [];
 		}
 
-		// We need to return the keywords slugs, not the WP_Term list.
-		$categories = array_map( function ( $term ) {
+		// We need to return the categories slugs, not the WP_Term list.
+		return array_map( function ( $term ) {
 			if ( $term instanceof \WP_Term ) {
 				$term = $term->slug;
 			}
 
 			return $term;
 		}, $categories );
+	}
 
-		return $categories;
+	public function set_post_solution_categories( int $post_ID, array $categories ): bool {
+		$result = wp_set_post_terms( $post_ID, $categories, static::CATEGORY_TAXONOMY );
+		if ( false === $result || is_wp_error( $result ) ) {
+			return false;
+		}
+
+		return true;
 	}
 
 	public function get_post_solution_keywords( int $post_ID ): array {
@@ -478,15 +485,13 @@ class SolutionManager {
 		}
 
 		// We need to return the keywords slugs, not the WP_Term list.
-		$keywords = array_map( function ( $term ) {
+		return array_map( function ( $term ) {
 			if ( $term instanceof \WP_Term ) {
 				$term = $term->slug;
 			}
 
 			return $term;
 		}, $keywords );
-
-		return $keywords;
 	}
 
 	public function set_post_solution_keywords( int $post_ID, array $keywords ): bool {
@@ -631,7 +636,7 @@ class SolutionManager {
 
 		$ltrecords_repo_url = $option['ltrecords-packages-repo-endpoint'];
 		$ltrecords_api_key  = $option['ltrecords-api-key'];
-		$ltrecords_api_pwd  = 'pixelgradelt_retailer';
+		$ltrecords_api_pwd  = 'pixelgradelt_records';
 
 		try {
 			$packages = $client->getPackages( [
@@ -675,7 +680,7 @@ class SolutionManager {
 				'require-dependencies'          => true,
 				'only-best-candidates'          => true,
 				'require'                       => [
-					// Any package version.
+					// Any solution version.
 					$solution->get_name() => '*',
 				],
 				'minimum-stability-per-package' => [
@@ -753,12 +758,12 @@ class SolutionManager {
 		 */
 		$vendor = apply_filters( 'pixelgradelt_retailer_vendor', 'pixelgradelt-retailer' );
 
-		if ( empty( $vendor) || empty( $name ) ) {
+		if ( empty( $vendor ) || empty( $name ) ) {
 			// Something is wrong. We will not include this required package.
 			$this->logger->error(
 				'Error generating the solution Composer package name for solution with name "{name}".',
 				[
-					'name'         => $name,
+					'name' => $name,
 				]
 			);
 
