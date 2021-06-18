@@ -18,6 +18,7 @@ use PixelgradeLT\Retailer\Provider\HealthCheck;
 use PixelgradeLT\Retailer\Repository\PackageRepository;
 use PixelgradeLT\Retailer\Transformer\ComposerPackageTransformer;
 
+use function PixelgradeLT\Retailer\get_setting;
 use function PixelgradeLT\Retailer\get_solutions_permalink;
 use function PixelgradeLT\Retailer\preload_rest_data;
 
@@ -407,8 +408,6 @@ class Settings extends AbstractHookProvider {
 	 * @return mixed
 	 */
 	protected function get_setting( string $key, $default = null ) {
-		$option = get_option( 'pixelgradelt_retailer' );
-
-		return $option[ $key ] ?? $default;
+		return get_setting( $key, $default );
 	}
 }

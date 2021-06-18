@@ -620,8 +620,9 @@ class SolutionManager {
 	public function dry_run_solution_require( Package $solution ) {
 		$client = $this->get_composer_client();
 
-		$option = get_option( 'pixelgradelt_retailer' );
-		if ( empty( $option['ltrecords-parts-repo-endpoint'] ) || empty( $option['ltrecords-api-key'] ) ) {
+		if ( empty( $ltrecords_repo_url = get_setting( 'ltrecords-parts-repo-endpoint' ) )
+		     || empty( $ltrecords_api_key = get_setting( 'ltrecords-api-key' ) ) ) {
+
 			$this->logger->error(
 				'Error during Composer require dry-run for solution "{package}" #{post_id}.' . PHP_EOL
 				. esc_html__( 'Missing LT Records Repo URL and/or LT Records API key in Settings > LT Retailer.', 'pixelgradelt_retailer' ),
@@ -634,9 +635,7 @@ class SolutionManager {
 			return false;
 		}
 
-		$ltrecords_repo_url = $option['ltrecords-packages-repo-endpoint'];
-		$ltrecords_api_key  = $option['ltrecords-api-key'];
-		$ltrecords_api_pwd  = 'pixelgradelt_records';
+		$ltrecords_api_pwd = 'pixelgradelt_records';
 
 		try {
 			$packages = $client->getPackages( [

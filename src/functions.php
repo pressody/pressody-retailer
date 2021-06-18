@@ -27,6 +27,22 @@ function plugin(): Plugin {
 }
 
 /**
+ * Retrieve a plugin's setting.
+ *
+ * @since 0.10.0
+ *
+ * @param string $key     Setting name.
+ * @param mixed  $default Optional. Default setting value.
+ *
+ * @return mixed
+ */
+function get_setting( string $key, $default = null ) {
+	$option = get_option( 'pixelgradelt_retailer' );
+
+	return $option[ $key ] ?? $default;
+}
+
+/**
  * Autoload mapped classes.
  *
  * @since 0.1.0

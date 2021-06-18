@@ -18,6 +18,7 @@ use Cedaro\WP\Plugin\AbstractHookProvider;
 use PixelgradeLT\Retailer\Transformer\ComposerPackageTransformer;
 use PixelgradeLT\Retailer\SolutionManager;
 use PixelgradeLT\Retailer\Repository\PackageRepository;
+use function PixelgradeLT\Retailer\get_setting;
 use function PixelgradeLT\Retailer\get_solutions_permalink;
 use function PixelgradeLT\Retailer\is_debug_mode;
 use function PixelgradeLT\Retailer\is_dev_url;
@@ -586,8 +587,9 @@ The excluded solutions only take effect in <strong>a purchase context (add to ca
 	protected function fetch_ltrecords_parts(): array {
 		$parts = [];
 
-		$option = get_option( 'pixelgradelt_retailer' );
-		if ( empty( $option['ltrecords-parts-repo-endpoint'] ) || empty( $option['ltrecords-api-key'] ) ) {
+		if ( empty( $ltrecords_parts_repo_url = get_setting( 'ltrecords-parts-repo-endpoint' ) )
+		     || empty( $ltrecords_api_key = get_setting( 'ltrecords-api-key' ) ) ) {
+
 			$this->add_user_message( 'error', sprintf(
 					'<p>%s</p>',
 					esc_html__( 'You need to provide a LT Records parts endpoint and a LT Records API key in Settings > LT Retailer.', 'pixelgradelt_retailer' )
@@ -596,9 +598,7 @@ The excluded solutions only take effect in <strong>a purchase context (add to ca
 			return $parts;
 		}
 
-		$ltrecords_parts_repo_url = $option['ltrecords-parts-repo-endpoint'];
-		$ltrecords_api_key        = $option['ltrecords-api-key'];
-		$ltrecords_api_pwd        = 'pixelgradelt_records';
+		$ltrecords_api_pwd = 'pixelgradelt_records';
 
 		$request_args = [
 				'headers'   => [

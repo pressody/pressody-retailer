@@ -138,7 +138,7 @@ class ServiceProvider implements ServiceProviderInterface {
 			);
 		};
 
-		$container['hooks.rest'] = function( $container ) {
+		$container['hooks.rest'] = function ( $container ) {
 			return new Provider\REST( $container['rest.controllers'] );
 		};
 
@@ -221,12 +221,12 @@ class ServiceProvider implements ServiceProviderInterface {
 
 		$container['repository.solutions'] = function ( $container ) {
 			return new Repository\Solutions(
-					$container['solution.factory'],
-					$container['solution.manager']
-				);
+				$container['solution.factory'],
+				$container['solution.manager']
+			);
 		};
 
-		$container['rest.controller.api_keys'] = function( $container ) {
+		$container['rest.controller.api_keys'] = function ( $container ) {
 			return new REST\ApiKeysController(
 				'pixelgradelt_retailer/v1',
 				'apikeys',
@@ -235,7 +235,16 @@ class ServiceProvider implements ServiceProviderInterface {
 			);
 		};
 
-		$container['rest.controller.solutions'] = function( $container ) {
+		$container['rest.controller.compositions'] = function ( $container ) {
+			return new REST\CompositionsController(
+				'pixelgradelt_retailer/v1',
+				'compositions',
+				$container['repository.solutions'],
+				$container['transformer.composer_package']
+			);
+		};
+
+		$container['rest.controller.solutions'] = function ( $container ) {
 			return new REST\SolutionsController(
 				'pixelgradelt_retailer/v1',
 				'solutions',
@@ -244,12 +253,13 @@ class ServiceProvider implements ServiceProviderInterface {
 			);
 		};
 
-		$container['rest.controllers'] = function( $container ) {
+		$container['rest.controllers'] = function ( $container ) {
 			return new ServiceIterator(
 				$container,
 				[
-					'api_keys' => 'rest.controller.api_keys',
-					'solutions' => 'rest.controller.solutions',
+					'api_keys'     => 'rest.controller.api_keys',
+					'compositions' => 'rest.controller.compositions',
+					'solutions'    => 'rest.controller.solutions',
 				]
 			);
 		};
