@@ -13,6 +13,7 @@ namespace PixelgradeLT\Retailer\Transformer;
 
 use PixelgradeLT\Retailer\Package;
 use PixelgradeLT\Retailer\SolutionFactory;
+use function PixelgradeLT\Retailer\get_composer_vendor;
 
 /**
  * Composer package transformer class.
@@ -55,7 +56,7 @@ class ComposerSolutionTransformer implements ComposerPackageTransformer {
 		// @link https://getcomposer.org/doc/04-schema.md#type
 		$builder->set_type( 'metapackage' );
 
-		$vendor = apply_filters( 'pixelgradelt_retailer_vendor', 'pixelgradelt-retailer' );
+		$vendor = get_composer_vendor();
 		$name   = $this->normalize_package_name( $package->get_slug() );
 		$builder->set_name( $vendor . '/' . $name );
 

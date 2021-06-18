@@ -11,6 +11,8 @@ declare ( strict_types = 1 );
 
 namespace PixelgradeLT\Retailer;
 
+use PixelgradeLT\Retailer\Exception\InvalidComposerVendor;
+
 /**
  * Retrieve the main plugin instance.
  *
@@ -119,6 +121,34 @@ function get_solutions_permalink( array $args = null ): string {
 }
 
 /**
+ * Retrieve the PixelgradeLT Retailer Composer vendor for use with our packages.
+ *
+ * @throws InvalidComposerVendor
+ * @return string
+ */
+function get_composer_vendor(): string {
+	/**
+	 * The custom vendor configured via the Settings page is hooked through @see CustomVendor::register_hooks()
+	 */
+	$vendor = apply_filters( 'pixelgradelt_retailer/vendor', 'pixelgradelt-retailer' );
+	if ( empty( $vendor ) || ! is_string( $vendor ) ) {
+		throw new InvalidComposerVendor( "The PixelgradeLT Retailer Composer vendor must be a string and it can't be empty or falsy." );
+	}
+
+	if ( strlen( $vendor ) < 10 ) {
+		throw new InvalidComposerVendor( "The PixelgradeLT Retailer Composer vendor must be at least 10 characters long. Please make sure that it is as unique as possible, in the entire Composer ecosystem." );
+	}
+
+	// This is the same partial pattern used by Composer.
+	// @see https://getcomposer.org/schema.json
+	if ( ! preg_match( '/^[a-z0-9]([_.-]?[a-z0-9]+)*$/i', $vendor ) ) {
+		throw InvalidComposerVendor::wrongFormat( $vendor );
+	}
+
+	return $vendor;
+}
+
+/**
  * Retrieve ID for the user being edited.
  *
  * @since 0.1.0
@@ -206,7 +236,7 @@ function is_rest_request() {
 	$rest_prefix         = trailingslashit( rest_get_url_prefix() );
 	$is_rest_api_request = ( false !== strpos( $_SERVER['REQUEST_URI'], $rest_prefix ) ); // phpcs:disable WordPress.Security.ValidatedSanitizedInput.MissingUnslash, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 
-	return apply_filters( 'pixelgradelt_retailer_is_rest_api_request', $is_rest_api_request );
+	return apply_filters( 'pixelgradelt_retailer/is_rest_api_request', $is_rest_api_request );
 }
 
 /**

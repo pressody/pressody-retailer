@@ -36,13 +36,14 @@ class Plugin extends BasePlugin implements Composable {
 		 * @param Plugin             $plugin    Main plugin instance.
 		 * @param ContainerInterface $container Dependency container.
 		 */
-		do_action( 'pixelgradelt_retailer_compose', $this, $container );
+		do_action( 'pixelgradelt_retailer/compose', $this, $container );
 
 		// Register hook providers.
 		$this
 			->register_hooks( $container->get( 'hooks.i18n' ) )
 			->register_hooks( $container->get( 'hooks.capabilities' ) )
 			->register_hooks( $container->get( 'hooks.rewrite_rules' ) )
+			->register_hooks( $container->get( 'hooks.custom_vendor' ) )
 			->register_hooks( $container->get( 'hooks.health_check' ) )
 			->register_hooks( $container->get( 'hooks.request_handler' ) )
 			->register_hooks( $container->get( 'hooks.rest' ) )
@@ -77,7 +78,7 @@ class Plugin extends BasePlugin implements Composable {
 		 * @param Plugin             $plugin    Main plugin instance.
 		 * @param ContainerInterface $container Dependency container.
 		 */
-		do_action( 'pixelgradelt_retailer_composed', $this, $container );
+		do_action( 'pixelgradelt_retailer/composed', $this, $container );
 	}
 
 	public function define_constants(): Plugin {

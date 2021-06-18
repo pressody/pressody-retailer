@@ -58,7 +58,7 @@ class ServiceProvider implements ServiceProviderInterface {
 
 		$container['authentication.servers'] = function ( $container ) {
 			$servers = apply_filters(
-				'pixelgradelt_retailer_authentication_servers',
+				'pixelgradelt_retailer/authentication_servers',
 				[
 					20  => 'authentication.api_key',
 					100 => 'authentication.unauthorized', // The last server to take action.
@@ -105,6 +105,10 @@ class ServiceProvider implements ServiceProviderInterface {
 
 		$container['hooks.capabilities'] = function () {
 			return new Provider\Capabilities();
+		};
+
+		$container['hooks.custom_vendor'] = function () {
+			return new Provider\CustomVendor();
 		};
 
 		$container['hooks.deactivation'] = function () {
@@ -312,7 +316,7 @@ class ServiceProvider implements ServiceProviderInterface {
 			$upload_config = \wp_upload_dir();
 			$path          = \path_join( $upload_config['basedir'], $container['storage.working_directory_name'] );
 
-			return (string) trailingslashit( apply_filters( 'pixelgradelt_retailer_working_directory', $path ) );
+			return (string) trailingslashit( apply_filters( 'pixelgradelt_retailer/working_directory', $path ) );
 		};
 
 		$container['storage.working_directory_name'] = function () {

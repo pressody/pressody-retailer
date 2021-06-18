@@ -267,7 +267,7 @@ class Settings extends AbstractHookProvider {
 			$value['ltrecords-api-key'] = trim( $value['ltrecords-api-key'] );
 		}
 
-		return (array) apply_filters( 'pixelgradelt_retailer_sanitize_settings', $value );
+		return (array) apply_filters( 'pixelgradelt_retailer/sanitize_settings', $value );
 	}
 
 	/**

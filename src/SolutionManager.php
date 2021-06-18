@@ -756,7 +756,7 @@ class SolutionManager {
 		/**
 		 * Construct the Composer-like package name (the same way @see ComposerSolutionTransformer::transform() does it).
 		 */
-		$vendor = apply_filters( 'pixelgradelt_retailer_vendor', 'pixelgradelt-retailer' );
+		$vendor = get_composer_vendor();
 
 		if ( empty( $vendor ) || empty( $name ) ) {
 			// Something is wrong. We will not include this required package.

@@ -61,7 +61,7 @@ class FileLogHandler extends LogHandler {
 		}
 
 		/** @noinspection PhpFieldAssignmentTypeMismatchInspection */
-		$this->log_size_limit = apply_filters( 'pixelgradelt_retailer_log_file_size_limit', $log_size_limit );
+		$this->log_size_limit = apply_filters( 'pixelgradelt_retailer/log_file_size_limit', $log_size_limit );
 
 		add_action( 'plugins_loaded', array( $this, 'write_cached_logs' ) );
 	}
@@ -282,7 +282,7 @@ class FileLogHandler extends LogHandler {
 			$result = true;
 		}
 
-		do_action( 'pixelgradelt_retailer_log_clear', $handle );
+		do_action( 'pixelgradelt_retailer/log_clear', $handle );
 
 		return $result;
 	}
@@ -305,7 +305,7 @@ class FileLogHandler extends LogHandler {
 				$this->close( $file ); // Close first to be certain no processes keep it alive after it is unlinked.
 				$removed = unlink( $file ); // phpcs:ignore WordPress.VIP.FileSystemWritesDisallow.file_ops_unlink
 			}
-			do_action( 'pixelgradelt_retailer_log_remove', $handle, $removed );
+			do_action( 'pixelgradelt_retailer/log_remove', $handle, $removed );
 		}
 		return $removed;
 	}

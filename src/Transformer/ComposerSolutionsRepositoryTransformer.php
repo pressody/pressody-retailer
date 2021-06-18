@@ -142,7 +142,7 @@ class ComposerSolutionsRepositoryTransformer implements PackageRepositoryTransfo
 		}
 
 		// Finally, allow others to have a say.
-		$require = apply_filters( 'pixelgradelt_retailer_composer_solution_require', $require, $package );
+		$require = apply_filters( 'pixelgradelt_retailer/composer_solution_require', $require, $package );
 
 		$excluded_solutions = [];
 		if ( $package->has_excluded_solutions() ) {

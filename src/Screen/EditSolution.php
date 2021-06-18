@@ -692,7 +692,7 @@ The excluded solutions only take effect in <strong>a purchase context (add to ca
 			return;
 		}
 
-		$messages = apply_filters( 'pixelgradelt_retailer_editsolution_show_user_messages', $this->user_messages, $post );
+		$messages = apply_filters( 'pixelgradelt_retailer/editsolution_show_user_messages', $this->user_messages, $post );
 		if ( empty( $messages ) ) {
 			return;
 		}

@@ -75,7 +75,7 @@ abstract class LogHandler implements LogHandlerInterface {
 //		}
 
 		return apply_filters(
-			'pixelgradelt_retailer_format_log_entry',
+			'pixelgradelt_retailer/format_log_entry',
 			$entry,
 			[
 				'timestamp' => $timestamp,
