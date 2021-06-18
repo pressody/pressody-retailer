@@ -107,6 +107,10 @@ class ServiceProvider implements ServiceProviderInterface {
 			return new Provider\Capabilities();
 		};
 
+		$container['hooks.compositions'] = function () {
+			return new Provider\Compositions();
+		};
+
 		$container['hooks.custom_vendor'] = function () {
 			return new Provider\CustomVendor();
 		};
