@@ -37,6 +37,15 @@ class SolutionsController extends WP_REST_Controller {
 	const SLUG_PATTERN = '[^.\/]+(?:\/[^.\/]+)?';
 
 	/**
+	 * Composer package name pattern.
+	 *
+	 * This is the same pattern present in the Composer schema: https://getcomposer.org/schema.json
+	 *
+	 * @var string
+	 */
+	const PACKAGE_NAME_PATTERN = '^[a-z0-9]([_.-]?[a-z0-9]+)*/[a-z0-9](([_.]?|-{0,2})[a-z0-9]+)*$';
+
+	/**
 	 * Solution repository.
 	 *
 	 * @var SolutionRepository
@@ -456,13 +465,13 @@ class SolutionsController extends WP_REST_Controller {
 		];
 
 		$params['packageName'] = [
-			'description'       => esc_html__( 'Limit results to solutions by one or more Composer package names (including the vendor). Use the "postSlug" parameter if you want to provide only the name, without the vendor.', 'pixelgradelt_retailer' ),
-			'type'              => 'array',
-			'items'             => [
-				'type' => 'string',
+			'description' => esc_html__( 'Limit results to solutions by one or more Composer package names (including the vendor). Use the "postSlug" parameter if you want to provide only the name, without the vendor.', 'pixelgradelt_retailer' ),
+			'type'        => 'array',
+			'items'       => [
+				'type'    => 'string',
+				'pattern' => self::PACKAGE_NAME_PATTERN,
 			],
-			'default'           => [],
-			'sanitize_callback' => 'wp_parse_slug_list',
+			'default'     => [],
 		];
 
 		$params['type'] = [
