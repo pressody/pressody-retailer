@@ -31,6 +31,8 @@ use function PixelgradeLT\Retailer\preload_rest_data;
  */
 class EditSolution extends AbstractHookProvider {
 
+	const LTRECORDS_API_PWD = 'pixelgradelt_records';
+
 	/**
 	 * Solution manager.
 	 *
@@ -598,11 +600,9 @@ The excluded solutions only take effect in <strong>a purchase context (add to ca
 			return $parts;
 		}
 
-		$ltrecords_api_pwd = 'pixelgradelt_records';
-
 		$request_args = [
 				'headers'   => [
-						'Authorization' => 'Basic ' . base64_encode( $ltrecords_api_key . ':' . $ltrecords_api_pwd ),
+						'Authorization' => 'Basic ' . base64_encode( $ltrecords_api_key . ':' . self::LTRECORDS_API_PWD ),
 				],
 				'timeout'   => 5,
 				'sslverify' => ! ( is_debug_mode() || is_dev_url( $ltrecords_parts_repo_url ) ),

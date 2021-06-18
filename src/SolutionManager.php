@@ -36,6 +36,8 @@ class SolutionManager {
 	const KEYWORD_TAXONOMY = 'ltsolution_keywords';
 	const KEYWORD_TAXONOMY_SINGULAR = 'ltsolution_keyword';
 
+	const LTRECORDS_API_PWD = 'pixelgradelt_records';
+
 	/**
 	 * External Composer repository client.
 	 *
@@ -635,8 +637,6 @@ class SolutionManager {
 			return false;
 		}
 
-		$ltrecords_api_pwd = 'pixelgradelt_records';
-
 		try {
 			$packages = $client->getPackages( [
 				'repositories'                  => [
@@ -665,7 +665,7 @@ class SolutionManager {
 							],
 							'http' => [
 								'header' => [
-									'Authorization: Basic ' . base64_encode( $ltrecords_api_key . ':' . $ltrecords_api_pwd ),
+									'Authorization: Basic ' . base64_encode( $ltrecords_api_key . ':' . self::LTRECORDS_API_PWD ),
 								],
 							],
 						],
