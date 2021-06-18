@@ -601,11 +601,11 @@ The excluded solutions only take effect in <strong>a purchase context (add to ca
 		}
 
 		$request_args = [
-				'headers'   => [
-						'Authorization' => 'Basic ' . base64_encode( $ltrecords_api_key . ':' . self::LTRECORDS_API_PWD ),
-				],
-				'timeout'   => 5,
-				'sslverify' => ! ( is_debug_mode() || is_dev_url( $ltrecords_parts_repo_url ) ),
+			'headers'   => [
+					'Authorization' => 'Basic ' . base64_encode( $ltrecords_api_key . ':' . self::LTRECORDS_API_PWD ),
+			],
+			'timeout'   => 5,
+			'sslverify' => ! ( is_debug_mode() || is_dev_url( $ltrecords_parts_repo_url ) ),
 		];
 
 		$response = wp_remote_get( $ltrecords_parts_repo_url, $request_args );
