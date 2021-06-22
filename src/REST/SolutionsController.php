@@ -657,7 +657,7 @@ class SolutionsController extends WP_REST_Controller {
 					'readonly'    => true,
 				],
 				'keywords'         => [
-					'description' => esc_html__( 'The package keywords.', 'pixelgradelt_records' ),
+					'description' => esc_html__( 'The package keywords.', 'pixelgradelt_retailer' ),
 					'type'        => 'array',
 					'items'       => [
 						'type' => 'string',
@@ -805,7 +805,7 @@ class SolutionsController extends WP_REST_Controller {
 					'readonly'    => true,
 				],
 				'editLink'         => [
-					'description' => esc_html__( 'The package post edit link.', 'pixelgradelt_records' ),
+					'description' => esc_html__( 'The package post edit link.', 'pixelgradelt_retailer' ),
 					'type'        => 'string',
 					'format'      => 'uri',
 					'context'     => [ 'view', 'edit' ],

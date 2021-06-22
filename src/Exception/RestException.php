@@ -50,7 +50,7 @@ class RestException extends \Exception implements PixelgradeltRetailerException 
 	}
 
 	/**
-	 * Create an exception for invalid composer.json LT user details.
+	 * Create an exception for invalid LT user details.
 	 *
 	 * @since 0.10.0
 	 *
@@ -66,14 +66,14 @@ class RestException extends \Exception implements PixelgradeltRetailerException 
 		Throwable $previous = null
 	): RestException {
 		if ( empty( $message ) ) {
-			$message = esc_html__( 'The provided composer JSON data has invalid LT user details.', 'pixelgradelt_retailer' );
+			$message = esc_html__( 'The provided data has invalid LT user details.', 'pixelgradelt_retailer' );
 		}
 
 		return new static( $message, HTTP::NOT_ACCEPTABLE, $code, $previous );
 	}
 
 	/**
-	 * Create an exception for missing composer.json LT user details.
+	 * Create an exception for missing LT user details.
 	 *
 	 * @since 0.10.0
 	 *
@@ -86,13 +86,13 @@ class RestException extends \Exception implements PixelgradeltRetailerException 
 		int $code = 0,
 		Throwable $previous = null
 	): RestException {
-		$message = esc_html__( 'The provided composer JSON data is missing some LT user details.', 'pixelgradelt_retailer' );
+		$message = esc_html__( 'The provided data is missing some LT user details.', 'pixelgradelt_retailer' );
 
 		return new static( $message, HTTP::NOT_ACCEPTABLE, $code, $previous );
 	}
 
 	/**
-	 * Create an exception for invalid composer.json LT fingerprint.
+	 * Create an exception for missing user.
 	 *
 	 * @since 0.10.0
 	 *
@@ -101,17 +101,17 @@ class RestException extends \Exception implements PixelgradeltRetailerException 
 	 *
 	 * @return RestException
 	 */
-	public static function forInvalidComposerFingerprint(
+	public static function forUserNotFound(
 		int $code = 0,
 		Throwable $previous = null
 	): RestException {
-		$message = esc_html__( 'The provided composer JSON data has an invalid LT fingerprint.', 'pixelgradelt_retailer' );
+		$message = esc_html__( 'Could not find a user with the provided ID.', 'pixelgradelt_retailer' );
 
 		return new static( $message, HTTP::NOT_ACCEPTABLE, $code, $previous );
 	}
 
 	/**
-	 * Create an exception for missing composer.json LT fingerprint.
+	 * Create an exception for missing composition.
 	 *
 	 * @since 0.10.0
 	 *
@@ -120,11 +120,11 @@ class RestException extends \Exception implements PixelgradeltRetailerException 
 	 *
 	 * @return RestException
 	 */
-	public static function forMissingComposerFingerprint(
+	public static function forCompositionNotFound(
 		int $code = 0,
 		Throwable $previous = null
 	): RestException {
-		$message = esc_html__( 'The provided composer JSON data is missing the LT fingerprint.', 'pixelgradelt_retailer' );
+		$message = esc_html__( 'Could not find a composition with the provided ID.', 'pixelgradelt_retailer' );
 
 		return new static( $message, HTTP::NOT_ACCEPTABLE, $code, $previous );
 	}

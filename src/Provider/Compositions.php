@@ -26,18 +26,17 @@ class Compositions extends AbstractHookProvider {
 	 * @since 1.0.0
 	 */
 	public function register_hooks() {
-		$this->add_filter( 'pixelgradelt_retailer/check_user_details', 'check_user_details', 10, 3 );
+		$this->add_filter( 'pixelgradelt_retailer/validate_user_details', 'validate_user_details', 10, 2 );
 		$this->add_filter( 'pixelgradelt_retailer/details_to_update_composition', 'details_to_update_composition', 10, 3 );
 	}
 
 	/**
 	 * @param bool|\WP_Error $valid        Whether the user details are valid.
 	 * @param array          $user_details The user details as decrypted from the composition details.
-	 * @param array          $composer     The full composition details.
 	 *
 	 * @return bool|\WP_Error
 	 */
-	protected function check_user_details( $valid, array $user_details, array $composer ) {
+	protected function validate_user_details( $valid, array $user_details ) {
 		// Do nothing if the user details have already been marked as invalid.
 		if ( is_wp_error( $valid ) || true !== $valid ) {
 			return $valid;
@@ -55,46 +54,46 @@ class Compositions extends AbstractHookProvider {
 			$errors->add( 'missing_or_empty', esc_html__( 'Missing or empty user ID.', 'pixelgradelt_retailer' ) );
 		}
 
-		if ( empty( $site_id = $user_details['siteid'] ) ) {
-			$errors->add( 'missing_or_empty', esc_html__( 'Missing or empty site ID.', 'pixelgradelt_retailer' ) );
+		if ( empty( $composition_id = $user_details['compositionid'] ) ) {
+			$errors->add( 'missing_or_empty', esc_html__( 'Missing or empty composition ID.', 'pixelgradelt_retailer' ) );
 		}
-		// @todo Check that the provided site ID is valid (belongs to an existing site). This should probably be checked with LT Deck.
+		// @todo Check that the provided composition ID is valid.
 
-		if ( ! empty( $user_details['orderid'] ) && function_exists( '\wc_get_order' ) && class_exists( '\WC_Order' ) ) {
-			if ( ! is_array( $user_details['orderid'] ) ) {
-				$errors->add( 'malformed', esc_html__( '"orderid" must be a list of WooCommerce order ids (integers).', 'pixelgradelt_retailer' ) );
-			} else {
-				// We will allow the check if at least one of the orders are active (not refunded, etc).
-				$has_active_orders = 0;
-				foreach ( $user_details['orderid'] as $order_id ) {
-					$order = \wc_get_order( $order_id );
-					if ( ! $order instanceof \WC_Order ) {
-						$errors->add( 'not_found', esc_html__( 'Couldn\'t find at least one of the provided order IDs.', 'pixelgradelt_retailer' ) );
-						break;
-					}
-
-					if ( ! empty( $user ) && $user->ID !== $order->get_user_id( 'edit' ) ) {
-						$errors->add( 'mismatch', esc_html__( 'At least one of the provided order IDs doesn\'t belong to the provided user ID.', 'pixelgradelt_retailer' ) );
-						break;
-					}
-
-					// We exclude on-hold orders as they are still pending payment.
-					if ( 'refunded' !== $order->get_status() && in_array( $order->get_status(), [
-							'completed',
-							'processing',
-							'refunded',
-						] ) ) {
-						$has_active_orders ++;
-					}
-
-					// @todo We should check for active or inactive subscriptions.
-				}
-
-				if ( ! $has_active_orders ) {
-					$errors->add( 'ecommerce', esc_html__( 'Couldn\'t find at least one of the provided order IDs that is active.', 'pixelgradelt_retailer' ) );
-				}
-			}
-		}
+//		if ( ! empty( $user_details['orderid'] ) && function_exists( '\wc_get_order' ) && class_exists( '\WC_Order' ) ) {
+//			if ( ! is_array( $user_details['orderid'] ) ) {
+//				$errors->add( 'malformed', esc_html__( '"orderid" must be a list of WooCommerce order ids (integers).', 'pixelgradelt_retailer' ) );
+//			} else {
+//				// We will allow the check if at least one of the orders are active (not refunded, etc).
+//				$has_active_orders = 0;
+//				foreach ( $user_details['orderid'] as $order_id ) {
+//					$order = \wc_get_order( $order_id );
+//					if ( ! $order instanceof \WC_Order ) {
+//						$errors->add( 'not_found', esc_html__( 'Couldn\'t find at least one of the provided order IDs.', 'pixelgradelt_retailer' ) );
+//						break;
+//					}
+//
+//					if ( ! empty( $user ) && $user->ID !== $order->get_user_id( 'edit' ) ) {
+//						$errors->add( 'mismatch', esc_html__( 'At least one of the provided order IDs doesn\'t belong to the provided user ID.', 'pixelgradelt_retailer' ) );
+//						break;
+//					}
+//
+//					// We exclude on-hold orders as they are still pending payment.
+//					if ( 'refunded' !== $order->get_status() && in_array( $order->get_status(), [
+//							'completed',
+//							'processing',
+//							'refunded',
+//						] ) ) {
+//						$has_active_orders ++;
+//					}
+//
+//					// @todo We should check for active or inactive subscriptions.
+//				}
+//
+//				if ( ! $has_active_orders ) {
+//					$errors->add( 'ecommerce', esc_html__( 'Couldn\'t find at least one of the provided order IDs that is active.', 'pixelgradelt_retailer' ) );
+//				}
+//			}
+//		}
 
 		if ( $errors->has_errors() ) {
 			return $errors;
@@ -108,11 +107,11 @@ class Compositions extends AbstractHookProvider {
 	 * @param array      $user_details      The received user details, already checked.
 	 * @param array      $composer          The full composition details.
 	 *
-	 * @return bool|array false if there is a reason to reject to attempt. Empty array if there is nothing to update.
+	 * @return bool|\WP_Error|array false or WP_Error if there is a reason to reject to attempt. Empty array if there is nothing to update.
 	 */
 	protected function details_to_update_composition( $details_to_update, array $user_details, array $composer ) {
 		// Do nothing if we should already reject.
-		if ( false === $details_to_update ) {
+		if ( false === $details_to_update || is_wp_error( $details_to_update ) ) {
 			return $details_to_update;
 		}
 

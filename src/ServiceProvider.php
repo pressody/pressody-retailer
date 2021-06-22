@@ -17,8 +17,7 @@ use Pimple\Container as PimpleContainer;
 use Pimple\Psr11\ServiceLocator;
 use Pimple\ServiceIterator;
 use Pimple\ServiceProviderInterface;
-use PixelgradeLT\Retailer\Authentication\ApiKey\Server;
-use PixelgradeLT\Retailer\Transformer\ComposerPackageTransformer;
+use PixelgradeLT\Retailer\Exception\PixelgradeltRetailerException;
 use PixelgradeLT\Retailer\Transformer\ComposerSolutionsRepositoryTransformer;
 use PixelgradeLT\Retailer\Logging\Handler\FileLogHandler;
 use PixelgradeLT\Retailer\Logging\Logger;
@@ -86,6 +85,19 @@ class ServiceProvider implements ServiceProviderInterface {
 
 		$container['client.composer.custom_token_auth'] = function () {
 			return new Client\CustomTokenAuthentication();
+		};
+
+		$container['crypter'] = function () {
+			$crypter = new StringCrypter();
+			// Load the encryption key from the environment.
+			try {
+				$crypter->loadEncryptionKey( $_ENV['LTRETAILER_ENCRYPTION_KEY'] );
+			} catch ( PixelgradeltRetailerException $e ) {
+				// Do nothing right now.
+				// We should handle a failed encryption setup through health checks and when attempting to encrypt or decrypt.
+			}
+
+			return $crypter;
 		};
 
 		$container['hooks.activation'] = function () {
@@ -244,7 +256,8 @@ class ServiceProvider implements ServiceProviderInterface {
 				'pixelgradelt_retailer/v1',
 				'compositions',
 				$container['repository.solutions'],
-				$container['transformer.composer_package']
+				$container['transformer.composer_package'],
+				$container['crypter']
 			);
 		};
 

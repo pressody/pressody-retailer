@@ -59,6 +59,8 @@ spl_autoload_register( __NAMESPACE__ . '\autoloader_classmap' );
 // We use immutable since we don't want to overwrite variables already set.
 $dotenv = \Dotenv\Dotenv::createImmutable(__DIR__);
 $dotenv->load();
+$dotenv->required( 'LTRETAILER_PHP_AUTH_USER' )->notEmpty();
+$dotenv->required( 'LTRETAILER_ENCRYPTION_KEY' )->notEmpty();
 
 // Load the WordPress plugin administration API.
 require_once ABSPATH . 'wp-admin/includes/plugin.php';
