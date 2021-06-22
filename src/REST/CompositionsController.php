@@ -50,6 +50,15 @@ class CompositionsController extends WP_REST_Controller {
 	const PACKAGE_NAME_PATTERN = '^[a-z0-9]([_.-]?[a-z0-9]+)*/[a-z0-9](([_.]?|-{0,2})[a-z0-9]+)*$';
 
 	/**
+	 * The key in composer.json `extra` used to store the encrypted user details.
+	 *
+	 * @since 0.10.0
+	 *
+	 * @var string
+	 */
+	const USER_DETAILS_KEY = 'lt-user';
+
+	/**
 	 * The key in composer.json `extra` used to store the composer.json fingerprint.
 	 *
 	 * @since 0.10.0
@@ -57,6 +66,17 @@ class CompositionsController extends WP_REST_Controller {
 	 * @var string
 	 */
 	const FINGERPRINT_KEY = 'lt-fingerprint';
+
+	/**
+	 * The key in composer.json `extra` used to store the composer.json LT version.
+	 *
+	 * We will use this in case we make breaking changes and wish to provide backwards compatibility.
+	 *
+	 * @since 0.10.0
+	 *
+	 * @var string
+	 */
+	const VERSION_KEY = 'lt-version';
 
 	/**
 	 * Solution repository.
@@ -188,14 +208,8 @@ class CompositionsController extends WP_REST_Controller {
 					'show_in_index'       => false,
 					'args'                => [
 						'context'  => $this->get_context_param( [ 'default' => 'edit' ] ),
-						'user'     => [
-							'description' => esc_html__( 'The encrypted user details.', 'pixelgradelt_retailer' ),
-							'type'        => 'string',
-							'context'     => [ 'view', 'edit' ],
-							'required'    => true,
-						],
 						'composer' => [
-							'description' => esc_html__( 'The current full composer.json contents.', 'pixelgradelt_retailer' ),
+							'description' => esc_html__( 'The full composer.json contents to determine if they need updating.', 'pixelgradelt_retailer' ),
 							'type'        => 'object',
 							'context'     => [ 'view', 'edit' ],
 							'required'    => true,
@@ -464,8 +478,15 @@ class CompositionsController extends WP_REST_Controller {
 		/* ==============================
 		 * Second, decrypt and validate the user details.
 		 */
+		if ( empty( $composition['extra'][ self::USER_DETAILS_KEY ] ) ) {
+			return new WP_Error(
+				'rest_missing_user_details',
+				esc_html__( 'The composition is missing the encrypted user details.', 'pixelgradelt_retailer' ),
+				[ 'status' => HTTP::NOT_ACCEPTABLE, ]
+			);
+		}
 		try {
-			$user_details = $this->decrypt_user_details( $request['user'] );
+			$user_details = $this->decrypt_user_details( $composition['extra'][ self::USER_DETAILS_KEY ] );
 		} catch ( CrypterBadFormatException | CrypterWrongKeyOrModifiedCiphertextException | RestException $e ) {
 			return new WP_Error(
 				'rest_invalid_user_details',

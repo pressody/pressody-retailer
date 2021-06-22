@@ -57,43 +57,7 @@ class Compositions extends AbstractHookProvider {
 		if ( empty( $composition_id = $user_details['compositionid'] ) ) {
 			$errors->add( 'missing_or_empty', esc_html__( 'Missing or empty composition ID.', 'pixelgradelt_retailer' ) );
 		}
-		// @todo Check that the provided composition ID is valid.
-
-//		if ( ! empty( $user_details['orderid'] ) && function_exists( '\wc_get_order' ) && class_exists( '\WC_Order' ) ) {
-//			if ( ! is_array( $user_details['orderid'] ) ) {
-//				$errors->add( 'malformed', esc_html__( '"orderid" must be a list of WooCommerce order ids (integers).', 'pixelgradelt_retailer' ) );
-//			} else {
-//				// We will allow the check if at least one of the orders are active (not refunded, etc).
-//				$has_active_orders = 0;
-//				foreach ( $user_details['orderid'] as $order_id ) {
-//					$order = \wc_get_order( $order_id );
-//					if ( ! $order instanceof \WC_Order ) {
-//						$errors->add( 'not_found', esc_html__( 'Couldn\'t find at least one of the provided order IDs.', 'pixelgradelt_retailer' ) );
-//						break;
-//					}
-//
-//					if ( ! empty( $user ) && $user->ID !== $order->get_user_id( 'edit' ) ) {
-//						$errors->add( 'mismatch', esc_html__( 'At least one of the provided order IDs doesn\'t belong to the provided user ID.', 'pixelgradelt_retailer' ) );
-//						break;
-//					}
-//
-//					// We exclude on-hold orders as they are still pending payment.
-//					if ( 'refunded' !== $order->get_status() && in_array( $order->get_status(), [
-//							'completed',
-//							'processing',
-//							'refunded',
-//						] ) ) {
-//						$has_active_orders ++;
-//					}
-//
-//					// @todo We should check for active or inactive subscriptions.
-//				}
-//
-//				if ( ! $has_active_orders ) {
-//					$errors->add( 'ecommerce', esc_html__( 'Couldn\'t find at least one of the provided order IDs that is active.', 'pixelgradelt_retailer' ) );
-//				}
-//			}
-//		}
+		// @todo Check that the composition ID is valid.
 
 		if ( $errors->has_errors() ) {
 			return $errors;
