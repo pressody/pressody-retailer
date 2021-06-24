@@ -40,24 +40,12 @@ Content-Type: application/json
 
 ###
 
-POST https://lt-retailer.local/wp-json/pixelgradelt_retailer/v1/compositions/check_user_details
-Authorization: Basic whtg94kNGV20FuOy7yTbqAi198hBMjyz pixelgradelt_retailer
-Accept: application/json
-Content-Type: application/json
-
-{
-  "user": "def502006e75d3354a75ce0ff2e3e0c2dcd9c8d6083c3c0816d94e19c0ddf65b4acdc516c83ff0f9d405c09a9e531faf49126d3c26a439ca1e66648803abd7ae4e61f6f5ac852cc76440033b1d4e15078db8e28003e9c45c8b24eadc27f9d5379b6e9e1935a2bc4d02c3a45e60366a9054cbea48cc8f4354be699a2ebb754fe158d9e9746e70ccb9a4f5"
-}
-
-###
-
 POST https://lt-retailer.local/wp-json/pixelgradelt_retailer/v1/compositions/details_to_update
 Authorization: Basic whtg94kNGV20FuOy7yTbqAi198hBMjyz pixelgradelt_retailer
 Accept: application/json
 Content-Type: application/json
 
 {
-  "user": "def5020022eeae1880bd161ba2cf48f1afc4fec03ba2396bcb0124678fe9195f2260c6431e51b0e6d1adea9f0e17b1865702b5e1d980c8c467310b44ef643bbf02b2729eba6197244adb2146ab2814b47e168a2441af7dce5253abc0e13cf4e74ca9ec731f97cbce864e3a3458cf44d832600090d3eda972b337a89188ca28551d59b0a63f",
   "composer": {
 	"name": "pixelgradelt\/my-site",
 	"type": "project",
@@ -174,6 +162,17 @@ Content-Type: application/json
 
 ###
 
+POST https://lt-retailer.local/wp-json/pixelgradelt_retailer/v1/compositions/check_user_details
+Authorization: Basic whtg94kNGV20FuOy7yTbqAi198hBMjyz pixelgradelt_retailer
+Accept: application/json
+Content-Type: application/json
+
+{
+  "user": "def502005762a1f7ab01944a6224811e40d61b97df9d0e155281b57a686c1cd9bf3dd1d7e636c69067bae573142d6b9560df6389000ba5e122bdee49947bfe09329ccb6b424c12d1e71416314661763df5d69ec3b5c7c84fad512b94c1fed6ee7df3b07a8b0b0aab80ac2ff855859286a417ffb9d927b7ce8d67b7989fc48c849b79e261f4e235201478d5613a8be7976bc301e45bdf17227d27f0133480"
+}
+
+###
+
 POST https://lt-retailer.local/wp-json/pixelgradelt_retailer/v1/compositions/encrypt_user_details
 Authorization: Basic whtg94kNGV20FuOy7yTbqAi198hBMjyz pixelgradelt_retailer
 Accept: application/json
@@ -181,9 +180,9 @@ Content-Type: application/json
 
 {
   "userid": 1,
-  "compositionid": 123,
+  "compositionid": "sdfsdwaqt",
   "extra": {
-	"aha": "yes"
+	"email": "test@test.com"
   }
 }
 

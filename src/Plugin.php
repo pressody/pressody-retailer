@@ -41,6 +41,7 @@ class Plugin extends BasePlugin implements Composable {
 		// Register hook providers.
 		$this
 			->register_hooks( $container->get( 'hooks.compositions' ) )
+			->register_hooks( $container->get( 'hooks.composition_post_type' ) )
 			->register_hooks( $container->get( 'hooks.i18n' ) )
 			->register_hooks( $container->get( 'hooks.capabilities' ) )
 			->register_hooks( $container->get( 'hooks.rewrite_rules' ) )
@@ -53,6 +54,8 @@ class Plugin extends BasePlugin implements Composable {
 			->register_hooks( $container->get( 'client.composer.custom_token_auth' ) )
 
 			->register_hooks( $container->get( 'logs.manager' ) )
+
+			->register_hooks( $container->get( 'screen.edit_composition' ) )
 
 			->register_hooks( $container->get( 'screen.edit_solution' ) )
 			->register_hooks( $container->get( 'screen.list_solutions' ) );

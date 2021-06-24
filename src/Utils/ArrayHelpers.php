@@ -337,4 +337,20 @@ class ArrayHelpers {
 
 		return array_pop( $args );
 	}
+
+	/**
+	 * Map an associative array allowing the output of an associative array.
+	 *
+	 * The callable receives each key and value and should return one-item associative arrays.
+	 *
+	 * @link https://stackoverflow.com/a/43004994
+	 *
+	 * @param callable $f
+	 * @param array    $a
+	 *
+	 * @return array
+	 */
+	public static function array_map_assoc( callable $f, array $a ): array {
+		return array_merge( ...array_map( $f, array_keys( $a ), $a ) );
+	}
 }

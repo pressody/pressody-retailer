@@ -2,12 +2,12 @@
 /**
  * Helper functions
  *
- * @package PixelgradeLT
+ * @since   0.1.0
  * @license GPL-2.0-or-later
- * @since 0.1.0
+ * @package PixelgradeLT
  */
 
-declare ( strict_types = 1 );
+declare ( strict_types=1 );
 
 namespace PixelgradeLT\Retailer;
 
@@ -23,6 +23,7 @@ use PixelgradeLT\Retailer\Exception\InvalidComposerVendor;
 function plugin(): Plugin {
 	static $instance;
 	$instance = $instance ?: new Plugin();
+
 	return $instance;
 }
 
@@ -74,7 +75,7 @@ function generate_random_string( int $length = 12 ): string {
 
 	$str = '';
 	$max = \strlen( $chars ) - 1;
-	for ( $i = 0; $i < $length; $i++ ) {
+	for ( $i = 0; $i < $length; $i ++ ) {
 		$str .= $chars[ random_int( 0, $max ) ];
 	}
 
@@ -191,7 +192,7 @@ function get_edited_user_id(): int {
  * @return bool
  */
 function is_plugin_file( string $plugin_file ): bool {
-	return '.php' === substr( $plugin_file, -4 );
+	return '.php' === substr( $plugin_file, - 4 );
 }
 
 /**
@@ -201,7 +202,7 @@ function is_plugin_file( string $plugin_file ): bool {
  */
 function display_missing_dependencies_notice() {
 	$message = sprintf(
-		/* translators: %s: documentation URL */
+	/* translators: %s: documentation URL */
 		__( 'PixelgradeLT Retailer is missing required dependencies. <a href="%s" target="_blank" rel="noopener noreferer">Learn more.</a>', 'pixelgradelt_retailer' ),
 		'https://github.com/pixelgradelt/pixelgradelt-retailer/blob/master/docs/installation.md'
 	);
@@ -293,6 +294,23 @@ function is_dev_url( string $url ): bool {
 }
 
 /**
+ * Given an URL, make sure that it points to the actual packages.json.
+ *
+ * @param string $url
+ *
+ * @return string
+ */
+function ensure_packages_json_url( string $url ): string {
+	$jsonUrlParts = parse_url( $url );
+
+	if ( isset( $jsonUrlParts['path'] ) && false !== strpos( $jsonUrlParts['path'], '.json' ) ) {
+		return $url;
+	}
+
+	return path_join( $url, 'packages.json' );
+}
+
+/**
  * Preload REST API data.
  *
  * @since 1.0.0
@@ -311,4 +329,33 @@ function preload_rest_data( array $paths ) {
 		sprintf( 'wp.apiFetch.use( wp.apiFetch.createPreloadingMiddleware( %s ) );', wp_json_encode( $preload_data ) ),
 		'after'
 	);
+}
+
+/**
+ * Helper to easily make an internal REST API call.
+ *
+ * Started with the code from @link https://wpscholar.com/blog/internal-wp-rest-api-calls/
+ *
+ * @param string $route              Request route.
+ * @param string $method             Request method. Default GET.
+ * @param array  $query_params       Request query parameters. Default empty array.
+ * @param array  $body_params        Request body parameters. Default empty array.
+ * @param array  $request_attributes Request attributes. Default empty array.
+ *
+ * @return mixed The response data on success or error details.
+ */
+function local_rest_call( string $route, string $method = 'GET', array $query_params = [], array $body_params = [], array $request_attributes = [] ) {
+	$request = new \WP_REST_Request( $method, $route, $request_attributes );
+
+	if ( $query_params ) {
+		$request->set_query_params( $query_params );
+	}
+	if ( $body_params ) {
+		$request->set_body_params( $body_params );
+	}
+
+	$response = rest_do_request( $request );
+	$server   = rest_get_server();
+
+	return $server->response_to_data( $response, false );
 }

@@ -83,6 +83,20 @@ class AdminAssets extends AbstractHookProvider {
 			$this->plugin->get_path( 'languages' )
 		);
 
+		wp_register_script(
+			'pixelgradelt_retailer-edit-composition',
+			$this->plugin->get_url( 'assets/js/edit-composition.js' ),
+			[ 'wp-components', 'wp-data', 'wp-data-controls', 'wp-element', 'wp-i18n' ],
+			'20210524',
+			true
+		);
+
+		wp_set_script_translations(
+			'pixelgradelt_retailer-edit-composition',
+			'pixelgradelt_retailer',
+			$this->plugin->get_path( 'languages' )
+		);
+
 		wp_register_style(
 			'pixelgradelt_retailer-admin',
 			$this->plugin->get_url( 'assets/css/admin.css' ),

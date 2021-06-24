@@ -87,6 +87,15 @@ class ServiceProvider implements ServiceProviderInterface {
 			return new Client\CustomTokenAuthentication();
 		};
 
+		$container['composition.manager'] = function ( $container ) {
+			return new CompositionManager(
+				$container['client.composer'],
+				$container['version.parser'],
+				$container['logs.logger'],
+				$container['hash.generator']
+			);
+		};
+
 		$container['crypter'] = function () {
 			$crypter = new StringCrypter();
 			// Load the encryption key from the environment.
@@ -98,6 +107,15 @@ class ServiceProvider implements ServiceProviderInterface {
 			}
 
 			return $crypter;
+		};
+
+		$container['hash.generator'] = function ( $container ) {
+			// We will use the randomly generated storage directory name as the salt,
+			// so that if that changes the hashes are also invalidated.
+			return new StringHashes(
+				$container['storage.working_directory_name'],
+				8
+			);
 		};
 
 		$container['hooks.activation'] = function () {
@@ -117,6 +135,12 @@ class ServiceProvider implements ServiceProviderInterface {
 
 		$container['hooks.capabilities'] = function () {
 			return new Provider\Capabilities();
+		};
+
+		$container['hooks.composition_post_type'] = function ( $container ) {
+			return new PostType\CompositionPostType(
+				$container['composition.manager']
+			);
 		};
 
 		$container['hooks.compositions'] = function () {
@@ -308,6 +332,15 @@ class ServiceProvider implements ServiceProviderInterface {
 		$container['screen.list_solutions'] = function ( $container ) {
 			return new Screen\ListSolutions(
 				$container['solution.manager']
+			);
+		};
+
+		$container['screen.edit_composition'] = function ( $container ) {
+			return new Screen\EditComposition(
+				$container['composition.manager'],
+				$container['solution.manager'],
+				$container['repository.solutions'],
+				$container['transformer.composer_package']
 			);
 		};
 

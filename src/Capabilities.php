@@ -57,6 +57,34 @@ final class Capabilities {
 	const MANAGE_SOLUTION_CATEGORIES = 'pixelgradelt_retailer_manage_package_categories';
 
 	/**
+	 * Primitive capability for viewing compositions.
+	 *
+	 * @var string
+	 */
+	const VIEW_COMPOSITIONS = 'pixelgradelt_retailer_view_compositions';
+
+	/**
+	 * Meta capability for viewing a specific composition.
+	 *
+	 * @var string
+	 */
+	const VIEW_COMPOSITION = 'pixelgradelt_retailer_view_composition';
+
+	/**
+	 * Primitive capability for editing compositions.
+	 *
+	 * @var string
+	 */
+	const EDIT_COMPOSITIONS = 'pixelgradelt_retailer_edit_compositions';
+
+	/**
+	 * Meta capability for editing a specific composition.
+	 *
+	 * @var string
+	 */
+	const EDIT_COMPOSITION = 'pixelgradelt_retailer_view_composition';
+
+	/**
 	 * Register roles and capabilities.
 	 *
 	 * @since 0.1.0
@@ -68,6 +96,8 @@ final class Capabilities {
 		$wp_roles->add_cap( 'administrator', self::MANAGE_OPTIONS );
 		$wp_roles->add_cap( 'administrator', self::MANAGE_SOLUTION_TYPES );
 		$wp_roles->add_cap( 'administrator', self::MANAGE_SOLUTION_CATEGORIES );
+		$wp_roles->add_cap( 'administrator', self::VIEW_COMPOSITIONS );
+		$wp_roles->add_cap( 'administrator', self::EDIT_COMPOSITIONS );
 
 		// Create a special role for users intended to be used by clients.
 		$wp_roles->add_role( 'pixelgradelt_retailer_client', 'LT Retailer Client', [

@@ -1,7 +1,7 @@
 import { html, i18n } from '../utils/index.js';
 import Releases from './releases.js';
 import PackageAuthors from './package-authors.js';
-import SolutionRequiredPackages from './solution-required-solutions.js';
+import SolutionRequiredPackages from './solution-required-packages.js';
 import PackageKeywords from './package-keywords.js';
 
 const { __ } = i18n;

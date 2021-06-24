@@ -44,6 +44,12 @@ class Capabilities extends AbstractHookProvider {
 			case Caps::VIEW_SOLUTION:
 				$caps = [ Caps::VIEW_SOLUTIONS ];
 				break;
+			case Caps::VIEW_COMPOSITION:
+				$caps = [ Caps::VIEW_COMPOSITIONS ];
+				break;
+			case Caps::EDIT_COMPOSITION:
+				$caps = [ Caps::EDIT_COMPOSITIONS ];
+				break;
 		}
 
 		return $caps;

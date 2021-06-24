@@ -13,6 +13,7 @@ namespace PixelgradeLT\Retailer\REST;
 
 use PixelgradeLT\Retailer\Capabilities;
 use PixelgradeLT\Retailer\Package;
+use PixelgradeLT\Retailer\Repository\PackageRepository;
 use PixelgradeLT\Retailer\Repository\ProcessedSolutions;
 use PixelgradeLT\Retailer\Repository\SolutionRepository;
 use PixelgradeLT\Retailer\SolutionType\SolutionTypes;
@@ -167,29 +168,8 @@ class SolutionsController extends WP_REST_Controller {
 	public function get_items( $request ) {
 		$items = [];
 
-		$repository = $this->repository->with_filter(
-			function ( $package ) use ( $request ) {
-				if ( ! empty( $request['type'] ) && ! in_array( $package->get_type(), $request['type'], true ) ) {
-					return false;
-				}
-
-				if ( ! empty( $request['postId'] ) && $request['postId'] !== [ 0 ] && ! in_array( $package->get_managed_post_id(), $request['postId'] ) ) {
-					return false;
-				}
-
-				if ( ! empty( $request['postSlug'] ) && ! in_array( $package->get_slug(), $request['postSlug'] ) ) {
-					return false;
-				}
-
-				if ( ! empty( $request['packageName'] ) && ! in_array( $package->get_composer_package_name(), $request['packageName'] ) ) {
-					return false;
-				}
-
-				return true;
-			}
-		);
-
-		foreach ( $repository->all() as $package ) {
+		$filtered_repository = $this->get_filtered_repository( $request );
+		foreach ( $filtered_repository->all() as $package ) {
 			$data    = $this->prepare_item_for_response( $package, $request );
 			$items[] = $this->prepare_response_for_collection( $data );
 		}
@@ -208,30 +188,10 @@ class SolutionsController extends WP_REST_Controller {
 	 *
 	 * @return WP_Error|WP_REST_Response
 	 */
-	public function get_processed_items( $request ) {
+	public function get_processed_items( WP_REST_Request $request ) {
 		$items = [];
 
-		$filtered_repository = $this->repository->with_filter(
-			function ( $package ) use ( $request ) {
-				if ( ! empty( $request['type'] ) && ! in_array( $package->get_type(), $request['type'], true ) ) {
-					return false;
-				}
-
-				if ( ! empty( $request['postId'] ) && ! in_array( $package->get_managed_post_id(), $request['postId'] ) ) {
-					return false;
-				}
-
-				if ( ! empty( $request['postSlug'] ) && ! in_array( $package->get_slug(), $request['postSlug'] ) ) {
-					return false;
-				}
-
-				if ( ! empty( $request['packageName'] ) && ! in_array( $package->get_composer_package_name(), $request['packageName'] ) ) {
-					return false;
-				}
-
-				return true;
-			}
-		);
+		$filtered_repository = $this->get_filtered_repository( $request );
 
 		$solutionsContext = [];
 		if ( ! empty( $request['solutionsContext'] ) && is_array( $request['solutionsContext'] ) ) {
@@ -251,9 +211,9 @@ class SolutionsController extends WP_REST_Controller {
 	}
 
 	/**
-	 * Retrieve a collection of parts required by the collection of solutions.
+	 * Retrieve a collection of parts required by a collection of solutions.
 	 *
-	 * The solutions collection is processed before determining the collection of parts that it requires.
+	 * Please note that the specified solutions collection is processed before determining the collection of parts that it requires.
 	 *
 	 * @since 1.0.0
 	 *
@@ -261,31 +221,11 @@ class SolutionsController extends WP_REST_Controller {
 	 *
 	 * @return WP_Error|WP_REST_Response
 	 */
-	public function get_items_parts( $request ) {
+	public function get_items_parts( WP_REST_Request $request ) {
 		/**
 		 * First, get the flattened, processed collection of solutions.
 		 */
-		$filtered_repository = $this->repository->with_filter(
-			function ( $package ) use ( $request ) {
-				if ( ! empty( $request['type'] ) && ! in_array( $package->get_type(), $request['type'], true ) ) {
-					return false;
-				}
-
-				if ( ! empty( $request['postId'] ) && ! in_array( $package->get_managed_post_id(), $request['postId'] ) ) {
-					return false;
-				}
-
-				if ( ! empty( $request['postSlug'] ) && ! in_array( $package->get_slug(), $request['postSlug'] ) ) {
-					return false;
-				}
-
-				if ( ! empty( $request['packageName'] ) && ! in_array( $package->get_composer_package_name(), $request['packageName'] ) ) {
-					return false;
-				}
-
-				return true;
-			}
-		);
+		$filtered_repository = $this->get_filtered_repository( $request );
 
 		$solutionsContext = [];
 		if ( ! empty( $request['solutionsContext'] ) && is_array( $request['solutionsContext'] ) ) {
@@ -328,7 +268,42 @@ class SolutionsController extends WP_REST_Controller {
 	}
 
 	/**
+	 * Return a standard, request filtered repository of the main repository.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param WP_REST_Request $request
+	 *
+	 * @return PackageRepository
+	 */
+	protected function get_filtered_repository( WP_REST_Request $request ): PackageRepository {
+		return $this->repository->with_filter(
+			function ( $package ) use ( $request ) {
+				if ( ! empty( $request['type'] ) && ! in_array( $package->get_type(), $request['type'], true ) ) {
+					return false;
+				}
+
+				if ( ! empty( $request['postId'] ) && $request['postId'] !== [ 0 ] && ! in_array( $package->get_managed_post_id(), $request['postId'] ) ) {
+					return false;
+				}
+
+				if ( ! empty( $request['postSlug'] ) && ! in_array( $package->get_slug(), $request['postSlug'] ) ) {
+					return false;
+				}
+
+				if ( ! empty( $request['packageName'] ) && ! in_array( $package->get_composer_package_name(), $request['packageName'] ) ) {
+					return false;
+				}
+
+				return true;
+			}
+		);
+	}
+
+	/**
 	 * Prepare solutions' parts for response.
+	 *
+	 * @since 1.0.0
 	 *
 	 * @param array           $items_parts Parts list.
 	 * @param WP_REST_Request $request     WP request instance.
@@ -535,6 +510,8 @@ class SolutionsController extends WP_REST_Controller {
 	/**
 	 * Prepare package required packages for response.
 	 *
+	 * @since 1.0.0
+	 *
 	 * @param Package         $package Package instance.
 	 * @param WP_REST_Request $request WP request instance.
 	 *
@@ -571,6 +548,8 @@ class SolutionsController extends WP_REST_Controller {
 
 	/**
 	 * Prepare package replaced packages for response.
+	 *
+	 * @since 1.0.0
 	 *
 	 * @param Package         $package Package instance.
 	 * @param WP_REST_Request $request WP request instance.
@@ -822,7 +801,7 @@ class SolutionsController extends WP_REST_Controller {
 	 *
 	 * @return array
 	 */
-	public function get_part_schema() {
+	public function get_part_schema(): array {
 		return [
 			'$schema'    => 'http://json-schema.org/draft-04/schema#',
 			'title'      => 'part',
@@ -875,7 +854,7 @@ class SolutionsController extends WP_REST_Controller {
 	 *
 	 * @return array Public part schema data.
 	 */
-	public function get_public_part_schema() {
+	public function get_public_part_schema(): array {
 
 		$schema = $this->get_part_schema();
 

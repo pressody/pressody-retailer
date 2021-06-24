@@ -269,7 +269,7 @@ class SolutionManager {
 	 *
 	 * @return int[] The solution post IDs list.
 	 */
-	public function get_solution_ids_by( array $args ): array {
+	public function get_solution_ids_by( array $args = [] ): array {
 		$query_args = [
 			'post_type'        => static::POST_TYPE,
 			'fields'           => 'ids',
@@ -408,22 +408,22 @@ class SolutionManager {
 	}
 
 	/**
-	 * Identify a package post ID based on certain details about it and return all configured data about it.
+	 * Identify a solution post ID based on certain details about it and return all configured data about it.
 	 *
-	 * @param array $args Array of package details to look for.
+	 * @param array $args Array of solution details to look for.
 	 *
-	 * @return array The found package data.
+	 * @return array The found solution data.
 	 */
 	public function get_solution_data_by( array $args ): array {
-		$found_package_id = $this->get_solution_ids_by( $args );
-		if ( empty( $found_package_id ) ) {
+		$found_solution_id = $this->get_solution_ids_by( $args );
+		if ( empty( $found_solution_id ) ) {
 			return [];
 		}
 
-		// Make sure we only tackle the first package found.
-		$found_package_id = reset( $found_package_id );
+		// Make sure we only tackle the first solution found.
+		$found_solution_id = reset( $found_solution_id );
 
-		return $this->get_solution_id_data( $found_package_id );
+		return $this->get_solution_id_data( $found_solution_id );
 	}
 
 	public function get_post_solution_name( int $post_ID ): string {
@@ -622,7 +622,7 @@ class SolutionManager {
 	public function dry_run_solution_require( Package $solution ) {
 		$client = $this->get_composer_client();
 
-		if ( empty( $ltrecords_repo_url = get_setting( 'ltrecords-parts-repo-endpoint' ) )
+		if ( empty( $ltrecords_repo_url = ensure_packages_json_url( get_setting( 'ltrecords-packages-repo-endpoint' ) ) )
 		     || empty( $ltrecords_api_key = get_setting( 'ltrecords-api-key' ) ) ) {
 
 			$this->logger->error(

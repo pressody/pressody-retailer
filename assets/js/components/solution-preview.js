@@ -1,29 +1,30 @@
-import { components, html, i18n } from '../utils/index.js';
-import SolutionTable from './solution-table.js';
+import { components, html, i18n } from '../utils/index.js'
+import SolutionTable from './solution-table.js'
 
-const { Placeholder } = components;
-const { __ } = i18n;
+const {Placeholder} = components
+const {__} = i18n
 
-function SolutionPlaceholder( props ) {
+function SolutionPlaceholder (props) {
 	return html`
-		<${ Placeholder }
-			label=${ __( 'No solution details', 'pixelgradelt_retailer' ) }
-			instructions=${ __( 'Probably you need to do some configuring first. Go on.. don\'t be shy..', 'pixelgradelt_retailer' ) }
-		>
-		</${ Placeholder }>
-	`;
+	  <${Placeholder}
+			  label=${__('No solution details', 'pixelgradelt_retailer')}
+			  instructions=${__('Probably you need to do some configuring first. Go on.. don\'t be shy..', 'pixelgradelt_retailer')}
+	  >
+	  </${Placeholder}>
+	`
 }
 
-function SolutionPreview(props ) {
-	if ( ! props.solutions.length ) {
+function SolutionPreview (props) {
+	if (!props.solutions.length) {
 		return html`
-			<${ SolutionPlaceholder } />
-		`;
+		<${SolutionPlaceholder}/>
+		`
 	}
 
-	return props.solutions.map( ( item, index ) =>
-		html`<${ SolutionTable } key=${ item.name } ...${ item } />`
-	);
+	return props.solutions.map((item, index) =>
+		html`
+		<${SolutionTable} key=${item.name} ...${item}/>`
+	)
 }
 
-export default SolutionPreview;
+export default SolutionPreview

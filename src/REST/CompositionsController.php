@@ -154,13 +154,13 @@ class CompositionsController extends WP_REST_Controller {
 						],
 						'compositionid' => [
 							'description' => esc_html__( 'The composition ID.', 'pixelgradelt_retailer' ),
-							'type'        => 'integer',
+							'type'        => 'string',
 							'context'     => [ 'view', 'edit' ],
 							'required'    => true,
 						],
 						'extra'         => [
 							'type'        => 'object',
-							'description' => esc_html__( 'Extra details to encrypt besides the core details.', 'pixelgradelt_retailer' ),
+							'description' => esc_html__( 'Extra user details to encrypt besides the core details.', 'pixelgradelt_retailer' ),
 							'default'     => [],
 							'context'     => [ 'view', 'edit' ],
 						],

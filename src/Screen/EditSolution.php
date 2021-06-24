@@ -18,6 +18,7 @@ use Cedaro\WP\Plugin\AbstractHookProvider;
 use PixelgradeLT\Retailer\Transformer\ComposerPackageTransformer;
 use PixelgradeLT\Retailer\SolutionManager;
 use PixelgradeLT\Retailer\Repository\PackageRepository;
+use function PixelgradeLT\Retailer\ensure_packages_json_url;
 use function PixelgradeLT\Retailer\get_setting;
 use function PixelgradeLT\Retailer\get_solutions_permalink;
 use function PixelgradeLT\Retailer\is_debug_mode;
@@ -589,7 +590,7 @@ The excluded solutions only take effect in <strong>a purchase context (add to ca
 	protected function fetch_ltrecords_parts(): array {
 		$parts = [];
 
-		if ( empty( $ltrecords_parts_repo_url = get_setting( 'ltrecords-parts-repo-endpoint' ) )
+		if ( empty( $ltrecords_parts_repo_url = ensure_packages_json_url( get_setting( 'ltrecords-parts-repo-endpoint' ) ) )
 		     || empty( $ltrecords_api_key = get_setting( 'ltrecords-api-key' ) ) ) {
 
 			$this->add_user_message( 'error', sprintf(
