@@ -1,15 +1,14 @@
 import { components, html, i18n } from '../utils/index.js'
-import PackageAuthors from './package-authors.js'
 import SolutionRequiredPackages from './solution-required-packages.js'
 
-const {Placeholder} = components
+const {Button, Placeholder} = components
 const {__} = i18n
 
 function CompositionPartsPlaceholder (props) {
 	return html`
 	  <${Placeholder}
 			  label=${__('No parts', 'pixelgradelt_retailer')}
-			  instructions=${__('Add some solutions to this composition if you want it to do something.', 'pixelgradelt_retailer')}
+			  instructions=${__('You need to do some more configuring.', 'pixelgradelt_retailer')}
 	  >
 	  </${Placeholder}>
 	`
@@ -31,42 +30,41 @@ function CompositionParts (props) {
 
 function CompositionPart (props) {
 	const {
-		authors,
-		composer,
-		description,
 		name,
-		homepage,
-		categories,
-		keywords,
-		releases,
-		requiredPackages,
-		excludedPackages,
-		slug,
-		type,
-		visibility,
-		editLink,
+		version,
+		requiredBy,
 	} = props
+
+	const requiredByList = requiredBy.map( ( solution, index ) => {
+
+		let className = 'button pixelgradelt_retailer-required-by-solution';
+
+		return html`
+			<${ Button }
+				key=${ name+solution.name }
+				className=${ className }
+				href=${ '#' }
+				target="_blank"
+				rel="noopener noreferer"
+			>
+				${ solution.name } (ver. req. ${ solution.requiredVersion })
+			</${ Button }>
+			${ ' ' }
+		`;
+	} );
 
 	return html`
 	  <table className="pixelgradelt_retailer-package widefat">
 		  <thead>
 		  <tr>
-			  <th colSpan="2">${composer.name}
-				  ${'public' !== visibility ? '(' + visibility[0].toUpperCase() + visibility.slice(1) + ')' : ''} <a
-						  className="edit-package" href=${editLink}>Edit solution</a></th>
+			  <th colSpan="2"><strong>${name} : ${version}</strong></th>
 		  </tr>
 		  </thead>
 		  <tbody>
 		  <tr>
-			  <th>${__('Authors', 'pixelgradelt_retailer')}</th>
-			  <td className="package-authors__list">
-				  <${PackageAuthors} authors=${authors}/>
-			  </td>
-		  </tr>
-		  <tr>
-			  <th>${__('Required Parts', 'pixelgradelt_retailer')}</th>
-			  <td className="pixelgradelt_retailer-required-packages">
-				  <${SolutionRequiredPackages} requiredPackages=${requiredPackages}/>
+			  <th>${__('Required By Solutions', 'pixelgradelt_retailer')}</th>
+			  <td className="pixelgradelt_retailer-required-by-solutions">
+				  ${requiredByList}
 			  </td>
 		  </tr>
 		  </tbody>

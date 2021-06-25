@@ -428,7 +428,7 @@ class CompositionManager {
 	}
 
 	public function get_post_composition_composer_require( int $post_ID, string $pseudo_id_delimiter = ' #', string $container_id = '' ): array {
-		// We don't currently allow defining a per-solution Composer require list.
+		// We don't currently allow defining a per-composition Composer require list.
 		return [];
 	}
 

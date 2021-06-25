@@ -193,6 +193,7 @@ class EditComposition extends AbstractHookProvider {
 			'_pixelgradeltRetailerEditCompositionData',
 			[
 				'editedPostId'     => get_the_ID(),
+				'editedHashId'     => $composition_data['hashid'],
 				'encryptedUser'    => $encrypted_user,
 				'solutionIds'      => array_map( function ( $solution ) {
 					return $solution->get_managed_post_id();

@@ -1,6 +1,6 @@
 import { data, dataControls } from '../utils/index.js';
 
-const { dispatch, registerStore, select } = data;
+const { dispatch, createReduxStore, register, select } = data;
 const { apiFetch, controls } = dataControls;
 
 const STORE_KEY = 'pixelgradelt_retailer/solutions';
@@ -48,7 +48,7 @@ function* getSolutions() {
 	dispatch( STORE_KEY ).setSolutions( solutions.sort( compareByName ) );
 }
 
-const store = {
+const store = createReduxStore( STORE_KEY, {
 	reducer( state = DEFAULT_STATE, action ) {
 		switch ( action.type ) {
 			case 'SET_SOLUTIONS' :
@@ -82,6 +82,5 @@ const store = {
 		getSolutions,
 	},
 	controls,
-};
-
-registerStore( STORE_KEY, store );
+} );
+register( store );

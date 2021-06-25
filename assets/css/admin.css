@@ -28,6 +28,7 @@
 	color: #fff;
 	line-height: 1.2;
 	padding: 10px;
+	overflow: scroll;
 }
 
 .pixelgradelt_retailer-composer-snippet code {
@@ -134,7 +135,8 @@
 }
 
 .pixelgradelt_retailer-release.button,
-.pixelgradelt_retailer-required-package.button {
+.pixelgradelt_retailer-required-package.button,
+.pixelgradelt_retailer-required-by-solution.button {
 	height: 24px;
 	margin-bottom: 3px;
 	margin-top: 3px;

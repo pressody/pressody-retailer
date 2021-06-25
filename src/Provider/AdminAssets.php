@@ -119,6 +119,7 @@ class AdminAssets extends AbstractHookProvider {
 			'pixelgradelt_retailer-access',
 			'pixelgradelt_retailer-repository',
 			'pixelgradelt_retailer-edit-solution',
+			'pixelgradelt_retailer-edit-composition',
 		];
 
 		if ( in_array( $handle, $modules, true ) ) {

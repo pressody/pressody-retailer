@@ -51,18 +51,12 @@ function CompositionSolution (props) {
 	  <table className="pixelgradelt_retailer-package widefat">
 		  <thead>
 		  <tr>
-			  <th colSpan="2">${composer.name}
+					<th colSpan="2"><strong>${composer.name}</strong>
 				  ${'public' !== visibility ? '(' + visibility[0].toUpperCase() + visibility.slice(1) + ')' : ''} <a
 						  className="edit-package" href=${editLink}>Edit solution</a></th>
 		  </tr>
 		  </thead>
 		  <tbody>
-		  <tr>
-			  <th>${__('Authors', 'pixelgradelt_retailer')}</th>
-			  <td className="package-authors__list">
-				  <${PackageAuthors} authors=${authors}/>
-			  </td>
-		  </tr>
 		  <tr>
 			  <th>${__('Required Packages', 'pixelgradelt_retailer')}</th>
 			  <td className="pixelgradelt_retailer-required-packages">

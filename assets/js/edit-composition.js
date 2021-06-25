@@ -8,6 +8,7 @@ const {Fragment, render} = element
 // noinspection JSUnresolvedVariable,JSHint
 const {
 	editedPostId,
+	editedHashId,
 	encryptedUser,
 	solutionIds,
 	solutionContexts
@@ -16,6 +17,7 @@ const {
 function App (props) {
 	const {
 		postId,
+		hashId,
 		encryptedUser,
 		solutionIds,
 		solutionContexts
@@ -23,12 +25,14 @@ function App (props) {
 
 	const {
 		setPostId,
+		setHashId,
 		setEncryptedUser,
 		setSolutionIds,
 		setSolutionContexts
 	} = useDispatch('pixelgradelt_retailer/composition')
 
 	setPostId(postId)
+	setHashId(hashId)
 	setEncryptedUser(encryptedUser)
 	setSolutionIds(solutionIds)
 	setSolutionContexts(solutionContexts)
@@ -48,10 +52,12 @@ function App (props) {
 	return html`
 	  <${Fragment}>
 		  <${CompositionState}
+				  key="composition-state"
 				  solutions=${solutions}
 				  parts=${parts}
 				  composerJson=${composerJson}
 				  postId=${postId}
+				  hashId=${hashId}
 				  encryptedUser=${encryptedUser}
 		  />
 	  </${Fragment}>
@@ -61,6 +67,7 @@ function App (props) {
 render(
 	html`
 	  <${App} postId=${editedPostId}
+	          hashId=${editedHashId}
 	          encryptedUser=${encryptedUser}
 	          solutionIds=${solutionIds}
 	          solutionContexts=${solutionContexts}/>`,
