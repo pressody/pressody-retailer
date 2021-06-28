@@ -27,6 +27,8 @@ declare ( strict_types=1 );
 
 namespace PixelgradeLT\Retailer;
 
+use Env\Env;
+
 // Exit if accessed directly.
 if ( ! \defined( 'ABSPATH' ) ) {
 	exit;
@@ -61,6 +63,8 @@ $dotenv = \Dotenv\Dotenv::createImmutable(__DIR__);
 $dotenv->load();
 $dotenv->required( 'LTRETAILER_PHP_AUTH_USER' )->notEmpty();
 $dotenv->required( 'LTRETAILER_ENCRYPTION_KEY' )->notEmpty();
+// Read environment variables from the $_ENV array also.
+Env::$options |= Env::USE_ENV_ARRAY;
 
 // Load the WordPress plugin administration API.
 require_once ABSPATH . 'wp-admin/includes/plugin.php';

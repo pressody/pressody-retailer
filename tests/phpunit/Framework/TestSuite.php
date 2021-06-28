@@ -11,6 +11,7 @@ declare ( strict_types=1 );
 
 namespace PixelgradeLT\Retailer\Tests\Framework;
 
+use Env\Env;
 use Exception;
 use PHPUnit\Framework\TestSuite as PHPUnitTestSuite;
 
@@ -121,11 +122,11 @@ class TestSuite extends PHPUnitTestSuite {
 	 * @return string Absolute path to the tests.
 	 */
 	protected function findSuite(): string {
-		$directories   = isset( $_ENV['WP_TESTS_DIR'] ) ? [ $_ENV['WP_TESTS_DIR'] ] : [];
+		$directories   = Env::get( 'WP_TESTS_DIR' ) !== null ? [ Env::get( 'WP_TESTS_DIR' ) ] : [];
 		$directories[] = realpath( 'vendor/wordpress/wordpress/tests/phpunit' );
 
-		if ( isset( $_ENV['WP_DEVELOP_DIR'] ) ) {
-			$directories[] = $_ENV['WP_DEVELOP_DIR'] . 'tests/phpunit';
+		if ( Env::get( 'WP_DEVELOP_DIR' ) !== null ) {
+			$directories[] = Env::get( 'WP_DEVELOP_DIR' ) . 'tests/phpunit';
 		}
 
 		$directories[] = '/tmp/wordpress-tests-lib';

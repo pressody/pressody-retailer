@@ -13,6 +13,7 @@ namespace PixelgradeLT\Retailer;
 
 use Cedaro\WP\Plugin\Provider\I18n;
 use Composer\Semver\VersionParser;
+use Env\Env;
 use Pimple\Container as PimpleContainer;
 use Pimple\Psr11\ServiceLocator;
 use Pimple\ServiceIterator;
@@ -100,7 +101,7 @@ class ServiceProvider implements ServiceProviderInterface {
 			$crypter = new StringCrypter();
 			// Load the encryption key from the environment.
 			try {
-				$crypter->loadEncryptionKey( $_ENV['LTRETAILER_ENCRYPTION_KEY'] );
+				$crypter->loadEncryptionKey( Env::get('LTRETAILER_ENCRYPTION_KEY') );
 			} catch ( PixelgradeltRetailerException $e ) {
 				// Do nothing right now.
 				// We should handle a failed encryption setup through health checks and when attempting to encrypt or decrypt.

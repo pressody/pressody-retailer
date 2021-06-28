@@ -11,6 +11,7 @@ declare ( strict_types=1 );
 
 namespace PixelgradeLT\Retailer;
 
+use Env\Env;
 use PixelgradeLT\Retailer\Authentication\ApiKey\Server;
 use PixelgradeLT\Retailer\Client\ComposerClient;
 use PixelgradeLT\Retailer\Utils\ArrayHelpers;
@@ -480,8 +481,8 @@ class CompositionManager {
 								'verify_peer' => ! is_debug_mode(),
 							],
 							'http' => [
-								'header' => ! empty( $_ENV['LTRETAILER_PHP_AUTH_USER'] ) ? [
-									'Authorization: Basic ' . base64_encode( $_ENV['LTRETAILER_PHP_AUTH_USER'] . ':' . Server::AUTH_PWD ),
+								'header' => ! empty( Env::get( 'LTRETAILER_PHP_AUTH_USER' ) ) ? [
+									'Authorization: Basic ' . base64_encode( Env::get('LTRETAILER_PHP_AUTH_USER') . ':' . Server::AUTH_PWD ),
 								] : [],
 							],
 						],
