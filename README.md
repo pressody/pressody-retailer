@@ -15,7 +15,7 @@ LT Solutions are **Composer metapackages** that are focused on fulfilling all th
 
 LT Solutions can require other LT Solutions, but **their main focus is on exposing LT Parts** (managed via the [PixelgradeLT Records](https://github.com/pixelgradelt/pixelgradelt-records) plugin) in a meaningful, understandable, relatable way to the end-users. While LT Parts should be focused on grouping functionality in ways that are easy to manage by us, **LT Solutions should strive to be easily managed and understood by end-users.**
 
-To allow for flexibility, LT Solutions can exclude other LT Solutions from being part of the same composition.
+To allow for flexibility, LT Solutions can exclude other LT Solutions from being part of the same composition. **The purchasing experience should reflect** the constraints between various products tied to LT Solutions.
 
 ### LT Compositions
 
