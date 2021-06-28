@@ -38,7 +38,7 @@ $suite->addFilter( 'muplugins_loaded', function() {
 	require dirname( __DIR__, 2 ) . '/pixelgradelt-retailer.php';
 } );
 
-$suite->addFilter( 'pixelgradelt_retailer_compose', function( $plugin, $container ) {
+$suite->addFilter( 'pixelgradelt_retailer/compose', function( $plugin, $container ) {
 	$container['logger'] = new NullLogger();
 	$container['storage.working_directory'] = \PixelgradeLT\Retailer\TESTS_DIR . '/Fixture/wp-content/uploads/pixelgradelt-retailer/';
 }, 10, 2 );
