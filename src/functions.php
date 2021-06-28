@@ -264,7 +264,7 @@ function is_rest_request() {
  * @return bool
  */
 function is_running_unit_tests(): bool {
-	return \defined( 'PIXELGRADELT_RETAILER_RUNNING_UNIT_TESTS' ) && true === PIXELGRADELT_RETAILER_RUNNING_UNIT_TESTS;
+	return \defined( 'PixelgradeLT\Retailer\RUNNING_UNIT_TESTS' ) && true === RUNNING_UNIT_TESTS;
 }
 
 /**

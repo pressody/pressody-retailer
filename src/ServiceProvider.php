@@ -370,8 +370,8 @@ class ServiceProvider implements ServiceProviderInterface {
 		};
 
 		$container['storage.working_directory'] = function ( $container ) {
-			if ( \defined( 'PIXELGRADELT_RETAILER_WORKING_DIRECTORY' ) ) {
-				return PIXELGRADELT_RETAILER_WORKING_DIRECTORY;
+			if ( \defined( 'PixelgradeLT\Retailer\WORKING_DIRECTORY' ) ) {
+				return \PixelgradeLT\Retailer\WORKING_DIRECTORY;
 			}
 
 			$upload_config = \wp_upload_dir();
