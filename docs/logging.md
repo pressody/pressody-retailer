@@ -4,7 +4,7 @@ PixelgradeLT Retailer implements a [PSR-3 Logger Interface](https://www.php-fig.
 
 Messages are logged in daily logs in the `wp-content/uploads/pixelgradelt-retailer-logs/` directory when `WP_DEBUG` is enabled.
 
-The file-based logs are rotated if they exceed 5 Mb (by default; use the `pixelgradelt_retailer_log_file_size_limit` filter to change this), and also automatically cleaned if older than 30 days (by default; use the `pixelgradelt_retailer_logger_days_to_retain_logs` filter to change this).
+The file-based logs are rotated if they exceed 5 Mb (by default; use the `pixelgradelt_retailer/log_file_size_limit` filter to change this), and also automatically cleaned if older than 30 days (by default; use the `pixelgradelt_retailer/logger_days_to_retain_logs` filter to change this).
 
 ## Changing the Log Level
 
@@ -12,7 +12,7 @@ To log more or less information, the log level can be adjusted in the DI contain
 
 ```php
 <?php
-add_action( 'pixelgradelt_retailer_compose', function( $plugin, $container ) {
+add_action( 'pixelgradelt_retailer/compose', function( $plugin, $container ) {
 	$container['logger.level'] = 'debug';
 }, 10, 2 );
 ```
@@ -32,7 +32,7 @@ use Monolog\Processor\PsrLogMessageProcessor;
 /**
  * Register the logger before PixelgradeLT Retailer is composed.
  */
-add_action( 'pixelgradelt_retailer_compose', function( $plugin, $container ) {
+add_action( 'pixelgradelt_retailer/compose', function( $plugin, $container ) {
 	$container['logger'] = function() {
 		$logger = new Logger( 'pixelgradelt-retailer' );
 		$logger->pushHandler( new ErrorLogHandler( ErrorLogHandler::OPERATING_SYSTEM, LOGGER::WARNING ) );

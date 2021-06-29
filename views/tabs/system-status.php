@@ -22,7 +22,7 @@ $allowed_tags = [
 ?>
 <div class="pixelgradelt_retailer-card">
 	<p>
-		<?php echo wp_kses( __( 'These are a series of system checks to reassure or warn you of <strong>how fit is the webserver for running PixelgradeLT Records.</strong>', 'pixelgradelt_retailer' ), $allowed_tags ); ?>
+		<?php echo wp_kses( __( 'These are a series of system checks to reassure or warn you of <strong>how fit is the webserver for running PixelgradeLT Retailer.</strong>', 'pixelgradelt_retailer' ), $allowed_tags ); ?>
 	</p>
 </div>
 
