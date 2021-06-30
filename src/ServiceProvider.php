@@ -92,6 +92,7 @@ class ServiceProvider implements ServiceProviderInterface {
 			return new CompositionManager(
 				$container['client.composer'],
 				$container['version.parser'],
+				$container['repository.solutions'],
 				$container['logs.logger'],
 				$container['hash.generator']
 			);
@@ -144,8 +145,12 @@ class ServiceProvider implements ServiceProviderInterface {
 			);
 		};
 
-		$container['hooks.compositions'] = function () {
-			return new Provider\Compositions();
+		$container['hooks.compositions'] = function ( $container ) {
+			return new Provider\Compositions(
+				$container['composition.manager'],
+				$container['solution.manager'],
+				$container['logs.logger']
+			);
 		};
 
 		$container['hooks.custom_vendor'] = function () {
@@ -340,7 +345,6 @@ class ServiceProvider implements ServiceProviderInterface {
 			return new Screen\EditComposition(
 				$container['composition.manager'],
 				$container['solution.manager'],
-				$container['repository.solutions'],
 				$container['transformer.composer_package']
 			);
 		};

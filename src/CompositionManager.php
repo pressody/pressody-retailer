@@ -14,6 +14,7 @@ namespace PixelgradeLT\Retailer;
 use Env\Env;
 use PixelgradeLT\Retailer\Authentication\ApiKey\Server;
 use PixelgradeLT\Retailer\Client\ComposerClient;
+use PixelgradeLT\Retailer\Repository\PackageRepository;
 use PixelgradeLT\Retailer\Utils\ArrayHelpers;
 use Psr\Log\LoggerInterface;
 
@@ -35,6 +36,12 @@ class CompositionManager {
 	const LTRECORDS_API_PWD = 'pixelgradelt_records';
 
 	/**
+	 * Used to create the pseudo IDs saved as values for a composition's solutions.
+	 * Don't change this without upgrading the data in the DB!
+	 */
+	const PSEUDO_ID_DELIMITER = ' #';
+
+	/**
 	 * External Composer repository client.
 	 *
 	 * @var ComposerClient
@@ -47,6 +54,13 @@ class CompositionManager {
 	 * @var ComposerVersionParser
 	 */
 	protected ComposerVersionParser $composer_version_parser;
+
+	/**
+	 * Solutions repository.
+	 *
+	 * @var PackageRepository
+	 */
+	protected PackageRepository $solutions;
 
 	/**
 	 * Logger.
@@ -69,18 +83,21 @@ class CompositionManager {
 	 *
 	 * @param ComposerClient        $composer_client
 	 * @param ComposerVersionParser $composer_version_parser
-	 * @param LoggerInterface       $logger Logger.
+	 * @param PackageRepository     $solutions Solutions repository.
+	 * @param LoggerInterface       $logger    Logger.
 	 * @param HasherInterface       $hasher
 	 */
 	public function __construct(
 		ComposerClient $composer_client,
 		ComposerVersionParser $composer_version_parser,
+		PackageRepository $solutions,
 		LoggerInterface $logger,
 		HasherInterface $hasher
 	) {
 
 		$this->composer_client         = $composer_client;
 		$this->composer_version_parser = $composer_version_parser;
+		$this->solutions               = $solutions;
 		$this->logger                  = $logger;
 		$this->hasher                  = $hasher;
 	}
@@ -232,6 +249,18 @@ class CompositionManager {
 			$query_args['post_status'] = $args['post_status'];
 		}
 
+		if ( ! empty( $args['hashid'] ) ) {
+			if ( is_string( $args['hashid'] ) ) {
+				$args['hashid'] = [ $args['hashid'] ];
+			}
+
+			$query_args['meta_query'][] = [
+				'key'     => '_composition_hashid',
+				'value'   => $args['hashid'],
+				'compare' => 'IN',
+			];
+		}
+
 		$query       = new \WP_Query( $query_args );
 		$package_ids = $query->get_posts();
 
@@ -246,13 +275,17 @@ class CompositionManager {
 	 * Gather all the data about a composition ID.
 	 *
 	 * @param int    $post_ID The composition post ID.
-	 * @param string $pseudo_id_delimiter
 	 * @param bool   $include_context
+	 * @param string $pseudo_id_delimiter
 	 *
 	 * @return array The composition data we have available.
 	 */
-	public function get_composition_id_data( int $post_ID, string $pseudo_id_delimiter = ' #', bool $include_context = false ): array {
+	public function get_composition_id_data( int $post_ID, bool $include_context = false, string $pseudo_id_delimiter = '' ): array {
 		$data = [];
+
+		if ( empty( $pseudo_id_delimiter ) ) {
+			$pseudo_id_delimiter = self::PSEUDO_ID_DELIMITER;
+		}
 
 		// First, some checking.
 		if ( ! $this->check_post_id( $post_ID ) ) {
@@ -267,7 +300,7 @@ class CompositionManager {
 
 		$data['user'] = $this->get_post_composition_user_details( $post_ID );
 
-		$data['required_solutions'] = $this->get_post_composition_required_solutions( $post_ID, $pseudo_id_delimiter, $include_context );
+		$data['required_solutions'] = $this->get_post_composition_required_solutions( $post_ID, $include_context, $pseudo_id_delimiter );
 		$data['composer_require']   = $this->get_post_composition_composer_require( $post_ID );
 
 		return $data;
@@ -293,13 +326,31 @@ class CompositionManager {
 	}
 
 	/**
-	 * Identify a composition post ID based on certain details about it and return all configured data about it.
+	 * Get a composition post ID based on certain details about it.
 	 *
 	 * @param array $args Array of package details to look for.
 	 *
+	 * @return integer The found post ID.
+	 */
+	public function get_composition_post_id_by( array $args ): int {
+		$found_package_ids = $this->get_composition_ids_by( $args );
+		if ( empty( $found_package_ids ) ) {
+			return 0;
+		}
+
+		// Make sure we only tackle the first package found.
+		return reset( $found_package_ids );
+	}
+
+	/**
+	 * Identify a composition post ID based on certain details about it and return all configured data about it.
+	 *
+	 * @param array $args Array of package details to look for.
+	 * @param bool  $include_context
+	 *
 	 * @return array The found package data.
 	 */
-	public function get_composition_data_by( array $args ): array {
+	public function get_composition_data_by( array $args, bool $include_context = false  ): array {
 		$found_package_id = $this->get_composition_ids_by( $args );
 		if ( empty( $found_package_id ) ) {
 			return [];
@@ -308,7 +359,7 @@ class CompositionManager {
 		// Make sure we only tackle the first package found.
 		$found_package_id = reset( $found_package_id );
 
-		return $this->get_composition_id_data( $found_package_id );
+		return $this->get_composition_id_data( $found_package_id, $include_context );
 	}
 
 	public function get_post_composition_name( int $post_ID ): string {
@@ -383,16 +434,42 @@ class CompositionManager {
 	}
 
 	/**
+	 * @param array $composition_data The Composition data as returned by @see self::get_composition_id_data().
+	 *
+	 * @return string
+	 */
+	public function get_post_composition_encrypted_user_details( array $composition_data ): string {
+		$encrypted = local_rest_call( '/pixelgradelt_retailer/v1/compositions/encrypt_user_details', 'POST', [], [
+			'userid'        => $composition_data['user']['id'],
+			'compositionid' => $composition_data['hashid'],
+			'extra'         => [
+				'email'    => $composition_data['user']['email'],
+				'username' => $composition_data['user']['username'],
+			],
+		] );
+		if ( ! is_string( $encrypted ) ) {
+			// This means there was an error. Maybe the user details failed validation, etc.
+			$encrypted = '';
+		}
+
+		return $encrypted;
+	}
+
+	/**
 	 * @param int    $post_ID             The Composition post ID.
-	 * @param string $pseudo_id_delimiter The delimiter used to construct each required solution's value.
 	 * @param bool   $include_context     Whether to include context data about each required solution (things like orders, timestamps, etc).
+	 * @param string $pseudo_id_delimiter The delimiter used to construct each required solution's value.
 	 *
 	 * @return array
 	 */
-	public function get_post_composition_required_solutions( int $post_ID, string $pseudo_id_delimiter = ' #', bool $include_context = false ): array {
+	public function get_post_composition_required_solutions( int $post_ID, bool $include_context = false, string $pseudo_id_delimiter = '' ): array {
 		$required_solutions = carbon_get_post_meta( $post_ID, 'composition_required_solutions' );
 		if ( empty( $required_solutions ) || ! is_array( $required_solutions ) ) {
 			return [];
+		}
+
+		if ( empty( $pseudo_id_delimiter ) ) {
+			$pseudo_id_delimiter = self::PSEUDO_ID_DELIMITER;
 		}
 
 		// Make sure only the fields we are interested in are left.
@@ -426,6 +503,61 @@ class CompositionManager {
 
 	public function set_post_composition_required_solutions( int $post_ID, array $required_solutions, string $container_id = '' ) {
 		carbon_set_post_meta( $post_ID, 'solution_required_solutions', $required_solutions, $container_id );
+	}
+
+	/**
+	 * @param array $required_solutions The Composition's required solutions data.
+	 *
+	 * @return Package[]
+	 */
+	public function get_post_composition_required_solutions_packages( array $required_solutions ): array {
+		$solutions = [];
+		foreach ( $required_solutions as $required_solution ) {
+			$package = $this->solutions->first_where( [
+				'managed_post_id' => $required_solution['managed_post_id'],
+			] );
+			if ( empty( $package ) ) {
+				continue;
+			}
+
+			$solutions[] = $package;
+		}
+
+		return $solutions;
+	}
+
+	/**
+	 * @param array $required_solutions The Composition's required solutions data.
+	 *
+	 * @return integer[]
+	 */
+	public function get_post_composition_required_solutions_ids( array $required_solutions ): array {
+		$solutions = $this->get_post_composition_required_solutions_packages( $required_solutions );
+
+		return array_map( function ( $solution ) {
+			return $solution->get_managed_post_id();
+		}, $solutions );
+	}
+
+	/**
+	 * @param array $required_solutions The Composition's required solutions data.
+	 *
+	 * @return Package[]
+	 */
+	public function get_post_composition_required_solutions_context( array $required_solutions ): array {
+		$solutionsContext = [];
+		foreach ( $required_solutions as $required_solution ) {
+			$package = $this->solutions->first_where( [
+				'managed_post_id' => $required_solution['managed_post_id'],
+			] );
+			if ( empty( $package ) ) {
+				continue;
+			}
+
+			$solutionsContext[ $package->get_composer_package_name() ] = $required_solution['context'];
+		}
+
+		return $solutionsContext;
 	}
 
 	public function get_post_composition_composer_require( int $post_ID, string $pseudo_id_delimiter = ' #', string $container_id = '' ): array {
@@ -482,7 +614,7 @@ class CompositionManager {
 							],
 							'http' => [
 								'header' => ! empty( Env::get( 'LTRETAILER_PHP_AUTH_USER' ) ) ? [
-									'Authorization: Basic ' . base64_encode( Env::get('LTRETAILER_PHP_AUTH_USER') . ':' . Server::AUTH_PWD ),
+									'Authorization: Basic ' . base64_encode( Env::get( 'LTRETAILER_PHP_AUTH_USER' ) . ':' . Server::AUTH_PWD ),
 								] : [],
 							],
 						],

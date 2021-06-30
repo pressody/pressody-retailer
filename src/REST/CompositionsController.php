@@ -536,7 +536,7 @@ class CompositionsController extends WP_REST_Controller {
 		 */
 		$details_to_update = apply_filters( 'pixelgradelt_retailer/details_to_update_composition', [], $user_details, $composition );
 		if ( is_wp_error( $details_to_update ) ) {
-			$message = esc_html__( 'Your attempt to determine details to update the composition with was rejected.. Here is what happened: ', 'pixelgradelt_retailer' ) . PHP_EOL;
+			$message = esc_html__( 'Your attempt to determine details to update the composition with was rejected. Here is what happened: ', 'pixelgradelt_retailer' ) . PHP_EOL;
 			$message .= implode( ' ; ' . PHP_EOL, $details_to_update->get_error_messages() );
 
 			return new WP_Error(
@@ -634,13 +634,20 @@ class CompositionsController extends WP_REST_Controller {
 		$objectsKeys = [
 			'require',
 			'require-dev',
-			'config',
+			'conflict',
 			'extra',
+			'provide',
+			'replace',
+			'suggest',
+			'config',
+			'autoload',
+			'autoload-dev',
 			'scripts',
+			'scripts-descriptions',
 			'support',
 		];
 		foreach ( $objectsKeys as $key ) {
-			if ( empty( $compositionObject->$key ) ) {
+			if ( isset( $compositionObject->$key ) && empty( $compositionObject->$key ) ) {
 				$compositionObject->$key = new \stdClass();
 			}
 		}

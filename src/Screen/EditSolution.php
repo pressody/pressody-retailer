@@ -67,13 +67,6 @@ class EditSolution extends AbstractHookProvider {
 	];
 
 	/**
-	 * Local cache of LT Records parts.
-	 *
-	 * @var array|null
-	 */
-	protected ?array $ltrecords_parts = null;
-
-	/**
 	 * Constructor.
 	 *
 	 * @since 0.1.0
@@ -542,94 +535,18 @@ The excluded solutions only take effect in <strong>a purchase context (add to ca
 	 * @return array
 	 */
 	protected function get_ltrecords_parts( bool $skip_cache = false ): array {
-		// First, try to get the parts from the instance property.
-		if ( ! is_null( $this->ltrecords_parts ) && ! $skip_cache ) {
-			return $this->ltrecords_parts;
-		}
+		$parts = $this->solution_manager->get_ltrecords_parts( $skip_cache );
+		if ( is_wp_error( $parts ) ) {
+			$this->add_user_message( 'error', sprintf(
+					'<p>%s</p>',
+					$parts->get_error_message()
+			) );
 
-		$parts = [];
-
-		// Second, use the cache.
-		if ( ! $skip_cache ) {
-			$parts   = get_option( '_pixelgradelt_retailer_ltrecords_parts' );
-			$timeout = get_option( '_pixelgradelt_retailer_ltrecords_parts_timeout' );
-			// If the cache isn't expired, use it.
-			if ( $timeout > time() ) {
-				$this->ltrecords_parts = $parts;
-
-				return $this->ltrecords_parts;
-			}
-		}
-
-		// Third, we need to fetch from the remote endpoint.
-		$remote_parts = $this->fetch_ltrecords_parts();
-		// If we have received remote parts, use them.
-		// Otherwise, we will keep the already cached data (if we haven't been instructed to skip the cache).
-		if ( ! empty( $remote_parts ) ) {
-			$parts = $remote_parts;
-			// Cache the results in an option with an expiration timestamp.
-			// Like a transient but without the automatic delete logic since we want to keep existing data if we are not able to fetch.
-			update_option( '_pixelgradelt_retailer_ltrecords_parts', $parts, true );
-			update_option( '_pixelgradelt_retailer_ltrecords_parts_timeout', time() + MINUTE_IN_SECONDS * 15, true );
+			return [];
 		}
 
 		if ( empty( $parts ) ) {
 			$parts = [];
-		}
-
-		$this->ltrecords_parts = $parts;
-
-		return $this->ltrecords_parts;
-	}
-
-	/**
-	 * Fetch the parts list (only package-names) from the repo setup in the LT Retailer settings.
-	 *
-	 * @return array
-	 */
-	protected function fetch_ltrecords_parts(): array {
-		$parts = [];
-
-		if ( empty( $ltrecords_parts_repo_url = ensure_packages_json_url( get_setting( 'ltrecords-parts-repo-endpoint' ) ) )
-		     || empty( $ltrecords_api_key = get_setting( 'ltrecords-api-key' ) ) ) {
-
-			$this->add_user_message( 'error', sprintf(
-					'<p>%s</p>',
-					esc_html__( 'You need to provide a LT Records parts endpoint and a LT Records API key in Settings > LT Retailer.', 'pixelgradelt_retailer' )
-			) );
-
-			return $parts;
-		}
-
-		$request_args = [
-			'headers'   => [
-					'Authorization' => 'Basic ' . base64_encode( $ltrecords_api_key . ':' . self::LTRECORDS_API_PWD ),
-			],
-			'timeout'   => 5,
-			'sslverify' => ! ( is_debug_mode() || is_dev_url( $ltrecords_parts_repo_url ) ),
-		];
-
-		$response = wp_remote_get( $ltrecords_parts_repo_url, $request_args );
-		if ( is_wp_error( $response ) || wp_remote_retrieve_response_code( $response ) !== 200 ) {
-			$this->add_user_message( 'error', sprintf(
-					'<p>%s</p>',
-					esc_html__( 'Something went wrong and we couldn\'t get the LT Records parts from the provided endpoint.', 'pixelgradelt_retailer' )
-			) );
-
-			return $parts;
-		}
-
-		// We get back the entire repo with it's Composer-specific structure.
-		// Retain only the parts package-names list.
-		$repo = json_decode( wp_remote_retrieve_body( $response ), true );
-		if ( ! empty( $repo['packages'] ) && is_array( $repo['packages'] ) ) {
-			foreach ( $repo['packages'] as $package_name => $package_releases ) {
-				if ( empty( $package_releases ) ) {
-					continue;
-				}
-
-				$parts[] = $package_name;
-			}
 		}
 
 		return $parts;

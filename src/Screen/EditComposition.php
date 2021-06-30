@@ -18,12 +18,7 @@ use Cedaro\WP\Plugin\AbstractHookProvider;
 use PixelgradeLT\Retailer\CompositionManager;
 use PixelgradeLT\Retailer\Transformer\ComposerPackageTransformer;
 use PixelgradeLT\Retailer\SolutionManager;
-use PixelgradeLT\Retailer\Repository\PackageRepository;
-use PixelgradeLT\Retailer\Utils\ArrayHelpers;
-use function PixelgradeLT\Retailer\ensure_packages_json_url;
 use function PixelgradeLT\Retailer\get_setting;
-use function PixelgradeLT\Retailer\get_solutions_permalink;
-use function PixelgradeLT\Retailer\local_rest_call;
 use function PixelgradeLT\Retailer\preload_rest_data;
 
 /**
@@ -34,8 +29,6 @@ use function PixelgradeLT\Retailer\preload_rest_data;
 class EditComposition extends AbstractHookProvider {
 
 	const LTRECORDS_API_PWD = 'pixelgradelt_records';
-
-	const PSEUDO_ID_DELIMITER = ' #';
 
 	/**
 	 * Composition manager.
@@ -50,13 +43,6 @@ class EditComposition extends AbstractHookProvider {
 	 * @var SolutionManager
 	 */
 	protected SolutionManager $solution_manager;
-
-	/**
-	 * Solutions repository.
-	 *
-	 * @var PackageRepository
-	 */
-	protected PackageRepository $solutions;
 
 	/**
 	 * Composer package transformer.
@@ -83,19 +69,16 @@ class EditComposition extends AbstractHookProvider {
 	 *
 	 * @param CompositionManager         $composition_manager  Compositions manager.
 	 * @param SolutionManager            $solution_manager     Solutions manager.
-	 * @param PackageRepository          $solutions            Solutions repository.
 	 * @param ComposerPackageTransformer $composer_transformer Solution transformer.
 	 */
 	public function __construct(
 		CompositionManager $composition_manager,
 		SolutionManager $solution_manager,
-		PackageRepository $solutions,
 		ComposerPackageTransformer $composer_transformer
 	) {
 
 		$this->composition_manager  = $composition_manager;
 		$this->solution_manager     = $solution_manager;
-		$this->solutions            = $solutions;
 		$this->composer_transformer = $composer_transformer;
 	}
 
@@ -122,8 +105,6 @@ class EditComposition extends AbstractHookProvider {
 		$this->add_action( 'carbon_fields_post_meta_container_saved', 'fill_hashid', 10, 2 );
 		$this->add_action( 'carbon_fields_post_meta_container_saved', 'check_required', 20, 2 );
 
-		// We get early so we can show error messages.
-		//		$this->add_action( 'plugins_loaded', 'get_ltrecords_parts', 20 );
 		// Show edit post screen error messages.
 		$this->add_action( 'edit_form_top', 'check_composition_post', 5 );
 		$this->add_action( 'edit_form_top', 'show_user_messages', 50 );
@@ -158,35 +139,12 @@ class EditComposition extends AbstractHookProvider {
 		wp_enqueue_script( 'pixelgradelt_retailer-edit-composition' );
 
 		// Gather all the contained solutions in the composition.
-		$solutions        = [];
-		$solutionsContext = [];
-
-		$composition_data = $this->composition_manager->get_composition_id_data( get_the_ID(), self::PSEUDO_ID_DELIMITER, true );
-		foreach ( $composition_data['required_solutions'] as $required_solution ) {
-			$package = $this->solutions->first_where( [
-				'managed_post_id' => $required_solution['managed_post_id'],
-			] );
-			if ( empty( $package ) ) {
-				continue;
-			}
-
-			$solutions[]                                               = $package;
-			$solutionsContext[ $package->get_composer_package_name() ] = $required_solution['context'];
-		}
+		$composition_data = $this->composition_manager->get_composition_id_data( get_the_ID(), true );
+		$solutionsIds     = $this->composition_manager->get_post_composition_required_solutions_ids( $composition_data['required_solutions'] );
+		$solutionsContext = $this->composition_manager->get_post_composition_required_solutions_context( $composition_data['required_solutions'] );
 
 		// Get the encrypted form of the composition user details.
-		$encrypted_user = local_rest_call( '/pixelgradelt_retailer/v1/compositions/encrypt_user_details', 'POST', [], [
-			'userid'        => $composition_data['user']['id'],
-			'compositionid' => $composition_data['hashid'],
-			'extra'         => [
-				'email'    => $composition_data['user']['email'],
-				'username' => $composition_data['user']['username'],
-			],
-		] );
-		if ( ! is_string( $encrypted_user ) ) {
-			// This means there was an error. Maybe the user details failed validation, etc.
-			$encrypted_user = '';
-		}
+		$encrypted_user = $this->composition_manager->get_post_composition_encrypted_user_details( $composition_data );
 
 		wp_localize_script(
 			'pixelgradelt_retailer-edit-composition',
@@ -195,9 +153,7 @@ class EditComposition extends AbstractHookProvider {
 				'editedPostId'     => get_the_ID(),
 				'editedHashId'     => $composition_data['hashid'],
 				'encryptedUser'    => $encrypted_user,
-				'solutionIds'      => array_map( function ( $solution ) {
-					return $solution->get_managed_post_id();
-				}, $solutions ),
+				'solutionIds'      => $solutionsIds,
 				'solutionContexts' => $solutionsContext,
 				'ltrecordsCompositionsUrl' => 'https://lt-records.local/wp-json/pixelgradelt_records/v1/compositions',
 				'ltrecordsApiKey' => get_setting( 'ltrecords-api-key' ),
@@ -385,19 +341,8 @@ Since each solution is tied to a e-commerce product, each solution here is tied 
 		}
 
 		// Gather all the contained solutions in the composition.
-		$solutions                      = [];
-		$composition_required_solutions = $this->composition_manager->get_post_composition_required_solutions( $post_ID, self::PSEUDO_ID_DELIMITER );
-		foreach ( $composition_required_solutions as $composition_solution ) {
-			$package = $this->solutions->first_where( [
-				'managed_post_id' => $composition_solution['managed_post_id'],
-			] );
-			if ( empty( $package ) ) {
-				continue;
-			}
-
-			$solutions[] = $package;
-		}
-
+		$composition_required_solutions = $this->composition_manager->get_post_composition_required_solutions( $post_ID );
+		$solutions                      = $this->composition_manager->get_post_composition_required_solutions_packages( $composition_required_solutions );
 		if ( empty( $solutions ) ) {
 			update_post_meta( $post_ID, '_package_require_dry_run_result', '' );
 
@@ -444,7 +389,7 @@ Since each solution is tied to a e-commerce product, each solution here is tied 
 		$solutions_ids = $this->solution_manager->get_solution_ids_by();
 
 		foreach ( $solutions_ids as $post_id ) {
-			$solution_pseudo_id = $this->solution_manager->get_post_solution_slug( $post_id ) . self::PSEUDO_ID_DELIMITER . $post_id;
+			$solution_pseudo_id = $this->solution_manager->get_post_solution_slug( $post_id ) . $this->composition_manager::PSEUDO_ID_DELIMITER . $post_id;
 
 			$options[ $solution_pseudo_id ] = sprintf( __( '%s - #%s', 'pixelgradelt_retailer' ), $this->solution_manager->get_post_solution_name( $post_id ), $post_id );
 		}
