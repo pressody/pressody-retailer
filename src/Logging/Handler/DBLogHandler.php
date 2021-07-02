@@ -53,7 +53,7 @@ class DBLogHandler extends LogHandler {
 	}
 
 	/**
-	 * Add a log entry to chosen file.
+	 * Add a log entry.
 	 *
 	 * @param int    $timestamp Log timestamp.
 	 * @param string $level     emergency|alert|critical|error|warning|notice|info|debug.
