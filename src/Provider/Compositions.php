@@ -106,10 +106,16 @@ class Compositions extends AbstractHookProvider {
 		$composition_data = $this->composition_manager->get_composition_data_by( [ 'hashid' => $composition_hashid, ] );
 		if ( empty( $composition_data ) ) {
 			$errors->add( 'not_found', esc_html__( 'Couldn\'t find a composition with the provided composition hashid.', 'pixelgradelt_retailer' ) );
-		}
-		// Check if the user is the same user that owns the composition.
+		} // Check if the user is the same user that owns the composition.
 		else if ( ! empty( $user_id ) && $user_id !== absint( $composition_data['user']['id'] ) ) {
 			$errors->add( 'invalid', esc_html__( 'The user that owns the composition is not the same as the provided user.', 'pixelgradelt_retailer' ) );
+		}
+
+		// Check the composition status. We want to let through only ready or active compositions.
+		if ( ! empty( $composition_data ) && ! in_array( $composition_data['status'], [ 'ready', 'active', ] ) ) {
+			$errors->add( 'status',
+				sprintf( esc_html__( 'According to the composition\'s status (%1$s), the composition is not fit for use.', 'pixelgradelt_retailer' ), $composition_data['status'] )
+			);
 		}
 
 		if ( $errors->has_errors() ) {
@@ -155,7 +161,7 @@ class Compositions extends AbstractHookProvider {
 					[
 						'post_id' => $composition_data['id'],
 						'hashid'  => $composition_data['hashid'],
-						'message'   => $all_ltparts->get_error_message(),
+						'message' => $all_ltparts->get_error_message(),
 					]
 				);
 			} else {

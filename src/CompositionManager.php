@@ -42,6 +42,17 @@ class CompositionManager {
 	const PSEUDO_ID_DELIMITER = ' #';
 
 	/**
+	 * The possible composition statuses with details.
+	 *
+	 * The array keys are the status IDs.
+	 *
+	 * @since 0.12.0
+	 *
+	 * @var array
+	 */
+	public static array $STATUSES;
+
+	/**
 	 * External Composer repository client.
 	 *
 	 * @var ComposerClient
@@ -100,6 +111,33 @@ class CompositionManager {
 		$this->solutions               = $solutions;
 		$this->logger                  = $logger;
 		$this->hasher                  = $hasher;
+
+		self::$STATUSES = apply_filters( 'pixelgradelt_retailer/composition_statuses', [
+			'not_ready' => [
+				'id' => 'not_ready',
+				'label' => esc_html__( 'Not Ready', 'pixelgradelt_retailer' ),
+				'desc' => esc_html__( 'The composition is not ready for use on a site. It needs more work to be ready.', 'pixelgradelt_retailer' ),
+				'internal' => false,
+			],
+			'ready' => [
+				'id' => 'ready',
+				'label' => esc_html__( 'Ready', 'pixelgradelt_retailer' ),
+				'desc' => esc_html__( 'The composition is ready for use on a site.', 'pixelgradelt_retailer' ),
+				'internal' => false,
+			],
+			'active' => [
+				'id' => 'active',
+				'label' => esc_html__( 'Active', 'pixelgradelt_retailer' ),
+				'desc' => esc_html__( 'The composition is being used on a site.', 'pixelgradelt_retailer' ),
+				'internal' => false,
+			],
+			'retired' => [
+				'id' => 'retired',
+				'label' => esc_html__( 'Retired', 'pixelgradelt_retailer' ),
+				'desc' => esc_html__( 'The composition has been retired and is no longer available for use.', 'pixelgradelt_retailer' ),
+				'internal' => false,
+			],
+		] );
 	}
 
 	/**
@@ -293,6 +331,7 @@ class CompositionManager {
 		}
 
 		$data['id']     = $post_ID;
+		$data['status'] = get_post_meta( $post_ID, '_composition_status', true );
 		$data['hashid'] = get_post_meta( $post_ID, '_composition_hashid', true );
 
 		$data['name']     = $this->get_post_composition_name( $post_ID );

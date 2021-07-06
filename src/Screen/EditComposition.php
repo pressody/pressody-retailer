@@ -18,6 +18,7 @@ use Cedaro\WP\Plugin\AbstractHookProvider;
 use PixelgradeLT\Retailer\CompositionManager;
 use PixelgradeLT\Retailer\Transformer\ComposerPackageTransformer;
 use PixelgradeLT\Retailer\SolutionManager;
+use PixelgradeLT\Retailer\Utils\ArrayHelpers;
 use function PixelgradeLT\Retailer\get_setting;
 use function PixelgradeLT\Retailer\preload_rest_data;
 
@@ -186,14 +187,11 @@ Under normal circumstances, <strong>compositions are created and details updated
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<strong>LT Records will query LT Retailer</strong> to check and provide update instructions, based on the information below.</em>', 'pixelgradelt_retailer' ) ) ),
 
 			         Field::make( 'select', 'composition_status', __( 'Composition Status', 'pixelgradelt_retailer' ) )
-			              ->set_help_text( __( 'The composition status will determine if and when this composition is available to be used on sites.<br>
-The <code>ready</code> status denotes that all is good with the composition and it can be used on sites. The <code>active</code> status means that a <code>ready</code> composition is actively used on a site.', 'pixelgradelt_retailer' ) )
-			              ->add_options( array(
-				              'not_ready' => esc_html__( 'Not Ready', 'pixelgradelt_retailer' ),
-				              'ready'     => esc_html__( 'Ready', 'pixelgradelt_retailer' ),
-				              'active'    => esc_html__( 'Active', 'pixelgradelt_retailer' ),
-				              'inactive'  => esc_html__( 'Inactive', 'pixelgradelt_retailer' ),
-			              ) )
+			              ->set_help_text( __( 'The composition status will determine if and when this composition is available to be used on sites.' , 'pixelgradelt_retailer' ) )
+			              ->add_options( ArrayHelpers::array_map_assoc( function( $key, $status ) {
+			              	// Construct the options from the global composition statuses.
+			              	return [ $status['id'] => $status['label'] . ' (' . $status['desc'] . ')' ];
+			              }, CompositionManager::$STATUSES ) )
 			              ->set_default_value( 'not_ready' )
 			              ->set_required( true )
 			              ->set_width( 50 ),
