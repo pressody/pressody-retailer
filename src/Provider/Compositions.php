@@ -108,7 +108,7 @@ class Compositions extends AbstractHookProvider {
 			$errors->add( 'not_found', esc_html__( 'Couldn\'t find a composition with the provided composition hashid.', 'pixelgradelt_retailer' ) );
 		}
 		// Check if the user is the same user that owns the composition.
-		if ( ! empty( $user_id ) && $user_id !== absint( $composition_data['user']['id'] ) ) {
+		else if ( ! empty( $user_id ) && $user_id !== absint( $composition_data['user']['id'] ) ) {
 			$errors->add( 'invalid', esc_html__( 'The user that owns the composition is not the same as the provided user.', 'pixelgradelt_retailer' ) );
 		}
 
@@ -193,12 +193,42 @@ class Compositions extends AbstractHookProvider {
 			}
 		}
 
-		// Get the encrypted form of the composition user details.
-		// Send them without worrying if they have changed. If they are the same, no problem.
-		$details_to_update['user'] = $this->composition_manager->get_post_composition_encrypted_user_details( $composition_data );
+		// If the user details are different, add them.
+		if ( $this->should_update_user( $composition_data, $user_details ) ) {
+			// Get the encrypted form of the composition user details.
+			$details_to_update['user'] = $this->composition_manager->get_post_composition_encrypted_user_details( $composition_data );
+		}
 
 		// @todo Maybe handle other composer.json entries by passing them in the 'composer' entry of $details_to_update.
 
 		return $details_to_update;
+	}
+
+	protected function should_update_user( array $composition_data, array $old_user_details ): bool {
+		if ( $composition_data['user']['id'] != $old_user_details['userid'] ) {
+			return true;
+		}
+
+		if ( $composition_data['hashid'] != $old_user_details['compositionid'] ) {
+			return true;
+		}
+
+		if ( isset( $composition_data['user']['email'] )
+		     && ! isset( $old_user_details['extra']['email'] ) ) {
+			return true;
+		}
+		if ( $composition_data['user']['email'] != $old_user_details['extra']['email'] ) {
+			return true;
+		}
+
+		if ( isset( $composition_data['user']['username'] )
+		     && ! isset( $old_user_details['extra']['username'] ) ) {
+			return true;
+		}
+		if ( $composition_data['user']['username'] != $old_user_details['extra']['username'] ) {
+			return true;
+		}
+
+		return false;
 	}
 }

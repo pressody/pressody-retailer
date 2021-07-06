@@ -52,7 +52,7 @@ Content-Type: application/json
 	"license": "MIT",
 	"description": "A Pixelgrade LT WordPress site.",
 	"homepage": "https:\/\/local.local",
-	"time": "2021-06-18T10:46:35+00:00",
+	"time": "2021-07-06T11:01:05+00:00",
 	"authors": [
 	  {
 		"name": "Vlad Olaru",
@@ -82,14 +82,26 @@ Content-Type: application/json
 	  }
 	],
 	"require": {
+	  "ext-json": "*",
+	  "oscarotero\/env": "^2.1",
+	  "php": ">=7.1",
 	  "pixelgradelt-records\/part_another-test": "*, >=3.0.0",
+	  "pixelgradelt-records\/part_spanky": "1.0.0",
 	  "pixelgradelt-records\/part_test-test": "*, ^4.0",
-	  "pixelgradelt-records\/part_yet-another": "*"
+	  "pixelgradelt-records\/part_yet-another": "*",
+	  "roots\/bedrock-autoloader": "^1.0",
+	  "roots\/wordpress": "*",
+	  "roots\/wp-config": "1.0.0",
+	  "roots\/wp-password-bcrypt": "1.0.0",
+	  "vlucas\/phpdotenv": "^5.3"
 	},
-	"require-dev": {},
+	"require-dev": {
+	  "roave\/security-advisories": "dev-latest",
+	  "squizlabs\/php_codesniffer": "^3.5.8"
+	},
 	"config": {
-	  "optimize-autoloader": true,
-	  "preferred-install": "dist"
+	  "optimize-autoloader": false,
+	  "preferred-install": "dev"
 	},
 	"minimum-stability": "stable",
 	"prefer-stable": false,
@@ -130,6 +142,16 @@ Content-Type: application/json
 			}
 		  ]
 		},
+		"pixelgradelt-records\/part_spanky": {
+		  "name": "pixelgradelt-records\/part_spanky",
+		  "version": "1.0.0",
+		  "requiredBy": [
+			{
+			  "name": "pixelgradelt-retailer\/fourth-solution",
+			  "requiredVersion": "1.0.0"
+			}
+		  ]
+		},
 		"pixelgradelt-records\/part_test-test": {
 		  "name": "pixelgradelt-records\/part_test-test",
 		  "version": "*, ^4.0",
@@ -145,15 +167,20 @@ Content-Type: application/json
 		  ]
 		}
 	  },
-	  "lt-user": "def502008fcbc51955416f332382a99a0c6f21bbe3581542522a97a7e2794adf85bb9b573b8f0de2a2cc58958657036f0a07bd6657484bc63924222a43fe5bf6dc94696b97a6c1ea3a5d36378a78ca6a285fe21884202cad5129994e697b6a7e3ce901c61e42a42b1c6350e46099d4c0ce48624097a4e0ab92b16610fcd0112bab0c848b79e9b752d1349673585c52651d91162acadcd78f2df7d07c1e",
+	  "lt-user": "def50200db40b13b32b07252c91972a94e7722bb2a3161fe51fd4ec063fb910c18ba89016382cd56c034fefee8c61cbdd03e978ed1a8da8479ec597544bf486082ab07d3609eac9526ec93d30ad1cb0616b4e50994c68412ab46c56a822a0b5ac3adb636db247245e150637d960bff625d8af3dd82da6749c1de79e015c3ec3dd71ea8b141bbdfc81a66f4526b36291d047fb217f3cc6d6832d71f4f4515",
+	  "lt-version": "1.1.0",
+	  "something": "yet",
 	  "wordpress-install-dir": "web\/wp",
-	  "lt-fingerprint": "44e4291a4eb8be042e08da3fb6f96ce4"
+	  "lt-fingerprint": "39272ca959a46c699c52b1d062c50e1a"
 	},
 	"scripts": {
 	  "post-root-package-install": [
 		"php -r \"copy('.env.example', '.env');\""
 	  ],
 	  "test": [
+		"phpcs"
+	  ],
+	  "test2": [
 		"phpcs"
 	  ]
 	}
@@ -168,7 +195,7 @@ Accept: application/json
 Content-Type: application/json
 
 {
-  "user": "def502008b590b343fbac515087976bfdab17466b1b9ac2be8dd7f257cfd8c0edbbe67378a2fdba577d914443b1e01cf9a622ccf00c5eb5e31ee6e0f7e30df66a2498a36f2da649aaf712b25fac0cca1b61cb39eae3404784a946acccbbb5c4232daa4e4802995e17dca0446f73d022950f1dd6a691f5a295c88b7434dbbb109073643696d6192ffca05c6bd84fb2edbeb89f66f49171cead428a153d3"
+  "user": "def5020046731ba3bee3dedcee2a8799e593b9bae26e0f82918209117ca8ef2d0b6f483b516c3b25b53a8fb0138835fdef7e5a759132158aa21e05d021217217ffee8585e27e12a1df65ee33f31b6e2a5fd35119911e06838a11aa98d9b2bcd6d2adf9e4ac6df8577ddb3d20a726fa51524e7d9d98f02afc7fe36c0ad1d178b7fa4e99cede7707ff4bccd6b6412cbfcb54fd8862b44c29dc135e6605a8"
 }
 
 ###
