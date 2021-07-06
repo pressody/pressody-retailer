@@ -9,7 +9,7 @@ const {Fragment, render} = element
 const {
 	editedPostId,
 	editedHashId,
-	encryptedUser,
+	encryptedLTDetails,
 	solutionIds,
 	solutionContexts
 } = _pixelgradeltRetailerEditCompositionData
@@ -18,7 +18,7 @@ function App (props) {
 	const {
 		postId,
 		hashId,
-		encryptedUser,
+		encryptedLTDetails,
 		solutionIds,
 		solutionContexts
 	} = props
@@ -26,14 +26,14 @@ function App (props) {
 	const {
 		setPostId,
 		setHashId,
-		setEncryptedUser,
+		setEncryptedLTDetails,
 		setSolutionIds,
 		setSolutionContexts
 	} = useDispatch('pixelgradelt_retailer/composition')
 
 	setPostId(postId)
 	setHashId(hashId)
-	setEncryptedUser(encryptedUser)
+	setEncryptedLTDetails(encryptedLTDetails)
 	setSolutionIds(solutionIds)
 	setSolutionContexts(solutionContexts)
 
@@ -58,7 +58,7 @@ function App (props) {
 				  composerJson=${composerJson}
 				  postId=${postId}
 				  hashId=${hashId}
-				  encryptedUser=${encryptedUser}
+				  encryptedLTDetails=${encryptedLTDetails}
 		  />
 	  </${Fragment}>
 	`
@@ -68,7 +68,7 @@ render(
 	html`
 	  <${App} postId=${editedPostId}
 	          hashId=${editedHashId}
-	          encryptedUser=${encryptedUser}
+	          encryptedLTDetails=${encryptedLTDetails}
 	          solutionIds=${solutionIds}
 	          solutionContexts=${solutionContexts}/>`,
 	document.getElementById('pixelgradelt_retailer-composition-state')

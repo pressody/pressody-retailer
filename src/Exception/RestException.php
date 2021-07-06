@@ -2,12 +2,12 @@
 /**
  * REST exception.
  *
- * @package PixelgradeLT
+ * @since   0.10.0
  * @license GPL-2.0-or-later
- * @since 0.10.0
+ * @package PixelgradeLT
  */
 
-declare ( strict_types = 1 );
+declare ( strict_types=1 );
 
 namespace PixelgradeLT\Retailer\Exception;
 
@@ -50,7 +50,7 @@ class RestException extends \Exception implements PixelgradeltRetailerException 
 	}
 
 	/**
-	 * Create an exception for invalid LT user details.
+	 * Create an exception for invalid composition LT details.
 	 *
 	 * @since 0.10.0
 	 *
@@ -60,20 +60,20 @@ class RestException extends \Exception implements PixelgradeltRetailerException 
 	 *
 	 * @return RestException
 	 */
-	public static function forInvalidComposerUserDetails(
+	public static function forInvalidCompositionLTDetails(
 		string $message = '',
 		int $code = 0,
 		Throwable $previous = null
 	): RestException {
 		if ( empty( $message ) ) {
-			$message = esc_html__( 'The provided data has invalid LT user details.', 'pixelgradelt_retailer' );
+			$message = esc_html__( 'The provided data has invalid composition LT details.', 'pixelgradelt_retailer' );
 		}
 
 		return new static( $message, HTTP::NOT_ACCEPTABLE, $code, $previous );
 	}
 
 	/**
-	 * Create an exception for missing LT user details.
+	 * Create an exception for missing composition LT details.
 	 *
 	 * @since 0.10.0
 	 *
@@ -82,11 +82,11 @@ class RestException extends \Exception implements PixelgradeltRetailerException 
 	 *
 	 * @return RestException
 	 */
-	public static function forMissingComposerUserDetails(
+	public static function forMissingCompositionLTDetails(
 		int $code = 0,
 		Throwable $previous = null
 	): RestException {
-		$message = esc_html__( 'The provided data is missing some LT user details.', 'pixelgradelt_retailer' );
+		$message = esc_html__( 'The provided data is missing some composition LT details.', 'pixelgradelt_retailer' );
 
 		return new static( $message, HTTP::NOT_ACCEPTABLE, $code, $previous );
 	}

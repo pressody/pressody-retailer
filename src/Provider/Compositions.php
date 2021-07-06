@@ -70,18 +70,18 @@ class Compositions extends AbstractHookProvider {
 	 * @since 1.0.0
 	 */
 	public function register_hooks() {
-		$this->add_filter( 'pixelgradelt_retailer/validate_user_details', 'validate_user_details', 10, 2 );
-		$this->add_filter( 'pixelgradelt_retailer/details_to_update_composition', 'details_to_update_composition', 10, 3 );
+		$this->add_filter( 'pixelgradelt_retailer/validate_composition_ltdetails', 'validate_composition_ltdetails', 10, 2 );
+		$this->add_filter( 'pixelgradelt_retailer/instructions_to_update_composition', 'instructions_to_update_composition', 10, 3 );
 	}
 
 	/**
-	 * @param bool|\WP_Error $valid        Whether the user details are valid.
-	 * @param array          $user_details The user details as decrypted from the composition details.
+	 * @param bool|\WP_Error $valid   Whether the composition LT details are valid.
+	 * @param array          $details The composition LT details as decrypted from the composition data.
 	 *
 	 * @return bool|\WP_Error
 	 */
-	protected function validate_user_details( $valid, array $user_details ) {
-		// Do nothing if the user details have already been marked as invalid.
+	protected function validate_composition_ltdetails( $valid, array $details ) {
+		// Do nothing if the composition details have already been marked as invalid.
 		if ( is_wp_error( $valid ) || true !== $valid ) {
 			return $valid;
 		}
@@ -89,7 +89,7 @@ class Compositions extends AbstractHookProvider {
 		// Prepare an errors holder.
 		$errors = new \WP_Error();
 
-		if ( ! empty( $user_details['userid'] ) && ! empty( $user_id = absint( $user_details['userid'] ) ) ) {
+		if ( ! empty( $details['userid'] ) && ! empty( $user_id = absint( $details['userid'] ) ) ) {
 			$user = get_user_by( 'id', $user_id );
 			if ( false === $user ) {
 				$errors->add( 'not_found', esc_html__( 'Couldn\'t find a user with the provided user ID.', 'pixelgradelt_retailer' ) );
@@ -98,7 +98,7 @@ class Compositions extends AbstractHookProvider {
 			$errors->add( 'missing_or_empty', esc_html__( 'Missing or empty user ID.', 'pixelgradelt_retailer' ) );
 		}
 
-		if ( empty( $composition_hashid = $user_details['compositionid'] ) ) {
+		if ( empty( $composition_hashid = $details['compositionid'] ) ) {
 			$errors->add( 'missing_or_empty', esc_html__( 'Missing or empty composition ID.', 'pixelgradelt_retailer' ) );
 		}
 
@@ -126,20 +126,20 @@ class Compositions extends AbstractHookProvider {
 	}
 
 	/**
-	 * @param bool|array $details_to_update The new composition details.
-	 * @param array      $user_details      The received user details, already checked.
-	 * @param array      $composer          The full composition details.
+	 * @param bool|array $instructions_to_update The instructions to update the composition by.
+	 * @param array      $composition_ltdetails  The decrypted composition LT details, already checked.
+	 * @param array      $composer               The full composition data.
 	 *
 	 * @return bool|\WP_Error|array false or WP_Error if there is a reason to reject to attempt. Empty array if there is nothing to update.
 	 */
-	protected function details_to_update_composition( $details_to_update, array $user_details, array $composer ) {
+	protected function instructions_to_update_composition( $instructions_to_update, array $composition_ltdetails, array $composer ) {
 		// Do nothing if we should already reject.
-		if ( false === $details_to_update || is_wp_error( $details_to_update ) ) {
-			return $details_to_update;
+		if ( false === $instructions_to_update || is_wp_error( $instructions_to_update ) ) {
+			return $instructions_to_update;
 		}
 
 		// Get all data about the composition.
-		$composition_data = $this->composition_manager->get_composition_data_by( [ 'hashid' => $user_details['compositionid'], ], true );
+		$composition_data = $this->composition_manager->get_composition_data_by( [ 'hashid' => $composition_ltdetails['compositionid'], ], true );
 
 		// Get the solutions IDs and context.
 		$solutionsIds     = $this->composition_manager->get_post_composition_required_solutions_ids( $composition_data['required_solutions'] );
@@ -149,8 +149,8 @@ class Compositions extends AbstractHookProvider {
 		// Sure, we can easily add, but what do we do with leftover LT Parts?
 		// Current answer: remove all LT Parts before adding the current ones.
 		if ( ! empty( $composer['require'] ) ) {
-			if ( empty( $details_to_update['remove'] ) ) {
-				$details_to_update['remove'] = [];
+			if ( empty( $instructions_to_update['remove'] ) ) {
+				$instructions_to_update['remove'] = [];
 			}
 			// To keep things simple, get all the LT Parts available from LT Records and remove any that we find.
 			$all_ltparts = $this->solution_manager->get_ltrecords_parts();
@@ -167,7 +167,7 @@ class Compositions extends AbstractHookProvider {
 			} else {
 				foreach ( $all_ltparts as $ltpart_package_name ) {
 					if ( isset( $composer['require'][ $ltpart_package_name ] ) ) {
-						$details_to_update['remove'][ $ltpart_package_name ] = [
+						$instructions_to_update['remove'][ $ltpart_package_name ] = [
 							'name' => $ltpart_package_name,
 						];
 					}
@@ -177,7 +177,7 @@ class Compositions extends AbstractHookProvider {
 
 		// Get the LT parts the composition solutions require.
 		// By default we don't require any LT Part.
-		$details_to_update['require'] = [];
+		$instructions_to_update['require'] = [];
 		if ( ! empty( $solutionsIds ) ) {
 			$required_parts = local_rest_call( '/pixelgradelt_retailer/v1/solutions/parts', 'GET', [], [
 				'postId'           => $solutionsIds,
@@ -195,43 +195,43 @@ class Compositions extends AbstractHookProvider {
 					]
 				);
 			} elseif ( ! empty( $required_parts ) ) {
-				$details_to_update['require'] = $required_parts;
+				$instructions_to_update['require'] = $required_parts;
 			}
 		}
 
-		// If the user details are different, add them.
-		if ( $this->should_update_user( $composition_data, $user_details ) ) {
-			// Get the encrypted form of the composition user details.
-			$details_to_update['user'] = $this->composition_manager->get_post_composition_encrypted_user_details( $composition_data );
+		// If the LT details are different, add them.
+		if ( $this->should_update_ltdetails( $composition_data, $composition_ltdetails ) ) {
+			// Get the encrypted form of the composition's LT details.
+			$instructions_to_update['ltdetails'] = $this->composition_manager->get_post_composition_encrypted_ltdetails( $composition_data );
 		}
 
-		// @todo Maybe handle other composer.json entries by passing them in the 'composer' entry of $details_to_update.
+		// @todo Maybe handle other composer.json entries by passing them in the 'composer' entry of $instructions_to_update.
 
-		return $details_to_update;
+		return $instructions_to_update;
 	}
 
-	protected function should_update_user( array $composition_data, array $old_user_details ): bool {
-		if ( $composition_data['user']['id'] != $old_user_details['userid'] ) {
+	protected function should_update_ltdetails( array $composition_data, array $old_ltdetails ): bool {
+		if ( $composition_data['user']['id'] != $old_ltdetails['userid'] ) {
 			return true;
 		}
 
-		if ( $composition_data['hashid'] != $old_user_details['compositionid'] ) {
+		if ( $composition_data['hashid'] != $old_ltdetails['compositionid'] ) {
 			return true;
 		}
 
 		if ( isset( $composition_data['user']['email'] )
-		     && ! isset( $old_user_details['extra']['email'] ) ) {
+		     && ! isset( $old_ltdetails['extra']['user-email'] ) ) {
 			return true;
 		}
-		if ( $composition_data['user']['email'] != $old_user_details['extra']['email'] ) {
+		if ( $composition_data['user']['email'] != $old_ltdetails['extra']['user-email'] ) {
 			return true;
 		}
 
 		if ( isset( $composition_data['user']['username'] )
-		     && ! isset( $old_user_details['extra']['username'] ) ) {
+		     && ! isset( $old_ltdetails['extra']['user-username'] ) ) {
 			return true;
 		}
-		if ( $composition_data['user']['username'] != $old_user_details['extra']['username'] ) {
+		if ( $composition_data['user']['username'] != $old_ltdetails['extra']['user-username'] ) {
 			return true;
 		}
 

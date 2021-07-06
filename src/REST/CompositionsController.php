@@ -50,13 +50,13 @@ class CompositionsController extends WP_REST_Controller {
 	const PACKAGE_NAME_PATTERN = '^[a-z0-9]([_.-]?[a-z0-9]+)*/[a-z0-9](([_.]?|-{0,2})[a-z0-9]+)*$';
 
 	/**
-	 * The key in composer.json `extra` used to store the encrypted user details.
+	 * The key in composer.json `extra` used to store the encrypted composition LT details.
 	 *
 	 * @since 0.10.0
 	 *
 	 * @var string
 	 */
-	const USER_DETAILS_KEY = 'lt-user';
+	const LTDETAILS_KEY = 'lt-composition';
 
 	/**
 	 * The key in composer.json `extra` used to store the composer.json fingerprint.
@@ -137,12 +137,12 @@ class CompositionsController extends WP_REST_Controller {
 	public function register_routes() {
 		register_rest_route(
 			$this->namespace,
-			'/' . $this->rest_base . '/encrypt_user_details',
+			'/' . $this->rest_base . '/encrypt_ltdetails',
 			[
 				[
 					'methods'             => WP_REST_Server::CREATABLE,
-					'callback'            => [ $this, 'encrypt_user_details' ],
-					'permission_callback' => [ $this, 'encrypt_user_details_permissions_check' ],
+					'callback'            => [ $this, 'encrypt_ltdetails' ],
+					'permission_callback' => [ $this, 'encrypt_ltdetails_permissions_check' ],
 					'show_in_index'       => false,
 					'args'                => [
 						'context'       => $this->get_context_param( [ 'default' => 'edit' ] ),
@@ -160,7 +160,7 @@ class CompositionsController extends WP_REST_Controller {
 						],
 						'extra'         => [
 							'type'        => 'object',
-							'description' => esc_html__( 'Extra user details to encrypt besides the core details.', 'pixelgradelt_retailer' ),
+							'description' => esc_html__( 'Extra details to encrypt besides the core details.', 'pixelgradelt_retailer' ),
 							'default'     => [],
 							'context'     => [ 'view', 'edit' ],
 						],
@@ -171,22 +171,22 @@ class CompositionsController extends WP_REST_Controller {
 
 		register_rest_route(
 			$this->namespace,
-			'/' . $this->rest_base . '/check_user_details',
+			'/' . $this->rest_base . '/check_ltdetails',
 			[
 				[
 					'methods'             => WP_REST_Server::CREATABLE,
-					'callback'            => [ $this, 'check_user_details' ],
+					'callback'            => [ $this, 'check_ltdetails' ],
 					'permission_callback' => [ $this, 'check_items_details_permissions_check' ],
 					'show_in_index'       => false,
 					'args'                => [
-						'context'  => $this->get_context_param( [ 'default' => 'view' ] ),
-						'user'     => [
-							'description' => esc_html__( 'The encrypted user details to check.', 'pixelgradelt_retailer' ),
+						'context'   => $this->get_context_param( [ 'default' => 'view' ] ),
+						'ltdetails' => [
+							'description' => esc_html__( 'The encrypted LT details to check.', 'pixelgradelt_retailer' ),
 							'type'        => 'string',
 							'context'     => [ 'view', 'edit' ],
 							'required'    => true,
 						],
-						'composer' => [
+						'composer'  => [
 							'type'        => 'object',
 							'description' => esc_html__( 'composer.json project (root) properties according to the Composer 2.0 JSON schema.', 'pixelgradelt_retailer' ),
 							'default'     => [],
@@ -199,11 +199,11 @@ class CompositionsController extends WP_REST_Controller {
 
 		register_rest_route(
 			$this->namespace,
-			'/' . $this->rest_base . '/details_to_update',
+			'/' . $this->rest_base . '/instructions_to_update',
 			[
 				[
 					'methods'             => WP_REST_Server::CREATABLE,
-					'callback'            => [ $this, 'details_to_update_composition' ],
+					'callback'            => [ $this, 'instructions_to_update_composition' ],
 					'permission_callback' => [ $this, 'update_items_details_permissions_check' ],
 					'show_in_index'       => false,
 					'args'                => [
@@ -221,7 +221,7 @@ class CompositionsController extends WP_REST_Controller {
 	}
 
 	/**
-	 * Check if a given request has access to encrypt user details.
+	 * Check if a given request has access to encrypt composition LT details.
 	 *
 	 * @since 1.0.0
 	 *
@@ -229,11 +229,11 @@ class CompositionsController extends WP_REST_Controller {
 	 *
 	 * @return true|WP_Error True if the request has read access, WP_Error object otherwise.
 	 */
-	public function encrypt_user_details_permissions_check( WP_REST_Request $request ) {
+	public function encrypt_ltdetails_permissions_check( WP_REST_Request $request ) {
 		if ( ! current_user_can( Capabilities::VIEW_SOLUTIONS ) ) {
 			return new WP_Error(
 				'rest_cannot_read',
-				esc_html__( 'Sorry, you are not allowed to encrypt user details.', 'pixelgradelt_retailer' ),
+				esc_html__( 'Sorry, you are not allowed to encrypt composition LT details.', 'pixelgradelt_retailer' ),
 				[ 'status' => rest_authorization_required_code() ]
 			);
 		}
@@ -254,7 +254,7 @@ class CompositionsController extends WP_REST_Controller {
 		if ( ! current_user_can( Capabilities::VIEW_SOLUTIONS ) ) {
 			return new WP_Error(
 				'rest_cannot_read',
-				esc_html__( 'Sorry, you are not allowed to check composition details.', 'pixelgradelt_retailer' ),
+				esc_html__( 'Sorry, you are not allowed to check composition LT details.', 'pixelgradelt_retailer' ),
 				[ 'status' => rest_authorization_required_code() ]
 			);
 		}
@@ -284,7 +284,7 @@ class CompositionsController extends WP_REST_Controller {
 	}
 
 	/**
-	 * Encrypt a set of user details.
+	 * Encrypt a set of composition LT details.
 	 *
 	 * @since 0.10.0
 	 *
@@ -292,34 +292,34 @@ class CompositionsController extends WP_REST_Controller {
 	 *
 	 * @return WP_REST_Response|WP_Error Response object on success, or WP_Error object on failure.
 	 */
-	public function encrypt_user_details( WP_REST_Request $request ) {
-		// Gather the user details.
-		$user_details = [
+	public function encrypt_ltdetails( WP_REST_Request $request ) {
+		// Gather the composition's LT details.
+		$details = [
 			'userid'        => $request['userid'],
 			'compositionid' => $request['compositionid'],
 			'extra'         => $request['extra'],
 		];
 
 		/**
-		 * Filter the user details before encryption.
+		 * Filter the composition's LT details before encryption.
 		 *
 		 * @since 0.10.0
 		 *
-		 * @see   CompositionsController::encrypt_user_details()
+		 * @see   CompositionsController::encrypt_ltdetails()
 		 *
-		 * @param bool  $valid        Whether the user details are valid.
-		 * @param array $user_details The user details as decrypted from the composition details.
-		 * @param array $composition  The full composition details.
+		 * @param bool  $valid       Whether the composition LT details are valid.
+		 * @param array $details     The composition's LT details as decrypted from the composition data.
+		 * @param array $composition The full composition data.
 		 */
-		$user_details = apply_filters( 'pixelgradelt_retailer/before_encrypt_user_details', $user_details, $request );
+		$details = apply_filters( 'pixelgradelt_retailer/before_encrypt_composition_ltdetails', $details, $request );
 
 		try {
-			// Validate the received user details.
-			// In case of invalid user details, exceptions are thrown.
-			$this->validate_user_details( $user_details );
+			// Validate the received details.
+			// In case of invalid details, exceptions are thrown.
+			$this->validate_ltdetails( $details );
 		} catch ( RestException $e ) {
 			return new WP_Error(
-				'rest_invalid_user_details',
+				'rest_invalid_composition_ltdetails',
 				$e->getMessage(),
 				[ 'status' => $e->getStatusCode(), ]
 			);
@@ -327,7 +327,7 @@ class CompositionsController extends WP_REST_Controller {
 
 		// Now encrypt them.
 		try {
-			$encrypted_user_details = $this->crypter->encrypt( json_encode( $user_details ) );
+			$encrypted_details = $this->crypter->encrypt( json_encode( $details ) );
 		} catch ( CrypterEnvironmentIsBrokenException $e ) {
 			return new WP_Error(
 				'rest_unable_to_encrypt',
@@ -339,12 +339,12 @@ class CompositionsController extends WP_REST_Controller {
 			);
 		}
 
-		// Return the encrypted user details (a string).
-		return rest_ensure_response( $encrypted_user_details );
+		// Return the encrypted composition LT details (a string).
+		return rest_ensure_response( $encrypted_details );
 	}
 
 	/**
-	 * Check a set of user details.
+	 * Check a set of composition LT details.
 	 *
 	 * @since 0.10.0
 	 *
@@ -352,15 +352,15 @@ class CompositionsController extends WP_REST_Controller {
 	 *
 	 * @return WP_REST_Response|WP_Error Response object on success, or WP_Error object on failure.
 	 */
-	public function check_user_details( WP_REST_Request $request ) {
+	public function check_ltdetails( WP_REST_Request $request ) {
 		/**
-		 * Validate the encrypted user details in the composition.
+		 * Validate the encrypted LT details in the composition.
 		 */
 		try {
-			$user_details = $this->decrypt_user_details( $request['user'] );
+			$details = $this->decrypt_ltdetails( $request['ltdetails'] );
 		} catch ( CrypterBadFormatException | CrypterWrongKeyOrModifiedCiphertextException | RestException $e ) {
 			return new WP_Error(
-				'rest_invalid_user_details',
+				'rest_invalid_ltdetails',
 				$e->getMessage(),
 				[ 'status' => HTTP::NOT_ACCEPTABLE, ]
 			);
@@ -376,11 +376,11 @@ class CompositionsController extends WP_REST_Controller {
 		}
 
 		try {
-			// In case of invalid user details, exceptions are thrown.
-			$this->validate_user_details( $user_details );
+			// In case of invalid LT details, exceptions are thrown.
+			$this->validate_ltdetails( $details );
 		} catch ( RestException $e ) {
 			return new WP_Error(
-				'rest_invalid_user_details',
+				'rest_invalid_ltdetails',
 				$e->getMessage(),
 				[ 'status' => $e->getStatusCode(), ]
 			);
@@ -391,50 +391,49 @@ class CompositionsController extends WP_REST_Controller {
 	}
 
 	/**
-	 * Validate the user details.
+	 * Validate the composition's LT details.
 	 *
 	 * Allow others to do further validations.
 	 *
 	 * @since 0.10.0
 	 *
-	 * @param array $user_details
+	 * @param array $details
 	 *
 	 * @throws RestException
 	 * @return bool True on valid. Exceptions are thrown on invalid.
 	 */
-	protected function validate_user_details( array $user_details ): bool {
+	protected function validate_ltdetails( array $details ): bool {
 
-		if ( ! isset( $user_details['userid'] ) ) {
-			throw RestException::forMissingComposerUserDetails();
+		if ( ! isset( $details['userid'] ) ) {
+			throw RestException::forMissingCompositionLTDetails();
 		}
 
 		// Check that the user ID actually belongs to a user.
-		$user = get_user_by( 'id', $user_details['userid'] );
+		$user = get_user_by( 'id', $details['userid'] );
 		if ( false === $user ) {
 			throw RestException::forUserNotFound();
 		}
 
 		/**
-		 * Filter the validation of user details.
+		 * Filter the validation of the composition's LT details.
 		 *
 		 * @since 0.10.0
 		 *
-		 * @see   CompositionsController::validate_user_details()
+		 * @see   CompositionsController::validate_ltdetails()
 		 *
-		 * Return true if the user details are valid, or a WP_Error in case we should reject them.
+		 * Return true if the composition details are valid, or a WP_Error in case we should reject them.
 		 *
-		 * @param bool  $valid        Whether the user details are valid.
-		 * @param array $user_details The user details as decrypted from the composition details.
-		 * @param array $composition  The full composition details.
+		 * @param bool  $valid   Whether the composition LT details are valid.
+		 * @param array $details The composition details as decrypted from the composition data.
 		 */
-		$valid = apply_filters( 'pixelgradelt_retailer/validate_user_details', true, $user_details );
+		$valid = apply_filters( 'pixelgradelt_retailer/validate_composition_ltdetails', true, $details );
 		if ( is_wp_error( $valid ) ) {
-			$message = esc_html__( 'Third-party user details checks have found them invalid. Here is what happened: ', 'pixelgradelt_retailer' ) . PHP_EOL;
+			$message = esc_html__( 'Third-party composition\'s LT details checks have found them invalid. Here is what happened: ', 'pixelgradelt_retailer' ) . PHP_EOL;
 			$message .= implode( ' ; ' . PHP_EOL, $valid->get_error_messages() );
 
-			throw RestException::forInvalidComposerUserDetails( $message );
+			throw RestException::forInvalidCompositionLTDetails( $message );
 		} elseif ( true !== $valid ) {
-			throw RestException::forInvalidComposerUserDetails();
+			throw RestException::forInvalidCompositionLTDetails();
 		}
 
 		return true;
@@ -443,7 +442,7 @@ class CompositionsController extends WP_REST_Controller {
 	/**
 	 * Determine what details should be updated in the received composition.
 	 *
-	 * The received user details and composition will be checked first.
+	 * First, the received composition LT details and composition will be checked.
 	 *
 	 * @since 0.10.0
 	 *
@@ -451,7 +450,7 @@ class CompositionsController extends WP_REST_Controller {
 	 *
 	 * @return WP_REST_Response|WP_Error Response object on success, or WP_Error object on failure.
 	 */
-	public function details_to_update_composition( WP_REST_Request $request ) {
+	public function instructions_to_update_composition( WP_REST_Request $request ) {
 		$composition = $request['composer'];
 		// Make sure we are dealing with an associative array.
 		if ( is_object( $composition ) ) {
@@ -476,20 +475,20 @@ class CompositionsController extends WP_REST_Controller {
 		}
 
 		/* ==============================
-		 * Second, decrypt and validate the user details.
+		 * Second, decrypt and validate the LT details.
 		 */
-		if ( empty( $composition['extra'][ self::USER_DETAILS_KEY ] ) ) {
+		if ( empty( $composition['extra'][ self::LTDETAILS_KEY ] ) ) {
 			return new WP_Error(
-				'rest_missing_user_details',
-				esc_html__( 'The composition is missing the encrypted user details.', 'pixelgradelt_retailer' ),
+				'rest_missing_composition_ltdetails',
+				esc_html__( 'The composition is missing the encrypted LT details.', 'pixelgradelt_retailer' ),
 				[ 'status' => HTTP::NOT_ACCEPTABLE, ]
 			);
 		}
 		try {
-			$user_details = $this->decrypt_user_details( $composition['extra'][ self::USER_DETAILS_KEY ] );
+			$composition_ltdetails = $this->decrypt_ltdetails( $composition['extra'][ self::LTDETAILS_KEY ] );
 		} catch ( CrypterBadFormatException | CrypterWrongKeyOrModifiedCiphertextException | RestException $e ) {
 			return new WP_Error(
-				'rest_invalid_user_details',
+				'rest_invalid_composition_ltdetails',
 				$e->getMessage(),
 				[ 'status' => $e->getStatusCode(), ]
 			);
@@ -505,11 +504,11 @@ class CompositionsController extends WP_REST_Controller {
 		}
 
 		try {
-			// In case of invalid user details, exceptions are thrown.
-			$this->validate_user_details( $user_details );
+			// In case of invalid composition LT details, exceptions are thrown.
+			$this->validate_ltdetails( $composition_ltdetails );
 		} catch ( RestException $e ) {
 			return new WP_Error(
-				'rest_invalid_user_details',
+				'rest_invalid_composition_ltdetails',
 				$e->getMessage(),
 				[ 'status' => $e->getStatusCode(), ]
 			);
@@ -526,33 +525,33 @@ class CompositionsController extends WP_REST_Controller {
 		 *
 		 * @since 0.10.0
 		 *
-		 * @see   CompositionsController::details_to_update_composition()
+		 * @see   CompositionsController::instructions_to_update_composition()
 		 *
-		 * @param bool|array $details_to_update The new composition details.
-		 *                                      false if we should reject the request and error out.
-		 *                                      An empty array if we should leave the composition unchanged.
-		 * @param array      $user_details      The decrypted user details, already checked.
-		 * @param array      $composition       The full composition details.
+		 * @param bool|array $instructions_to_update The instructions to update the composition by.
+		 *                                           false if we should reject the request and error out.
+		 *                                           An empty array if we should leave the composition unchanged.
+		 * @param array      $composition_ltdetails  The decrypted composition LT details, already checked.
+		 * @param array      $composition            The full composition data.
 		 */
-		$details_to_update = apply_filters( 'pixelgradelt_retailer/details_to_update_composition', [], $user_details, $composition );
-		if ( is_wp_error( $details_to_update ) ) {
-			$message = esc_html__( 'Your attempt to determine details to update the composition with was rejected. Here is what happened: ', 'pixelgradelt_retailer' ) . PHP_EOL;
-			$message .= implode( ' ; ' . PHP_EOL, $details_to_update->get_error_messages() );
+		$instructions_to_update = apply_filters( 'pixelgradelt_retailer/instructions_to_update_composition', [], $composition_ltdetails, $composition );
+		if ( is_wp_error( $instructions_to_update ) ) {
+			$message = esc_html__( 'Your attempt to determine what to update in the composition was rejected. Here is what happened: ', 'pixelgradelt_retailer' ) . PHP_EOL;
+			$message .= implode( ' ; ' . PHP_EOL, $instructions_to_update->get_error_messages() );
 
 			return new WP_Error(
 				'rest_rejected',
 				$message,
 				[ 'status' => HTTP::NOT_ACCEPTABLE, ]
 			);
-		} elseif ( false === $details_to_update ) {
+		} elseif ( false === $instructions_to_update ) {
 			return new WP_Error(
 				'rest_rejected',
-				esc_html__( 'Your attempt to determine details to update the composition with was rejected.', 'pixelgradelt_retailer' ),
+				esc_html__( 'Your attempt to determine what to update in the composition was rejected.', 'pixelgradelt_retailer' ),
 				[ 'status' => HTTP::NOT_ACCEPTABLE, ]
 			);
 		}
 
-		if ( ! is_array( $details_to_update ) || empty( $details_to_update ) ) {
+		if ( ! is_array( $instructions_to_update ) || empty( $instructions_to_update ) ) {
 			// There is nothing to update. Respond accordingly.
 			$response = rest_ensure_response( [] );
 			$response->set_status( HTTP::NO_CONTENT );
@@ -560,15 +559,15 @@ class CompositionsController extends WP_REST_Controller {
 			return $response;
 		}
 
-		return rest_ensure_response( $details_to_update );
+		return rest_ensure_response( $instructions_to_update );
 	}
 
 	/**
-	 * Decrypt the encrypted composition user details.
+	 * Decrypt the encrypted composition LT details.
 	 *
 	 * @since 0.10.0
 	 *
-	 * @param string $encrypted_user_details
+	 * @param string $encrypted_details
 	 *
 	 * @throws CrypterBadFormatException
 	 * @throws CrypterEnvironmentIsBrokenException
@@ -576,14 +575,14 @@ class CompositionsController extends WP_REST_Controller {
 	 * @throws RestException
 	 * @return array
 	 */
-	protected function decrypt_user_details( string $encrypted_user_details ): array {
-		$user_details = json_decode( $this->crypter->decrypt( $encrypted_user_details ), true );
+	protected function decrypt_ltdetails( string $encrypted_details ): array {
+		$details = json_decode( $this->crypter->decrypt( $encrypted_details ), true );
 
-		if ( null === $user_details ) {
-			throw RestException::forInvalidComposerUserDetails();
+		if ( null === $details ) {
+			throw RestException::forInvalidCompositionLTDetails();
 		}
 
-		return $user_details;
+		return $details;
 	}
 
 	/**

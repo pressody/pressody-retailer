@@ -144,8 +144,8 @@ class EditComposition extends AbstractHookProvider {
 		$solutionsIds     = $this->composition_manager->get_post_composition_required_solutions_ids( $composition_data['required_solutions'] );
 		$solutionsContext = $this->composition_manager->get_post_composition_required_solutions_context( $composition_data['required_solutions'] );
 
-		// Get the encrypted form of the composition user details.
-		$encrypted_user = $this->composition_manager->get_post_composition_encrypted_user_details( $composition_data );
+		// Get the encrypted form of the composition's LT details.
+		$encrypted_ltdetails = $this->composition_manager->get_post_composition_encrypted_ltdetails( $composition_data );
 
 		wp_localize_script(
 			'pixelgradelt_retailer-edit-composition',
@@ -153,7 +153,7 @@ class EditComposition extends AbstractHookProvider {
 			[
 				'editedPostId'     => get_the_ID(),
 				'editedHashId'     => $composition_data['hashid'],
-				'encryptedUser'    => $encrypted_user,
+				'encryptedLTDetails'    => $encrypted_ltdetails,
 				'solutionIds'      => $solutionsIds,
 				'solutionContexts' => $solutionsContext,
 				'ltrecordsCompositionsUrl' => 'https://lt-records.local/wp-json/pixelgradelt_records/v1/compositions',

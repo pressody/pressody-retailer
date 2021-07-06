@@ -114,27 +114,27 @@ class CompositionManager {
 
 		self::$STATUSES = apply_filters( 'pixelgradelt_retailer/composition_statuses', [
 			'not_ready' => [
-				'id' => 'not_ready',
-				'label' => esc_html__( 'Not Ready', 'pixelgradelt_retailer' ),
-				'desc' => esc_html__( 'The composition is not ready for use on a site. It needs more work to be ready.', 'pixelgradelt_retailer' ),
+				'id'       => 'not_ready',
+				'label'    => esc_html__( 'Not Ready', 'pixelgradelt_retailer' ),
+				'desc'     => esc_html__( 'The composition is not ready for use on a site. It needs more work to be ready.', 'pixelgradelt_retailer' ),
 				'internal' => false,
 			],
-			'ready' => [
-				'id' => 'ready',
-				'label' => esc_html__( 'Ready', 'pixelgradelt_retailer' ),
-				'desc' => esc_html__( 'The composition is ready for use on a site.', 'pixelgradelt_retailer' ),
+			'ready'     => [
+				'id'       => 'ready',
+				'label'    => esc_html__( 'Ready', 'pixelgradelt_retailer' ),
+				'desc'     => esc_html__( 'The composition is ready for use on a site.', 'pixelgradelt_retailer' ),
 				'internal' => false,
 			],
-			'active' => [
-				'id' => 'active',
-				'label' => esc_html__( 'Active', 'pixelgradelt_retailer' ),
-				'desc' => esc_html__( 'The composition is being used on a site.', 'pixelgradelt_retailer' ),
+			'active'    => [
+				'id'       => 'active',
+				'label'    => esc_html__( 'Active', 'pixelgradelt_retailer' ),
+				'desc'     => esc_html__( 'The composition is being used on a site.', 'pixelgradelt_retailer' ),
 				'internal' => false,
 			],
-			'retired' => [
-				'id' => 'retired',
-				'label' => esc_html__( 'Retired', 'pixelgradelt_retailer' ),
-				'desc' => esc_html__( 'The composition has been retired and is no longer available for use.', 'pixelgradelt_retailer' ),
+			'retired'   => [
+				'id'       => 'retired',
+				'label'    => esc_html__( 'Retired', 'pixelgradelt_retailer' ),
+				'desc'     => esc_html__( 'The composition has been retired and is no longer available for use.', 'pixelgradelt_retailer' ),
 				'internal' => false,
 			],
 		] );
@@ -389,7 +389,7 @@ class CompositionManager {
 	 *
 	 * @return array The found package data.
 	 */
-	public function get_composition_data_by( array $args, bool $include_context = false  ): array {
+	public function get_composition_data_by( array $args, bool $include_context = false ): array {
 		$found_package_id = $this->get_composition_ids_by( $args );
 		if ( empty( $found_package_id ) ) {
 			return [];
@@ -477,17 +477,17 @@ class CompositionManager {
 	 *
 	 * @return string
 	 */
-	public function get_post_composition_encrypted_user_details( array $composition_data ): string {
-		$encrypted = local_rest_call( '/pixelgradelt_retailer/v1/compositions/encrypt_user_details', 'POST', [], [
+	public function get_post_composition_encrypted_ltdetails( array $composition_data ): string {
+		$encrypted = local_rest_call( '/pixelgradelt_retailer/v1/compositions/encrypt_ltdetails', 'POST', [], [
 			'userid'        => $composition_data['user']['id'],
 			'compositionid' => $composition_data['hashid'],
 			'extra'         => [
-				'email'    => $composition_data['user']['email'],
-				'username' => $composition_data['user']['username'],
+				'user-email'    => $composition_data['user']['email'],
+				'user-username' => $composition_data['user']['username'],
 			],
 		] );
 		if ( ! is_string( $encrypted ) ) {
-			// This means there was an error. Maybe the user details failed validation, etc.
+			// This means there was an error. Maybe the composition LT details failed validation, etc.
 			$encrypted = '';
 		}
 

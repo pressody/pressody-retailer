@@ -12,7 +12,7 @@ const DEFAULT_STATE = {
 	composerJson: {},
 	postId: null,
 	hashId: null,
-	encryptedUser: null,
+	encryptedLTDetails: null,
 	solutionIds: [],
 	solutionContexts: [],
 }
@@ -71,9 +71,9 @@ function* getParts () {
 	// Since we need the parts to get a composer.json, do it here.
 	// I haven't managed to figure it out how to do resolvers in a cascade. This will do for now.
 
-	const encryptedUser = select(STORE_KEY).getEncryptedUser()
-	// If we don't have the encrypted user data, the request will be rejected either way. So, best not to waste any time on it.
-	if (!encryptedUser) {
+	const encryptedLTDetails = select(STORE_KEY).getEncryptedLTDetails()
+	// If we don't have the encrypted LT data, the request will be rejected either way. So, best not to waste any time on it.
+	if (!encryptedLTDetails) {
 		dispatch(STORE_KEY).setComposerJson({})
 	}
 
@@ -91,7 +91,7 @@ function* getParts () {
 			'Authorization': 'Basic ' + btoa(ltrecordsApiKey + ':' + ltrecordsApiPwd)
 		},
 		data: {
-			user: encryptedUser,
+			ltdetails: encryptedLTDetails,
 			require: parts,
 			composer: {
 				'name': 'pixelgradelt/' + select(STORE_KEY).getHashId().toLowerCase(),
@@ -122,10 +122,10 @@ function setHashId (hashId) {
 	}
 }
 
-function setEncryptedUser (encryptedUser) {
+function setEncryptedLTDetails (encryptedLTDetails) {
 	return {
-		type: 'SET_ENCRYPTED_USER',
-		encryptedUser: encryptedUser,
+		type: 'SET_ENCRYPTED_LTDETAILS',
+		encryptedLTDetails: encryptedLTDetails,
 	}
 }
 
@@ -176,10 +176,10 @@ const store = createReduxStore(STORE_KEY, {
 					hashId: action.hashId,
 				}
 
-			case 'SET_ENCRYPTED_USER' :
+			case 'SET_ENCRYPTED_LTDETAILS' :
 				return {
 					...state,
-					encryptedUser: action.encryptedUser,
+					encryptedLTDetails: action.encryptedLTDetails,
 				}
 
 			case 'SET_SOLUTION_IDS' :
@@ -203,7 +203,7 @@ const store = createReduxStore(STORE_KEY, {
 		setComposerJson,
 		setPostId,
 		setHashId,
-		setEncryptedUser,
+		setEncryptedLTDetails,
 		setSolutionIds,
 		setSolutionContexts,
 	},
@@ -223,8 +223,8 @@ const store = createReduxStore(STORE_KEY, {
 		getHashId (state) {
 			return state.hashId || null
 		},
-		getEncryptedUser (state) {
-			return state.encryptedUser || ''
+		getEncryptedLTDetails (state) {
+			return state.encryptedLTDetails || ''
 		},
 		getSolutionIds (state) {
 			return state.solutionIds || []
