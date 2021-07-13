@@ -56,9 +56,7 @@ class Plugin extends BasePlugin implements Composable {
 			->register_hooks( $container->get( 'logs.manager' ) )
 
 			->register_hooks( $container->get( 'screen.edit_composition' ) )
-
-			->register_hooks( $container->get( 'screen.edit_solution' ) )
-			->register_hooks( $container->get( 'screen.list_solutions' ) );
+			->register_hooks( $container->get( 'screen.edit_solution' ) );
 
 
 		if ( is_admin() ) {
@@ -67,7 +65,10 @@ class Plugin extends BasePlugin implements Composable {
 				->register_hooks( $container->get( 'hooks.admin_assets' ) )
 				->register_hooks( $container->get( 'screen.edit_user' ) )
 				->register_hooks( $container->get( 'screen.list_wooproducts' ) )
-				->register_hooks( $container->get( 'screen.settings' ) );
+				->register_hooks( $container->get( 'screen.settings' ) )
+
+				->register_hooks( $container->get( 'screen.list_compositions' ) )
+				->register_hooks( $container->get( 'screen.list_solutions' ) );
 		}
 
 		if ( \function_exists( 'members_plugin' ) ) {

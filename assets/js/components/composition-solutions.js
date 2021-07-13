@@ -52,8 +52,9 @@ function CompositionSolution (props) {
 		  <thead>
 		  <tr>
 					<th colSpan="2"><strong>${composer.name}</strong>
-				  ${'public' !== visibility ? '(' + visibility[0].toUpperCase() + visibility.slice(1) + ')' : ''} <a
-						  className="edit-package" href=${editLink}>Edit solution</a></th>
+				  ${'public' !== visibility ? '(' + visibility[0].toUpperCase() + visibility.slice(1) + ')' : ''}
+							<a className="edit-package" href=${editLink}>Edit solution</a>
+					</th>
 		  </tr>
 		  </thead>
 		  <tbody>

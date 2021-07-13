@@ -349,6 +349,13 @@ class ServiceProvider implements ServiceProviderInterface {
 			);
 		};
 
+		$container['screen.list_compositions'] = function ( $container ) {
+			return new Screen\ListCompositions(
+				$container['composition.manager'],
+				$container['solution.manager']
+			);
+		};
+
 		$container['screen.edit_user'] = function ( $container ) {
 			return new Screen\EditUser(
 				$container['api_key.repository']

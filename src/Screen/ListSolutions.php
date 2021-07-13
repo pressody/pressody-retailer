@@ -162,8 +162,7 @@ class ListSolutions extends AbstractHookProvider {
 		if ( 'solution_required_solutions' === $column && ! empty( $solution_data['required_solutions'] ) ) {
 			$list = [];
 			foreach ( $solution_data['required_solutions'] as $solution_details ) {
-
-				$list[] = '<a class="package-list_link" href="' . esc_url( get_edit_post_link( $solution_details['managed_post_id'] ) ) . '" title="Edit Required LT Solution">' . $solution_details['pseudo_id'] . '</a>';
+				$list[] = '<a class="package-list_link" href="' . esc_url( get_edit_post_link( $solution_details['managed_post_id'] ) ) . '" title="Edit Required LT Solution">' . get_the_title( $solution_details['managed_post_id'] ) . ' (' . $solution_details['pseudo_id'] . ')</a>';
 			}
 
 			$output = implode( '<br>' . PHP_EOL, $list );
@@ -172,8 +171,7 @@ class ListSolutions extends AbstractHookProvider {
 		if ( 'solution_excluded_solutions' === $column && ! empty( $solution_data['excluded_solutions'] ) ) {
 			$list = [];
 			foreach ( $solution_data['excluded_solutions'] as $solution_details ) {
-
-				$list[] = '<a class="package-list_link" href="' . esc_url( get_edit_post_link( $solution_details['managed_post_id'] ) ) . '" title="Edit Excluded LT Solution">' . $solution_details['pseudo_id'] . '</a>';
+				$list[] = '<a class="package-list_link" href="' . esc_url( get_edit_post_link( $solution_details['managed_post_id'] ) ) . '" title="Edit Excluded LT Solution">' . get_the_title( $solution_details['managed_post_id'] ) . ' (' . $solution_details['pseudo_id'] . ')</a>';
 			}
 
 			$output = implode( '<br>' . PHP_EOL, $list );

@@ -1,7 +1,7 @@
-import { components, html, i18n } from '../utils/index.js'
-import SolutionRequiredPackages from './solution-required-packages.js'
+import { components, data, html, i18n } from '../utils/index.js'
 
 const {Button, Placeholder} = components
+const {useSelect} = data
 const {__} = i18n
 
 function CompositionPartsPlaceholder (props) {
@@ -35,15 +35,31 @@ function CompositionPart (props) {
 		requiredBy,
 	} = props
 
+	const solutionsList = useSelect((select) => {
+		return select('pixelgradelt_retailer/composition').getSolutions()
+	})
+
 	const requiredByList = requiredBy.map( ( solution, index ) => {
 
 		let className = 'button pixelgradelt_retailer-required-by-solution';
+
+		// Find the solution that requires this LT part.
+		let solutionEditLink = '#';
+		if ( solutionsList.length ) {
+			const solutionDetails = solutionsList.find((item) => {
+				return item.composer.name === solution.name;
+			})
+
+			if ( undefined !== solutionDetails ) {
+				solutionEditLink = solutionDetails.editLink;
+			}
+		}
 
 		return html`
 			<${ Button }
 				key=${ name+solution.name }
 				className=${ className }
-				href=${ '#' }
+				href=${ solutionEditLink }
 				target="_blank"
 				rel="noopener noreferer"
 			>
