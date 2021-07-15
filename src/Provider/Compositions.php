@@ -138,8 +138,21 @@ class Compositions extends AbstractHookProvider {
 			return $instructions_to_update;
 		}
 
+		if ( empty( $composition_ltdetails['compositionid'] ) ) {
+			return new \WP_Error(
+				'missing_compositionid',
+				'The composition\'s LT details are missing the "compositionid".',
+			);
+		}
+
 		// Get all data about the composition.
 		$composition_data = $this->composition_manager->get_composition_data_by( [ 'hashid' => $composition_ltdetails['compositionid'], ], true );
+		if ( empty( $composition_data ) ) {
+			return new \WP_Error(
+				'composition_not_found',
+				'The composition with the LT details "compositionid" could not be found.',
+			);
+		}
 
 		// Get the solutions IDs and context.
 		$solutionsIds     = $this->composition_manager->get_post_composition_required_solutions_ids( $composition_data['required_solutions'] );
@@ -157,7 +170,7 @@ class Compositions extends AbstractHookProvider {
 			if ( is_wp_error( $all_ltparts ) ) {
 				// We have failed to get the LT Parts from LT Records. Log and move on.
 				$this->logger->error(
-					'Error fetching the all the LT Parts from LT Records for the composition with post ID #{post_id} and hashid "{hashid}": {message}',
+					'Error fetching all the LT Parts from LT Records for the composition with post ID #{post_id} and hashid "{hashid}": {message}',
 					[
 						'post_id' => $composition_data['id'],
 						'hashid'  => $composition_data['hashid'],
@@ -179,7 +192,7 @@ class Compositions extends AbstractHookProvider {
 		// By default we don't require any LT Part.
 		$instructions_to_update['require'] = [];
 		if ( ! empty( $solutionsIds ) ) {
-			$required_parts = local_rest_call( '/pixelgradelt_retailer/v1/solutions/parts', 'GET', [], [
+			$required_parts = local_rest_call( '/pixelgradelt_retailer/v1/solutions/parts', 'GET', [
 				'postId'           => $solutionsIds,
 				'solutionsContext' => $solutionsContext,
 			] );
