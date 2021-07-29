@@ -1,5 +1,6 @@
 {
 	"name": "pixelgradelt/pixelgradelt-retailer",
+  	"version": "0.13.0",
 	"description": "Define and manage PixelgradeLT solutions to be purchased and used on customers' websites.",
 	"keywords": [
 		"pixelgradelt",
