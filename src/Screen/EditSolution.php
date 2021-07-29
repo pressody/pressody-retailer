@@ -18,11 +18,7 @@ use Cedaro\WP\Plugin\AbstractHookProvider;
 use PixelgradeLT\Retailer\Transformer\ComposerPackageTransformer;
 use PixelgradeLT\Retailer\SolutionManager;
 use PixelgradeLT\Retailer\Repository\PackageRepository;
-use function PixelgradeLT\Retailer\ensure_packages_json_url;
-use function PixelgradeLT\Retailer\get_setting;
 use function PixelgradeLT\Retailer\get_solutions_permalink;
-use function PixelgradeLT\Retailer\is_debug_mode;
-use function PixelgradeLT\Retailer\is_dev_url;
 use function PixelgradeLT\Retailer\preload_rest_data;
 
 /**
@@ -114,6 +110,9 @@ class EditSolution extends AbstractHookProvider {
 		// ADD CUSTOM POST META VIA CARBON FIELDS.
 		$this->add_action( 'plugins_loaded', 'carbonfields_load' );
 		$this->add_action( 'carbon_fields_register_fields', 'attach_post_meta_fields' );
+
+		// Handle changes that affect dependants (things like slug/package name change that is saved in pseudo_ids).
+		$this->add_action( 'post_updated', 'maybe_update_dependants_on_slug_change', 3, 3 );
 
 		// Check that the package can be resolved with the required packages.
 		$this->add_action( 'carbon_fields_post_meta_container_saved', 'check_required', 20, 2 );
@@ -435,6 +434,44 @@ The excluded solutions only take effect in <strong>a purchase context (add to ca
 	}
 
 	/**
+	 * If the slug/package name changes, we need to update the pseudo IDs meta-data for dependants.
+	 *
+	 * @since 0.13.0
+	 *
+	 * @param int      $post_ID     Post ID.
+	 * @param \WP_Post $post_after  Post object following the update.
+	 * @param \WP_Post $post_before Post object before the update.
+	 */
+	protected function maybe_update_dependants_on_slug_change( int $post_ID, \WP_Post $post_after, \WP_Post $post_before ) {
+		if ( $this->solution_manager::POST_TYPE !== get_post_type( $post_ID ) ) {
+			return;
+		}
+
+		// Determine if the slug hasn't changed. Bail if so.
+		if ( $post_after->post_name === $post_before->post_name ) {
+			return;
+		}
+
+		// We have work to do.
+
+		// At the moment, we are only interested in certain meta entries.
+		// Replace pseudo IDs.
+		$prev_solution_pseudo_id = $post_before->post_name . $this->solution_manager::PSEUDO_ID_DELIMITER . $post_ID;
+		$new_solution_pseudo_id = $post_after->post_name . $this->solution_manager::PSEUDO_ID_DELIMITER . $post_ID;
+
+		global $wpdb;
+		$wpdb->get_results( $wpdb->prepare( "
+UPDATE $wpdb->postmeta m
+JOIN $wpdb->posts p ON m.post_id = p.ID
+SET m.meta_value = REPLACE(m.meta_value, %s, %s)
+WHERE m.meta_key LIKE '%pseudo_id%' AND p.post_type <> 'revision'", $prev_solution_pseudo_id, $new_solution_pseudo_id ) );
+
+		// Flush the entire cache since we don't know what post IDs might have been affected.
+		// It is OK since this is a rare operation.
+		wp_cache_flush();
+	}
+
+	/**
 	 * Check if the package can be resolved by Composer with the required solutions, excluded solutions, and required parts.
 	 * Show a warning message if it can't be.
 	 *
@@ -484,8 +521,6 @@ The excluded solutions only take effect in <strong>a purchase context (add to ca
 	public function get_available_required_solutions_options(): array {
 		$options = [];
 
-		$pseudo_id_delimiter = ' #';
-
 		// We exclude the current package post ID, of course.
 		$exclude_post_ids = [ get_the_ID(), ];
 		// We can't exclude the currently required packages because if we use carbon_get_post_meta()
@@ -494,7 +529,7 @@ The excluded solutions only take effect in <strong>a purchase context (add to ca
 		$solutions_ids = $this->solution_manager->get_solution_ids_by( [ 'exclude_post_ids' => $exclude_post_ids, ] );
 
 		foreach ( $solutions_ids as $post_id ) {
-			$solution_pseudo_id = $this->solution_manager->get_post_solution_slug( $post_id ) . $pseudo_id_delimiter . $post_id;
+			$solution_pseudo_id = $this->solution_manager->get_post_solution_slug( $post_id ) . $this->solution_manager::PSEUDO_ID_DELIMITER . $post_id;
 
 			$options[ $solution_pseudo_id ] = sprintf( __( '%s - #%s', 'pixelgradelt_retailer' ), $this->solution_manager->get_post_solution_name( $post_id ), $post_id );
 		}

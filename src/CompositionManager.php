@@ -36,7 +36,7 @@ class CompositionManager {
 	const LTRECORDS_API_PWD = 'pixelgradelt_records';
 
 	/**
-	 * Used to create the pseudo IDs saved as values for a composition's solutions.
+	 * Used to create the pseudo IDs saved as values for a composition's contained solutions.
 	 * Don't change this without upgrading the data in the DB!
 	 */
 	const PSEUDO_ID_DELIMITER = ' #';
@@ -599,7 +599,11 @@ class CompositionManager {
 		return $solutionsContext;
 	}
 
-	public function get_post_composition_composer_require( int $post_ID, string $pseudo_id_delimiter = ' #', string $container_id = '' ): array {
+	public function get_post_composition_composer_require( int $post_ID, string $container_id = '', string $pseudo_id_delimiter = '' ): array {
+		if ( empty( $pseudo_id_delimiter ) ) {
+			$pseudo_id_delimiter = self::PSEUDO_ID_DELIMITER;
+		}
+
 		// We don't currently allow defining a per-composition Composer require list.
 		return [];
 	}

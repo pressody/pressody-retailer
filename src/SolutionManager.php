@@ -40,6 +40,12 @@ class SolutionManager {
 	const LTRECORDS_API_PWD = 'pixelgradelt_records';
 
 	/**
+	 * Used to create the pseudo IDs saved as values for a solution's required or excluded solutions.
+	 * Don't change this without upgrading the data in the DB!
+	 */
+	const PSEUDO_ID_DELIMITER = ' #';
+
+	/**
 	 * Local cache of LT Records parts.
 	 *
 	 * @var array|null|\WP_Error
@@ -513,10 +519,14 @@ class SolutionManager {
 		return true;
 	}
 
-	public function get_post_solution_required_solutions( int $post_ID, string $pseudo_id_delimiter = ' #', string $container_id = '' ): array {
+	public function get_post_solution_required_solutions( int $post_ID, string $container_id = '', string $pseudo_id_delimiter = '' ): array {
 		$required_solutions = carbon_get_post_meta( $post_ID, 'solution_required_solutions', $container_id );
 		if ( empty( $required_solutions ) || ! is_array( $required_solutions ) ) {
 			return [];
+		}
+
+		if ( empty( $pseudo_id_delimiter ) ) {
+			$pseudo_id_delimiter = self::PSEUDO_ID_DELIMITER;
 		}
 
 		// Make sure only the fields we are interested in are left.
@@ -547,10 +557,14 @@ class SolutionManager {
 		carbon_set_post_meta( $post_ID, 'solution_required_solutions', $required_solutions, $container_id );
 	}
 
-	public function get_post_solution_excluded_solutions( int $post_ID, string $pseudo_id_delimiter = ' #', string $container_id = '' ): array {
+	public function get_post_solution_excluded_solutions( int $post_ID, string $container_id = '', string $pseudo_id_delimiter = '' ): array {
 		$excluded_solutions = carbon_get_post_meta( $post_ID, 'solution_excluded_solutions', $container_id );
 		if ( empty( $excluded_solutions ) || ! is_array( $excluded_solutions ) ) {
 			return [];
+		}
+
+		if ( empty( $pseudo_id_delimiter ) ) {
+			$pseudo_id_delimiter = self::PSEUDO_ID_DELIMITER;
 		}
 
 		// Make sure only the fields we are interested in are left.
@@ -610,7 +624,11 @@ class SolutionManager {
 		carbon_set_post_meta( $post_ID, 'solution_required_parts', $required_parts, $container_id );
 	}
 
-	public function get_post_solution_composer_require( int $post_ID, string $pseudo_id_delimiter = ' #', string $container_id = '' ): array {
+	public function get_post_solution_composer_require( int $post_ID, string $container_id = '', string $pseudo_id_delimiter = '' ): array {
+		if ( empty( $pseudo_id_delimiter ) ) {
+			$pseudo_id_delimiter = self::PSEUDO_ID_DELIMITER;
+		}
+
 		// We don't currently allow defining a per-solution Composer require list.
 		return [];
 	}
