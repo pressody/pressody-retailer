@@ -50,6 +50,7 @@
 		"htmlburger/carbon-fields": "^3.2",
 		"oscarotero/env": "^2.1",
 		"pimple/pimple": "^3.2",
+		"pixelgrade/wp-post-notes": "^0.5.1",
 		"psr/container": "^1.0",
 		"psr/log": "^1.0",
 		"vlucas/phpdotenv": "^5.3"

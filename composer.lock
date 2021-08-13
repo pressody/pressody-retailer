@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "cfd4986e9d7a2c65ad7713961f862fc1",
+    "content-hash": "d3ad50318273df175f320252357b76a1",
     "packages": [
         {
             "name": "automattic/jetpack-constants",
@@ -1395,6 +1395,73 @@
                 "source": "https://github.com/silexphp/Pimple/tree/v3.4.0"
             },
             "time": "2021-03-06T08:28:00+00:00"
+        },
+        {
+            "name": "pixelgrade/wp-post-notes",
+            "version": "0.5.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/pixelgrade/wp-post-notes.git",
+                "reference": "5cff7387071aca93a2686d059a61fbf33d9d9b2a"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/pixelgrade/wp-post-notes/zipball/5cff7387071aca93a2686d059a61fbf33d9d9b2a",
+                "reference": "5cff7387071aca93a2686d059a61fbf33d9d9b2a",
+                "shasum": ""
+            },
+            "require": {
+                "php": "^7.4"
+            },
+            "require-dev": {
+                "brain/monkey": "^2.2",
+                "dealerdirect/phpcodesniffer-composer-installer": "^0.7.1",
+                "phpcompatibility/phpcompatibility-wp": "^2",
+                "phpunit/phpunit": "^7.5",
+                "roave/security-advisories": "dev-master",
+                "squizlabs/php_codesniffer": "^3.3",
+                "wordpress/wordpress": "^5.6",
+                "wp-cli/i18n-command": "dev-master",
+                "wp-coding-standards/wpcs": "^1"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Pixelgrade\\WPPostNotes\\": "src/"
+                },
+                "files": [
+                    "src/functions.php"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "GPL-2.0-or-later"
+            ],
+            "authors": [
+                {
+                    "name": "Vlad Olaru",
+                    "email": "vlad@pixelgrade.com",
+                    "homepage": "https://pixelgrade.com/"
+                }
+            ],
+            "description": "WordPress library for adding internal, private or public notes to posts, pages, or any custom post type.",
+            "homepage": "https://github.com/pixelgrade/wp-post-notes",
+            "keywords": [
+                "cpt-notes",
+                "custom-post-type-notes",
+                "internal",
+                "notes",
+                "pixelgrade",
+                "pixelgradelt",
+                "post-notes",
+                "private",
+                "wordpress"
+            ],
+            "support": {
+                "issues": "https://github.com/pixelgrade/wp-post-notes/issues",
+                "source": "https://github.com/pixelgrade/wp-post-notes"
+            },
+            "time": "2021-08-13T11:06:21+00:00"
         },
         {
             "name": "psr/container",

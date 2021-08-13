@@ -12,6 +12,7 @@ declare ( strict_types=1 );
 namespace PixelgradeLT\Retailer\PostType;
 
 use Cedaro\WP\Plugin\AbstractHookProvider;
+use Pixelgrade\WPPostNotes\PostNotes;
 use PixelgradeLT\Retailer\SolutionType\SolutionTypes;
 use PixelgradeLT\Retailer\SolutionManager;
 
@@ -40,6 +41,8 @@ class SolutionPostType extends AbstractHookProvider {
 			SolutionManager $solution_manager
 	) {
 		$this->solution_manager = $solution_manager;
+
+		$this->post_notes = new PostNotes( $this->solution_manager::POST_TYPE );
 	}
 
 	public function register_hooks() {

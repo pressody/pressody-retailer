@@ -12,6 +12,7 @@ declare ( strict_types=1 );
 namespace PixelgradeLT\Retailer\PostType;
 
 use Cedaro\WP\Plugin\AbstractHookProvider;
+use Pixelgrade\WPPostNotes\PostNotes;
 use PixelgradeLT\Retailer\CompositionManager;
 
 /**
@@ -39,6 +40,8 @@ class CompositionPostType extends AbstractHookProvider {
 			CompositionManager $composition_manager
 	) {
 		$this->composition_manager = $composition_manager;
+
+		$this->post_notes = new PostNotes( $this->composition_manager::POST_TYPE );
 	}
 
 	public function register_hooks() {
