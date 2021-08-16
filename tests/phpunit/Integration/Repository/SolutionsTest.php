@@ -43,7 +43,7 @@ class SolutionsTest extends TestCase {
 		$register_solution_keyword_taxonomy->invoke( self::$old_container['hooks.solution_post_type'] );
 
 		// Set this package as a basic solution type.
-		$package_type = get_term_by( 'slug', SolutionTypes::BASIC, self::$old_container['solution.manager']::TYPE_TAXONOMY );
+		$package_type = get_term_by( 'slug', SolutionTypes::REGULAR, self::$old_container['solution.manager']::TYPE_TAXONOMY );
 
 		self::$dep_posts_data = [
 			'blog' => [
@@ -152,7 +152,7 @@ And here is a quote from a customer:
 		$this->assertCount( 0, $package->get_authors() );
 		$this->assertSame( 'Package custom description.', $package->get_description() );
 		$this->assertSame( 'https://package.homepage', $package->get_homepage() );
-		$this->assertSame( SolutionTypes::BASIC, $package->get_type() );
+		$this->assertSame( SolutionTypes::REGULAR, $package->get_type() );
 		$this->assertCount( 3, $package->get_keywords() );
 		$this->assertTrue( $package->has_required_ltrecords_parts() );
 		$this->assertCount( 1, $package->get_required_ltrecords_parts() );

@@ -456,7 +456,7 @@ class SolutionsController extends WP_REST_Controller {
 				'type' => 'string',
 			],
 			'default'           => [
-				SolutionTypes::BASIC,
+				SolutionTypes::REGULAR,
 			],
 			'sanitize_callback' => 'wp_parse_slug_list',
 		];
@@ -772,7 +772,7 @@ class SolutionsController extends WP_REST_Controller {
 					'description' => esc_html__( 'Type of package.', 'pixelgradelt_retailer' ),
 					'type'        => 'string',
 					'enum'        => [
-						SolutionTypes::BASIC,
+						SolutionTypes::REGULAR,
 					],
 					'context'     => [ 'view', 'edit', 'embed' ],
 					'required'    => true,

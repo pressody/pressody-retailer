@@ -57,7 +57,7 @@ class BaseSolutionBuilderTest extends TestCase {
 	}
 
 	public function test_type() {
-		$expected = SolutionTypes::BASIC;
+		$expected = SolutionTypes::REGULAR;
 		$package  = $this->builder->set_type( $expected )->build();
 
 		$this->assertSame( $expected, $package->type );
@@ -216,7 +216,7 @@ class BaseSolutionBuilderTest extends TestCase {
 	public function test_from_package_data() {
 		$expected['name']                     = 'Solution Name';
 		$expected['slug']                     = 'slug';
-		$expected['type']                     = SolutionTypes::BASIC;
+		$expected['type']                     = SolutionTypes::REGULAR;
 		$expected['authors']                  = [
 			[
 				'name'     => 'Name',
@@ -297,7 +297,7 @@ class BaseSolutionBuilderTest extends TestCase {
 		};
 		$expected->name             = 'Solution';
 		$expected->slug             = 'solution-slug';
-		$expected->type             = SolutionTypes::BASIC;
+		$expected->type             = SolutionTypes::REGULAR;
 		$expected->authors          = [
 			[
 				'name' => 'Some Theme Author',
@@ -313,7 +313,7 @@ class BaseSolutionBuilderTest extends TestCase {
 
 		$package_data['name']             = 'Solution Name';
 		$package_data['slug']             = 'slug';
-		$package_data['type']             = SolutionTypes::BASIC;
+		$package_data['type']             = SolutionTypes::REGULAR;
 		$package_data['authors']          = [];
 		$package_data['homepage']         = 'https://pixelgrade.com';
 		$package_data['description']      = 'Some description.';
@@ -469,7 +469,7 @@ class BaseSolutionBuilderTest extends TestCase {
 		};
 		$expected->name                     = 'Solution Name';
 		$expected->slug                     = 'slug';
-		$expected->type                     = SolutionTypes::BASIC;
+		$expected->type                     = SolutionTypes::REGULAR;
 		$expected->authors                  = [];
 		$expected->homepage                 = 'https://pixelgrade.com';
 		$expected->description              = 'Some description.';

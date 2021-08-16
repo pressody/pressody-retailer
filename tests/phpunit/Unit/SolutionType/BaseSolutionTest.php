@@ -33,7 +33,7 @@ class BaseSolutionTest extends TestCase {
 	}
 
 	public function test_type() {
-		$expected            = SolutionTypes::BASIC;
+		$expected            = SolutionTypes::REGULAR;
 		$this->package->type = $expected;
 
 		$this->assertSame( $expected, $this->package->get_type() );

@@ -25,7 +25,7 @@ class ComposerSolutionTransformerTest extends TestCase {
 
 		$factory = new SolutionFactory( $solution_manager, $logger );
 
-		$this->solution = $factory->create( SolutionTypes::BASIC )
+		$this->solution = $factory->create( SolutionTypes::REGULAR )
 		                          ->set_slug( 'AcmeCode' )
 		                          ->build();
 

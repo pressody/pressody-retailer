@@ -30,6 +30,13 @@ class CompositionPostType extends AbstractHookProvider {
 	protected CompositionManager $composition_manager;
 
 	/**
+	 * Post notes functionality.
+	 *
+	 * @var PostNotes
+	 */
+	protected PostNotes $post_notes;
+
+	/**
 	 * Constructor.
 	 *
 	 * @since 0.11.0

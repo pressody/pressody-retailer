@@ -21,16 +21,27 @@ namespace PixelgradeLT\Retailer\SolutionType;
  */
 final class SolutionTypes {
 	/**
-	 * Basic solution type ID.
+	 * Regular solution type ID.
 	 *
 	 * @var string
 	 */
-	const BASIC = 'basic';
+	const REGULAR = 'regular';
+
+	/**
+	 * Hosting solution type ID.
+	 *
+	 * @var string
+	 */
+	const HOSTING = 'hosting';
 
 	const DETAILS = [
-		self::BASIC => [
-			'name'        => 'Basic Solution',
-			'description' => 'A basic LT solution.',
+		self::REGULAR => [
+			'name'        => 'Regular Solution',
+			'description' => 'A regular LT solution that provides code-based functionality to a composition.',
+		],
+		self::HOSTING => [
+			'name'        => 'Hosting Solution',
+			'description' => 'A hosting LT solution that provides hosting services to a composition.',
 		],
 	];
 }

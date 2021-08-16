@@ -90,7 +90,7 @@ class Solutions extends AbstractRepository implements SolutionRepository {
 	 * @return Package
 	 */
 	protected function build( int $post_id ): Package {
-		return $this->factory->create( SolutionTypes::BASIC )
+		return $this->factory->create( SolutionTypes::REGULAR )
 		                     ->from_manager( $post_id )
 		                     ->build();
 	}
