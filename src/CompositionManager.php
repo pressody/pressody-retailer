@@ -496,10 +496,12 @@ class CompositionManager {
 
 	/**
 	 * @param int    $post_ID             The Composition post ID.
-	 * @param bool   $include_context     Whether to include context data about each required solution (things like orders, timestamps, etc).
+	 * @param bool   $include_context     Whether to include context data about each required solution
+	 *                                    (things like orders, timestamps, etc).
 	 * @param string $pseudo_id_delimiter The delimiter used to construct each required solution's value.
 	 *
-	 * @return array
+	 * @return array List of composition required solutions.
+	 *               Each solution has its pseudo ID, slug, managed post ID and maybe context information, if $include_context is true.
 	 */
 	public function get_post_composition_required_solutions( int $post_ID, bool $include_context = false, string $pseudo_id_delimiter = '' ): array {
 		$required_solutions = carbon_get_post_meta( $post_ID, 'composition_required_solutions' );

@@ -18,6 +18,7 @@ use Cedaro\WP\Plugin\AbstractHookProvider;
 use PixelgradeLT\Retailer\Transformer\ComposerPackageTransformer;
 use PixelgradeLT\Retailer\SolutionManager;
 use PixelgradeLT\Retailer\Repository\PackageRepository;
+use function Pixelgrade\WPPostNotes\create_note;
 use function PixelgradeLT\Retailer\get_solutions_permalink;
 use function PixelgradeLT\Retailer\preload_rest_data;
 
@@ -111,8 +112,8 @@ class EditSolution extends AbstractHookProvider {
 		$this->add_action( 'plugins_loaded', 'carbonfields_load' );
 		$this->add_action( 'carbon_fields_register_fields', 'attach_post_meta_fields' );
 
-		// Handle changes that affect dependants (things like slug/package name change that is saved in pseudo_ids).
-		$this->add_action( 'post_updated', 'maybe_update_dependants_on_slug_change', 3, 3 );
+		// Handle changes to the slug - things that affect dependants (things like slug/package name change that is saved in pseudo_ids).
+		$this->add_action( 'post_updated', 'on_slug_change', 3, 3 );
 
 		// Check that the package can be resolved with the required packages.
 		$this->add_action( 'carbon_fields_post_meta_container_saved', 'check_required', 20, 2 );
@@ -125,6 +126,11 @@ class EditSolution extends AbstractHookProvider {
 
 		// Add a message to the post publish metabox.
 		$this->add_action( 'post_submitbox_start', 'show_publish_message' );
+
+		/*
+		 * HANDLE AUTOMATIC POST NOTES.
+		 */
+		$this->add_action( 'pixelgradelt_retailer/ltsolution/slug_change', 'add_solution_slug_change_note', 10, 3 );
 	}
 
 	/**
@@ -434,7 +440,7 @@ The excluded solutions only take effect in <strong>a purchase context (add to ca
 	}
 
 	/**
-	 * If the slug/package name changes, we need to update the pseudo IDs meta-data for dependants.
+	 * If the slug/package name changes, we need to update things like the pseudo IDs meta-data for dependants.
 	 *
 	 * @since 0.13.0
 	 *
@@ -442,7 +448,7 @@ The excluded solutions only take effect in <strong>a purchase context (add to ca
 	 * @param \WP_Post $post_after  Post object following the update.
 	 * @param \WP_Post $post_before Post object before the update.
 	 */
-	protected function maybe_update_dependants_on_slug_change( int $post_ID, \WP_Post $post_after, \WP_Post $post_before ) {
+	protected function on_slug_change( int $post_ID, \WP_Post $post_after, \WP_Post $post_before ) {
 		if ( $this->solution_manager::POST_TYPE !== get_post_type( $post_ID ) ) {
 			return;
 		}
@@ -469,6 +475,36 @@ WHERE m.meta_key LIKE '%pseudo_id%' AND p.post_type <> 'revision'", $prev_soluti
 		// Flush the entire cache since we don't know what post IDs might have been affected.
 		// It is OK since this is a rare operation.
 		wp_cache_flush();
+
+		/**
+		 * Fires on LT solution slug change.
+		 *
+		 * @since 0.14.0
+		 *
+		 * @param int    $post_id  The solution post ID.
+		 * @param string $new_slug The new solution slug.
+		 * @param string $old_slug The old solution slug.
+		 */
+		do_action( 'pixelgradelt_retailer/ltsolution/slug_change', $post_ID, $post_after->post_name, $post_before->post_name );
+	}
+
+	/**
+	 * Add post note on LT solution slug change.
+	 *
+	 * @since 0.14.0
+	 *
+	 * @param int    $post_id  The solution post ID.
+	 * @param string $new_slug The new solution slug.
+	 * @param string $old_slug The old solution slug.
+	 */
+	protected function add_solution_slug_change_note( int $post_id, string $new_slug, string $old_slug ) {
+		$note = sprintf(
+				esc_html__( 'Solution slug (package name) changed from %1$s to %2$s.', 'pixelgradelt_retailer' ),
+				'<strong>' . $old_slug . '</strong>',
+				'<strong>' . $new_slug . '</strong>'
+		);
+
+		create_note( $post_id, $note, 'internal', true );
 	}
 
 	/**

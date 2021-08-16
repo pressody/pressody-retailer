@@ -246,7 +246,7 @@ class SolutionPostType extends AbstractHookProvider {
 	}
 
 	/**
-	 * Add system note on LT solution type change.
+	 * Add post note on LT solution type change.
 	 *
 	 * @since 0.14.0
 	 *
@@ -261,6 +261,6 @@ class SolutionPostType extends AbstractHookProvider {
 				'<strong>' . $new_type . '</strong>'
 		);
 
-		create_note( $post_id, $note, 'internal', false );
+		create_note( $post_id, $note, 'internal', true );
 	}
 }

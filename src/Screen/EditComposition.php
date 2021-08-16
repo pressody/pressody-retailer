@@ -19,6 +19,7 @@ use PixelgradeLT\Retailer\CompositionManager;
 use PixelgradeLT\Retailer\Transformer\ComposerPackageTransformer;
 use PixelgradeLT\Retailer\SolutionManager;
 use PixelgradeLT\Retailer\Utils\ArrayHelpers;
+use function Pixelgrade\WPPostNotes\create_note;
 use function PixelgradeLT\Retailer\get_setting;
 use function PixelgradeLT\Retailer\preload_rest_data;
 
@@ -64,6 +65,13 @@ class EditComposition extends AbstractHookProvider {
 	];
 
 	/**
+	 * We will use this to remember the composition corresponding to a post before the save data is actually inserted into the DB.
+	 *
+	 * @var array|null
+	 */
+	protected ?array $pre_save_composition = null;
+
+	/**
 	 * Constructor.
 	 *
 	 * @since 0.11.0
@@ -102,6 +110,9 @@ class EditComposition extends AbstractHookProvider {
 		$this->add_action( 'plugins_loaded', 'carbonfields_load' );
 		$this->add_action( 'carbon_fields_register_fields', 'attach_post_meta_fields' );
 
+		// Handle post data retention before the post is updated in the DB (like changing the status).
+		$this->add_action( 'pre_post_update', 'remember_post_composition_data', 10, 1 );
+
 		// Check that the package can be resolved with the required packages.
 		$this->add_action( 'carbon_fields_post_meta_container_saved', 'fill_hashid', 10, 2 );
 		$this->add_action( 'carbon_fields_post_meta_container_saved', 'check_required', 20, 2 );
@@ -112,6 +123,19 @@ class EditComposition extends AbstractHookProvider {
 
 		// Add a message to the post publish metabox.
 		$this->add_action( 'post_submitbox_start', 'show_publish_message' );
+
+		/*
+		 * HANDLE POST UPDATE CHANGES.
+		 */
+		$this->add_action( 'wp_after_insert_post', 'handle_post_update', 10, 3 );
+
+		/*
+		 * HANDLE AUTOMATIC POST NOTES.
+		 */
+		$this->add_action( 'pixelgradelt_retailer/ltcomposition/status_change', 'add_composition_status_change_note', 10, 3 );
+		$this->add_action( 'pixelgradelt_retailer/ltcomposition/hashid_change', 'add_composition_hashid_change_note', 10, 3 );
+		$this->add_action( 'pixelgradelt_retailer/ltcomposition/user_change', 'add_composition_user_change_note', 10, 3 );
+		$this->add_action( 'pixelgradelt_retailer/ltcomposition/required_solutions_change', 'add_composition_required_solutions_change_note', 10, 3 );
 	}
 
 	/**
@@ -151,14 +175,14 @@ class EditComposition extends AbstractHookProvider {
 			'pixelgradelt_retailer-edit-composition',
 			'_pixelgradeltRetailerEditCompositionData',
 			[
-				'editedPostId'     => get_the_ID(),
-				'editedHashId'     => $composition_data['hashid'],
-				'encryptedLTDetails'    => $encrypted_ltdetails,
-				'solutionIds'      => $solutionsIds,
-				'solutionContexts' => $solutionsContext,
+				'editedPostId'             => get_the_ID(),
+				'editedHashId'             => $composition_data['hashid'],
+				'encryptedLTDetails'       => $encrypted_ltdetails,
+				'solutionIds'              => $solutionsIds,
+				'solutionContexts'         => $solutionsContext,
 				'ltrecordsCompositionsUrl' => 'https://lt-records.local/wp-json/pixelgradelt_records/v1/compositions',
-				'ltrecordsApiKey' => get_setting( 'ltrecords-api-key' ),
-				'ltrecordsApiPwd' => self::LTRECORDS_API_PWD,
+				'ltrecordsApiKey'          => get_setting( 'ltrecords-api-key' ),
+				'ltrecordsApiPwd'          => self::LTRECORDS_API_PWD,
 			]
 		);
 
@@ -187,10 +211,10 @@ Under normal circumstances, <strong>compositions are created and details updated
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<strong>LT Records will query LT Retailer</strong> to check and provide update instructions, based on the information below.</em>', 'pixelgradelt_retailer' ) ) ),
 
 			         Field::make( 'select', 'composition_status', __( 'Composition Status', 'pixelgradelt_retailer' ) )
-			              ->set_help_text( __( 'The composition status will determine if and when this composition is available to be used on sites.' , 'pixelgradelt_retailer' ) )
-			              ->add_options( ArrayHelpers::array_map_assoc( function( $key, $status ) {
-			              	// Construct the options from the global composition statuses.
-			              	return [ $status['id'] => $status['label'] . ' (' . $status['desc'] . ')' ];
+			              ->set_help_text( __( 'The composition status will determine if and when this composition is available to be used on sites.', 'pixelgradelt_retailer' ) )
+			              ->add_options( ArrayHelpers::array_map_assoc( function ( $key, $status ) {
+				              // Construct the options from the global composition statuses.
+				              return [ $status['id'] => $status['label'] . ' (' . $status['desc'] . ')' ];
 			              }, CompositionManager::$STATUSES ) )
 			              ->set_default_value( 'not_ready' )
 			              ->set_required( true )
@@ -373,6 +397,22 @@ Since each solution is tied to a e-commerce product, each solution here is tied 
 	}
 
 	/**
+	 * Given a post ID, find and remember the composition data corresponding to it.
+	 *
+	 * @since 0.14.0
+	 *
+	 * @param int $post_id
+	 */
+	protected function remember_post_composition_data( int $post_id ) {
+		$composition_data = $this->composition_manager->get_composition_id_data( $post_id );
+		if ( empty( $composition_data ) ) {
+			return;
+		}
+
+		$this->pre_save_composition = $composition_data;
+	}
+
+	/**
 	 *
 	 * @since 0.11.0
 	 *
@@ -498,5 +538,255 @@ Since each solution is tied to a e-commerce product, each solution here is tied 
 			$this->user_messages[ $type ] = [];
 		}
 		$this->user_messages[ $type ][] = $message;
+	}
+
+	/**
+	 * Handle post update changes.
+	 *
+	 * @since 0.14.0
+	 *
+	 * @param int      $post_id Post ID.
+	 * @param \WP_Post $post    Post object.
+	 * @param bool     $update  Whether this is an existing post being updated.
+	 */
+	protected function handle_post_update( int $post_id, \WP_Post $post, bool $update ) {
+		if ( ! $update ) {
+			return;
+		}
+		// If we don't have the pre-update composition data, we have nothing to compare to.
+		if ( empty( $this->pre_save_composition ) ) {
+			return;
+		}
+		$old_composition = $this->pre_save_composition;
+
+		$current_composition = $this->composition_manager->get_composition_id_data( $post_id );
+		if ( empty( $current_composition ) ) {
+			return;
+		}
+
+		// Handle composition status change.
+		if ( ! empty( $old_composition['status'] ) && $old_composition['status'] !== $current_composition['status'] ) {
+			/**
+			 * Fires on LT composition status change.
+			 *
+			 * @since 0.14.0
+			 *
+			 * @param int    $post_id         The composition post ID.
+			 * @param string $new_status      The new composition status.
+			 * @param string $old_status      The old composition status.
+			 * @param array  $new_composition The new composition data.
+			 */
+			do_action( 'pixelgradelt_retailer/ltcomposition/status_change',
+				$post_id,
+				$current_composition['status'],
+				$old_composition['status'],
+				$current_composition
+			);
+		}
+
+		// Handle composition hashid change.
+		if ( ! empty( $old_composition['hashid'] ) && $old_composition['hashid'] !== $current_composition['hashid'] ) {
+			/**
+			 * Fires on LT composition hashid change.
+			 *
+			 * @since 0.14.0
+			 *
+			 * @param int    $post_id         The composition post ID.
+			 * @param string $new_hashid      The new composition hashid.
+			 * @param string $old_hashid      The old composition hashid.
+			 * @param array  $new_composition The new composition data.
+			 */
+			do_action( 'pixelgradelt_retailer/ltcomposition/hashid_change',
+				$post_id,
+				$current_composition['hashid'],
+				$old_composition['hashid'],
+				$current_composition
+			);
+		}
+
+		// Handle composition user details changes.
+		if ( count( array_diff_assoc( $old_composition['user'], $current_composition['user'] ) ) ) {
+			/**
+			 * Fires on LT composition user details change.
+			 *
+			 * @since 0.14.0
+			 *
+			 * @param int   $post_id         The composition post ID.
+			 * @param array $new_user        The new composition user details.
+			 * @param array $old_user        The old composition user details.
+			 * @param array $new_composition The new composition data.
+			 */
+			do_action( 'pixelgradelt_retailer/ltcomposition/user_change',
+				$post_id,
+				$current_composition['user'],
+				$old_composition['user'],
+				$current_composition
+			);
+		}
+
+		// Handle composition required solutions changes.
+		// We are only interested in actual solutions changes, not slug or context details changes.
+		// That is why we will only look at the required solution post ID (managed_post_id).
+		$old_required_solutions          = ArrayHelpers::array_map_assoc( function ( $key, $solution ) {
+			// If we return the post ID as the key (as we would like), the key will be lost since it's numeric.
+			return [ $solution['slug'] => $solution['managed_post_id'] ];
+		}, $old_composition['required_solutions'] );
+		$old_required_solutions = array_flip( $old_required_solutions );
+		$old_required_solutions_post_ids = array_keys( $old_required_solutions );
+		sort( $old_required_solutions_post_ids );
+
+		$current_required_solutions          = ArrayHelpers::array_map_assoc( function ( $key, $solution ) {
+			// If we return the post ID as the key (as we would like), the key will be lost since it's numeric.
+			return [ $solution['slug'] => $solution['managed_post_id'] ];
+		}, $current_composition['required_solutions'] );
+		$current_required_solutions = array_flip( $current_required_solutions );
+		$current_required_solutions_post_ids = array_keys( $current_required_solutions );
+		sort( $current_required_solutions_post_ids );
+
+		if ( serialize( $old_required_solutions_post_ids ) !== serialize( $current_required_solutions_post_ids ) ) {
+			/**
+			 * Fires on LT composition required solutions change (post ID changes).
+			 *
+			 * @since 0.14.0
+			 *
+			 * @param int   $post_id                The composition post ID.
+			 * @param array $new_required_solutions The new composition required_solutions.
+			 * @param array $old_required_solutions The old composition required_solutions.
+			 * @param array $new_composition        The new composition data.
+			 */
+			do_action( 'pixelgradelt_retailer/ltcomposition/required_solutions_change',
+				$post_id,
+				$current_required_solutions,
+				$old_required_solutions,
+				$current_composition
+			);
+		}
+	}
+
+	/**
+	 * Add post note on LT composition status change.
+	 *
+	 * @since 0.14.0
+	 *
+	 * @param int    $post_id    The composition post ID.
+	 * @param string $new_status The new composition status.
+	 * @param string $old_status The old composition status.
+	 */
+	protected function add_composition_status_change_note( int $post_id, string $new_status, string $old_status ) {
+		$note = sprintf(
+			esc_html__( 'Composition status changed from %1$s to %2$s.', 'pixelgradelt_retailer' ),
+			'<strong>' . $old_status . '</strong>',
+			'<strong>' . $new_status . '</strong>'
+		);
+
+		create_note( $post_id, $note, 'internal', true );
+	}
+
+	/**
+	 * Add post note on LT composition hashid change.
+	 *
+	 * @since 0.14.0
+	 *
+	 * @param int    $post_id    The composition post ID.
+	 * @param string $new_hashid The new composition hashid.
+	 * @param string $old_hashid The old composition hashid.
+	 */
+	protected function add_composition_hashid_change_note( int $post_id, string $new_hashid, string $old_hashid ) {
+		$note = sprintf(
+			esc_html__( 'Composition hashid changed from %1$s to %2$s.', 'pixelgradelt_retailer' ),
+			'<strong>' . $old_hashid . '</strong>',
+			'<strong>' . $new_hashid . '</strong>'
+		);
+
+		create_note( $post_id, $note, 'internal', true );
+	}
+
+	/**
+	 * Add post note on LT composition user change.
+	 *
+	 * @since 0.14.0
+	 *
+	 * @param int   $post_id  The composition post ID.
+	 * @param array $new_user The new composition user details.
+	 * @param array $old_user The old composition user details.
+	 */
+	protected function add_composition_user_change_note( int $post_id, array $new_user, array $old_user ) {
+		$note = '';
+		if ( $new_user['id'] !== $old_user['id'] ) {
+			$note .= sprintf(
+				esc_html__( 'Composition user ID changed from %1$s to %2$s. ', 'pixelgradelt_retailer' ),
+				'<strong>' . $old_user['id'] . '</strong>',
+				'<strong>' . $new_user['id'] . '</strong>'
+			);
+		}
+
+		if ( $new_user['email'] !== $old_user['email'] ) {
+			$note .= sprintf(
+				esc_html__( 'Composition user email changed from %1$s to %2$s. ', 'pixelgradelt_retailer' ),
+				'<strong>' . $old_user['email'] . '</strong>',
+				'<strong>' . $new_user['email'] . '</strong>'
+			);
+		}
+
+		if ( $new_user['username'] !== $old_user['username'] ) {
+			$note .= sprintf(
+				esc_html__( 'Composition user username changed from %1$s to %2$s. ', 'pixelgradelt_retailer' ),
+				'<strong>' . $old_user['username'] . '</strong>',
+				'<strong>' . $new_user['username'] . '</strong>'
+			);
+		}
+
+		if ( ! empty( trim( $note ) ) ) {
+			create_note( $post_id, $note, 'internal', true );
+		}
+	}
+
+	/**
+	 * Add post note on LT composition required solutions change.
+	 *
+	 * @since 0.14.0
+	 *
+	 * @param int   $post_id                The composition post ID.
+	 * @param array $new_required_solutions The new composition required_solutions.
+	 * @param array $old_required_solutions The old composition required_solutions.
+	 */
+	protected function add_composition_required_solutions_change_note( int $post_id, array $new_required_solutions, array $old_required_solutions ) {
+		$old_required_solutions_post_ids = array_keys( $old_required_solutions );
+		sort( $old_required_solutions_post_ids );
+
+		$new_required_solutions_post_ids = array_keys( $new_required_solutions );
+		sort( $new_required_solutions_post_ids );
+
+		$added   = array_diff( $new_required_solutions_post_ids, $old_required_solutions_post_ids );
+		$removed = array_diff( $old_required_solutions_post_ids, $new_required_solutions_post_ids );
+
+		$note = '';
+		if ( ! empty( $removed ) ) {
+			$removed_list = [];
+			foreach ( $removed as $removed_post_id ) {
+				$removed_list[] = $old_required_solutions[ $removed_post_id ] . $this->composition_manager::PSEUDO_ID_DELIMITER . $removed_post_id;
+			}
+
+			$note .= sprintf(
+				esc_html__( 'Removed these contained solutions: %1$s. ', 'pixelgradelt_retailer' ),
+				'<strong>' . implode( ', ', $removed_list ) . '</strong>'
+			);
+		}
+
+		if ( ! empty( $added ) ) {
+			$added_list = [];
+			foreach ( $added as $added_post_id ) {
+				$added_list[] = $new_required_solutions[ $added_post_id ] . $this->composition_manager::PSEUDO_ID_DELIMITER . $added_post_id;
+			}
+
+			$note .= sprintf(
+				esc_html__( 'Added the following solutions: %1$s. ', 'pixelgradelt_retailer' ),
+				'<strong>' . implode( ', ', $added_list ) . '</strong>'
+			);
+		}
+
+		if ( ! empty( trim( $note ) ) ) {
+			create_note( $post_id, $note, 'internal', true );
+		}
 	}
 }
