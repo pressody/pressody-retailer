@@ -321,7 +321,7 @@ Learn more about Composer <a href="https://getcomposer.org/doc/articles/versions
 				         Field::make( 'complex', 'solution_required_parts', __( 'Required Parts', 'pixelgradelt_retailer' ) )
 				              ->set_help_text( __( 'The order is not important, from a logic standpoint. Also, if you add <strong>the same part multiple times</strong> only the last one will take effect since it will overwrite the previous ones.<br>
 LT Records Parts don\'t have a <code>stability</code> field because we want to <strong>control the stability at a composition level</strong> (the global site level).<br>
-<strong>FYI:</strong> Each required part label is comprised of the standardized <code>package_name</code> and the <code>#post_id</code>.', 'pixelgradelt_retailer' ) )
+<strong>FYI:</strong> Each required part label is comprised of the standardized <code>package_name</code> and the <code>version range</code>.', 'pixelgradelt_retailer' ) )
 				              ->set_classes( 'solution-required-solutions solution-required-parts' )
 				              ->set_collapsed( true )
 				              ->add_fields( [
