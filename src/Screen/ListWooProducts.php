@@ -4,7 +4,7 @@
  *
  * @package PixelgradeLT
  * @license GPL-2.0-or-later
- * @since 0.1.0
+ * @since 0.14.0
  */
 
 declare ( strict_types = 1 );
@@ -12,56 +12,71 @@ declare ( strict_types = 1 );
 namespace PixelgradeLT\Retailer\Screen;
 
 use Cedaro\WP\Plugin\AbstractHookProvider;
-use PixelgradeLT\Retailer\Capabilities;
-use PixelgradeLT\Retailer\Repository\PackageRepository;
+use PixelgradeLT\Retailer\SolutionManager;
+use PixelgradeLT\Retailer\Utils\ArrayHelpers;
 
 /**
  * WooCommerce products list screen provider class.
  *
- * @since 0.1.0
+ * @since 0.14.0
  */
 class ListWooProducts extends AbstractHookProvider {
 	/**
-	 * Solutions repository.
+	 * Solution manager.
 	 *
-	 * @var PackageRepository
+	 * @var SolutionManager
 	 */
-	protected PackageRepository $repository;
+	protected SolutionManager $solution_manager;
 
 	/**
-	 * Create the WooCommerce products list screen provider.
+	 * Constructor.
 	 *
-	 * @param PackageRepository $repository Solutions repository.
+	 * @since 0.14.0
+	 *
+	 * @param SolutionManager $solution_manager Solutions manager.
 	 */
-	public function __construct( PackageRepository $repository ) {
-		$this->repository = $repository;
+	public function __construct(
+		SolutionManager $solution_manager
+	) {
+		$this->solution_manager = $solution_manager;
 	}
 
 	/**
 	 * Register hooks.
 	 *
-	 * @since 0.1.0
+	 * @since 0.14.0
 	 */
 	public function register_hooks() {
-		if ( is_multisite() ) {
-			add_filter( 'manage_plugins-network_columns', [ $this, 'register_columns' ] );
-		} else {
-			add_filter( 'manage_plugins_columns', [ $this, 'register_columns' ] );
+		// Assets.
+		add_action( 'load-edit.php', [ $this, 'load_screen' ] );
+
+		// Add custom columns to post list.
+		$this->add_action( 'manage_product_posts_columns', 'add_custom_columns' );
+		$this->add_action( 'manage_product_posts_custom_column', 'populate_custom_columns', 10, 2 );
+	}
+
+	/**
+	 * Set up the screen.
+	 *
+	 * @since 0.14.0
+	 */
+	public function load_screen() {
+		$screen = get_current_screen();
+		if ( 'product' !== $screen->post_type ) {
+			return;
 		}
 
 		add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_assets' ] );
-		add_action( 'manage_plugins_custom_column', [ $this, 'display_columns' ], 10, 2 );
 	}
 
 	/**
 	 * Enqueue assets for the screen.
 	 *
-	 * @since 0.1.0
-	 *
-	 * @param string $hook_suffix Screen hook id.
+	 * @since 0.14.0
 	 */
-	public function enqueue_assets( string $hook_suffix ) {
-		if ( 'plugins.php' !== $hook_suffix ) {
+	public function enqueue_assets() {
+		$screen = get_current_screen();
+		if ( 'product' !== $screen->post_type ) {
 			return;
 		}
 
@@ -70,43 +85,46 @@ class ListWooProducts extends AbstractHookProvider {
 	}
 
 	/**
-	 * Register admin columns.
+	 * @since 0.14.0
 	 *
-	 * @since 0.1.0
+	 * @param array $columns
 	 *
-	 * @param array $columns List of admin columns.
 	 * @return array
 	 */
-	public function register_columns( array $columns ): array {
-		if ( current_user_can( Capabilities::MANAGE_OPTIONS ) ) {
-			$columns['pixelgradelt_retailer'] = 'LT Solution Source';
+	protected function add_custom_columns( array $columns ): array {
+		$screen = get_current_screen();
+		if ( 'product' !== $screen->post_type ) {
+			return $columns;
 		}
+
+		// Insert after the tags column.
+		$columns = ArrayHelpers::insertAfterKey( $columns, 'product_tag',
+			[
+				'linked_ltsolution' => esc_html__( 'Linked LT Solution', 'pixelgradelt_retailer' ),
+			]
+		);
 
 		return $columns;
 	}
 
 	/**
-	 * Display admin columns.
+	 * @since 0.14.0
 	 *
-	 * @since 0.1.0
-	 *
-	 * @throws \Exception If package type not known.
-	 *
-	 * @param string $column_name Column identifier.
-	 * @param string $plugin_file Plugin file basename.
+	 * @param string $column
+	 * @param int    $post_id
 	 */
-	public function display_columns( string $column_name, string $plugin_file ) {
-		if ( 'pixelgradelt_retailer' !== $column_name ) {
+	protected function populate_custom_columns( string $column, int $post_id ): void {
+		if ( ! in_array( $column, [ 'linked_ltsolution', ] ) ) {
 			return;
 		}
 
-		$output = '<span>';
-		if ( $this->repository->contains( [ 'slug' => $plugin_file ] ) ) {
-			$output .= '<span class="dashicons dashicons-yes-alt wp-ui-text-highlight"></span>';
-		} else {
-			$output .= '&nbsp;';
+		$output = '—';
+		// Find a solution that is linked to this product. Since a product can only be linked to only one solution, we are safe.
+		$solution_id = $this->solution_manager->get_solution_ids_by( ['woocommerce_product_id' => $post_id ] );
+		if ( ! empty( $solution_id ) ) {
+			$solution_id = reset( $solution_id );
+			$output = '<a class="package-list_link" href="' . esc_url( get_edit_post_link( $solution_id ) ) . '" title="Edit LT Solution">' . get_the_title( $solution_id ) . ' #' . $solution_id . '</a>';
 		}
-		$output .= '</span>';
 
 		echo $output;
 	}

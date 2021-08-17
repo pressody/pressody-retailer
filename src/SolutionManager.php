@@ -358,6 +358,16 @@ class SolutionManager {
 			$query_args['post_status'] = $args['post_status'];
 		}
 
+		/**
+		 * Filters the solution IDs query args.
+		 *
+		 * @since 0.14.0
+		 *
+		 * @param array $query_args The query args.
+		 * @param array $args       The received args.
+		 */
+		$query_args = apply_filters( 'pixelgradelt_retailer/solution_ids_by_query_args', $query_args, $args );
+
 		$query       = new \WP_Query( $query_args );
 		$package_ids = $query->get_posts();
 

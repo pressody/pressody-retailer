@@ -359,7 +359,7 @@ class ServiceProvider implements ServiceProviderInterface {
 		};
 
 		$container['screen.list_wooproducts'] = function ( $container ) {
-			return new Screen\ListWooProducts( $container['repository.solutions'] );
+			return new Screen\ListWooProducts( $container['solution.manager'] );
 		};
 
 		$container['screen.settings'] = function ( $container ) {

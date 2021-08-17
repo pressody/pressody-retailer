@@ -28,6 +28,7 @@ class WooCommerce extends AbstractHookProvider {
 	 */
 	public function register_hooks() {
 		$this->add_filter( 'pixelgradelt_retailer/solution_id_data', 'add_solution_data', 5, 2 );
+		$this->add_filter( 'pixelgradelt_retailer/solution_ids_by_query_args', 'handle_solution_query_args', 10, 2 );
 	}
 
 	/**
@@ -50,5 +51,29 @@ class WooCommerce extends AbstractHookProvider {
 		$solution_data['woocommerce_products_raw'] = carbon_get_raw_post_meta( $post_id, 'solution_woocommerce_products' );
 
 		return $solution_data;
+	}
+
+	/**
+	 * Handle WooCommerce specific solution query args.
+	 *
+	 * @since 0.14.0
+	 *
+	 * @param array $query_args The query args.
+	 * @param array $args       The received args.
+	 *
+	 * @return array The modified solution ID data.
+	 */
+	protected function handle_solution_query_args( array $query_args, array $args ): array {
+		if ( ! empty( $args['woocommerce_product_id'] ) && 'any' !== $args['woocommerce_product_id'] && is_numeric( $args['woocommerce_product_id'] ) ) {
+
+			$args['woocommerce_product_id'] = absint( $args['woocommerce_product_id'] );
+
+			$query_args['meta_query'][] = [
+				'key' => 'solution_woocommerce_products',
+				'value' => $args['woocommerce_product_id'],
+			];
+		}
+
+		return $query_args;
 	}
 }
