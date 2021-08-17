@@ -15,7 +15,6 @@ use Cedaro\WP\Plugin\AbstractHookProvider;
 use Pixelgrade\WPPostNotes\PostNotes;
 use PixelgradeLT\Retailer\SolutionType\SolutionTypes;
 use PixelgradeLT\Retailer\SolutionManager;
-use function Pixelgrade\WPPostNotes\create_note;
 
 /**
  * The Solution custom post type provider: provides the interface for and stores the information about each solution.
@@ -68,11 +67,6 @@ class SolutionPostType extends AbstractHookProvider {
 		$this->add_action( 'init', 'register_solution_keyword_taxonomy', 18 );
 
 		$this->add_action( 'save_post_' . $this->solution_manager::POST_TYPE, 'save_solution_type_meta_box' );
-
-		/*
-		 * HANDLE AUTOMATIC POST NOTES.
-		 */
-		$this->add_action( 'pixelgradelt_retailer/ltsolution/type_change', 'add_solution_type_change_note', 10, 3 );
 	}
 
 	/**
@@ -228,39 +222,6 @@ class SolutionPostType extends AbstractHookProvider {
 		$term = get_term_by( 'slug', $solution_type, $this->solution_manager::TYPE_TAXONOMY );
 		if ( ! empty( $term ) && ! is_wp_error( $term ) ) {
 			wp_set_object_terms( $post_id, $term->term_id, $this->solution_manager::TYPE_TAXONOMY, false );
-
-			// We don't want to trigger the action on solution creation, only on change.
-			if ( ! empty( $current_solution_type ) ) {
-				/**
-				 * Fires on LT solution type change.
-				 *
-				 * @since 0.14.0
-				 *
-				 * @param int    $post_id  The solution post ID.
-				 * @param string $new_type The new solution type slug.
-				 * @param string $old_type The old solution type slug.
-				 */
-				do_action( 'pixelgradelt_retailer/ltsolution/type_change', $post_id, $solution_type, $current_solution_type );
-			}
 		}
-	}
-
-	/**
-	 * Add post note on LT solution type change.
-	 *
-	 * @since 0.14.0
-	 *
-	 * @param int    $post_id  The solution post ID.
-	 * @param string $new_type The new solution type slug.
-	 * @param string $old_type The old solution type slug.
-	 */
-	protected function add_solution_type_change_note( int $post_id, string $new_type, string $old_type ) {
-		$note = sprintf(
-				esc_html__( 'Solution type changed from %1$s to %2$s.', 'pixelgradelt_retailer' ),
-				'<strong>' . $old_type . '</strong>',
-				'<strong>' . $new_type . '</strong>'
-		);
-
-		create_note( $post_id, $note, 'internal', true );
 	}
 }

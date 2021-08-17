@@ -466,7 +466,28 @@ Since each solution is tied to a e-commerce product, each solution here is tied 
 	}
 
 	/**
+	 * Add a certain user message type to the list for later display.
+	 *
+	 * @since 0.11.0
+	 *
+	 * @param $type
+	 * @param $message
+	 */
+	protected function add_user_message( $type, $message ) {
+		if ( ! in_array( $type, [ 'error', 'warning', 'info' ] ) ) {
+			return;
+		}
+
+		if ( empty( $this->user_messages[ $type ] ) ) {
+			$this->user_messages[ $type ] = [];
+		}
+		$this->user_messages[ $type ][] = $message;
+	}
+
+	/**
 	 * Display user messages at the top of the post edit screen.
+	 *
+	 * @since 0.11.0
 	 *
 	 * @param \WP_Post The current post object.
 	 */
@@ -508,6 +529,8 @@ Since each solution is tied to a e-commerce product, each solution here is tied 
 	/**
 	 * Display a message above the post publish actions.
 	 *
+	 * @since 0.11.0
+	 *
 	 * @param \WP_Post The current post object.
 	 */
 	protected function show_publish_message( \WP_Post $post ) {
@@ -519,25 +542,6 @@ Since each solution is tied to a e-commerce product, each solution here is tied 
 			'<div class="message patience"><p>%s</p></div>',
 			wp_kses_post( __( 'Please bear in mind that Publish/Update may take a while since we do some heavy lifting behind the scenes.<br>Exercise patience 🦉', 'pixelgradelt_retailer' ) )
 		);
-	}
-
-	/**
-	 * Add a certain user message type to the list for later display.
-	 *
-	 * @since 0.11.0
-	 *
-	 * @param $type
-	 * @param $message
-	 */
-	protected function add_user_message( $type, $message ) {
-		if ( ! in_array( $type, [ 'error', 'warning', 'info' ] ) ) {
-			return;
-		}
-
-		if ( empty( $this->user_messages[ $type ] ) ) {
-			$this->user_messages[ $type ] = [];
-		}
-		$this->user_messages[ $type ][] = $message;
 	}
 
 	/**
@@ -631,7 +635,7 @@ Since each solution is tied to a e-commerce product, each solution here is tied 
 			// If we return the post ID as the key (as we would like), the key will be lost since it's numeric.
 			return [ $solution['slug'] => $solution['managed_post_id'] ];
 		}, $old_composition['required_solutions'] );
-		$old_required_solutions = array_flip( $old_required_solutions );
+		$old_required_solutions          = array_flip( $old_required_solutions );
 		$old_required_solutions_post_ids = array_keys( $old_required_solutions );
 		sort( $old_required_solutions_post_ids );
 
@@ -639,7 +643,7 @@ Since each solution is tied to a e-commerce product, each solution here is tied 
 			// If we return the post ID as the key (as we would like), the key will be lost since it's numeric.
 			return [ $solution['slug'] => $solution['managed_post_id'] ];
 		}, $current_composition['required_solutions'] );
-		$current_required_solutions = array_flip( $current_required_solutions );
+		$current_required_solutions          = array_flip( $current_required_solutions );
 		$current_required_solutions_post_ids = array_keys( $current_required_solutions );
 		sort( $current_required_solutions_post_ids );
 
@@ -661,6 +665,21 @@ Since each solution is tied to a e-commerce product, each solution here is tied 
 				$current_composition
 			);
 		}
+
+		/**
+		 * Fires on LT composition update, after the individual change hooks have been fired.
+		 *
+		 * @since 0.14.0
+		 *
+		 * @param int   $post_id         The composition post ID.
+		 * @param array $new_composition The new composition data.
+		 * @param array $old_composition The old composition data.
+		 */
+		do_action( 'pixelgradelt_retailer/ltcomposition/update',
+			$post_id,
+			$current_composition,
+			$old_composition
+		);
 	}
 
 	/**

@@ -385,6 +385,7 @@ class SolutionManager {
 
 		$data['is_managed']      = true;
 		$data['managed_post_id'] = $post_ID;
+		$data['visibility']      = $this->get_post_solution_visibility( $post_ID );
 
 		$data['name']        = $this->get_post_solution_name( $post_ID );
 		$data['type']        = $this->get_post_solution_type( $post_ID );
@@ -399,7 +400,15 @@ class SolutionManager {
 		$data['excluded_solutions']       = $this->get_post_solution_excluded_solutions( $post_ID );
 		$data['composer_require']         = $this->get_post_solution_composer_require( $post_ID );
 
-		return $data;
+		/**
+		 * Filters the solution ID data.
+		 *
+		 * @since 0.14.0
+		 *
+		 * @param array $solution_data The solution data.
+		 * @param int   $post_id       The solution post ID.
+		 */
+		return apply_filters( 'pixelgradelt_retailer/solution_id_data', $data, $post_ID );
 	}
 
 	/**
@@ -438,6 +447,25 @@ class SolutionManager {
 		$found_solution_id = reset( $found_solution_id );
 
 		return $this->get_solution_id_data( $found_solution_id );
+	}
+
+	/**
+	 * @since 0.14.0
+	 *
+	 * @param int $post_ID
+	 *
+	 * @return string
+	 */
+	public function get_post_solution_visibility( int $post_ID ): string {
+		switch ( \get_post_status( $post_ID ) ) {
+			case 'publish':
+				return 'public';
+			case 'draft':
+				return 'draft';
+			case 'private':
+			default:
+				return 'private';
+		}
 	}
 
 	public function get_post_solution_name( int $post_ID ): string {
@@ -766,15 +794,7 @@ class SolutionManager {
 			return 'public';
 		}
 
-		switch ( \get_post_status( $solution->get_managed_post_id() ) ) {
-			case 'publish':
-				return 'public';
-			case 'draft':
-				return 'draft';
-			case 'private':
-			default:
-				return 'private';
-		}
+		return $this->get_post_solution_visibility( $solution->get_managed_post_id() );
 	}
 
 	public function solution_name_to_composer_package_name( string $name ): ?string {

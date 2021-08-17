@@ -71,7 +71,12 @@ class Plugin extends BasePlugin implements Composable {
 				->register_hooks( $container->get( 'screen.list_solutions' ) );
 		}
 
-		if ( \function_exists( 'members_plugin' ) ) {
+		if ( \function_exists( '\WC' ) ) {
+			$this->register_hooks( $container->get( 'plugin.woocommerce' ) );
+			$this->register_hooks( $container->get( 'plugin.woocommerce.screen.edit_solution' ) );
+		}
+
+		if ( \function_exists( '\members_plugin' ) ) {
 			$this->register_hooks( $container->get( 'plugin.members' ) );
 		}
 

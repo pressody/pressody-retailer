@@ -18,6 +18,7 @@ use Cedaro\WP\Plugin\AbstractHookProvider;
 use PixelgradeLT\Retailer\Transformer\ComposerPackageTransformer;
 use PixelgradeLT\Retailer\SolutionManager;
 use PixelgradeLT\Retailer\Repository\PackageRepository;
+use PixelgradeLT\Retailer\Utils\ArrayHelpers;
 use function Pixelgrade\WPPostNotes\create_note;
 use function PixelgradeLT\Retailer\get_solutions_permalink;
 use function PixelgradeLT\Retailer\preload_rest_data;
@@ -62,6 +63,13 @@ class EditSolution extends AbstractHookProvider {
 			'warning' => [],
 			'info'    => [],
 	];
+
+	/**
+	 * We will use this to remember the solution corresponding to a post before the save data is actually inserted into the DB.
+	 *
+	 * @var array|null
+	 */
+	protected ?array $pre_save_solution = null;
 
 	/**
 	 * Constructor.
@@ -112,8 +120,8 @@ class EditSolution extends AbstractHookProvider {
 		$this->add_action( 'plugins_loaded', 'carbonfields_load' );
 		$this->add_action( 'carbon_fields_register_fields', 'attach_post_meta_fields' );
 
-		// Handle changes to the slug - things that affect dependants (things like slug/package name change that is saved in pseudo_ids).
-		$this->add_action( 'post_updated', 'on_slug_change', 3, 3 );
+		// Handle post data retention before the post is updated in the DB.
+		$this->add_action( 'pre_post_update', 'remember_post_solution_data', 10, 1 );
 
 		// Check that the package can be resolved with the required packages.
 		$this->add_action( 'carbon_fields_post_meta_container_saved', 'check_required', 20, 2 );
@@ -128,9 +136,20 @@ class EditSolution extends AbstractHookProvider {
 		$this->add_action( 'post_submitbox_start', 'show_publish_message' );
 
 		/*
+		 * HANDLE POST UPDATE CHANGES.
+		 */
+		$this->add_action( 'wp_after_insert_post', 'handle_post_update', 10, 3 );
+		// Handle changes to the slug - things that affect dependants (things like slug/package name change that is saved in pseudo_ids).
+		$this->add_action( 'pixelgradelt_retailer/ltsolution/slug_change', 'on_slug_change', 5, 3 );
+
+		/*
 		 * HANDLE AUTOMATIC POST NOTES.
 		 */
+		$this->add_action( 'pixelgradelt_retailer/ltsolution/visibility_change', 'add_solution_visibility_change_note', 10, 3 );
+		$this->add_action( 'pixelgradelt_retailer/ltsolution/type_change', 'add_solution_type_change_note', 10, 3 );
 		$this->add_action( 'pixelgradelt_retailer/ltsolution/slug_change', 'add_solution_slug_change_note', 10, 3 );
+		$this->add_action( 'pixelgradelt_retailer/ltsolution/required_solutions_change', 'add_solution_required_solutions_change_note', 10, 3 );
+		$this->add_action( 'pixelgradelt_retailer/ltsolution/excluded_solutions_change', 'add_solution_excluded_solutions_change_note', 10, 3 );
 	}
 
 	/**
@@ -440,71 +459,19 @@ The excluded solutions only take effect in <strong>a purchase context (add to ca
 	}
 
 	/**
-	 * If the slug/package name changes, we need to update things like the pseudo IDs meta-data for dependants.
-	 *
-	 * @since 0.13.0
-	 *
-	 * @param int      $post_ID     Post ID.
-	 * @param \WP_Post $post_after  Post object following the update.
-	 * @param \WP_Post $post_before Post object before the update.
-	 */
-	protected function on_slug_change( int $post_ID, \WP_Post $post_after, \WP_Post $post_before ) {
-		if ( $this->solution_manager::POST_TYPE !== get_post_type( $post_ID ) ) {
-			return;
-		}
-
-		// Determine if the slug hasn't changed. Bail if so.
-		if ( $post_after->post_name === $post_before->post_name ) {
-			return;
-		}
-
-		// We have work to do.
-
-		// At the moment, we are only interested in certain meta entries.
-		// Replace pseudo IDs.
-		$prev_solution_pseudo_id = $post_before->post_name . $this->solution_manager::PSEUDO_ID_DELIMITER . $post_ID;
-		$new_solution_pseudo_id = $post_after->post_name . $this->solution_manager::PSEUDO_ID_DELIMITER . $post_ID;
-
-		global $wpdb;
-		$wpdb->get_results( $wpdb->prepare( "
-UPDATE $wpdb->postmeta m
-JOIN $wpdb->posts p ON m.post_id = p.ID
-SET m.meta_value = REPLACE(m.meta_value, %s, %s)
-WHERE m.meta_key LIKE '%pseudo_id%' AND p.post_type <> 'revision'", $prev_solution_pseudo_id, $new_solution_pseudo_id ) );
-
-		// Flush the entire cache since we don't know what post IDs might have been affected.
-		// It is OK since this is a rare operation.
-		wp_cache_flush();
-
-		/**
-		 * Fires on LT solution slug change.
-		 *
-		 * @since 0.14.0
-		 *
-		 * @param int    $post_id  The solution post ID.
-		 * @param string $new_slug The new solution slug.
-		 * @param string $old_slug The old solution slug.
-		 */
-		do_action( 'pixelgradelt_retailer/ltsolution/slug_change', $post_ID, $post_after->post_name, $post_before->post_name );
-	}
-
-	/**
-	 * Add post note on LT solution slug change.
+	 * Given a post ID, find and remember the solution data corresponding to it.
 	 *
 	 * @since 0.14.0
 	 *
-	 * @param int    $post_id  The solution post ID.
-	 * @param string $new_slug The new solution slug.
-	 * @param string $old_slug The old solution slug.
+	 * @param int $post_id
 	 */
-	protected function add_solution_slug_change_note( int $post_id, string $new_slug, string $old_slug ) {
-		$note = sprintf(
-				esc_html__( 'Solution slug (package name) changed from %1$s to %2$s.', 'pixelgradelt_retailer' ),
-				'<strong>' . $old_slug . '</strong>',
-				'<strong>' . $new_slug . '</strong>'
-		);
+	protected function remember_post_solution_data( int $post_id ) {
+		$solution_data = $this->solution_manager->get_solution_id_data( $post_id );
+		if ( empty( $solution_data ) ) {
+			return;
+		}
 
-		create_note( $post_id, $note, 'internal', true );
+		$this->pre_save_solution = $solution_data;
 	}
 
 	/**
@@ -672,7 +639,28 @@ WHERE m.meta_key LIKE '%pseudo_id%' AND p.post_type <> 'revision'", $prev_soluti
 	}
 
 	/**
+	 * Add a certain user message type to the list for later display.
+	 *
+	 * @since 0.1.0
+	 *
+	 * @param $type
+	 * @param $message
+	 */
+	protected function add_user_message( $type, $message ) {
+		if ( ! in_array( $type, [ 'error', 'warning', 'info' ] ) ) {
+			return;
+		}
+
+		if ( empty( $this->user_messages[ $type ] ) ) {
+			$this->user_messages[ $type ] = [];
+		}
+		$this->user_messages[ $type ][] = $message;
+	}
+
+	/**
 	 * Display user messages at the top of the post edit screen.
+	 *
+	 * @since 0.1.0
 	 *
 	 * @param \WP_Post The current post object.
 	 */
@@ -714,6 +702,8 @@ WHERE m.meta_key LIKE '%pseudo_id%' AND p.post_type <> 'revision'", $prev_soluti
 	/**
 	 * Display a message above the post publish actions.
 	 *
+	 * @since 0.1.0
+	 *
 	 * @param \WP_Post The current post object.
 	 */
 	protected function show_publish_message( \WP_Post $post ) {
@@ -728,21 +718,411 @@ WHERE m.meta_key LIKE '%pseudo_id%' AND p.post_type <> 'revision'", $prev_soluti
 	}
 
 	/**
-	 * Add a certain user message type to the list for later display.
+	 * Handle post update changes.
 	 *
-	 * @since 0.1.0
+	 * @since 0.14.0
 	 *
-	 * @param $type
-	 * @param $message
+	 * @param int      $post_id Post ID.
+	 * @param \WP_Post $post    Post object.
+	 * @param bool     $update  Whether this is an existing post being updated.
 	 */
-	protected function add_user_message( $type, $message ) {
-		if ( ! in_array( $type, [ 'error', 'warning', 'info' ] ) ) {
+	protected function handle_post_update( int $post_id, \WP_Post $post, bool $update ) {
+		if ( ! $update ) {
+			return;
+		}
+		// If we don't have the pre-update solution data, we have nothing to compare to.
+		if ( empty( $this->pre_save_solution ) ) {
+			return;
+		}
+		$old_solution = $this->pre_save_solution;
+
+		$current_solution = $this->solution_manager->get_solution_id_data( $post_id );
+		if ( empty( $current_solution ) ) {
 			return;
 		}
 
-		if ( empty( $this->user_messages[ $type ] ) ) {
-			$this->user_messages[ $type ] = [];
+		/*
+		 * Handle solution visibility change.
+		 */
+		if ( ! empty( $old_solution['visibility'] ) && $old_solution['visibility'] !== $current_solution['visibility'] ) {
+			/**
+			 * Fires on LT solution visibility change.
+			 *
+			 * @since 0.14.0
+			 *
+			 * @param int    $post_id        The solution post ID.
+			 * @param string $new_visibility The new solution visibility.
+			 * @param string $old_visibility The old solution visibility.
+			 * @param array  $new_solution   The new solution data.
+			 */
+			do_action( 'pixelgradelt_retailer/ltsolution/visibility_change',
+					$post_id,
+					$current_solution['visibility'],
+					$old_solution['visibility'],
+					$current_solution
+			);
 		}
-		$this->user_messages[ $type ][] = $message;
+
+		/*
+		 * Handle solution type change.
+		 */
+		if ( ! empty( $old_solution['type'] ) && $old_solution['type'] !== $current_solution['type'] ) {
+			/**
+			 * Fires on LT solution type change.
+			 *
+			 * @since 0.14.0
+			 *
+			 * @param int    $post_id      The solution post ID.
+			 * @param string $new_type     The new solution type.
+			 * @param string $old_type     The old solution type.
+			 * @param array  $new_solution The new solution data.
+			 */
+			do_action( 'pixelgradelt_retailer/ltsolution/type_change',
+					$post_id,
+					$current_solution['type'],
+					$old_solution['type'],
+					$current_solution
+			);
+		}
+
+		/*
+		 * Handle solution slug change.
+		 */
+		if ( ! empty( $old_solution['slug'] ) && $old_solution['slug'] !== $current_solution['slug'] ) {
+			/**
+			 * Fires on LT solution slug change.
+			 *
+			 * @since 0.14.0
+			 *
+			 * @param int    $post_id      The solution post ID.
+			 * @param string $new_slug     The new solution slug.
+			 * @param string $old_slug     The old solution slug.
+			 * @param array  $new_solution The new solution data.
+			 */
+			do_action( 'pixelgradelt_retailer/ltsolution/slug_change',
+					$post_id,
+					$current_solution['slug'],
+					$old_solution['slug'],
+					$current_solution
+			);
+		}
+
+		/*
+		 * Handle solution required LT Parts changes.
+		 */
+		// We are only interested in actual LT Parts changes, not version range changes.
+		// That is why we will only look at the required LT Part package name.
+		$old_required_ltparts_package_name = \wp_list_pluck( $old_solution['required_ltrecords_parts'], 'package_name' );
+		sort( $old_required_ltparts_package_name );
+
+		$current_required_ltparts_package_name = wp_list_pluck( $current_solution['required_ltrecords_parts'], 'package_name' );
+		sort( $current_required_ltparts_package_name );
+
+		if ( serialize( $old_required_ltparts_package_name ) !== serialize( $current_required_ltparts_package_name ) ) {
+			/**
+			 * Fires on LT solution required solutions change (post ID changes).
+			 *
+			 * @since 0.14.0
+			 *
+			 * @param int   $post_id              The solution post ID.
+			 * @param array $new_required_ltparts The new solution required_ltparts.
+			 * @param array $old_required_ltparts The old solution required_ltparts.
+			 * @param array $new_solution         The new solution data.
+			 */
+			do_action( 'pixelgradelt_retailer/ltsolution/required_ltparts_change',
+					$post_id,
+					$current_solution['required_ltrecords_parts'],
+					$old_solution['required_ltrecords_parts'],
+					$current_solution
+			);
+		}
+
+		/*
+		 * Handle solution required solutions changes.
+		 */
+		// We are only interested in actual solutions changes, not slug or context details changes.
+		// That is why we will only look at the required solution post ID (managed_post_id).
+		$old_required_solutions          = ArrayHelpers::array_map_assoc( function ( $key, $solution ) {
+			// If we return the post ID as the key (as we would like), the key will be lost since it's numeric.
+			return [ $solution['slug'] => $solution['managed_post_id'] ];
+		}, $old_solution['required_solutions'] );
+		$old_required_solutions          = array_flip( $old_required_solutions );
+		$old_required_solutions_post_ids = array_keys( $old_required_solutions );
+		sort( $old_required_solutions_post_ids );
+
+		$current_required_solutions          = ArrayHelpers::array_map_assoc( function ( $key, $solution ) {
+			// If we return the post ID as the key (as we would like), the key will be lost since it's numeric.
+			return [ $solution['slug'] => $solution['managed_post_id'] ];
+		}, $current_solution['required_solutions'] );
+		$current_required_solutions          = array_flip( $current_required_solutions );
+		$current_required_solutions_post_ids = array_keys( $current_required_solutions );
+		sort( $current_required_solutions_post_ids );
+
+		if ( serialize( $old_required_solutions_post_ids ) !== serialize( $current_required_solutions_post_ids ) ) {
+			/**
+			 * Fires on LT solution required solutions change (post ID changes).
+			 *
+			 * @since 0.14.0
+			 *
+			 * @param int   $post_id                The solution post ID.
+			 * @param array $new_required_solutions The new solution required_solutions.
+			 * @param array $old_required_solutions The old solution required_solutions.
+			 * @param array $new_solution           The new solution data.
+			 */
+			do_action( 'pixelgradelt_retailer/ltsolution/required_solutions_change',
+					$post_id,
+					$current_required_solutions,
+					$old_required_solutions,
+					$current_solution
+			);
+		}
+
+		/*
+		 * Handle solution excluded solutions changes.
+		 */
+		// We are only interested in actual solutions changes, not slug or context details changes.
+		// That is why we will only look at the excluded solution post ID (managed_post_id).
+		$old_excluded_solutions          = ArrayHelpers::array_map_assoc( function ( $key, $solution ) {
+			// If we return the post ID as the key (as we would like), the key will be lost since it's numeric.
+			return [ $solution['slug'] => $solution['managed_post_id'] ];
+		}, $old_solution['excluded_solutions'] );
+		$old_excluded_solutions          = array_flip( $old_excluded_solutions );
+		$old_excluded_solutions_post_ids = array_keys( $old_excluded_solutions );
+		sort( $old_excluded_solutions_post_ids );
+
+		$current_excluded_solutions          = ArrayHelpers::array_map_assoc( function ( $key, $solution ) {
+			// If we return the post ID as the key (as we would like), the key will be lost since it's numeric.
+			return [ $solution['slug'] => $solution['managed_post_id'] ];
+		}, $current_solution['excluded_solutions'] );
+		$current_excluded_solutions          = array_flip( $current_excluded_solutions );
+		$current_excluded_solutions_post_ids = array_keys( $current_excluded_solutions );
+		sort( $current_excluded_solutions_post_ids );
+
+		if ( serialize( $old_excluded_solutions_post_ids ) !== serialize( $current_excluded_solutions_post_ids ) ) {
+			/**
+			 * Fires on LT solution excluded solutions change (post ID changes).
+			 *
+			 * @since 0.14.0
+			 *
+			 * @param int   $post_id                The solution post ID.
+			 * @param array $new_excluded_solutions The new solution excluded_solutions.
+			 * @param array $old_excluded_solutions The old solution excluded_solutions.
+			 * @param array $new_solution           The new solution data.
+			 */
+			do_action( 'pixelgradelt_retailer/ltsolution/excluded_solutions_change',
+					$post_id,
+					$current_excluded_solutions,
+					$old_excluded_solutions,
+					$current_solution
+			);
+		}
+
+		/**
+		 * Fires on LT solution update, after the individual change hooks have been fired.
+		 *
+		 * @since 0.14.0
+		 *
+		 * @param int   $post_id      The solution post ID.
+		 * @param array $new_solution The new solution data.
+		 * @param array $old_solution The old solution data.
+		 */
+		do_action( 'pixelgradelt_retailer/ltsolution/update',
+				$post_id,
+				$current_solution,
+				$old_solution
+		);
+	}
+
+	/**
+	 * If the slug/package name changes, we need to update things like the pseudo IDs meta-data for dependants.
+	 *
+	 * @since 0.13.0
+	 *
+	 * @param int    $post_id  The solution post ID.
+	 * @param string $new_slug The new solution slug.
+	 * @param string $old_slug The old solution slug.
+	 */
+	protected function on_slug_change( int $post_id, string $new_slug, string $old_slug ) {
+		if ( $this->solution_manager::POST_TYPE !== get_post_type( $post_id ) ) {
+			return;
+		}
+
+		// Determine if the slug hasn't changed, just in case. Bail if so.
+		if ( $new_slug === $old_slug ) {
+			return;
+		}
+
+		// We have work to do.
+
+		// At the moment, we are only interested in certain meta entries.
+		// Replace pseudo IDs.
+		$prev_solution_pseudo_id = $old_slug . $this->solution_manager::PSEUDO_ID_DELIMITER . $post_id;
+		$new_solution_pseudo_id  = $new_slug . $this->solution_manager::PSEUDO_ID_DELIMITER . $post_id;
+
+		global $wpdb;
+		$wpdb->get_results( $wpdb->prepare( "
+UPDATE $wpdb->postmeta m
+JOIN $wpdb->posts p ON m.post_id = p.ID
+SET m.meta_value = REPLACE(m.meta_value, %s, %s)
+WHERE m.meta_key LIKE '%pseudo_id%' AND p.post_type <> 'revision'", $prev_solution_pseudo_id, $new_solution_pseudo_id ) );
+
+		// Flush the entire cache since we don't know what post IDs might have been affected.
+		// It is OK since this is a rare operation.
+		wp_cache_flush();
+	}
+
+	/**
+	 * Add post note on LT solution visibility change.
+	 *
+	 * @since 0.14.0
+	 *
+	 * @param int    $post_id        The solution post ID.
+	 * @param string $new_visibility The new solution visibility.
+	 * @param string $old_visibility The old solution visibility.
+	 */
+	protected function add_solution_visibility_change_note( int $post_id, string $new_visibility, string $old_visibility ) {
+		$note = sprintf(
+				esc_html__( 'Solution visibility changed from %1$s to %2$s.', 'pixelgradelt_retailer' ),
+				'<strong>' . $old_visibility . '</strong>',
+				'<strong>' . $new_visibility . '</strong>'
+		);
+
+		create_note( $post_id, $note, 'internal', true );
+	}
+
+	/**
+	 * Add post note on LT solution visibility change.
+	 *
+	 * @since 0.14.0
+	 *
+	 * @param int    $post_id  The solution post ID.
+	 * @param string $new_type The new solution type slug.
+	 * @param string $old_type The old solution type slug.
+	 */
+	protected function add_solution_type_change_note( int $post_id, string $new_type, string $old_type ) {
+		$note = sprintf(
+				esc_html__( 'Solution type changed from %1$s to %2$s.', 'pixelgradelt_retailer' ),
+				'<strong>' . $old_type . '</strong>',
+				'<strong>' . $new_type . '</strong>'
+		);
+
+		create_note( $post_id, $note, 'internal', true );
+	}
+
+	/**
+	 * Add post note on LT solution slug change.
+	 *
+	 * @since 0.14.0
+	 *
+	 * @param int    $post_id  The solution post ID.
+	 * @param string $new_slug The new solution slug.
+	 * @param string $old_slug The old solution slug.
+	 */
+	protected function add_solution_slug_change_note( int $post_id, string $new_slug, string $old_slug ) {
+		$note = sprintf(
+				esc_html__( 'Solution slug (package name) changed from %1$s to %2$s.', 'pixelgradelt_retailer' ),
+				'<strong>' . $old_slug . '</strong>',
+				'<strong>' . $new_slug . '</strong>'
+		);
+
+		create_note( $post_id, $note, 'internal', true );
+	}
+
+	/**
+	 * Add post note on LT solution required solutions change.
+	 *
+	 * @since 0.14.0
+	 *
+	 * @param int   $post_id                The solution post ID.
+	 * @param array $new_required_solutions The new solution required_solutions.
+	 * @param array $old_required_solutions The old solution required_solutions.
+	 */
+	protected function add_solution_required_solutions_change_note( int $post_id, array $new_required_solutions, array $old_required_solutions ) {
+		$old_required_solutions_post_ids = array_keys( $old_required_solutions );
+		sort( $old_required_solutions_post_ids );
+
+		$new_required_solutions_post_ids = array_keys( $new_required_solutions );
+		sort( $new_required_solutions_post_ids );
+
+		$added   = array_diff( $new_required_solutions_post_ids, $old_required_solutions_post_ids );
+		$removed = array_diff( $old_required_solutions_post_ids, $new_required_solutions_post_ids );
+
+		$note = '';
+		if ( ! empty( $removed ) ) {
+			$removed_list = [];
+			foreach ( $removed as $removed_post_id ) {
+				$removed_list[] = $old_required_solutions[ $removed_post_id ] . $this->solution_manager::PSEUDO_ID_DELIMITER . $removed_post_id;
+			}
+
+			$note .= sprintf(
+					esc_html__( 'Removed these required solutions: %1$s. ', 'pixelgradelt_retailer' ),
+					'<strong>' . implode( ', ', $removed_list ) . '</strong>'
+			);
+		}
+
+		if ( ! empty( $added ) ) {
+			$added_list = [];
+			foreach ( $added as $added_post_id ) {
+				$added_list[] = $new_required_solutions[ $added_post_id ] . $this->solution_manager::PSEUDO_ID_DELIMITER . $added_post_id;
+			}
+
+			$note .= sprintf(
+					esc_html__( 'Added the following required solutions: %1$s. ', 'pixelgradelt_retailer' ),
+					'<strong>' . implode( ', ', $added_list ) . '</strong>'
+			);
+		}
+
+		if ( ! empty( trim( $note ) ) ) {
+			create_note( $post_id, $note, 'internal', true );
+		}
+	}
+
+	/**
+	 * Add post note on LT solution excluded solutions change.
+	 *
+	 * @since 0.14.0
+	 *
+	 * @param int   $post_id                The solution post ID.
+	 * @param array $new_excluded_solutions The new solution excluded_solutions.
+	 * @param array $old_excluded_solutions The old solution excluded_solutions.
+	 */
+	protected function add_solution_excluded_solutions_change_note( int $post_id, array $new_excluded_solutions, array $old_excluded_solutions ) {
+		$old_excluded_solutions_post_ids = array_keys( $old_excluded_solutions );
+		sort( $old_excluded_solutions_post_ids );
+
+		$new_excluded_solutions_post_ids = array_keys( $new_excluded_solutions );
+		sort( $new_excluded_solutions_post_ids );
+
+		$added   = array_diff( $new_excluded_solutions_post_ids, $old_excluded_solutions_post_ids );
+		$removed = array_diff( $old_excluded_solutions_post_ids, $new_excluded_solutions_post_ids );
+
+		$note = '';
+		if ( ! empty( $removed ) ) {
+			$removed_list = [];
+			foreach ( $removed as $removed_post_id ) {
+				$removed_list[] = $old_excluded_solutions[ $removed_post_id ] . $this->solution_manager::PSEUDO_ID_DELIMITER . $removed_post_id;
+			}
+
+			$note .= sprintf(
+					esc_html__( 'Removed these excluded solutions: %1$s. ', 'pixelgradelt_retailer' ),
+					'<strong>' . implode( ', ', $removed_list ) . '</strong>'
+			);
+		}
+
+		if ( ! empty( $added ) ) {
+			$added_list = [];
+			foreach ( $added as $added_post_id ) {
+				$added_list[] = $new_excluded_solutions[ $added_post_id ] . $this->solution_manager::PSEUDO_ID_DELIMITER . $added_post_id;
+			}
+
+			$note .= sprintf(
+					esc_html__( 'Added the following excluded solutions: %1$s. ', 'pixelgradelt_retailer' ),
+					'<strong>' . implode( ', ', $added_list ) . '</strong>'
+			);
+		}
+
+		if ( ! empty( trim( $note ) ) ) {
+			create_note( $post_id, $note, 'internal', true );
+		}
 	}
 }

@@ -261,10 +261,6 @@ class ServiceProvider implements ServiceProviderInterface {
 			);
 		};
 
-		$container['plugin.members'] = function () {
-			return new Integration\Members();
-		};
-
 		$container['repository.solutions'] = function ( $container ) {
 			return new Repository\Solutions(
 				$container['solution.factory'],
@@ -426,6 +422,25 @@ class ServiceProvider implements ServiceProviderInterface {
 
 		$container['version.parser'] = function () {
 			return new ComposerVersionParser( new VersionParser() );
+		};
+
+		/*
+		 * INTEGRATIONS
+		 */
+
+		$container['plugin.members'] = function () {
+			return new Integration\Members();
+		};
+
+		$container['plugin.woocommerce'] = function () {
+			return new Integration\WooCommerce();
+		};
+
+		$container['plugin.woocommerce.screen.edit_solution'] = function ( $container ) {
+			return new Integration\WooCommerce\Screen\EditSolution(
+				$container['solution.manager'],
+				$container['repository.solutions']
+			);
 		};
 	}
 }

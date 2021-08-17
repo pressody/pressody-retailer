@@ -11,6 +11,7 @@ declare ( strict_types=1 );
 
 namespace PixelgradeLT\Retailer;
 
+use Carbon_Fields\Helper\Helper;
 use PixelgradeLT\Retailer\Exception\InvalidComposerVendor;
 
 /**
@@ -175,6 +176,37 @@ function get_composer_vendor(): string {
 function get_edited_user_id(): int {
 	// phpcs:ignore WordPress.Security.NonceVerification.NoNonceVerification
 	return empty( $_GET['user_id'] ) ? get_current_user_id() : (int) $_GET['user_id'];
+}
+
+/**
+ * Get the raw (unfiltered) post meta field for a post.
+ *
+ * @since 0.14.0
+ *
+ * @param int    $id           Post ID
+ * @param string $name         Field name
+ * @param string $container_id The container ID to restrict the field search to.
+ *
+ * @return mixed
+ */
+function carbon_get_raw_post_meta( int $id, string $name, string $container_id = '' ) {
+	$id = apply_filters( 'carbon_get_post_meta_post_id', $id, $name, $container_id );
+
+	return Helper::with_field_clone(
+		$id,
+		'post_meta',
+		$container_id,
+		$name,
+		function( $field ) {
+			if ( ! $field ) {
+				return '';
+			}
+			/** @var \Carbon_Fields\Field\Field $field */
+			$field->load();
+			// We get the raw, non-formatted value.
+			return $field->get_value();
+		}
+	);
 }
 
 /**
