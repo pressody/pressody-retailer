@@ -195,7 +195,7 @@ class EditSolution extends AbstractHookProvider {
 	/**
 	 * Prevent the package from being published on certain occasions.
 	 *
-	 * Instead save as draft.
+	 * Save as draft instead.
 	 *
 	 * @param int $post_id The ID of the post that's being saved.
 	 */
@@ -727,6 +727,21 @@ The excluded solutions only take effect in <strong>a purchase context (add to ca
 	 * @param bool     $update  Whether this is an existing post being updated.
 	 */
 	protected function handle_post_update( int $post_id, \WP_Post $post, bool $update ) {
+		/**
+		 * Fires on LT solution post save.
+		 *
+		 * @since 0.14.0
+		 *
+		 * @param int      $post_id The solution post ID.
+		 * @param \WP_Post $post    The post object.
+		 * @param bool     $update  If the operation was an update.
+		 */
+		do_action( 'pixelgradelt_retailer/ltsolution/save',
+				$post_id,
+				$post,
+				$update
+		);
+
 		if ( ! $update ) {
 			return;
 		}

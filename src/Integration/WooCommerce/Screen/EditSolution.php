@@ -17,7 +17,6 @@ use Carbon_Fields\Field;
 use Cedaro\WP\Plugin\AbstractHookProvider;
 use PixelgradeLT\Retailer\SolutionManager;
 use PixelgradeLT\Retailer\Repository\PackageRepository;
-use PixelgradeLT\Retailer\Utils\ArrayHelpers;
 use function Pixelgrade\WPPostNotes\create_note;
 
 /**
@@ -98,7 +97,9 @@ class EditSolution extends AbstractHookProvider {
 		/*
 		 * HANDLE POST UPDATE CHANGES.
 		 */
+		$this->add_action( 'pixelgradelt_retailer/ltsolution/save', 'handle_post_save', 10, 3 );
 		$this->add_action( 'pixelgradelt_retailer/ltsolution/update', 'handle_post_update', 10, 3 );
+		$this->add_action( 'pixelgradelt_retailer/ltsolution/woocommerce_products_change', 'update_linked_products_metadata', 10, 3 );
 
 		/*
 		 * HANDLE AUTOMATIC POST NOTES.
@@ -150,7 +151,9 @@ class EditSolution extends AbstractHookProvider {
 			              ->set_html( sprintf( '<p class="description">%s</p>', __( 'Configure details about <strong>the solution\'s integration with WooCommerce products.</strong>', 'pixelgradelt_retailer' ) ) ),
 
 			         Field::make( 'multiselect', 'solution_woocommerce_products', __( 'Linked Products', 'pixelgradelt_retailer' ) )
-			              ->set_help_text( __( 'This could be a URL to a page that presents details about this solution.', 'pixelgradelt_retailer' ) )
+			              ->set_help_text( __( 'These are all the WooCommerce products that, when purchased, <strong>will determine the availability of the current LT Solution.</strong><br>
+Bear in mind that <strong>a WooCommerce product can be linked to only one LT Solution.</strong> That is why the control will display <strong>only not previously linked products.</strong><br>
+As long as the order that includes one of these products remains valid ("completed" or active subscription) the current solution will be available to be used in LT Compositions.', 'pixelgradelt_retailer' ) )
 			              ->set_options( [ $this, 'get_available_products_options' ] )
 			              ->set_default_value( [] )
 			              ->set_required( false )
@@ -187,13 +190,33 @@ class EditSolution extends AbstractHookProvider {
 	 */
 	protected function get_available_products(): array {
 
-		// We exclude all the products that other solutions are already linked to,
-		// since we want 1-to-many relationships between solutions and products.
-		$exclude_post_ids = [ get_the_ID(), ];
+		/**
+		 * We exclude all the products that other solutions are already linked to,
+		 * since we want 1-to-many relationships between solutions and products.
+		 *
+		 * @see \PixelgradeLT\Retailer\Integration\WooCommerce::handle_custom_query_vars()
+		 */
+		// First get all the product IDs that are not linked to a solution, including the current one.
+		$include = wc_get_products( [
+			'status'               => 'publish',
+			'linked_to_ltsolution' => false,
+			'limit'                => - 1,
+			'return'               => 'ids',
+		] );
+		// Now add the products linked to the current solution.
+		array_push( $include, ...wc_get_products( [
+			'status'               => 'publish',
+			'linked_to_ltsolution' => get_the_ID(),
+			'limit'                => - 1,
+			'return'               => 'ids',
+		] ) );
+
+		$include = array_unique( $include );
+
 
 		$query_args = [
 			'status'  => 'publish',
-			'exclude' => [],
+			'include' => $include,
 			'limit'   => - 1,
 			'orderby' => 'date',
 			'order'   => 'DESC',
@@ -308,6 +331,65 @@ class EditSolution extends AbstractHookProvider {
 
 		return $messages;
 	}
+
+	/**
+	 * Handle post update save.
+	 *
+	 * @since 0.14.0
+	 *
+	 * @param int      $post_id The solution post ID.
+	 * @param \WP_Post $post    The post object.
+	 * @param bool     $update  If the operation was an update.
+	 */
+	protected function handle_post_save( int $post_id, \WP_Post $post, bool $update ) {
+		// We want to set metadata for each linked product on post creation.
+		// For updates we will handle separately.
+		if ( $update ) {
+			return;
+		}
+
+		$solution_data = $this->solution_manager->get_solution_id_data( $post_id );
+		if ( empty( $solution_data ) ) {
+			return;
+		}
+
+		if ( ! empty( $solution_data['woocommerce_products'] ) ) {
+			foreach ( $solution_data['woocommerce_products'] as $product_id ) {
+				update_post_meta( $product_id, '_linked_to_ltsolution', $solution_data['managed_post_id'] );
+			}
+		}
+	}
+
+	/**
+	 * Handle post update save.
+	 *
+	 * @since 0.14.0
+	 *
+	 * @param int   $post_id         The solution post ID.
+	 * @param array $new_product_ids The new solution WooCommerce product IDs.
+	 * @param array $old_product_ids The old solution WooCommerce product IDs.
+	 */
+	protected function update_linked_products_metadata( int $post_id, array $new_product_ids, array $old_product_ids ) {
+		$solution_data = $this->solution_manager->get_solution_id_data( $post_id );
+		if ( empty( $solution_data ) ) {
+			return;
+		}
+
+		$removed = array_diff( $old_product_ids, $new_product_ids );
+
+		if ( ! empty( $removed ) ) {
+			foreach ( $removed as $product_id ) {
+				update_post_meta( $product_id, '_linked_to_ltsolution', false );
+			}
+		}
+
+		if ( ! empty( $new_product_ids ) ) {
+			foreach ( $new_product_ids as $product_id ) {
+				update_post_meta( $product_id, '_linked_to_ltsolution', $solution_data['managed_post_id'] );
+			}
+		}
+	}
+
 
 	/**
 	 * Handle post update changes.

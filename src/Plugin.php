@@ -64,7 +64,6 @@ class Plugin extends BasePlugin implements Composable {
 				->register_hooks( $container->get( 'hooks.upgrade' ) )
 				->register_hooks( $container->get( 'hooks.admin_assets' ) )
 				->register_hooks( $container->get( 'screen.edit_user' ) )
-				->register_hooks( $container->get( 'screen.list_wooproducts' ) )
 				->register_hooks( $container->get( 'screen.settings' ) )
 
 				->register_hooks( $container->get( 'screen.list_compositions' ) )
@@ -74,6 +73,10 @@ class Plugin extends BasePlugin implements Composable {
 		if ( \function_exists( '\WC' ) ) {
 			$this->register_hooks( $container->get( 'plugin.woocommerce' ) );
 			$this->register_hooks( $container->get( 'plugin.woocommerce.screen.edit_solution' ) );
+
+			if ( is_admin() ) {
+				$this->register_hooks( $container->get( 'plugin.woocommerce.screen.list_wooproducts' ) );
+			}
 		}
 
 		if ( \function_exists( '\members_plugin' ) ) {

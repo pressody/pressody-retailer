@@ -358,10 +358,6 @@ class ServiceProvider implements ServiceProviderInterface {
 			);
 		};
 
-		$container['screen.list_wooproducts'] = function ( $container ) {
-			return new Screen\ListWooProducts( $container['solution.manager'] );
-		};
-
 		$container['screen.settings'] = function ( $container ) {
 			return new Screen\Settings(
 				$container['repository.solutions'],
@@ -441,6 +437,10 @@ class ServiceProvider implements ServiceProviderInterface {
 				$container['solution.manager'],
 				$container['repository.solutions']
 			);
+		};
+
+		$container['plugin.woocommerce.screen.list_wooproducts'] = function ( $container ) {
+			return new Integration\WooCommerce\Screen\ListWooProducts( $container['solution.manager'] );
 		};
 	}
 }
