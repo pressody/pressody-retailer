@@ -13,7 +13,6 @@ namespace PixelgradeLT\Retailer\Screen;
 
 use Cedaro\WP\Plugin\AbstractHookProvider;
 use PixelgradeLT\Retailer\SolutionManager;
-use PixelgradeLT\Retailer\SolutionType\SolutionTypes;
 use PixelgradeLT\Retailer\Utils\ArrayHelpers;
 
 /**
@@ -62,7 +61,7 @@ class ListSolutions extends AbstractHookProvider {
 	}
 
 	/**
-	 * Output filters in the All Posts screen.
+	 * Output filters in the "All Posts" screen.
 	 *
 	 * @param string $post_type The current post type.
 	 */
@@ -143,7 +142,11 @@ class ListSolutions extends AbstractHookProvider {
 	}
 
 	protected function populate_custom_columns( string $column, int $post_id ): void {
-		if ( ! in_array( $column, [ 'solution_required_parts', 'solution_required_solutions', 'solution_excluded_solutions', ] ) ) {
+		if ( ! in_array( $column, [
+			'solution_required_parts',
+			'solution_required_solutions',
+			'solution_excluded_solutions',
+		] ) ) {
 			return;
 		}
 

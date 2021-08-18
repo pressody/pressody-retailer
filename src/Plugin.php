@@ -75,7 +75,9 @@ class Plugin extends BasePlugin implements Composable {
 			$this->register_hooks( $container->get( 'plugin.woocommerce.screen.edit_solution' ) );
 
 			if ( is_admin() ) {
-				$this->register_hooks( $container->get( 'plugin.woocommerce.screen.list_wooproducts' ) );
+				$this
+					->register_hooks( $container->get( 'plugin.woocommerce.screen.list_solutions' ) )
+					->register_hooks( $container->get( 'plugin.woocommerce.screen.list_wooproducts' ) );
 			}
 		}
 

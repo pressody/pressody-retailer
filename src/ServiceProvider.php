@@ -439,6 +439,10 @@ class ServiceProvider implements ServiceProviderInterface {
 			);
 		};
 
+		$container['plugin.woocommerce.screen.list_solutions'] = function ( $container ) {
+			return new Integration\WooCommerce\Screen\ListSolutions( $container['solution.manager'] );
+		};
+
 		$container['plugin.woocommerce.screen.list_wooproducts'] = function ( $container ) {
 			return new Integration\WooCommerce\Screen\ListWooProducts( $container['solution.manager'] );
 		};

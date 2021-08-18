@@ -282,6 +282,24 @@ input.pixelgradelt_retailer-cli-field {
 	display: none;
 }
 
+/* List Solutions screen
+----------------------------------------------------------------------------- */
+.post-type-ltsolution table.table-view-list.posts {
+	table-layout: auto;
+}
+.column-solution_required_parts {
+	white-space: nowrap;
+}
+
+/* List Compositions screen
+----------------------------------------------------------------------------- */
+.post-type-ltcomposition table.table-view-list.posts {
+	table-layout: auto;
+}
+.column-composition_required_solutions {
+	white-space: nowrap;
+}
+
 /* Other
 ----------------------------------------------------------------------------- */
 
