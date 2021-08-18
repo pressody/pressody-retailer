@@ -165,7 +165,7 @@ class Authentication extends AbstractHookProvider {
 			return true;
 		}
 
-		// This isa request for the solutions composer repo.
+		// This is a request for the solutions composer repo.
 		if ( 0 === strpos( $request_path, '/ltsolutions' ) ) {
 			return true;
 		}
