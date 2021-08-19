@@ -71,7 +71,7 @@ class ArrayHelpers {
 	 * @param string $key   The key to search for
 	 * @param mixed  $value The value to search for
 	 *
-	 * @return mixed|false
+	 * @return mixed|false The subarray index key if found, false otherwise.
 	 */
 	public static function findSubarrayByKeyValue( $array, $key, $value ) {
 		// Bail if it's not array

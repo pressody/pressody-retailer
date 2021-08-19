@@ -40,7 +40,8 @@ final class Order {
 			return $purchased_solutions;
 		}
 
-		foreach ( $order->get_items( 'line_item' ) as $item ) {
+		foreach ( $order->get_items() as $item ) {
+			// Be extra sure.
 			if ( ! $item instanceof \WC_Order_Item_Product ) {
 				continue;
 			}
