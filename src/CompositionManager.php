@@ -510,30 +510,28 @@ class CompositionManager {
 			return [];
 		}
 
-		if ( empty( $pseudo_id_delimiter ) ) {
-			$pseudo_id_delimiter = self::PSEUDO_ID_DELIMITER;
-		}
-
 		// Make sure only the fields we are interested in are left.
 		$accepted_keys = array_fill_keys( [ 'pseudo_id', ], '' );
 		$context_keys  = array_fill_keys( [ 'order_id', 'order_item_id', 'timestamp', ], '' );
 		foreach ( $required_solutions as $key => $required_solution ) {
 			$required_solutions[ $key ] = array_replace( $accepted_keys, array_intersect_key( $required_solution, $accepted_keys ) );
 
-			if ( empty( $required_solution['pseudo_id'] ) || false === strpos( $required_solution['pseudo_id'], $pseudo_id_delimiter ) ) {
+			if ( empty( $required_solution['pseudo_id'] ) ) {
 				unset( $required_solutions[ $key ] );
 				continue;
 			}
 
-			// We will now split the pseudo_id in its components (slug and post_id with the delimiter in between).
-			[ $slug, $post_id ] = explode( $pseudo_id_delimiter, $required_solution['pseudo_id'] );
-			if ( empty( $post_id ) ) {
+			// We will now split the pseudo_id in its components (slug and post_id with the delimiter in between) and check them.
+			$pseudo_id_components = $this->explode_pseudo_id( $required_solution['pseudo_id'] );
+			if ( empty( $pseudo_id_components ) ) {
 				unset( $required_solutions[ $key ] );
 				continue;
 			}
+
+			[ $slug, $post_id ] = $pseudo_id_components;
 
 			$required_solutions[ $key ]['slug']            = $slug;
-			$required_solutions[ $key ]['managed_post_id'] = intval( $post_id );
+			$required_solutions[ $key ]['managed_post_id'] = $post_id;
 
 			if ( $include_context ) {
 				$required_solutions[ $key ]['context'] = array_replace( $context_keys, array_intersect_key( $required_solution, $context_keys ) );
@@ -543,8 +541,214 @@ class CompositionManager {
 		return $required_solutions;
 	}
 
-	public function set_post_composition_required_solutions( int $post_ID, array $required_solutions, string $container_id = '' ) {
-		carbon_set_post_meta( $post_ID, 'solution_required_solutions', $required_solutions, $container_id );
+	/**
+	 * Explode a pseudo ID into its slug and post ID components.
+	 *
+	 * @since 0.14.0
+	 *
+	 * @param string $pseudo_id
+	 * @param string $pseudo_id_delimiter Optional.
+	 *
+	 * @return array|null The slug and post ID. Null on invalid pseudo_id.
+	 */
+	protected function explode_pseudo_id( string $pseudo_id, string $pseudo_id_delimiter = '' ): ?array {
+		if ( empty( $pseudo_id_delimiter ) ) {
+			$pseudo_id_delimiter = self::PSEUDO_ID_DELIMITER;
+		}
+
+		if ( ! is_string( $pseudo_id ) || false === strpos( $pseudo_id, $pseudo_id_delimiter ) ) {
+			return null;
+		}
+
+		$components = explode( $pseudo_id_delimiter, $pseudo_id );
+		if ( count( $components ) < 2 || empty( $components[0] ) || empty( $components[1] ) || ! is_numeric( $components[1] ) ) {
+			return null;
+		}
+
+		$components[1] = intval( $components[1] );
+
+		return $components;
+	}
+
+	/**
+	 * @param int    $post_id
+	 * @param array  $required_solutions
+	 * @param string $container_id
+	 */
+	public function set_post_composition_required_solutions( int $post_id, array $required_solutions, string $container_id = '' ) {
+		/**
+		 * Fires before LT composition update.
+		 *
+		 * @since 0.14.0
+		 *
+		 * @param int $post_id The composition post ID.
+		 */
+		do_action( 'pixelgradelt_retailer/ltcomposition/before_update', $post_id );
+
+		carbon_set_post_meta( $post_id, 'composition_required_solutions', $required_solutions, $container_id );
+
+		/**
+		 * Fires after LT composition update.
+		 *
+		 * The provided parameters are compatible with the 'wp_after_insert_post' core action, so we can use the same handlers.
+		 *
+		 * @since 0.14.0
+		 *
+		 * @param int      $post_id The composition post ID.
+		 * @param \WP_Post $post    The composition post object.
+		 * @param bool     $update  If this is an update.
+		 */
+		do_action( 'pixelgradelt_retailer/ltcomposition/update',
+			$post_id,
+			get_post( $post_id ),
+			true
+		);
+	}
+
+	/**
+	 * Add a composition required solution to the list.
+	 *
+	 * @since 0.14.0
+	 *
+	 * @param int   $post_id            The composition post ID.
+	 * @param array $required_solution  The required solution details (pseudo_id, order_id, order_item_id).
+	 * @param bool  $update             Optional. Whether to update the details of an already present solution.
+	 *                                  If false and the solution is already present, nothing is added or modified.
+	 *                                  Default false.
+	 * @param bool  $process_solutions  Optional. Whether to run the solution list processing logic after adding the solution.
+	 *                                  This way, solutions that are excluded by the newly added solution will be removed.
+	 *                                  See \PixelgradeLT\Retailer\Repository\ProcessedSolutions::process_solutions()
+	 *                                  The processing will run only when the solution is added to the list,
+	 *                                  not when it is already present, regardless of the $update value.
+	 *                                  Default false.
+	 *
+	 * @return bool True on success. False if the solution is already present and we haven't been instructed to update
+	 *              or the data is invalid.
+	 */
+	public function add_post_composition_required_solution( int $post_id, array $required_solution, bool $update = false, bool $process_solutions = false ): bool {
+		$composition_post = get_post( $post_id );
+		if ( empty( $composition_post ) ) {
+			return false;
+		}
+
+		$required_solutions = carbon_get_post_meta( $composition_post->ID, 'composition_required_solutions' );
+		if ( empty( $required_solutions ) || ! is_array( $required_solutions ) ) {
+			$required_solutions = [];
+		}
+
+		$old_required_solutions = $required_solutions;
+
+		$accepted_keys     = array_fill_keys( [ 'pseudo_id', 'order_id', 'order_item_id' ], '' );
+		$required_solution = array_replace( $accepted_keys, array_intersect_key( $required_solution, $accepted_keys ) );
+		if ( empty( $required_solution['pseudo_id'] ) ) {
+			return false;
+		}
+
+		// We will now split the pseudo_id in its components (slug and post_id with the delimiter in between) and check them.
+		$pseudo_id_components = $this->explode_pseudo_id( $required_solution['pseudo_id'] );
+		if ( empty( $pseudo_id_components ) ) {
+			return false;
+		}
+
+		[ $required_solution_slug, $required_solution_post_id ] = $pseudo_id_components;
+
+		// Check that the post ID corresponds to a valid solution package.
+		$package = $this->solutions->first_where( [
+			'managed_post_id' => $required_solution_post_id,
+		] );
+		if ( empty( $package ) ) {
+			return false;
+		}
+
+		// Search if the provided solution is already present in the list.
+		$did_update_existing_solution = false;
+		$found_key                    = ArrayHelpers::findSubarrayByKeyValue( $required_solutions, 'pseudo_id', $required_solution['pseudo_id'] );
+		if ( false === $found_key ) {
+			$required_solutions[] = $required_solution;
+		} else {
+			if ( ! $update ) {
+				return false;
+			}
+
+			$did_update_existing_solution = true;
+
+			// Update the order ID and, maybe, the order item ID.
+			if ( ! empty( $required_solution['order_id'] ) ) {
+				$required_solutions[ $found_key ]['order_id'] = $required_solution['order_id'];
+
+				// The order item ID is tied to the order, so don't break their relation by updating independently.
+				if ( ! empty( $required_solution['order_item_id'] ) ) {
+					$required_solutions[ $found_key ]['order_item_id'] = $required_solution['order_item_id'];
+				}
+			}
+		}
+
+		// Run the solutions list processing if we have been instructed to do so,
+		// but only if we actually added the solution to the list.
+		$did_process_solutions = false;
+		if ( $process_solutions && ! $did_update_existing_solution && ! empty( $required_solutions ) ) {
+			// Gather all the required solutions IDs, the manual way.
+			$solutionsIds = array_filter( array_map( function ( $details ) {
+				$pseudo_id_components = $this->explode_pseudo_id( $details['pseudo_id'] );
+				if ( empty( $pseudo_id_components ) ) {
+					return null;
+				}
+
+				return $pseudo_id_components[1];
+			}, $required_solutions ) );
+
+			if ( ! empty( $solutionsIds ) ) {
+				$processed_required_solutions = local_rest_call( '/pixelgradelt_retailer/v1/solutions/processed', 'GET', [
+					'postId' => $solutionsIds,
+				] );
+
+				if ( isset( $processed_required_solutions['code'] ) || isset( $processed_required_solutions['message'] ) ) {
+					// We have failed to get the processed solutions. Log and move on.
+					$this->logger->error(
+						'Error processing the composition required solutions list for the composition with post ID #{post_id}, before adding a new solution programmatically.',
+						[
+							'post_id'        => $composition_post->ID,
+							'added_solution' => $required_solution,
+							'response'       => $processed_required_solutions,
+							'logCategory'    => 'composition_manager',
+						]
+					);
+				} elseif ( ! empty( $processed_required_solutions ) ) {
+					$did_process_solutions = true;
+					// Leave only the required solutions that are still in the processed list.
+					$required_solutions = array_filter( $required_solutions, function ( $details ) use ( $processed_required_solutions ) {
+						$pseudo_id_components = $this->explode_pseudo_id( $details['pseudo_id'] );
+
+						return false !== ArrayHelpers::findSubarrayByKeyValue( $processed_required_solutions, 'id', $pseudo_id_components[1] );
+					} );
+				}
+			}
+		}
+
+		/**
+		 * Filters the new composition required solutions list after adding a new solution.
+		 *
+		 * @since 0.14.0
+		 *
+		 * @param array $new_required_solutions The new required solutions list.
+		 * @param int   $post_id                The composition post ID.
+		 * @param array $old_required_solutions The old required solutions list.
+		 * @param array $new_solution           The new solution details (pseudo_id, order_id, order_item_id).
+		 * @param bool  $updated                Whether we have updated the details of an already existing solution.
+		 * @param bool  $processed              Whether we have run the solution list processing logic after adding the solution.
+		 */
+		$required_solutions = apply_filters( 'pixelgradelt_retailer/ltcomposition/add_required_solution',
+			$required_solutions,
+			$post_id,
+			$old_required_solutions,
+			$required_solution,
+			$did_update_existing_solution,
+			$did_process_solutions
+		);
+
+		$this->set_post_composition_required_solutions( $composition_post->ID, $required_solutions );
+
+		return true;
 	}
 
 	/**

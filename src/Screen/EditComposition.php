@@ -112,6 +112,8 @@ class EditComposition extends AbstractHookProvider {
 
 		// Handle post data retention before the post is updated in the DB (like changing the status).
 		$this->add_action( 'pre_post_update', 'remember_post_composition_data', 10, 1 );
+		// These are programmatic changes.
+		$this->add_action( 'pixelgradelt_retailer/ltcomposition/before_update', 'remember_post_composition_data', 10, 1 );
 
 		// Check that the package can be resolved with the required packages.
 		$this->add_action( 'carbon_fields_post_meta_container_saved', 'fill_hashid', 10, 2 );
@@ -128,6 +130,8 @@ class EditComposition extends AbstractHookProvider {
 		 * HANDLE POST UPDATE CHANGES.
 		 */
 		$this->add_action( 'wp_after_insert_post', 'handle_post_update', 10, 3 );
+		// These are programmatic changes.
+		$this->add_action( 'pixelgradelt_retailer/ltcomposition/update', 'handle_post_update', 10, 3 );
 
 		/*
 		 * HANDLE AUTOMATIC POST NOTES.

@@ -189,7 +189,7 @@ class Compositions extends AbstractHookProvider {
 		}
 
 		// Get the LT parts the composition solutions require.
-		// By default we don't require any LT Part.
+		// By default, we don't require any LT Part.
 		$instructions_to_update['require'] = [];
 		if ( ! empty( $solutionsIds ) ) {
 			$required_parts = local_rest_call( '/pixelgradelt_retailer/v1/solutions/parts', 'GET', [
