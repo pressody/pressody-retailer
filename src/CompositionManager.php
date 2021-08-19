@@ -178,6 +178,7 @@ class CompositionManager {
 			'show_in_rest'       => false,
 			'show_ui'            => true,
 			'show_in_menu'       => true,
+			'menu_icon'          => 'dashicons-playlist-audio',
 			'show_in_nav_menus'  => false,
 			'supports'           => [
 				'title',

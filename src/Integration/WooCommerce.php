@@ -92,7 +92,7 @@ class WooCommerce extends AbstractHookProvider {
 	 *
 	 * @return array The modified $query
 	 */
-	public function handle_custom_query_vars( $query, $query_vars ) {
+	public function handle_custom_query_vars( array $query, array $query_vars ): array {
 		/*
 		 * Handle the 'linked_to_ltsolution' custom query var behavior:
 		 * - true : Only products that are linked to a solution;
