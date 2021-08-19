@@ -12,6 +12,7 @@ declare ( strict_types=1 );
 namespace PixelgradeLT\Retailer\Integration\WooCommerce\Screen;
 
 use Cedaro\WP\Plugin\AbstractHookProvider;
+use PixelgradeLT\Retailer\Integration\WooCommerce;
 use PixelgradeLT\Retailer\SolutionManager;
 use PixelgradeLT\Retailer\Utils\ArrayHelpers;
 
@@ -125,9 +126,8 @@ class ListWooProducts extends AbstractHookProvider {
 
 		$output = '—';
 		// Find the solution that is linked to this product.
-		$solution_id = get_post_meta( $post_id, '_linked_to_ltsolution', true );
+		$solution_id = WooCommerce::get_product_linked_ltsolution( $post_id );
 		if ( ! empty( $solution_id ) ) {
-			$solution_id = absint( $solution_id );
 			$output      = '<a class="package-list_link" href="' . esc_url( get_edit_post_link( $solution_id ) ) . '" title="' . esc_attr__( 'Edit LT Solution', 'pixelgradelt_retailer' ) . '">' . get_the_title( $solution_id ) . ' #' . $solution_id . '</a>';
 		}
 
@@ -217,7 +217,7 @@ class ListWooProducts extends AbstractHookProvider {
 	public function filter_linked_to_ltsolution_post_clauses( array $args ): array {
 		global $wpdb;
 		if ( ! empty( $_GET['linked_to_ltsolution'] ) && in_array( $_GET['linked_to_ltsolution'], ['linked', 'notlinked'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-			$args['join']  .= " LEFT JOIN {$wpdb->postmeta} ltmeta ON $wpdb->posts.ID = ltmeta.post_id AND ltmeta.meta_key = '_linked_to_ltsolution' ";
+			$args['join']  .= " LEFT JOIN {$wpdb->postmeta} ltmeta ON $wpdb->posts.ID = ltmeta.post_id AND ltmeta.meta_key = WooCommerce::PRODUCT_LINKED_TO_LTSOLUTION_META_KEY ";
 			if ( 'linked' === $_GET['linked_to_ltsolution'] ) {
 				$args['where'] .= " AND ltmeta.meta_value ";
 			} else {

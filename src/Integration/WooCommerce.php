@@ -21,6 +21,8 @@ use function PixelgradeLT\Retailer\carbon_get_raw_post_meta;
  */
 class WooCommerce extends AbstractHookProvider {
 
+	const PRODUCT_LINKED_TO_LTSOLUTION_META_KEY = '_linked_to_ltsolution';
+
 	/**
 	 * Register hooks.
 	 *
@@ -102,11 +104,11 @@ class WooCommerce extends AbstractHookProvider {
 		if ( isset( $query_vars['linked_to_ltsolution'] ) ) {
 			if ( true === $query_vars['linked_to_ltsolution'] ) {
 				$query['meta_query'][] = [
-					'key'     => '_linked_to_ltsolution',
+					'key'     => self::PRODUCT_LINKED_TO_LTSOLUTION_META_KEY,
 					'compare' => 'EXISTS',
 				];
 				$query['meta_query'][] = [
-					'key'     => '_linked_to_ltsolution',
+					'key'     => self::PRODUCT_LINKED_TO_LTSOLUTION_META_KEY,
 					'value'   => 0,
 					'compare' => '>',
 				];
@@ -114,22 +116,22 @@ class WooCommerce extends AbstractHookProvider {
 				$query['meta_query'][] = [
 					'relation' => 'OR',
 					[
-						'key'     => '_linked_to_ltsolution',
+						'key'     => self::PRODUCT_LINKED_TO_LTSOLUTION_META_KEY,
 						'compare' => 'NOT EXISTS',
 					],
 					[
-						'key'     => '_linked_to_ltsolution',
+						'key'     => self::PRODUCT_LINKED_TO_LTSOLUTION_META_KEY,
 						'value'   => 0,
 						'compare' => '=',
 					],
 				];
 			} else if ( absint( $query_vars['linked_to_ltsolution'] ) > 0 ) {
 				$query['meta_query'][] = [
-					'key'     => '_linked_to_ltsolution',
+					'key'     => self::PRODUCT_LINKED_TO_LTSOLUTION_META_KEY,
 					'compare' => 'EXISTS',
 				];
 				$query['meta_query'][] = [
-					'key'     => '_linked_to_ltsolution',
+					'key'     => self::PRODUCT_LINKED_TO_LTSOLUTION_META_KEY,
 					'value'   => absint( $query_vars['linked_to_ltsolution'] ),
 					'compare' => '=',
 				];
@@ -144,16 +146,16 @@ class WooCommerce extends AbstractHookProvider {
 			$query['meta_query'][] = [
 				'relation' => 'OR',
 				[
-					'key'     => '_linked_to_ltsolution',
+					'key'     => self::PRODUCT_LINKED_TO_LTSOLUTION_META_KEY,
 					'compare' => 'NOT EXISTS',
 				],
 				[
-					'key'     => '_linked_to_ltsolution',
+					'key'     => self::PRODUCT_LINKED_TO_LTSOLUTION_META_KEY,
 					'value'   => 0,
 					'compare' => '=',
 				],
 				[
-					'key'     => '_linked_to_ltsolution',
+					'key'     => self::PRODUCT_LINKED_TO_LTSOLUTION_META_KEY,
 					'value'   => absint( $query_vars['not_linked_to_ltsolution'] ),
 					'compare' => '!=',
 				],
@@ -161,5 +163,28 @@ class WooCommerce extends AbstractHookProvider {
 		}
 
 		return $query;
+	}
+
+	/**
+	 * Given a product, return its linked LT Solution
+	 *
+	 * @since 0.14.0
+	 *
+	 * @param mixed $product WC_Product|WP_Post|int|bool $product Product instance, post instance, numeric or false to use global $post.
+	 *
+	 * @return int|false The linked LT Solution post ID or false on no linked LT Solution or failure.
+	 */
+	public static function get_product_linked_ltsolution( $product = false ) {
+		$product = wc_get_product( $product );
+		if ( empty( $product ) ) {
+			return false;
+		}
+
+		$solution_id = get_post_meta( $product->get_id(), WooCommerce::PRODUCT_LINKED_TO_LTSOLUTION_META_KEY, true );
+		if ( empty( $solution_id ) ) {
+			return false;
+		}
+
+		return absint( $solution_id );
 	}
 }

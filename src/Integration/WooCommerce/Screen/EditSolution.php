@@ -15,6 +15,7 @@ use Carbon_Fields\Carbon_Fields;
 use Carbon_Fields\Container;
 use Carbon_Fields\Field;
 use Cedaro\WP\Plugin\AbstractHookProvider;
+use PixelgradeLT\Retailer\Integration\WooCommerce;
 use PixelgradeLT\Retailer\SolutionManager;
 use PixelgradeLT\Retailer\Repository\PackageRepository;
 use function Pixelgrade\WPPostNotes\create_note;
@@ -355,7 +356,7 @@ As long as the order that includes one of these products remains valid ("complet
 
 		if ( ! empty( $solution_data['woocommerce_products'] ) ) {
 			foreach ( $solution_data['woocommerce_products'] as $product_id ) {
-				update_post_meta( $product_id, '_linked_to_ltsolution', $solution_data['managed_post_id'] );
+				update_post_meta( $product_id, WooCommerce::PRODUCT_LINKED_TO_LTSOLUTION_META_KEY, $solution_data['managed_post_id'] );
 			}
 		}
 	}
@@ -379,13 +380,13 @@ As long as the order that includes one of these products remains valid ("complet
 
 		if ( ! empty( $removed ) ) {
 			foreach ( $removed as $product_id ) {
-				update_post_meta( $product_id, '_linked_to_ltsolution', false );
+				update_post_meta( $product_id, WooCommerce::PRODUCT_LINKED_TO_LTSOLUTION_META_KEY, false );
 			}
 		}
 
 		if ( ! empty( $new_product_ids ) ) {
 			foreach ( $new_product_ids as $product_id ) {
-				update_post_meta( $product_id, '_linked_to_ltsolution', $solution_data['managed_post_id'] );
+				update_post_meta( $product_id, WooCommerce::PRODUCT_LINKED_TO_LTSOLUTION_META_KEY, $solution_data['managed_post_id'] );
 			}
 		}
 	}
