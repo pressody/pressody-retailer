@@ -11,42 +11,66 @@ declare ( strict_types=1 );
 
 namespace PixelgradeLT\Retailer\Integration\WooCommerce;
 
-use Cedaro\WP\Plugin\AbstractHookProvider;
-use function PixelgradeLT\Retailer\carbon_get_raw_post_meta;
+use PixelgradeLT\Retailer\Integration\WooCommerce;
 
 /**
- * WooCommerce Order utility wrapping provider class.
+ * WooCommerce Order utility wrapping class.
  *
  * @since 0.14.0
  */
-class Order extends AbstractHookProvider {
+final class Order {
 
 	/**
-	 * Register hooks.
-	 *
-	 * @since 0.14.0
-	 */
-	public function register_hooks() {
-		$this->add_filter( 'pixelgradelt_retailer/solution_id_data', 'add_solution_data', 5, 2 );
-		$this->add_filter( 'pixelgradelt_retailer/solution_ids_by_query_args', 'handle_solution_query_args', 10, 2 );
-
-		add_filter( 'woocommerce_product_data_store_cpt_get_products_query', [
-			$this,
-			'handle_custom_query_vars',
-		], 10, 2 );
-	}
-
-	/**
-	 * Add WooCommerce specific data to a solution.
+	 * Given a WooCommerce order extract the corresponding purchased solutions.
 	 *
 	 * @since 0.14.0
 	 *
-	 * @param array $solution_data The solution data.
-	 * @param int   $post_id       The solution post ID.
+	 * @param mixed $order WP_Post object, WC_Order object, order ID.
 	 *
-	 * @return array The modified solution ID data.
+	 * @return array The purchased solutions details list.
 	 */
-	protected function add_solution_data( array $solution_data, int $post_id ): array {
+	public static function get_purchased_solutions( $order ): array {
+		$purchased_solutions = [];
 
+		if ( ! $order instanceof \WC_Abstract_Order ) {
+			$order = \WC_Order_Factory::get_order( $order );
+		}
+
+		if ( empty( $order ) ) {
+			return $purchased_solutions;
+		}
+
+		foreach ( $order->get_items( 'line_item' ) as $item ) {
+			if ( ! $item instanceof \WC_Order_Item_Product ) {
+				continue;
+			}
+
+			// We want the base product, not variations.
+			$product = wc_get_product( $item->get_product_id() );
+			if ( ! $product instanceof \WC_Product ) {
+				continue;
+			}
+
+			// Determine if this product is linked to an LT Solution.
+			$linked_solution_id = WooCommerce::get_product_linked_ltsolution( $product );
+			if ( empty( $linked_solution_id ) ) {
+				// No linked solution.
+				continue;
+			}
+
+			$refunded_qty          = absint( $order->get_qty_refunded_for_item( $item->get_id() ) );
+			$purchased_solutions[] = [
+				'id'            => $linked_solution_id,
+				'status'        => ( $item->get_quantity() === $refunded_qty ) ? 'refunded' : 'active',
+				'product_id'    => $item->get_product_id(),
+				'variation_id'  => $item->get_variation_id(),
+				'order_id'      => $order->get_id(),
+				'order_item_id' => $item->get_id(),
+				'qty'           => $item->get_quantity(),
+				'refunded_qty'  => $refunded_qty,
+			];
+		}
+
+		return $purchased_solutions;
 	}
 }
