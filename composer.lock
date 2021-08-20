@@ -1398,16 +1398,16 @@
         },
         {
             "name": "pixelgrade/wp-post-notes",
-            "version": "0.6.0",
+            "version": "0.6.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/pixelgrade/wp-post-notes.git",
-                "reference": "92928b2c59fa78d42ee383a5042fc3d0fe6b7b8a"
+                "reference": "08efcf95c05b014ad58f07deb3c55310dde030cd"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/pixelgrade/wp-post-notes/zipball/92928b2c59fa78d42ee383a5042fc3d0fe6b7b8a",
-                "reference": "92928b2c59fa78d42ee383a5042fc3d0fe6b7b8a",
+                "url": "https://api.github.com/repos/pixelgrade/wp-post-notes/zipball/08efcf95c05b014ad58f07deb3c55310dde030cd",
+                "reference": "08efcf95c05b014ad58f07deb3c55310dde030cd",
                 "shasum": ""
             },
             "require": {
@@ -1461,7 +1461,7 @@
                 "issues": "https://github.com/pixelgrade/wp-post-notes/issues",
                 "source": "https://github.com/pixelgrade/wp-post-notes"
             },
-            "time": "2021-08-18T08:31:53+00:00"
+            "time": "2021-08-20T08:07:55+00:00"
         },
         {
             "name": "psr/container",
