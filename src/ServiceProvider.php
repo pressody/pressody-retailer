@@ -428,8 +428,8 @@ class ServiceProvider implements ServiceProviderInterface {
 			return new Integration\Members();
 		};
 
-		$container['plugin.woocommerce'] = function () {
-			return new Integration\WooCommerce();
+		$container['plugin.woocommerce'] = function ( $container ) {
+			return new Integration\WooCommerce( $container['logs.logger'] );
 		};
 
 		$container['plugin.woocommerce.screen.edit_solution'] = function ( $container ) {

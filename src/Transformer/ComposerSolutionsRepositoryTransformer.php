@@ -28,9 +28,9 @@ class ComposerSolutionsRepositoryTransformer implements PackageRepositoryTransfo
 	/**
 	 * Composer package transformer.
 	 *
-	 * @var ComposerPackageTransformer.
+	 * @var ComposerSolutionTransformer.
 	 */
-	protected ComposerPackageTransformer $composer_transformer;
+	protected ComposerSolutionTransformer $composer_transformer;
 
 	/**
 	 * Package manager.
@@ -58,13 +58,13 @@ class ComposerSolutionsRepositoryTransformer implements PackageRepositoryTransfo
 	 *
 	 * @since 0.1.0
 	 *
-	 * @param ComposerPackageTransformer $composer_transformer Composer package transformer.
+	 * @param ComposerSolutionTransformer $composer_transformer Composer package transformer.
 	 * @param SolutionManager            $package_manager      Packages manager.
 	 * @param VersionParser              $version_parser       Version parser.
 	 * @param LoggerInterface            $logger               Logger.
 	 */
 	public function __construct(
-		ComposerPackageTransformer $composer_transformer,
+		ComposerSolutionTransformer $composer_transformer,
 		SolutionManager $package_manager,
 		VersionParser $version_parser,
 		LoggerInterface $logger

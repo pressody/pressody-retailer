@@ -94,7 +94,7 @@ class FlattenedSolutions extends AbstractRepository implements PackageRepository
 
 		foreach ( $packages as $package ) {
 			// If the package is not an object but some package data, build it if it's not already in the list.
-			if ( ! $package instanceof Package && is_array( $package ) && ! empty( $package['composer_package_name'] ) ) {
+			if ( is_array( $package ) && ! empty( $package['composer_package_name'] ) ) {
 				if ( array_key_exists( $package['composer_package_name'], $list ) ) {
 					continue;
 				}

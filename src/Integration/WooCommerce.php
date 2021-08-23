@@ -12,6 +12,8 @@ declare ( strict_types=1 );
 namespace PixelgradeLT\Retailer\Integration;
 
 use Cedaro\WP\Plugin\AbstractHookProvider;
+use PixelgradeLT\Retailer\Database\Tables\PurchasedSolutions;
+use Psr\Log\LoggerInterface;
 use function PixelgradeLT\Retailer\carbon_get_raw_post_meta;
 
 /**
@@ -21,7 +23,35 @@ use function PixelgradeLT\Retailer\carbon_get_raw_post_meta;
  */
 class WooCommerce extends AbstractHookProvider {
 
+	/**
+	 * @since 0.14.0
+	 */
 	const PRODUCT_LINKED_TO_LTSOLUTION_META_KEY = '_linked_to_ltsolution';
+
+	/**
+	 * Logger.
+	 *
+	 * @since 0.14.0
+	 *
+	 * @var LoggerInterface
+	 */
+	protected LoggerInterface $logger;
+
+	/**
+	 * Constructor.
+	 *
+	 * @since 0.14.0
+	 *
+	 * @param LoggerInterface   $logger     Logger.
+	 */
+	public function __construct(
+		LoggerInterface $logger
+	) {
+		$this->logger          = $logger;
+
+		// Make sure that the needed custom DB tables are up-and-running.
+		new PurchasedSolutions();
+	}
 
 	/**
 	 * Register hooks.

@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "cb947c8d56b9d3986289f1befefb70d4",
+    "content-hash": "a698efe712cdd7dd64224a00e74a87e2",
     "packages": [
         {
             "name": "automattic/jetpack-constants",
@@ -50,6 +50,37 @@
                 "source": "https://github.com/Automattic/jetpack-constants/tree/v1.6.5"
             },
             "time": "2021-05-25T16:35:30+00:00"
+        },
+        {
+            "name": "berlindb/core",
+            "version": "2.0.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/berlindb/core.git",
+                "reference": "52f07e192b484d201d668daef0ba290df5836ecb"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/berlindb/core/zipball/52f07e192b484d201d668daef0ba290df5836ecb",
+                "reference": "52f07e192b484d201d668daef0ba290df5836ecb",
+                "shasum": ""
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "BerlinDB\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "GPL-2.0-only"
+            ],
+            "description": "A collection of PHP classes and functions that aims to provide an ORM-like experience and interface to WordPress database tables.",
+            "support": {
+                "issues": "https://github.com/berlindb/core/issues",
+                "source": "https://github.com/berlindb/core/tree/2.0.0"
+            },
+            "time": "2021-07-12T14:55:04+00:00"
         },
         {
             "name": "cedaro/wp-plugin",

@@ -40,6 +40,7 @@
 		"php": "^7.4",
 		"ext-json": "*",
 		"automattic/jetpack-constants": "^1.6",
+		"berlindb/core": "^2.0",
 		"cedaro/wp-plugin": "^0.4.0",
 		"chamilo/pclzip": "^2.8",
 		"composer/composer": "^2.0",

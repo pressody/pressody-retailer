@@ -12,6 +12,7 @@ declare ( strict_types = 1 );
 namespace PixelgradeLT\Retailer\Logging;
 
 use Cedaro\WP\Plugin\AbstractHookProvider;
+use PixelgradeLT\Retailer\Database\Tables\Logs;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -41,6 +42,9 @@ class LogsManager extends AbstractHookProvider {
 		LoggerInterface $logger
 	) {
 		$this->logger          = $logger;
+
+		// Make sure that the needed custom DB tables are up-and-running.
+		new Logs();
 	}
 
 	/**
