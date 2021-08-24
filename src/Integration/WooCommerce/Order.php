@@ -21,23 +21,23 @@ use PixelgradeLT\Retailer\Integration\WooCommerce;
 final class Order {
 
 	/**
-	 * Given a WooCommerce order extract the corresponding purchased solutions.
+	 * Given a WooCommerce order extract the corresponding purchased solutions details.
 	 *
 	 * @since 0.14.0
 	 *
 	 * @param mixed $order WP_Post object, WC_Order object, order ID.
 	 *
-	 * @return array The purchased solutions details list.
+	 * @return array List with each purchased solutions details.
 	 */
 	public static function get_purchased_solutions( $order ): array {
-		$purchased_solutions = [];
+		$details = [];
 
 		if ( ! $order instanceof \WC_Abstract_Order ) {
 			$order = \WC_Order_Factory::get_order( $order );
 		}
 
 		if ( empty( $order ) ) {
-			return $purchased_solutions;
+			return $details;
 		}
 
 		foreach ( $order->get_items() as $item ) {
@@ -59,19 +59,20 @@ final class Order {
 				continue;
 			}
 
-			$refunded_qty          = \absint( $order->get_qty_refunded_for_item( $item->get_id() ) );
-			$purchased_solutions[] = [
-				'id'            => $linked_solution_id,
+			$refunded_qty = \absint( $order->get_qty_refunded_for_item( $item->get_id() ) );
+			$details[]    = [
 				'status'        => ( $item->get_quantity() === $refunded_qty ) ? 'refunded' : 'active',
+				'solution_id'   => $linked_solution_id,
 				'product_id'    => $item->get_product_id(),
 				'variation_id'  => $item->get_variation_id(),
 				'order_id'      => $order->get_id(),
 				'order_item_id' => $item->get_id(),
 				'qty'           => $item->get_quantity(),
 				'refunded_qty'  => $refunded_qty,
+				'customer_id'   => $order->get_customer_id(),
 			];
 		}
 
-		return $purchased_solutions;
+		return $details;
 	}
 }

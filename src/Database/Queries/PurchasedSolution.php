@@ -136,7 +136,7 @@ class PurchasedSolution extends Query {
 	 * @type int           $offset                 Number of logs to offset the query. Used to build LIMIT clause.
 	 *                                              Default 0.
 	 * @type bool          $no_found_rows          Whether to disable the `SQL_CALC_FOUND_ROWS` query. Default true.
-	 * @type string|array  $orderby                Accepts 'id', 'solution_id', 'user_id', 'order_id', 'order_item_id',
+	 * @type string|array  $orderby                Accepts 'id', 'status', 'solution_id', 'user_id', 'order_id', 'order_item_id',
 	 *                                              'composition_id', 'date_created', and 'date_modified'. Also accepts false,
 	 *                                              an empty array, or 'none' to disable `ORDER BY` clause.
 	 *                                              Default 'id'.

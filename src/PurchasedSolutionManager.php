@@ -11,6 +11,7 @@ declare ( strict_types=1 );
 
 namespace PixelgradeLT\Retailer;
 
+use BerlinDB\Database\Query;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -135,7 +136,7 @@ class PurchasedSolutionManager {
 	 *
 	 * @since 0.14.0
 	 *
-	 * @param int   $id Purchased solution ID.
+	 * @param int   $id             Purchased solution ID.
 	 * @param array $data           {
 	 *                              Array of purchased solution data. Default empty.
 	 *
@@ -166,13 +167,68 @@ class PurchasedSolutionManager {
 	}
 
 	/**
-	 * Move a purchased solution to the retired status.
+	 * Move a purchased solution to the `invalid` status.
 	 *
 	 * @since 0.14.0
 	 *
 	 * @param int $id
 	 *
-	 * @return bool      true if the purchased order was retired successfully, false if not.
+	 * @return bool true if the purchased order was invalidate successfully, false if not.
+	 */
+	public function invalidate_purchased_solution( int $id ): bool {
+		$purchased_solutions = new Database\Queries\PurchasedSolution();
+
+		return $purchased_solutions->update_item( $id, [
+			'status' => 'invalid',
+		] );
+	}
+
+	/**
+	 * Move a purchased solution to the `ready` status.
+	 *
+	 * @since 0.14.0
+	 *
+	 * @param int $id
+	 *
+	 * @return bool true if the purchased order was readied successfully, false if not.
+	 */
+	public function ready_purchased_solution( int $id ): bool {
+		$purchased_solutions = new Database\Queries\PurchasedSolution();
+
+		return $purchased_solutions->update_item( $id, [
+			'status' => 'ready',
+		] );
+	}
+
+	/**
+	 * Move a purchased solution to the `active` status.
+	 *
+	 * A composition ID must be provided to be able to activate a purchased solution.
+	 *
+	 * @since 0.14.0
+	 *
+	 * @param int $id
+	 * @param int $composition_id The composition ID this purchased solution is active in.
+	 *
+	 * @return bool true if the purchased order was activated successfully, false if not.
+	 */
+	public function activate_purchased_solution( int $id, int $composition_id ): bool {
+		$purchased_solutions = new Database\Queries\PurchasedSolution();
+
+		return $purchased_solutions->update_item( $id, [
+			'status'         => 'active',
+			'composition_id' => $composition_id,
+		] );
+	}
+
+	/**
+	 * Move a purchased solution to the `retired` status.
+	 *
+	 * @since 0.14.0
+	 *
+	 * @param int $id
+	 *
+	 * @return bool true if the purchased order was retired successfully, false if not.
 	 */
 	public function retire_purchased_solution( int $id ): bool {
 		$purchased_solutions = new Database\Queries\PurchasedSolution();
@@ -206,7 +262,7 @@ class PurchasedSolutionManager {
 	 *
 	 * @return PurchasedSolution|false Purchased solution object if successful, false otherwise.
 	 */
-	function get_purchased_solution( int $id = 0 ) {
+	public function get_purchased_solution( int $id = 0 ) {
 		$purchased_solutions = new Database\Queries\PurchasedSolution();
 
 		// Return purchased solution
@@ -218,12 +274,12 @@ class PurchasedSolutionManager {
 	 *
 	 * @since 0.14.0
 	 *
-	 * @param string $field Database table field.
-	 * @param string|int  $value Value of the row.
+	 * @param string     $field Database table field.
+	 * @param string|int $value Value of the row.
 	 *
 	 * @return PurchasedSolution|false Purchased solution object if successful, false otherwise.
 	 */
-	function get_purchased_solution_by( string $field = '', $value = '' ) {
+	public function get_purchased_solution_by( string $field = '', $value = '' ) {
 		$purchased_solutions = new Database\Queries\PurchasedSolution();
 
 		// Return purchased solution
@@ -242,12 +298,12 @@ class PurchasedSolutionManager {
 	 *
 	 * @return PurchasedSolution[] Array of `PurchasedSolution` objects.
 	 */
-	function get_purchased_solutions( array $args = [] ): array {
+	public function get_purchased_solutions( array $args = [] ): array {
 		$purchased_solutions = new Database\Queries\PurchasedSolution();
 
 		// Parse args.
 		$args = wp_parse_args( $args, array(
-			'number' => 30,
+			'number' => 50,
 		) );
 
 		// Return purchased solutions.
@@ -266,7 +322,7 @@ class PurchasedSolutionManager {
 	 *
 	 * @return int Number of purchased solutions returned based on query arguments passed.
 	 */
-	function count_purchased_solutions( array $args = [] ): int {
+	public function count_purchased_solutions( array $args = [] ): int {
 		// Parse args.
 		$args = wp_parse_args( $args, array(
 			'count' => true,
@@ -277,5 +333,63 @@ class PurchasedSolutionManager {
 
 		// Return count(s).
 		return absint( $purchased_solutions->found_items );
+	}
+
+	/**
+	 * Query for and return array of purchased solution counts, keyed by status.
+	 *
+	 * @since 0.14.0
+	 *
+	 * @see   Database\Queries\PurchasedSolution::__construct()
+	 *
+	 * @param array $args Arguments. See `\PixelgradeLT\Retailer\Database\Queries\PurchasedSolution` for
+	 *                    accepted arguments.
+	 *
+	 * @return array Purchased solution counts keyed by status.
+	 */
+	public function get_purchased_solution_counts( array $args = [] ): array {
+
+		// Parse args
+		$args = wp_parse_args( $args, array(
+			'count'   => true,
+			'groupby' => 'status',
+		) );
+
+		// Query for counts.
+		$counts = new Database\Queries\PurchasedSolution( $args );
+
+		// Format & return
+		return $this->format_counts( $counts, $args['groupby'] );
+	}
+
+	/**
+	 * Format an array of count objects, using the $groupby key.
+	 *
+	 * @since 0.14.0
+	 *
+	 * @param Query  $counts
+	 * @param string $groupby
+	 *
+	 * @return array
+	 */
+	protected function format_counts( Query $counts, string $groupby = '' ): array {
+
+		// Default array
+		$c = array(
+			'total' => 0,
+		);
+
+		// Loop through counts and shape return value
+		if ( ! empty( $counts->items ) ) {
+
+			// Loop through statuses
+			foreach ( $counts->items as $count ) {
+				$c[ $count[ $groupby ] ] = absint( $count['count'] );
+			}
+
+		}
+
+		// Return array of counts
+		return $c;
 	}
 }

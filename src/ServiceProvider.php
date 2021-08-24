@@ -443,6 +443,7 @@ class ServiceProvider implements ServiceProviderInterface {
 
 		$container['plugin.woocommerce'] = function ( $container ) {
 			return new Integration\WooCommerce(
+				$container['purchased_solution.manager'],
 				$container['db.purchased_solutions'],
 				$container['logs.logger']
 			);
