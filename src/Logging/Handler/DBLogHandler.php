@@ -14,6 +14,7 @@ declare ( strict_types = 1 );
 namespace PixelgradeLT\Retailer\Logging\Handler;
 
 use Automattic\Jetpack\Constants;
+use PixelgradeLT\Retailer\Database\Queries\Log;
 use PixelgradeLT\Retailer\Logging\LogLevels;
 
 /**
@@ -64,28 +65,20 @@ class DBLogHandler extends LogHandler {
 	 * @return bool True if write was successful.
 	 */
 	protected static function add( int $timestamp, string $level, string $message, string $source, array $context ): bool {
-		global $wpdb;
+		// Instantiate a query object.
+		$logs = new Log();
 
 		$insert = [
-			'timestamp' => date( 'Y-m-d H:i:s', $timestamp ),
 			'level'     => LogLevels::get_level_severity( $level ),
 			'message'   => $message,
 			'source'    => $source,
+			'date_created' => date( 'Y-m-d H:i:s', $timestamp ),
 		];
-
-		$format = [
-			'%s',
-			'%d',
-			'%s',
-			'%s',
-			'%s', // possible serialized context.
-		];
-
 		if ( ! empty( $context ) ) {
 			$insert['context'] = serialize( $context ); // @codingStandardsIgnoreLine.
 		}
 
-		return false !== $wpdb->insert( "{$wpdb->prefix}pixelgradelt_retailer_log", $insert, $format );
+		return $logs->add_item( $insert );
 	}
 
 	/**
@@ -96,7 +89,7 @@ class DBLogHandler extends LogHandler {
 	public static function flush(): bool {
 		global $wpdb;
 
-		return $wpdb->query( "TRUNCATE TABLE {$wpdb->prefix}pixelgradelt_retailer_log" );
+		return $wpdb->query( "TRUNCATE TABLE {$wpdb->prefix}lt_retailer_logs" );
 	}
 
 	/**
@@ -111,7 +104,7 @@ class DBLogHandler extends LogHandler {
 
 		return $wpdb->query(
 			$wpdb->prepare(
-				"DELETE FROM {$wpdb->prefix}pixelgradelt_retailer_log WHERE source = %s",
+				"DELETE FROM {$wpdb->prefix}lt_retailer_logs WHERE source = %s",
 				$source
 			)
 		);
@@ -133,7 +126,7 @@ class DBLogHandler extends LogHandler {
 
 		$format   = array_fill( 0, count( $log_ids ), '%d' );
 		$query_in = '(' . implode( ',', $format ) . ')';
-		return $wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->prefix}pixelgradelt_retailer_log WHERE log_id IN {$query_in}", $log_ids ) ); // @codingStandardsIgnoreLine.
+		return $wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->prefix}lt_retailer_logs WHERE id IN {$query_in}", $log_ids ) ); // @codingStandardsIgnoreLine.
 	}
 
 	/**
@@ -150,7 +143,7 @@ class DBLogHandler extends LogHandler {
 
 		$wpdb->query(
 			$wpdb->prepare(
-				"DELETE FROM {$wpdb->prefix}pixelgradelt_retailer_log WHERE timestamp < %s",
+				"DELETE FROM {$wpdb->prefix}lt_retailer_logs WHERE date_created < %s",
 				date( 'Y-m-d H:i:s', $timestamp )
 			)
 		);
