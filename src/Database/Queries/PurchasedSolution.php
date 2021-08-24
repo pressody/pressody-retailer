@@ -105,6 +105,9 @@ class PurchasedSolution extends Query {
 	 * @type int           $id                     A purchased solution ID to only return that purchased solution. Default empty.
 	 * @type array         $id__in                 Array of purchased solution IDs to include. Default empty.
 	 * @type array         $id__not_in             Array of purchased solution IDs to exclude. Default empty.
+	 * @type string        $status                 A purchased solution status to only return items with that status. Default empty.
+	 * @type array         $status__in             Array of purchased solution statuses to include. Default empty.
+	 * @type array         $status__not_in         Array of purchased solution statuses to exclude. Default empty.
 	 * @type string        $solution_id            A solution ID to only return those purchased solutions associated with it. Default empty.
 	 * @type array         $solution_id__in        Array of solution IDs to include only those purchased solutions associated with them. Default empty.
 	 * @type array         $solution_id__not_in    Array of solution IDs to exclude those purchased solutions associated with them. Default empty.

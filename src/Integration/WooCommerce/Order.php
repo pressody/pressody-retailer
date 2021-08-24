@@ -47,7 +47,7 @@ final class Order {
 			}
 
 			// We want the base product, not variations.
-			$product = wc_get_product( $item->get_product_id() );
+			$product = \wc_get_product( $item->get_product_id() );
 			if ( ! $product instanceof \WC_Product ) {
 				continue;
 			}
@@ -59,7 +59,7 @@ final class Order {
 				continue;
 			}
 
-			$refunded_qty          = absint( $order->get_qty_refunded_for_item( $item->get_id() ) );
+			$refunded_qty          = \absint( $order->get_qty_refunded_for_item( $item->get_id() ) );
 			$purchased_solutions[] = [
 				'id'            => $linked_solution_id,
 				'status'        => ( $item->get_quantity() === $refunded_qty ) ? 'refunded' : 'active',

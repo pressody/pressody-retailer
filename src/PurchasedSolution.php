@@ -7,7 +7,7 @@
  * @package PixelgradeLT
  */
 
-declare ( strict_types = 1 );
+declare ( strict_types=1 );
 
 namespace PixelgradeLT\Retailer;
 
@@ -16,12 +16,13 @@ namespace PixelgradeLT\Retailer;
  *
  * @since 0.14.0
  *
- * @property int $id
- * @property int $solution_id
- * @property int $user_id
- * @property int $order_id
- * @property int $order_item_id
- * @property int $composition_id
+ * @property int    $id
+ * @property string $status
+ * @property int    $solution_id
+ * @property int    $user_id
+ * @property int    $order_id
+ * @property int    $order_item_id
+ * @property int    $composition_id
  * @property string $date_created
  * @property string $date_modified
  */
@@ -35,6 +36,17 @@ class PurchasedSolution extends Database\Rows\PurchasedSolution {
 	 * @var    int
 	 */
 	protected int $id;
+
+	/**
+	 * Purchased Solution status.
+	 *
+	 * @since  0.14.0
+	 * @access protected
+	 * @see    PurchasedSolutionManager::$STATUSES for possible values.
+	 *
+	 * @var    string
+	 */
+	protected string $status;
 
 	/**
 	 * Solution ID.

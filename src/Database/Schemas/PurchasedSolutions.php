@@ -40,6 +40,16 @@ class PurchasedSolutions extends Schema {
 			'sortable'   => true
 		),
 
+		// status
+		array(
+			'name'       => 'status',
+			'type'       => 'varchar',
+			'length'     => '20',
+			'default'    => 'valid',
+			'sortable'   => true,
+			'transition' => true
+		),
+
 		// solution_id
 		array(
 			'name'       => 'solution_id',

@@ -11,8 +11,8 @@ declare ( strict_types=1 );
 
 namespace PixelgradeLT\Retailer\Integration;
 
+use BerlinDB\Database\Table;
 use Cedaro\WP\Plugin\AbstractHookProvider;
-use PixelgradeLT\Retailer\Database\Tables\PurchasedSolutions;
 use Psr\Log\LoggerInterface;
 use function PixelgradeLT\Retailer\carbon_get_raw_post_meta;
 
@@ -29,6 +29,15 @@ class WooCommerce extends AbstractHookProvider {
 	const PRODUCT_LINKED_TO_LTSOLUTION_META_KEY = '_linked_to_ltsolution';
 
 	/**
+	 * The custom DB table.
+	 *
+	 * @since 0.14.0
+	 *
+	 * @var Table
+	 */
+	protected Table $db;
+
+	/**
 	 * Logger.
 	 *
 	 * @since 0.14.0
@@ -42,15 +51,15 @@ class WooCommerce extends AbstractHookProvider {
 	 *
 	 * @since 0.14.0
 	 *
-	 * @param LoggerInterface   $logger     Logger.
+	 * @param Table           $db     The instance handling the custom DB table.
+	 * @param LoggerInterface $logger Logger.
 	 */
 	public function __construct(
+		Table $db,
 		LoggerInterface $logger
 	) {
-		$this->logger          = $logger;
-
-		// Make sure that the needed custom DB tables are up-and-running.
-		new PurchasedSolutions();
+		$this->db     = $db;
+		$this->logger = $logger;
 	}
 
 	/**
@@ -59,9 +68,11 @@ class WooCommerce extends AbstractHookProvider {
 	 * @since 0.14.0
 	 */
 	public function register_hooks() {
+		// Handle LT Solutions.
 		$this->add_filter( 'pixelgradelt_retailer/solution_id_data', 'add_solution_data', 5, 2 );
 		$this->add_filter( 'pixelgradelt_retailer/solution_ids_by_query_args', 'handle_solution_query_args', 10, 2 );
 
+		// Handle WooCommerce Products query custom query vars.
 		add_filter( 'woocommerce_product_data_store_cpt_get_products_query', [
 			$this,
 			'handle_custom_query_vars',
@@ -82,7 +93,7 @@ class WooCommerce extends AbstractHookProvider {
 		/**
 		 * THE LINKED PRODUCT IDS.
 		 */
-		$solution_data['woocommerce_products'] = carbon_get_post_meta( $post_id, 'solution_woocommerce_products' );
+		$solution_data['woocommerce_products'] = \carbon_get_post_meta( $post_id, 'solution_woocommerce_products' );
 		// Add the un-formatted DB data, for reference.
 		// Differences may arise from invalid products that are no longer part of the options list (CarbonFields removes them automatically).
 		$solution_data['woocommerce_products_raw'] = carbon_get_raw_post_meta( $post_id, 'solution_woocommerce_products' );
@@ -103,7 +114,7 @@ class WooCommerce extends AbstractHookProvider {
 	protected function handle_solution_query_args( array $query_args, array $args ): array {
 		if ( ! empty( $args['woocommerce_product_id'] ) && 'any' !== $args['woocommerce_product_id'] && is_numeric( $args['woocommerce_product_id'] ) ) {
 
-			$args['woocommerce_product_id'] = absint( $args['woocommerce_product_id'] );
+			$args['woocommerce_product_id'] = \absint( $args['woocommerce_product_id'] );
 
 			$query_args['meta_query'][] = [
 				'key'   => 'solution_woocommerce_products',
@@ -162,7 +173,7 @@ class WooCommerce extends AbstractHookProvider {
 				];
 				$query['meta_query'][] = [
 					'key'     => self::PRODUCT_LINKED_TO_LTSOLUTION_META_KEY,
-					'value'   => absint( $query_vars['linked_to_ltsolution'] ),
+					'value'   => \absint( $query_vars['linked_to_ltsolution'] ),
 					'compare' => '=',
 				];
 			}
@@ -186,7 +197,7 @@ class WooCommerce extends AbstractHookProvider {
 				],
 				[
 					'key'     => self::PRODUCT_LINKED_TO_LTSOLUTION_META_KEY,
-					'value'   => absint( $query_vars['not_linked_to_ltsolution'] ),
+					'value'   => \absint( $query_vars['not_linked_to_ltsolution'] ),
 					'compare' => '!=',
 				],
 			];
@@ -196,7 +207,7 @@ class WooCommerce extends AbstractHookProvider {
 	}
 
 	/**
-	 * Given a product, return its linked LT Solution
+	 * Given a product, return its linked LT Solution.
 	 *
 	 * @since 0.14.0
 	 *
@@ -205,16 +216,16 @@ class WooCommerce extends AbstractHookProvider {
 	 * @return int|false The linked LT Solution post ID or false on no linked LT Solution or failure.
 	 */
 	public static function get_product_linked_ltsolution( $product = false ) {
-		$product = wc_get_product( $product );
+		$product = \wc_get_product( $product );
 		if ( empty( $product ) ) {
 			return false;
 		}
 
-		$solution_id = get_post_meta( $product->get_id(), WooCommerce::PRODUCT_LINKED_TO_LTSOLUTION_META_KEY, true );
+		$solution_id = \get_post_meta( $product->get_id(), WooCommerce::PRODUCT_LINKED_TO_LTSOLUTION_META_KEY, true );
 		if ( empty( $solution_id ) ) {
 			return false;
 		}
 
-		return absint( $solution_id );
+		return \absint( $solution_id );
 	}
 }

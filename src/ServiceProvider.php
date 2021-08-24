@@ -111,6 +111,12 @@ class ServiceProvider implements ServiceProviderInterface {
 			return $crypter;
 		};
 
+		$container['db.purchased_solutions'] = function () {
+			// Handle the purchased solution custom DB tables (create, upgrade, etc).
+			// This just needs to be instantiated.
+			return new Database\Tables\PurchasedSolutions();
+		};
+
 		$container['hash.generator'] = function ( $container ) {
 			// We will use the randomly generated storage directory name as the salt,
 			// so that if that changes the hashes are also invalidated.
@@ -257,6 +263,13 @@ class ServiceProvider implements ServiceProviderInterface {
 			return new SolutionManager(
 				$container['client.composer'],
 				$container['version.parser'],
+				$container['logs.logger']
+			);
+		};
+
+		$container['purchased_solution.manager'] = function ( $container ) {
+			return new PurchasedSolutionManager(
+				$container['solution.manager'],
 				$container['logs.logger']
 			);
 		};
@@ -429,7 +442,10 @@ class ServiceProvider implements ServiceProviderInterface {
 		};
 
 		$container['plugin.woocommerce'] = function ( $container ) {
-			return new Integration\WooCommerce( $container['logs.logger'] );
+			return new Integration\WooCommerce(
+				$container['db.purchased_solutions'],
+				$container['logs.logger']
+			);
 		};
 
 		$container['plugin.woocommerce.screen.edit_solution'] = function ( $container ) {

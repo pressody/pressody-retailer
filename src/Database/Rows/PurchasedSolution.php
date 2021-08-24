@@ -12,6 +12,7 @@ declare ( strict_types=1 );
 namespace PixelgradeLT\Retailer\Database\Rows;
 
 use BerlinDB\Database\Row;
+use PixelgradeLT\Retailer\PurchasedSolutionManager;
 
 /**
  * Purchased Solution database row class.
@@ -40,12 +41,13 @@ class PurchasedSolution extends Row {
 
 		// This is optional, but recommended. Set the type of each column, and prepare.
 		$this->id             = (int) $this->id;
+		$this->status         = in_array( $this->status, array_keys( PurchasedSolutionManager::$STATUSES ) ) ? $this->status : 'invalid';
 		$this->solution_id    = (int) $this->solution_id;
 		$this->user_id        = (int) $this->user_id;
 		$this->order_id       = (int) $this->order_id;
 		$this->order_item_id  = (int) $this->order_item_id;
 		$this->composition_id = (int) $this->composition_id;
-//		$this->date_created   = ( false === $this->date_created ) ? 0 : strtotime( $this->date_created );
-//		$this->date_modified  = ( false === $this->date_modified ) ? 0 : strtotime( $this->date_modified );
+		//		$this->date_created   = ( false === $this->date_created ) ? 0 : strtotime( $this->date_created );
+		//		$this->date_modified  = ( false === $this->date_modified ) ? 0 : strtotime( $this->date_modified );
 	}
 }
