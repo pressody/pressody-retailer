@@ -163,7 +163,9 @@ class PurchasedSolutionManager {
 	public function update_purchased_solution( int $id, array $data ): bool {
 		$purchased_solutions = new Database\Queries\PurchasedSolution();
 
-		return $purchased_solutions->update_item( $id, $data );
+		$result = $purchased_solutions->update_item( $id, $data );
+
+		return $result !== false;
 	}
 
 	/**
@@ -178,9 +180,11 @@ class PurchasedSolutionManager {
 	public function invalidate_purchased_solution( int $id ): bool {
 		$purchased_solutions = new Database\Queries\PurchasedSolution();
 
-		return $purchased_solutions->update_item( $id, [
+		$result = $purchased_solutions->update_item( $id, [
 			'status' => 'invalid',
 		] );
+
+		return $result !== false;
 	}
 
 	/**
@@ -195,9 +199,11 @@ class PurchasedSolutionManager {
 	public function ready_purchased_solution( int $id ): bool {
 		$purchased_solutions = new Database\Queries\PurchasedSolution();
 
-		return $purchased_solutions->update_item( $id, [
+		$result = $purchased_solutions->update_item( $id, [
 			'status' => 'ready',
 		] );
+
+		return $result !== false;
 	}
 
 	/**
@@ -215,10 +221,12 @@ class PurchasedSolutionManager {
 	public function activate_purchased_solution( int $id, int $composition_id ): bool {
 		$purchased_solutions = new Database\Queries\PurchasedSolution();
 
-		return $purchased_solutions->update_item( $id, [
+		$result = $purchased_solutions->update_item( $id, [
 			'status'         => 'active',
 			'composition_id' => $composition_id,
 		] );
+
+		return $result !== false;
 	}
 
 	/**
@@ -233,9 +241,11 @@ class PurchasedSolutionManager {
 	public function retire_purchased_solution( int $id ): bool {
 		$purchased_solutions = new Database\Queries\PurchasedSolution();
 
-		return $purchased_solutions->update_item( $id, [
+		$result = $purchased_solutions->update_item( $id, [
 			'status' => 'retired',
 		] );
+
+		return $result !== false;
 	}
 
 	/**
@@ -250,7 +260,9 @@ class PurchasedSolutionManager {
 	public function delete_purchased_solution( int $id ): bool {
 		$purchased_solutions = new Database\Queries\PurchasedSolution();
 
-		return $purchased_solutions->delete_item( $id );
+		$result = $purchased_solutions->delete_item( $id );
+
+		return $result !== false;
 	}
 
 	/**
@@ -381,10 +393,10 @@ class PurchasedSolutionManager {
 
 		// Loop through counts and shape return value
 		if ( ! empty( $counts->items ) ) {
-
 			// Loop through statuses
 			foreach ( $counts->items as $count ) {
 				$c[ $count[ $groupby ] ] = absint( $count['count'] );
+				$c['total'] += $c[ $count[ $groupby ] ];
 			}
 
 		}

@@ -727,6 +727,10 @@ The excluded solutions only take effect in <strong>a purchase context (add to ca
 	 * @param bool     $update  Whether this is an existing post being updated.
 	 */
 	protected function handle_post_update( int $post_id, \WP_Post $post, bool $update ) {
+		if ( $this->solution_manager::POST_TYPE !== $post->post_type ) {
+			return;
+		}
+
 		/**
 		 * Fires on LT solution post save.
 		 *

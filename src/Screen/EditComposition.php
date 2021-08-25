@@ -558,6 +558,10 @@ Since each solution is tied to a e-commerce product, each solution here is tied 
 	 * @param bool     $update  Whether this is an existing post being updated.
 	 */
 	protected function handle_post_update( int $post_id, \WP_Post $post, bool $update ) {
+		if ( $this->composition_manager::POST_TYPE !== $post->post_type ) {
+			return;
+		}
+
 		if ( ! $update ) {
 			return;
 		}

@@ -193,7 +193,11 @@ As long as the order that includes one of these products remains valid ("complet
 
 		/**
 		 * We exclude all the products that other solutions are already linked to,
-		 * since we want 1-to-many relationships between solutions and products.
+		 * since we want 1-to-many relationships between solutions and products!
+		 * Another way of saying it:
+		 * - a WooCommerce product can be linked to a single solution! Not multiple solutions!
+		 * - a Solution can be linked to multiple products! The purchase of any of those products
+		 *   will lead to the purchase of that Solution.
 		 *
 		 * @see \PixelgradeLT\Retailer\Integration\WooCommerce::handle_custom_query_vars()
 		 */
