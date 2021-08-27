@@ -215,7 +215,7 @@ Accept: application/json
 Content-Type: application/json
 
 {
-  "ltdetails": "def50200f830e9646a8dc04858de8a9f6048a09ecab3134798ae88d94e57757e15569c75b8f7e5152bcf7c7b40f06d3c3176ab7a42aadeeac31447de35ca1f53ec576d386c45fd2524611d79bcdde353fa365d4223a67818f3cd9bfcd8810ea227ffdb3b1b806101e2fd805843bbccccf078b8142b656b4c4e30a392814a5763c6d168e60ccc256b68416d2ed31b7164e240607ce24e166eb667f80d051ef7e8983a"
+  "ltdetails": "def502008255eca7bb197c6abea2ba0dc5c9d6315418946d37e17b68a8a3fd3ce5a9132d0ffa95836a5952b1b18667a2b592b50a8bbf84b3afe9e7e06298d9ca29f5a722024673215d8111ccdbdf3d9fbbd7d3f5b5467482ce5822f833b29a6f3e4dd06128323a00732b06449b9400fb957958dc3af89d1475204a1e0e2214a8971df85f8db5ad5b7ba2eb1d7b3f78f2fbf6e3949da68f42d7c76b29aab2f01e4eeed84fed71aa46301d3c3c2b3e288373cbe239e886acb1e68f8490bb7f5b682c3ae4ee27fcfff2619188f2fd57ba8d9fd3"
 }
 
 ###
@@ -226,10 +226,17 @@ Accept: application/json
 Content-Type: application/json
 
 {
-  "userid": 1,
+  "userids": [1],
   "compositionid": "lwqGArXg",
   "extra": {
-	"user-email": "test@test.com"
+	"users": [
+	  {
+		"status": "valid",
+		"id": 1,
+		"email": "test@test.com",
+		"username": ""
+	  }
+	]
   }
 }
 

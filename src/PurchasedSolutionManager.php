@@ -85,7 +85,7 @@ class PurchasedSolutionManager {
 			'invalid' => [
 				'id'       => 'invalid',
 				'label'    => esc_html__( 'Invalid', 'pixelgradelt_retailer' ),
-				'desc'     => esc_html__( 'The purchased solution can\'t be used in compositions. After certain changes it may become `ready`.', 'pixelgradelt_retailer' ),
+				'desc'     => esc_html__( 'The purchased solution can\'t be used in compositions. After certain changes it may become `ready` or `active`.', 'pixelgradelt_retailer' ),
 				'internal' => false,
 			],
 			'retired' => [

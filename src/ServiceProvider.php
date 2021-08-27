@@ -90,9 +90,10 @@ class ServiceProvider implements ServiceProviderInterface {
 
 		$container['composition.manager'] = function ( $container ) {
 			return new CompositionManager(
+				$container['repository.solutions'],
+				$container['purchased_solution.manager'],
 				$container['client.composer'],
 				$container['version.parser'],
-				$container['repository.solutions'],
 				$container['logs.logger'],
 				$container['hash.generator']
 			);
@@ -354,6 +355,7 @@ class ServiceProvider implements ServiceProviderInterface {
 			return new Screen\EditComposition(
 				$container['composition.manager'],
 				$container['solution.manager'],
+				$container['purchased_solution.manager'],
 				$container['transformer.composer_package']
 			);
 		};

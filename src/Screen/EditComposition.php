@@ -14,8 +14,10 @@ namespace PixelgradeLT\Retailer\Screen;
 use Carbon_Fields\Carbon_Fields;
 use Carbon_Fields\Container;
 use Carbon_Fields\Field;
+use Carbon_Fields\Helper\Helper;
 use Cedaro\WP\Plugin\AbstractHookProvider;
 use PixelgradeLT\Retailer\CompositionManager;
+use PixelgradeLT\Retailer\PurchasedSolutionManager;
 use PixelgradeLT\Retailer\Transformer\ComposerPackageTransformer;
 use PixelgradeLT\Retailer\SolutionManager;
 use PixelgradeLT\Retailer\Utils\ArrayHelpers;
@@ -47,6 +49,13 @@ class EditComposition extends AbstractHookProvider {
 	protected SolutionManager $solution_manager;
 
 	/**
+	 * Purchased-Solutions manager.
+	 *
+	 * @var PurchasedSolutionManager
+	 */
+	protected PurchasedSolutionManager $ps_manager;
+
+	/**
 	 * Composer package transformer.
 	 *
 	 * @var ComposerPackageTransformer
@@ -76,18 +85,21 @@ class EditComposition extends AbstractHookProvider {
 	 *
 	 * @since 0.11.0
 	 *
-	 * @param CompositionManager         $composition_manager  Compositions manager.
-	 * @param SolutionManager            $solution_manager     Solutions manager.
-	 * @param ComposerPackageTransformer $composer_transformer Solution transformer.
+	 * @param CompositionManager         $composition_manager        Compositions manager.
+	 * @param SolutionManager            $solution_manager           Solutions manager.
+	 * @param PurchasedSolutionManager   $purchased_solution_manager Purchased-Solutions manager.
+	 * @param ComposerPackageTransformer $composer_transformer       Solution transformer.
 	 */
 	public function __construct(
 		CompositionManager $composition_manager,
 		SolutionManager $solution_manager,
+		PurchasedSolutionManager $purchased_solution_manager,
 		ComposerPackageTransformer $composer_transformer
 	) {
 
 		$this->composition_manager  = $composition_manager;
 		$this->solution_manager     = $solution_manager;
+		$this->ps_manager           = $purchased_solution_manager;
 		$this->composer_transformer = $composer_transformer;
 	}
 
@@ -129,9 +141,9 @@ class EditComposition extends AbstractHookProvider {
 		/*
 		 * HANDLE POST UPDATE CHANGES.
 		 */
-		$this->add_action( 'wp_after_insert_post', 'handle_post_update', 10, 3 );
-		// These are programmatic changes.
-		$this->add_action( 'pixelgradelt_retailer/ltcomposition/update', 'handle_post_update', 10, 3 );
+		// Just trigger the update action.
+		$this->add_action( 'wp_after_insert_post', 'do_update_action', 10, 3 );
+		$this->add_action( 'pixelgradelt_retailer/ltcomposition/update', 'handle_composition_update', 10, 3 );
 
 		/*
 		 * HANDLE AUTOMATIC POST NOTES.
@@ -139,7 +151,8 @@ class EditComposition extends AbstractHookProvider {
 		$this->add_action( 'pixelgradelt_retailer/ltcomposition/status_change', 'add_composition_status_change_note', 10, 3 );
 		$this->add_action( 'pixelgradelt_retailer/ltcomposition/hashid_change', 'add_composition_hashid_change_note', 10, 3 );
 		$this->add_action( 'pixelgradelt_retailer/ltcomposition/user_change', 'add_composition_user_change_note', 10, 3 );
-		$this->add_action( 'pixelgradelt_retailer/ltcomposition/required_solutions_change', 'add_composition_required_solutions_change_note', 10, 3 );
+		$this->add_action( 'pixelgradelt_retailer/ltcomposition/required_purchased_solutions_change', 'add_composition_required_purchased_solutions_change_note', 10, 3 );
+		$this->add_action( 'pixelgradelt_retailer/ltcomposition/required_manual_solutions_change', 'add_composition_required_manual_solutions_change_note', 10, 3 );
 	}
 
 	/**
@@ -169,8 +182,8 @@ class EditComposition extends AbstractHookProvider {
 
 		// Gather all the contained solutions in the composition.
 		$composition_data = $this->composition_manager->get_composition_id_data( get_the_ID(), true );
-		$solutionsIds     = $this->composition_manager->get_post_composition_required_solutions_ids( $composition_data['required_solutions'] );
-		$solutionsContext = $this->composition_manager->get_post_composition_required_solutions_context( $composition_data['required_solutions'] );
+		$solutionsIds     = $this->composition_manager->extract_required_solutions_post_ids( $composition_data['required_solutions'] );
+		$solutionsContext = $this->composition_manager->extract_required_solutions_context( $composition_data['required_solutions'] );
 
 		// Get the encrypted form of the composition's LT details.
 		$encrypted_ltdetails = $this->composition_manager->get_post_composition_encrypted_ltdetails( $composition_data );
@@ -228,62 +241,73 @@ Under normal circumstances, <strong>compositions are created and details updated
 			              ->set_help_text( __( 'This will be used to <strong>uniquely identify the composition throughout the ecosystem.</strong> Be careful when changing this after a composition is used on a site.<br>
 <strong>Leave empty</strong> and we will fill it with a hash generated from the post ID. You should <strong>leave it as such</strong> if you don\'t have a good reason to change it!', 'pixelgradelt_retailer' ) ),
 
-			         Field::make( 'html', 'composition_user_details_html', __( 'Section Description', 'pixelgradelt_retailer' ) )
-			              ->set_html( sprintf( '<p class="description">%s</p>', __( 'Provide as many details for identifying the user this composition belongs to.', 'pixelgradelt_retailer' ) ) ),
-
-			         Field::make( 'text', 'composition_user_id', __( 'Composition User ID', 'pixelgradelt_retailer' ) )
-			              ->set_help_text( __( 'This is the numeric ID of the user this composition belongs to.', 'pixelgradelt_retailer' ) )
-			              ->set_attribute( 'type', 'number' )
-			              ->set_required( false )
-			              ->set_width( 25 ),
-			         Field::make( 'text', 'composition_user_email', __( 'Composition User Email', 'pixelgradelt_retailer' ) )
-			              ->set_help_text( __( 'This is the email of the user this composition belongs to.', 'pixelgradelt_retailer' ) )
-			              ->set_attribute( 'type', 'email' )
-			              ->set_required( false )
-			              ->set_width( 25 ),
-			         Field::make( 'text', 'composition_user_username', __( 'Composition User Username', 'pixelgradelt_retailer' ) )
-			              ->set_help_text( __( 'This is the username of the user this composition belongs to.', 'pixelgradelt_retailer' ) )
-			              ->set_required( false )
-			              ->set_width( 25 ),
+			         Field::make( 'association', 'composition_user_ids', __( 'Composition Owner(s)', 'pixelgradelt_retailer' ) )
+			              ->set_duplicates_allowed( false )
+			              ->set_help_text( sprintf( '<p class="description">%s</p>', __( 'These are registered users that act as <strong>owners of this composition.</strong> They can edit the composition and use it on sites.<br>
+<strong>Only the owners\' purchased solutions</strong> can be included in the composition.<br>
+<em>Note:</em> After modifying the owner list, update the post to make the new purchased solutions available.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Please bear in mind that already included purchased solutions may be removed from the composition if they are no longer available.', 'pixelgradelt_retailer' ) ) )
+			              ->set_types( [
+				              [
+					              'type' => 'user',
+				              ],
+			              ] ),
 		         ] );
 
-		// Register the metabox for managing the solutions the current composition contains.
-		Container::make( 'post_meta', 'carbon_fields_container_solutions_configuration_' . $this->composition_manager::POST_TYPE, esc_html__( 'Contained Solutions Configuration', 'pixelgradelt_retailer' ) )
+		// Create a HTML list of the purchased solutions statuses to be used as help text.
+		$purchased_solutions_statuses_help = [];
+		foreach ( PurchasedSolutionManager::$STATUSES as $status => $status_details ) {
+			if ( $status_details['internal'] ) {
+				continue;
+			}
+			$purchased_solutions_statuses_help[] = sprintf( __( '<code>%1$s</code> : %2$s', 'pixelgradelt_retailer' ), $status, $status_details['desc'] );
+		}
+
+		// Register the metabox for managing the purchased or manual solutions the current composition includes.
+		Container::make( 'post_meta', 'carbon_fields_container_solutions_configuration_' . $this->composition_manager::POST_TYPE, esc_html__( 'Included Solutions Configuration', 'pixelgradelt_retailer' ) )
 		         ->where( 'post_type', '=', $this->composition_manager::POST_TYPE )
 		         ->set_context( 'normal' )
 		         ->set_priority( 'core' )
 		         ->add_fields( [
 			         Field::make( 'html', 'solutions_configuration_html', __( 'Solutions Description', 'pixelgradelt_retailer' ) )
-			              ->set_html( sprintf( '<p class="description">%s</p>', __( 'Here you edit and configure <strong>the list of solutions</strong> the current composition contains/requires.', 'pixelgradelt_retailer' ) ) ),
+			              ->set_html( sprintf( '<p class="description">%s</p>', __( 'Here you edit and configure <strong>the list of solutions</strong> the composition includes.<br>
+The purchased solutions list will be <strong>merged</strong> with the manual solutions list to make up <strong>the final list.</strong><br>
+If a <strong>manual solution</strong> is present then <strong>that LT solution will always be part of the composition,</strong> regardless of the status of a purchased solution matching the same LT Solution.', 'pixelgradelt_retailer' ) ) ),
 
-			         Field::make( 'complex', 'composition_required_solutions', __( 'Contained Solutions', 'pixelgradelt_retailer' ) )
-			              ->set_help_text( __( 'These are <strong>the LT solutions part of this composition.</strong> A composition is normally created/updated when <strong>a user purchases a set of solutions</strong> for a site.<br>
-Since each solution is tied to a e-commerce product, each solution here is tied to <strong>an order and a specific item in that order.</strong><br>
+			         Field::make( 'multiselect', 'composition_required_purchased_solutions', __( 'Purchased Solutions', 'pixelgradelt_retailer' ) )
+			              ->set_help_text( __( 'These are <strong>purchased LT solutions that are included in this composition.</strong><br>
+The options available are <strong>all the solutions purchased by the composition owners, combined.</strong> They are ordered by their purchased-solution ID, ascending.<br>
+<strong>FYI:</strong> Each purchased-solution label is comprised of: <code>LT solution name</code>, <code>LT solution #post_id</code>, and purchased solution details like <code>customer username</code>, <code>order ID</code>, <code>purchased-solution status</code>.<br>
+The statuses can be: <br>
+<ul><li>' . implode( '</li><li>', $purchased_solutions_statuses_help ) . '</li></ul>', 'pixelgradelt_retailer' ) )
+			              ->set_classes( 'composition-required-solutions composition_required_purchased_solutions' )
+			              ->set_options( [ $this, 'get_available_required_purchased_solutions_options' ] )
+			              ->set_default_value( [] )
+			              ->set_required( false )
+			              ->set_width( 50 ),
+
+			         Field::make( 'complex', 'composition_required_manual_solutions', __( 'Manual Solutions', 'pixelgradelt_retailer' ) )
+			              ->set_help_text( __( 'These are <strong>the manual LT solutions part of this composition.</strong> These are <strong>LT solutions that don\'t have a product purchase associated</strong> with them.<br>
+Manually included solutions are <strong>for internal use only</strong> and are not accessible to composition users. That is why an optional "Reason" field is attached to each.<br>
 <strong>FYI:</strong> Each solution label is comprised of the solution <code>slug</code> and the <code>#post_id</code>.', 'pixelgradelt_retailer' ) )
-			              ->set_classes( 'composition-required-solutions' )
+			              ->set_classes( 'composition-required-solutions composition_required_manual_solutions' )
 			              ->set_collapsed( true )
 			              ->add_fields( [
 				              Field::make( 'select', 'pseudo_id', __( 'Choose one of the configured solutions', 'pixelgradelt_retailer' ) )
-				                   ->set_options( [ $this, 'get_available_required_solutions_options' ] )
+				                   ->set_options( [ $this, 'get_available_required_manual_solutions_options' ] )
 				                   ->set_default_value( null )
 				                   ->set_required( true )
 				                   ->set_width( 50 ),
-				              Field::make( 'text', 'order_id', __( 'Order ID', 'pixelgradelt_retailer' ) )
-				                   ->set_help_text( __( 'This is the order ID through which this solution was purchased.', 'pixelgradelt_retailer' ) )
-				                   ->set_attribute( 'type', 'number' )
+				              Field::make( 'text', 'reason', __( 'Reason', 'pixelgradelt_retailer' ) )
+				                   ->set_help_text( __( 'The reason this LT solution is manually included in the composition.', 'pixelgradelt_retailer' ) )
 				                   ->set_required( false )
-				                   ->set_width( 25 ),
-				              Field::make( 'text', 'order_item_id', __( 'Order Item ID', 'pixelgradelt_retailer' ) )
-				                   ->set_help_text( __( 'This is the order item ID matching the e-commerce product tied to the solution.', 'pixelgradelt_retailer' ) )
-				                   ->set_attribute( 'type', 'number' )
-				                   ->set_required( false )
-				                   ->set_width( 25 ),
+				                   ->set_width( 50 ),
 			              ] )
 			              ->set_header_template( '
 										    <% if (pseudo_id) { %>
 										        <%- pseudo_id %>
-										        <% if (order_id) { %>
-											        (Order #<%- order_id %> → item #<%= order_item_id %>)
+										        <% if (reason) { %>
+											        (Reason: <%- reason %>)
 											    <% } %>
 										    <% } %>
 										' ),
@@ -296,7 +320,7 @@ Since each solution is tied to a e-commerce product, each solution here is tied 
 		add_meta_box(
 			$container_id,
 			esc_html__( 'Current Composition State Details', 'pixelgradelt_retailer' ),
-			array( $this, 'display_composition_current_state_meta_box' ),
+			[ $this, 'display_composition_current_state_meta_box' ],
 			$this->composition_manager::POST_TYPE,
 			'normal',
 			'core'
@@ -417,15 +441,103 @@ Since each solution is tied to a e-commerce product, each solution here is tied 
 	}
 
 	/**
+	 * Get the select options for the required purchased-solutions.
 	 *
 	 * @since 0.11.0
 	 *
 	 * @return array
 	 */
-	public function get_available_required_solutions_options(): array {
+	public function get_available_required_purchased_solutions_options(): array {
+		// Get the current composition owners (saved in the DB).
+		$raw_owners = $this->get_cf_field_raw_value( get_the_ID(), 'composition_user_ids', 'carbon_fields_container_general_configuration_' . $this->composition_manager::POST_TYPE );
+		if ( empty( $raw_owners ) || ! is_array( $raw_owners ) ) {
+			return [ null => esc_html__( 'Set some composition owners first..', 'pixelgradelt_retailer' ) ];
+		}
+
+		// Process the raw values.
+		$owner_ids = array_map( 'intval', \wp_list_pluck( $raw_owners, 'id' ) );
+
+		// Get all solutions of all the current owners that are not attached to a composition, and exclude retired ones.
+		// We leave invalid ones in to be more transparent about what is going on.
+		$purchased_solutions = $this->ps_manager->get_purchased_solutions( [
+			'user_id__in'        => $owner_ids,
+			'status__not_in'     => [ 'retired', ],
+			'composition_id__in' => [ 0, get_the_ID(), ],
+			'number'             => 100,
+		] );
+
+		if ( empty( $purchased_solutions ) || ! is_array( $purchased_solutions ) ) {
+			return [ null => esc_html__( 'There are no (usable) purchased solutions from the current composition owners..', 'pixelgradelt_retailer' ) ];
+		}
+
+		$options = [];
+		/** @var \PixelgradeLT\Retailer\PurchasedSolution $ps */
+		foreach ( $purchased_solutions as $ps ) {
+			$customer = get_userdata( $ps->user_id );
+			if ( empty( $customer ) ) {
+				continue;
+			}
+			$options[ $ps->id ] = sprintf(
+				__( '%1$s - #%2$s (Customer: %3$s, Order: #%4$s, Status: %5$s)', 'pixelgradelt_retailer' ),
+				$this->solution_manager->get_post_solution_name( $ps->solution_id ),
+				$ps->solution_id,
+				$customer->user_login,
+				$ps->order_id,
+				$ps->status
+			);
+		}
+
+		ksort( $options );
+
+		return $options;
+	}
+
+	/**
+	 * Get the raw, unfiltered value of a CarbonFields fields to avoid the infinite loop implied by fetching the value
+	 * through regular channels.
+	 *
+	 * @param int    $post_id
+	 * @param string $field_name
+	 * @param string $container_id
+	 *
+	 * @return array|null
+	 */
+	protected function get_cf_field_raw_value( int $post_id, string $field_name, string $container_id = '' ): ?array {
+		$field = Helper::get_field( 'post_meta', $container_id, $field_name );
+		if ( empty( $field ) ) {
+			return null;
+		}
+
+		// No need to clone the field since we only read the value
+		// and \Carbon_Fields\Datastore\Post_Meta_Datastore::load() doesn't have side effects.
+
+		$field_datastore = $field->get_datastore();
+		if ( empty( $field_datastore ) ) {
+			return null;
+		}
+		// Remember the current datastore object ID so we can put it back.
+		$datastore_object_id = $field_datastore->get_object_id();
+
+		$field_datastore->set_object_id( $post_id );
+		$result = $field_datastore->load( $field );
+
+		// Put the previous object ID back.
+		$field_datastore->set_object_id( $datastore_object_id );
+
+		return $result;
+	}
+
+	/**
+	 * Get the select options for the required manual-solutions (not customer purchased solutions).
+	 *
+	 * @since 0.11.0
+	 *
+	 * @return array
+	 */
+	public function get_available_required_manual_solutions_options(): array {
 		$options = [];
 
-		// We can't exclude the currently required packages because if we use carbon_get_post_meta()
+		// We can't exclude the currently required solutions because if we use carbon_get_post_meta()
 		// to fetch the current complex field value, we enter an infinite loop since that requires the field options.
 		// And to replicate the Carbon Fields logic to parse complex fields datastore is not fun.
 		$solutions_ids = $this->solution_manager->get_solution_ids_by();
@@ -549,7 +661,7 @@ Since each solution is tied to a e-commerce product, each solution here is tied 
 	}
 
 	/**
-	 * Handle post update changes.
+	 * Handle composition post update changes.
 	 *
 	 * @since 0.14.0
 	 *
@@ -557,7 +669,33 @@ Since each solution is tied to a e-commerce product, each solution here is tied 
 	 * @param \WP_Post $post    Post object.
 	 * @param bool     $update  Whether this is an existing post being updated.
 	 */
-	protected function handle_post_update( int $post_id, \WP_Post $post, bool $update ) {
+	protected function do_update_action( int $post_id, \WP_Post $post, bool $update ) {
+		/**
+		 * Fires after LT composition update.
+		 *
+		 * @since 0.14.0
+		 *
+		 * @param int      $post_id The newly created or updated composition post ID
+		 * @param \WP_Post $post    The composition post object.
+		 * @param bool     $update  If this is an update.
+		 */
+		do_action( 'pixelgradelt_retailer/ltcomposition/update',
+			$post_id,
+			$post,
+			$update
+		);
+	}
+
+	/**
+	 * Handle composition post update changes.
+	 *
+	 * @since 0.14.0
+	 *
+	 * @param int      $post_id Post ID.
+	 * @param \WP_Post $post    Post object.
+	 * @param bool     $update  Whether this is an existing post being updated.
+	 */
+	protected function handle_composition_update( int $post_id, \WP_Post $post, bool $update ) {
 		if ( $this->composition_manager::POST_TYPE !== $post->post_type ) {
 			return;
 		}
@@ -586,7 +724,7 @@ Since each solution is tied to a e-commerce product, each solution here is tied 
 			 * @param int    $post_id         The composition post ID.
 			 * @param string $new_status      The new composition status.
 			 * @param string $old_status      The old composition status.
-			 * @param array  $new_composition The new composition data.
+			 * @param array  $new_composition The entire new composition data.
 			 */
 			do_action( 'pixelgradelt_retailer/ltcomposition/status_change',
 				$post_id,
@@ -606,7 +744,7 @@ Since each solution is tied to a e-commerce product, each solution here is tied 
 			 * @param int    $post_id         The composition post ID.
 			 * @param string $new_hashid      The new composition hashid.
 			 * @param string $old_hashid      The old composition hashid.
-			 * @param array  $new_composition The new composition data.
+			 * @param array  $new_composition The entire new composition data.
 			 */
 			do_action( 'pixelgradelt_retailer/ltcomposition/hashid_change',
 				$post_id,
@@ -616,60 +754,133 @@ Since each solution is tied to a e-commerce product, each solution here is tied 
 			);
 		}
 
-		// Handle composition user details changes.
-		if ( count( array_diff_assoc( $old_composition['user'], $current_composition['user'] ) ) ) {
+		/**
+		 * Handle composition owners/users changes.
+		 * @see CompositionManager::get_post_composition_users_details()
+		 */
+		// We are only interested in actual user IDs changes, not individual user details changes.
+		$old_userids = array_keys( $old_composition['users'] );
+		$new_userids = array_keys( $current_composition['users'] );
+		sort( $old_userids );
+		sort( $new_userids );
+		if ( $old_userids != $new_userids ) {
 			/**
 			 * Fires on LT composition user details change.
 			 *
 			 * @since 0.14.0
 			 *
+			 * @see   CompositionManager::get_post_composition_users_details() For data details
+			 *
 			 * @param int   $post_id         The composition post ID.
-			 * @param array $new_user        The new composition user details.
-			 * @param array $old_user        The old composition user details.
-			 * @param array $new_composition The new composition data.
+			 * @param array $new_users       The new composition users details.
+			 * @param array $old_users       The old composition users details.
+			 * @param array $new_composition The entire new composition data.
 			 */
 			do_action( 'pixelgradelt_retailer/ltcomposition/user_change',
 				$post_id,
-				$current_composition['user'],
-				$old_composition['user'],
+				$current_composition['users'],
+				$old_composition['users'],
 				$current_composition
 			);
 		}
 
-		// Handle composition required solutions changes.
+		/**
+		 * Handle composition required purchased-solutions changes.
+		 * @see CompositionManager::get_post_composition_required_purchased_solutions()
+		 */
+		$old_required_purchased_solutions_ids = \wp_list_pluck( $old_composition['required_purchased_solutions'], 'purchased_solution_id' );
+		sort( $old_required_purchased_solutions_ids );
+
+		$current_required_purchased_solutions_ids = \wp_list_pluck( $current_composition['required_purchased_solutions'], 'purchased_solution_id' );
+		sort( $current_required_purchased_solutions_ids );
+
+		if ( serialize( $old_required_purchased_solutions_ids ) !== serialize( $current_required_purchased_solutions_ids ) ) {
+			/**
+			 * Fires on LT composition required purchased-solutions change (post ID changes).
+			 *
+			 * @since 0.14.0
+			 *
+			 * @see   CompositionManager::get_post_composition_required_purchased_solutions() For data details
+			 *
+			 * @param int   $post_id                          The composition post ID.
+			 * @param array $new_required_purchased_solutions The new composition required_purchased_solutions details.
+			 * @param array $old_required_purchased_solutions The old composition required_purchased_solutions details.
+			 * @param array $new_composition                  The entire new composition data.
+			 */
+			do_action( 'pixelgradelt_retailer/ltcomposition/required_purchased_solutions_change',
+				$post_id,
+				$current_composition['required_purchased_solutions'],
+				$old_composition['required_purchased_solutions'],
+				$current_composition
+			);
+		}
+
+		/**
+		 * Handle composition required manual-solutions changes.
+		 * @see CompositionManager::get_post_composition_required_manual_solutions()
+		 */
 		// We are only interested in actual solutions changes, not slug or context details changes.
 		// That is why we will only look at the required solution post ID (managed_post_id).
-		$old_required_solutions          = ArrayHelpers::array_map_assoc( function ( $key, $solution ) {
-			// If we return the post ID as the key (as we would like), the key will be lost since it's numeric.
-			return [ $solution['slug'] => $solution['managed_post_id'] ];
-		}, $old_composition['required_solutions'] );
-		$old_required_solutions          = array_flip( $old_required_solutions );
-		$old_required_solutions_post_ids = array_keys( $old_required_solutions );
-		sort( $old_required_solutions_post_ids );
+		$old_required_manual_solutions_post_ids = \wp_list_pluck( $old_composition['required_manual_solutions'], 'managed_post_id' );
+		sort( $old_required_manual_solutions_post_ids );
 
-		$current_required_solutions          = ArrayHelpers::array_map_assoc( function ( $key, $solution ) {
-			// If we return the post ID as the key (as we would like), the key will be lost since it's numeric.
-			return [ $solution['slug'] => $solution['managed_post_id'] ];
-		}, $current_composition['required_solutions'] );
-		$current_required_solutions          = array_flip( $current_required_solutions );
-		$current_required_solutions_post_ids = array_keys( $current_required_solutions );
-		sort( $current_required_solutions_post_ids );
+		$current_required_manual_solutions_post_ids = \wp_list_pluck( $current_composition['required_manual_solutions'], 'managed_post_id' );
+		sort( $current_required_manual_solutions_post_ids );
 
-		if ( serialize( $old_required_solutions_post_ids ) !== serialize( $current_required_solutions_post_ids ) ) {
+		if ( serialize( $old_required_manual_solutions_post_ids ) !== serialize( $current_required_manual_solutions_post_ids ) ) {
 			/**
 			 * Fires on LT composition required solutions change (post ID changes).
 			 *
 			 * @since 0.14.0
 			 *
+			 * @see   CompositionManager::get_post_composition_required_manual_solutions() For data details
+			 *
+			 * @param int   $post_id                       The composition post ID.
+			 * @param array $new_required_manual_solutions The new composition required_manual_solutions details.
+			 * @param array $old_required_manual_solutions The old composition required_manual_solutions details.
+			 * @param array $new_composition               The entire new composition data.
+			 */
+			do_action( 'pixelgradelt_retailer/ltcomposition/required_manual_solutions_change',
+				$post_id,
+				$current_composition['required_manual_solutions'],
+				$old_composition['required_manual_solutions'],
+				$current_composition
+			);
+		}
+
+		/**
+		 * Handle the final required LT solutions list that may or may not change on purchased or manual solutions list changes
+		 * since this list is a merge of the two.
+		 * @see CompositionManager::get_post_composition_required_solutions()
+		 */
+		// We are only interested in actual LT solutions changes, not slug or context details changes.
+		// That is why we will only look at the required solution post ID (managed_post_id).
+		$old_required_solutions_post_ids = \wp_list_pluck( $old_composition['required_solutions'], 'managed_post_id' );
+		sort( $old_required_solutions_post_ids );
+
+		$current_required_solutions_post_ids = \wp_list_pluck( $current_composition['required_solutions'], 'managed_post_id' );
+		sort( $current_required_solutions_post_ids );
+
+		if ( serialize( $old_required_solutions_post_ids ) !== serialize( $current_required_solutions_post_ids ) ) {
+			/**
+			 * Fires on LT composition required solutions final list change (post ID changes).
+			 *
+			 * Use the 'pixelgradelt_retailer/ltcomposition/required_purchased_solutions_change' or
+			 * 'pixelgradelt_retailer/ltcomposition/required_manual_solutions_change' hooks for more specific actions.
+			 *
+			 * @since 0.14.0
+			 *
+			 * @see   CompositionManager::get_post_composition_required_solutions() For data details
+			 *
 			 * @param int   $post_id                The composition post ID.
 			 * @param array $new_required_solutions The new composition required_solutions.
 			 * @param array $old_required_solutions The old composition required_solutions.
-			 * @param array $new_composition        The new composition data.
+			 * @param array $new_composition        The entire new composition data.
 			 */
 			do_action( 'pixelgradelt_retailer/ltcomposition/required_solutions_change',
 				$post_id,
-				$current_required_solutions,
-				$old_required_solutions,
+				$current_composition['required_solutions'],
+				$old_composition['required_solutions'],
 				$current_composition
 			);
 		}
@@ -679,11 +890,13 @@ Since each solution is tied to a e-commerce product, each solution here is tied 
 		 *
 		 * @since 0.14.0
 		 *
+		 * @see   CompositionManager::get_composition_id_data() For data details
+		 *
 		 * @param int   $post_id         The composition post ID.
-		 * @param array $new_composition The new composition data.
-		 * @param array $old_composition The old composition data.
+		 * @param array $new_composition The entire new composition data.
+		 * @param array $old_composition The entire old composition data.
 		 */
-		do_action( 'pixelgradelt_retailer/ltcomposition/update',
+		do_action( 'pixelgradelt_retailer/ltcomposition/after_update',
 			$post_id,
 			$current_composition,
 			$old_composition
@@ -729,38 +942,73 @@ Since each solution is tied to a e-commerce product, each solution here is tied 
 	}
 
 	/**
-	 * Add post note on LT composition user change.
+	 * Add post note on LT composition users change.
 	 *
 	 * @since 0.14.0
 	 *
-	 * @param int   $post_id  The composition post ID.
-	 * @param array $new_user The new composition user details.
-	 * @param array $old_user The old composition user details.
+	 * @param int   $post_id   The composition post ID.
+	 * @param array $new_users The new composition users details.
+	 * @param array $old_users The old composition users details.
 	 */
-	protected function add_composition_user_change_note( int $post_id, array $new_user, array $old_user ) {
+	protected function add_composition_user_change_note( int $post_id, array $new_users, array $old_users ) {
+		$old_users_ids = array_keys( $old_users );
+		sort( $old_users_ids );
+
+		$new_users_ids = array_keys( $new_users );
+		sort( $new_users_ids );
+
+		$added   = array_diff( $new_users_ids, $old_users_ids );
+		$removed = array_diff( $old_users_ids, $new_users_ids );
+
 		$note = '';
-		if ( $new_user['id'] !== $old_user['id'] ) {
-			$note .= sprintf(
-				esc_html__( 'Composition user ID changed from %1$s to %2$s. ', 'pixelgradelt_retailer' ),
-				'<strong>' . $old_user['id'] . '</strong>',
-				'<strong>' . $new_user['id'] . '</strong>'
-			);
+		if ( ! empty( $removed ) ) {
+			$removed_list = [];
+			foreach ( $removed as $removed_user_id ) {
+				$item = '#' . $removed_user_id;
+				$user = get_userdata( $removed_user_id );
+				if ( false !== $user ) {
+					$item = $user->user_login . ' ' . $item;
+				}
+
+				$removed_list[] = $item;
+			}
+
+			if ( count( $removed_list ) == 1 ) {
+				$note .= sprintf(
+					esc_html__( 'Removed a composition owner: %1$s. ', 'pixelgradelt_retailer' ),
+					'<strong>' . implode( ', ', $removed_list ) . '</strong>'
+				);
+			} else {
+				$note .= sprintf(
+					esc_html__( 'Removed these composition owners: %1$s. ', 'pixelgradelt_retailer' ),
+					'<strong>' . implode( ', ', $removed_list ) . '</strong>'
+				);
+			}
 		}
 
-		if ( $new_user['email'] !== $old_user['email'] ) {
-			$note .= sprintf(
-				esc_html__( 'Composition user email changed from %1$s to %2$s. ', 'pixelgradelt_retailer' ),
-				'<strong>' . $old_user['email'] . '</strong>',
-				'<strong>' . $new_user['email'] . '</strong>'
-			);
-		}
+		if ( ! empty( $added ) ) {
+			$added_list = [];
+			foreach ( $added as $added_user_id ) {
+				$item = '#' . $added_user_id;
+				$user = get_userdata( $added_user_id );
+				if ( false !== $user ) {
+					$item = $user->user_login . ' ' . $item;
+				}
 
-		if ( $new_user['username'] !== $old_user['username'] ) {
-			$note .= sprintf(
-				esc_html__( 'Composition user username changed from %1$s to %2$s. ', 'pixelgradelt_retailer' ),
-				'<strong>' . $old_user['username'] . '</strong>',
-				'<strong>' . $new_user['username'] . '</strong>'
-			);
+				$added_list[] = $item;
+			}
+
+			if ( count( $added_list ) == 1 ) {
+				$note .= sprintf(
+					esc_html__( 'Added a composition owner: %1$s. ', 'pixelgradelt_retailer' ),
+					'<strong>' . implode( ', ', $added_list ) . '</strong>'
+				);
+			} else {
+				$note .= sprintf(
+					esc_html__( 'Added the following composition owners: %1$s. ', 'pixelgradelt_retailer' ),
+					'<strong>' . implode( ', ', $added_list ) . '</strong>'
+				);
+			}
 		}
 
 		if ( ! empty( trim( $note ) ) ) {
@@ -769,19 +1017,84 @@ Since each solution is tied to a e-commerce product, each solution here is tied 
 	}
 
 	/**
-	 * Add post note on LT composition required solutions change.
+	 * Add post note on LT composition required purchased-solutions change.
 	 *
 	 * @since 0.14.0
 	 *
-	 * @param int   $post_id                The composition post ID.
-	 * @param array $new_required_solutions The new composition required_solutions.
-	 * @param array $old_required_solutions The old composition required_solutions.
+	 * @param int   $post_id                          The composition post ID.
+	 * @param array $new_required_purchased_solutions The new composition required_purchased_solutions data.
+	 * @param array $old_required_purchased_solutions The old composition required_purchased_solutions data.
 	 */
-	protected function add_composition_required_solutions_change_note( int $post_id, array $new_required_solutions, array $old_required_solutions ) {
-		$old_required_solutions_post_ids = array_keys( $old_required_solutions );
+	protected function add_composition_required_purchased_solutions_change_note( int $post_id, array $new_required_purchased_solutions, array $old_required_purchased_solutions ) {
+		$old_required_purchased_solutions_ids = \wp_list_pluck( $old_required_purchased_solutions, 'purchased_solution_id' );
+		sort( $old_required_purchased_solutions_ids );
+
+		$new_required_purchased_solutions_ids = \wp_list_pluck( $new_required_purchased_solutions, 'purchased_solution_id' );
+		sort( $new_required_purchased_solutions_ids );
+
+		$added   = array_diff( $new_required_purchased_solutions_ids, $old_required_purchased_solutions_ids );
+		$removed = array_diff( $old_required_purchased_solutions_ids, $new_required_purchased_solutions_ids );
+
+		$note = '';
+		if ( ! empty( $removed ) ) {
+			$removed_list = [];
+			foreach ( $removed as $removed_purchased_solution_id ) {
+				$index = ArrayHelpers::findSubarrayByKeyValue( $old_required_purchased_solutions, 'purchased_solution_id', $removed_purchased_solution_id );
+				$removed_list[] = $old_required_purchased_solutions[ $index ]['slug'] . $this->composition_manager::PSEUDO_ID_DELIMITER . $old_required_purchased_solutions[ $index ]['managed_post_id'] . ' (psID:#' . $removed_purchased_solution_id . ')';
+			}
+
+			if ( count( $removed_list ) == 1 ) {
+				$note .= sprintf(
+					esc_html__( 'Removed a purchased-solution: %1$s. ', 'pixelgradelt_retailer' ),
+					'<strong>' . implode( ', ', $removed_list ) . '</strong>'
+				);
+			} else {
+				$note .= sprintf(
+					esc_html__( 'Removed these purchased-solutions: %1$s. ', 'pixelgradelt_retailer' ),
+					'<strong>' . implode( ', ', $removed_list ) . '</strong>'
+				);
+			}
+		}
+
+		if ( ! empty( $added ) ) {
+			$added_list = [];
+			foreach ( $added as $added_purchased_solution_id ) {
+				$index = ArrayHelpers::findSubarrayByKeyValue( $new_required_purchased_solutions, 'purchased_solution_id', $added_purchased_solution_id );
+				$added_list[] = $new_required_purchased_solutions[ $index ]['slug'] . $this->composition_manager::PSEUDO_ID_DELIMITER . $new_required_purchased_solutions[ $index ]['managed_post_id'] . ' (psID:#' . $added_purchased_solution_id . ')';
+			}
+
+			if ( count( $added_list ) == 1 ) {
+				$note .= sprintf(
+					esc_html__( 'Added a purchased-solution: %1$s. ', 'pixelgradelt_retailer' ),
+					'<strong>' . implode( ', ', $added_list ) . '</strong>'
+				);
+			} else {
+				$note .= sprintf(
+					esc_html__( 'Added the following purchased-solutions: %1$s. ', 'pixelgradelt_retailer' ),
+					'<strong>' . implode( ', ', $added_list ) . '</strong>'
+				);
+			}
+		}
+
+		if ( ! empty( trim( $note ) ) ) {
+			create_note( $post_id, $note, 'internal', true );
+		}
+	}
+
+	/**
+	 * Add post note on LT composition required manual-solutions change.
+	 *
+	 * @since 0.14.0
+	 *
+	 * @param int   $post_id                       The composition post ID.
+	 * @param array $new_required_manual_solutions The new composition required_manual_solutions data.
+	 * @param array $old_required_manual_solutions The old composition required_manual solutions data.
+	 */
+	protected function add_composition_required_manual_solutions_change_note( int $post_id, array $new_required_manual_solutions, array $old_required_manual_solutions ) {
+		$old_required_solutions_post_ids = \wp_list_pluck( $old_required_manual_solutions, 'managed_post_id' );
 		sort( $old_required_solutions_post_ids );
 
-		$new_required_solutions_post_ids = array_keys( $new_required_solutions );
+		$new_required_solutions_post_ids = \wp_list_pluck( $new_required_manual_solutions, 'managed_post_id' );
 		sort( $new_required_solutions_post_ids );
 
 		$added   = array_diff( $new_required_solutions_post_ids, $old_required_solutions_post_ids );
@@ -791,25 +1104,41 @@ Since each solution is tied to a e-commerce product, each solution here is tied 
 		if ( ! empty( $removed ) ) {
 			$removed_list = [];
 			foreach ( $removed as $removed_post_id ) {
-				$removed_list[] = $old_required_solutions[ $removed_post_id ] . $this->composition_manager::PSEUDO_ID_DELIMITER . $removed_post_id;
+				$index = ArrayHelpers::findSubarrayByKeyValue( $old_required_manual_solutions, 'managed_post_id', $removed_post_id );
+				$removed_list[] = $old_required_manual_solutions[ $index ]['slug'] . $this->composition_manager::PSEUDO_ID_DELIMITER . $removed_post_id;
 			}
 
-			$note .= sprintf(
-				esc_html__( 'Removed these contained solutions: %1$s. ', 'pixelgradelt_retailer' ),
-				'<strong>' . implode( ', ', $removed_list ) . '</strong>'
-			);
+			if ( count( $removed_list ) == 1 ) {
+				$note .= sprintf(
+					esc_html__( 'Removed a manual-solution: %1$s. ', 'pixelgradelt_retailer' ),
+					'<strong>' . implode( ', ', $removed_list ) . '</strong>'
+				);
+			} else {
+				$note .= sprintf(
+					esc_html__( 'Removed these manual-solutions: %1$s. ', 'pixelgradelt_retailer' ),
+					'<strong>' . implode( ', ', $removed_list ) . '</strong>'
+				);
+			}
 		}
 
 		if ( ! empty( $added ) ) {
 			$added_list = [];
 			foreach ( $added as $added_post_id ) {
-				$added_list[] = $new_required_solutions[ $added_post_id ] . $this->composition_manager::PSEUDO_ID_DELIMITER . $added_post_id;
+				$index = ArrayHelpers::findSubarrayByKeyValue( $new_required_manual_solutions, 'managed_post_id', $added_post_id );
+				$added_list[] = $new_required_manual_solutions[ $index ]['slug'] . $this->composition_manager::PSEUDO_ID_DELIMITER . $added_post_id;
 			}
 
-			$note .= sprintf(
-				esc_html__( 'Added the following solutions: %1$s. ', 'pixelgradelt_retailer' ),
-				'<strong>' . implode( ', ', $added_list ) . '</strong>'
-			);
+			if ( count( $added_list ) == 1 ) {
+				$note .= sprintf(
+					esc_html__( 'Added a manual-solution: %1$s. ', 'pixelgradelt_retailer' ),
+					'<strong>' . implode( ', ', $added_list ) . '</strong>'
+				);
+			} else {
+				$note .= sprintf(
+					esc_html__( 'Added the following manual-solutions: %1$s. ', 'pixelgradelt_retailer' ),
+					'<strong>' . implode( ', ', $added_list ) . '</strong>'
+				);
+			}
 		}
 
 		if ( ! empty( trim( $note ) ) ) {

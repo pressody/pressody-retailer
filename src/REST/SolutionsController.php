@@ -23,6 +23,7 @@ use WP_REST_Controller;
 use WP_REST_Request;
 use WP_REST_Response;
 use WP_REST_Server;
+use WP_Http as HTTP;
 
 /**
  * Solutions REST controller class.
@@ -191,6 +192,16 @@ class SolutionsController extends WP_REST_Controller {
 	public function get_processed_items( WP_REST_Request $request ) {
 		$items = [];
 
+		// Requests for processed items need to specify a list of items to process.
+		// Otherwise, all the solutions as processed and that doesn't make any sense.
+		if ( empty( $request['postId'] ) && empty( $request['postSlug'] ) && empty( $request['packageName'] ) ) {
+			return new WP_Error(
+				'pixelgradelt_retailer_rest_no_list',
+				esc_html__( 'You need to define a subset of solutions to process.', 'pixelgradelt_retailer' ),
+				[ 'status' => HTTP::NOT_ACCEPTABLE ]
+			);
+		}
+
 		$filtered_repository = $this->get_filtered_repository( $request );
 
 		$solutionsContext = [];
@@ -222,6 +233,16 @@ class SolutionsController extends WP_REST_Controller {
 	 * @return WP_Error|WP_REST_Response
 	 */
 	public function get_items_parts( WP_REST_Request $request ) {
+		// Requests for processed items need to specify a list of items to process.
+		// Otherwise, all the solutions as processed and that doesn't make any sense.
+		if ( empty( $request['postId'] ) && empty( $request['postSlug'] ) && empty( $request['packageName'] ) ) {
+			return new WP_Error(
+				'pixelgradelt_retailer_rest_no_list',
+				esc_html__( 'You need to define a subset of solutions to process.', 'pixelgradelt_retailer' ),
+				[ 'status' => HTTP::NOT_ACCEPTABLE ]
+			);
+		}
+
 		/**
 		 * First, get the flattened, processed collection of solutions.
 		 */

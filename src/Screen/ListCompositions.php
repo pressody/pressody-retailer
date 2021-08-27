@@ -104,8 +104,8 @@ class ListCompositions extends AbstractHookProvider {
 			[
 				'composition_status' => esc_html__( 'Status', 'pixelgradelt_retailer' ),
 				'composition_hashid' => esc_html__( 'Hashid', 'pixelgradelt_retailer' ),
-				'composition_user' => esc_html__( 'User', 'pixelgradelt_retailer' ),
-				'composition_required_solutions' => esc_html__( 'Contained Solutions', 'pixelgradelt_retailer' ),
+				'composition_users' => esc_html__( 'Owner(s)', 'pixelgradelt_retailer' ),
+				'composition_required_solutions' => esc_html__( 'Contained Solution(s)', 'pixelgradelt_retailer' ),
 			]
 		);
 
@@ -116,7 +116,7 @@ class ListCompositions extends AbstractHookProvider {
 		if ( ! in_array( $column, [
 			'composition_status',
 			'composition_hashid',
-			'composition_user',
+			'composition_users',
 			'composition_required_solutions',
 		] ) ) {
 			return;
@@ -134,20 +134,22 @@ class ListCompositions extends AbstractHookProvider {
 			$output = $composition_data['hashid'];
 		}
 
-		if ( 'composition_user' === $column && ! empty( $composition_data['user'] ) ) {
-			$user = false;
-			if ( ! empty( $composition_data['user']['id'] ) ) {
-				$user = get_user_by( 'id', $composition_data['user']['id'] );
-			}
-			if ( false === $user && ! empty( $composition_data['user']['email'] ) ) {
-				$user = get_user_by( 'email', $composition_data['user']['email'] );
-			}
-			if ( false === $user && ! empty( $composition_data['user']['username'] ) ) {
-				$user = get_user_by( 'login', $composition_data['user']['username'] );
+		if ( 'composition_users' === $column && ! empty( $composition_data['users'] ) ) {
+			$list = [];
+			foreach ( $composition_data['users'] as $composition_user ) {
+				if ( 'valid' !== $composition_user['status'] ) {
+					$list[] = '#' . $composition_user['id'] . '(invalid)';
+					continue;
+				}
+
+				$user = get_user_by( 'id', $composition_user['id'] );
+				if ( false !== $user ) {
+					$list[] = '<a class="composition-user_link package-list_link" href="' . esc_url( get_edit_user_link( $user->ID ) ) . '" title="Edit User Profile">' . $user->get('display_name') . ' (' . $user->get('user_email') . ' #' . $user->ID. ')</a>';
+				}
 			}
 
-			if ( false !== $user ) {
-				$output = '<a class="composition-user_link" href="' . esc_url( get_edit_user_link( $user->ID ) ) . '" title="Edit User Profile">' . $user->get('display_name') . ' (' . $user->get('user_email') . ' #' . $user->ID. ')</a>';
+			if ( ! empty( $list ) ) {
+				$output = implode( '<br>' . PHP_EOL, $list );
 			}
 		}
 

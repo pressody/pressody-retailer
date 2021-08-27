@@ -146,9 +146,12 @@ class CompositionsController extends WP_REST_Controller {
 					'show_in_index'       => false,
 					'args'                => [
 						'context'       => $this->get_context_param( [ 'default' => 'edit' ] ),
-						'userid'        => [
-							'description' => esc_html__( 'The user ID.', 'pixelgradelt_retailer' ),
-							'type'        => 'integer',
+						'userids'       => [
+							'description' => esc_html__( 'The owner/user IDs list.', 'pixelgradelt_retailer' ),
+							'type'        => 'array',
+							'items'       => [
+								'type' => 'integer',
+							],
 							'context'     => [ 'view', 'edit' ],
 							'required'    => true,
 						],
@@ -295,7 +298,7 @@ class CompositionsController extends WP_REST_Controller {
 	public function encrypt_ltdetails( WP_REST_Request $request ) {
 		// Gather the composition's LT details.
 		$details = [
-			'userid'        => $request['userid'],
+			'userids'       => $request['userids'],
 			'compositionid' => $request['compositionid'],
 			'extra'         => $request['extra'],
 		];
@@ -404,13 +407,15 @@ class CompositionsController extends WP_REST_Controller {
 	 */
 	protected function validate_ltdetails( array $details ): bool {
 
-		if ( ! isset( $details['userid'] ) ) {
+		if ( ! isset( $details['userids'] ) ) {
 			throw RestException::forMissingCompositionLTDetails();
 		}
 
-		// Check that the user ID actually belongs to a user.
-		$user = get_user_by( 'id', $details['userid'] );
-		if ( false === $user ) {
+		// Check that AT LEAST a user ID actually belongs to a valid user.
+		$valid_users = array_filter( $details['userids'], function ( $userid ) {
+			return false !== get_user_by( 'id', $userid );
+		} );
+		if ( empty( $valid_users ) ) {
 			throw RestException::forUserNotFound();
 		}
 

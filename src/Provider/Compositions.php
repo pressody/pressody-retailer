@@ -75,10 +75,12 @@ class Compositions extends AbstractHookProvider {
 	}
 
 	/**
+	 * Validate the received composition details.
+	 *
 	 * @param bool|\WP_Error $valid   Whether the composition LT details are valid.
 	 * @param array          $details The composition LT details as decrypted from the composition data.
 	 *
-	 * @return bool|\WP_Error
+	 * @return bool|\WP_Error True on valid. False or WP_Error on invalid.
 	 */
 	protected function validate_composition_ltdetails( $valid, array $details ) {
 		// Do nothing if the composition details have already been marked as invalid.
@@ -89,13 +91,16 @@ class Compositions extends AbstractHookProvider {
 		// Prepare an errors holder.
 		$errors = new \WP_Error();
 
-		if ( ! empty( $details['userid'] ) && ! empty( $user_id = absint( $details['userid'] ) ) ) {
-			$user = get_user_by( 'id', $user_id );
-			if ( false === $user ) {
-				$errors->add( 'not_found', esc_html__( 'Couldn\'t find a user with the provided user ID.', 'pixelgradelt_retailer' ) );
+		if ( ! empty( $details['userids'] ) ) {
+			// Check that AT LEAST a user ID actually belongs to a valid user.
+			$valid_user_ids = array_filter( $details['userids'], function( $userid ) {
+				return false !== get_user_by( 'id', $userid );
+			} );
+			if ( empty( $valid_user_ids ) ) {
+				$errors->add( 'not_found', esc_html__( 'Couldn\'t find at least a valid user with the provided user IDs.', 'pixelgradelt_retailer' ) );
 			}
 		} else {
-			$errors->add( 'missing_or_empty', esc_html__( 'Missing or empty user ID.', 'pixelgradelt_retailer' ) );
+			$errors->add( 'missing_or_empty', esc_html__( 'Missing or empty user IDs.', 'pixelgradelt_retailer' ) );
 		}
 
 		if ( empty( $composition_hashid = $details['compositionid'] ) ) {
@@ -106,9 +111,13 @@ class Compositions extends AbstractHookProvider {
 		$composition_data = $this->composition_manager->get_composition_data_by( [ 'hashid' => $composition_hashid, ] );
 		if ( empty( $composition_data ) ) {
 			$errors->add( 'not_found', esc_html__( 'Couldn\'t find a composition with the provided composition hashid.', 'pixelgradelt_retailer' ) );
-		} // Check if the user is the same user that owns the composition.
-		else if ( ! empty( $user_id ) && $user_id !== absint( $composition_data['user']['id'] ) ) {
-			$errors->add( 'invalid', esc_html__( 'The user that owns the composition is not the same as the provided user.', 'pixelgradelt_retailer' ) );
+		} else if ( ! empty( $valid_user_ids ) ) {
+			// Check if at least a provided, valid user is among the current composition owners.
+			$composition_user_ids = array_filter( array_keys( $composition_data['users'] ) );
+			sort( $composition_user_ids );
+			if ( ! empty( $composition_user_ids ) && array_intersect( $valid_user_ids, $composition_user_ids ) ) {
+				$errors->add( 'invalid', esc_html__( 'None of the provided users is among the composition\'s current owners.', 'pixelgradelt_retailer' ) );
+			}
 		}
 
 		// Check the composition status. We want to let through only ready or active compositions.
@@ -126,11 +135,13 @@ class Compositions extends AbstractHookProvider {
 	}
 
 	/**
+	 * Generate the instructions to update a composition by.
+	 *
 	 * @param bool|array $instructions_to_update The instructions to update the composition by.
 	 * @param array      $composition_ltdetails  The decrypted composition LT details, already checked.
 	 * @param array      $composer               The full composition data.
 	 *
-	 * @return bool|\WP_Error|array false or WP_Error if there is a reason to reject to attempt. Empty array if there is nothing to update.
+	 * @return bool|\WP_Error|array false or WP_Error if there is a reason to reject the attempt. Empty array if there is nothing to update.
 	 */
 	protected function instructions_to_update_composition( $instructions_to_update, array $composition_ltdetails, array $composer ) {
 		// Do nothing if we should already reject.
@@ -155,8 +166,8 @@ class Compositions extends AbstractHookProvider {
 		}
 
 		// Get the solutions IDs and context.
-		$solutionsIds     = $this->composition_manager->get_post_composition_required_solutions_ids( $composition_data['required_solutions'] );
-		$solutionsContext = $this->composition_manager->get_post_composition_required_solutions_context( $composition_data['required_solutions'] );
+		$solutionsIds     = $this->composition_manager->extract_required_solutions_post_ids( $composition_data['required_solutions'] );
+		$solutionsContext = $this->composition_manager->extract_required_solutions_context( $composition_data['required_solutions'] );
 
 		// We have a conundrum when it comes to updating the required LT Parts: what happens with the removed LT Parts?
 		// Sure, we can easily add, but what do we do with leftover LT Parts?
@@ -223,28 +234,26 @@ class Compositions extends AbstractHookProvider {
 		return $instructions_to_update;
 	}
 
+	/**
+	 * Check if a composition's details need to be updated.
+	 *
+	 * @param array $composition_data The full composition data.
+	 * @param array $old_ltdetails The old composition LT details, already checked.
+	 *
+	 * @return bool
+	 */
 	protected function should_update_ltdetails( array $composition_data, array $old_ltdetails ): bool {
-		if ( $composition_data['user']['id'] != $old_ltdetails['userid'] ) {
+		// If there is a change in the composition owners/users list, we need to update.
+		$old_userids = $old_ltdetails['userids'];
+		$new_userids = array_filter( array_keys( $composition_data['users'] ) );
+		sort( $old_userids );
+		sort( $new_userids );
+		if ( $old_userids != $new_userids ) {
 			return true;
 		}
 
+		// If the hashid has changed, we need to update.
 		if ( $composition_data['hashid'] != $old_ltdetails['compositionid'] ) {
-			return true;
-		}
-
-		if ( isset( $composition_data['user']['email'] )
-		     && ! isset( $old_ltdetails['extra']['user-email'] ) ) {
-			return true;
-		}
-		if ( $composition_data['user']['email'] != $old_ltdetails['extra']['user-email'] ) {
-			return true;
-		}
-
-		if ( isset( $composition_data['user']['username'] )
-		     && ! isset( $old_ltdetails['extra']['user-username'] ) ) {
-			return true;
-		}
-		if ( $composition_data['user']['username'] != $old_ltdetails['extra']['user-username'] ) {
 			return true;
 		}
 

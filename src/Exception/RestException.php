@@ -105,7 +105,7 @@ class RestException extends \Exception implements PixelgradeltRetailerException 
 		int $code = 0,
 		Throwable $previous = null
 	): RestException {
-		$message = esc_html__( 'Could not find a user with the provided ID.', 'pixelgradelt_retailer' );
+		$message = esc_html__( 'Could not find a valid user with the provided ID(s).', 'pixelgradelt_retailer' );
 
 		return new static( $message, HTTP::NOT_ACCEPTABLE, $code, $previous );
 	}

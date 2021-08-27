@@ -282,9 +282,23 @@ input.pixelgradelt_retailer-cli-field {
 	display: none;
 }
 
+/* Edit composition screen
+----------------------------------------------------------------------------- */
+
+/* Give the association field a little more contrast compared with the container. */
+body.post-type-ltcomposition .cf-association__bar,
+body.post-type-ltcomposition .cf-association__bar .cf-search-input__inner,
+body.post-type-ltcomposition .cf-association__cols {
+	background-color: #fbfbfc;
+}
+
+body.post-type-ltcomposition .cf-association__cols .cf-association__option--selected {
+	background-color: #efefef;
+}
+
 /* List Solutions screen
 ----------------------------------------------------------------------------- */
-.post-type-ltsolution table.table-view-list.posts {
+body.post-type-ltsolution table.table-view-list.posts {
 	table-layout: auto;
 }
 .column-solution_required_parts {
@@ -293,7 +307,7 @@ input.pixelgradelt_retailer-cli-field {
 
 /* List Compositions screen
 ----------------------------------------------------------------------------- */
-.post-type-ltcomposition table.table-view-list.posts {
+body.post-type-ltcomposition table.table-view-list.posts {
 	table-layout: auto;
 }
 .column-composition_required_solutions {

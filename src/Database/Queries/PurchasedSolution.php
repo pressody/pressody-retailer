@@ -111,9 +111,9 @@ class PurchasedSolution extends Query {
 	 * @type string        $solution_id            A solution ID to only return those purchased solutions associated with it. Default empty.
 	 * @type array         $solution_id__in        Array of solution IDs to include only those purchased solutions associated with them. Default empty.
 	 * @type array         $solution_id__not_in    Array of solution IDs to exclude those purchased solutions associated with them. Default empty.
-	 * @type string        $user_id                A user ID to only return those users. Default empty.
-	 * @type array         $user_id__in            Array of user IDs to include. Default empty.
-	 * @type array         $user_id__not_in        Array of user IDs to exclude. Default empty.
+	 * @type string        $user_id                A user ID to only return purchased solutions of those users. Default empty.
+	 * @type array         $user_id__in            Array of user IDs to include purchased solutions of. Default empty.
+	 * @type array         $user_id__not_in        Array of user IDs to exclude purchased solutions of. Default empty.
 	 * @type string        $order_id               An order ID to only return those purchased solutions associated with it. Default empty.
 	 * @type array         $order_id__in           Array of order IDs to include only those purchased solutions associated with them. Default empty.
 	 * @type array         $order_id__not_in       Array of order IDs to exclude those purchased solutions associated with them. Default empty.
@@ -132,8 +132,10 @@ class PurchasedSolution extends Query {
 	 *                                              Default false.
 	 * @type string        $fields                 Item fields to return. Accepts any column known names
 	 *                                              or empty (returns an array of complete objects). Default empty.
-	 * @type int           $number                 Limit number of logs to retrieve. Default 100.
-	 * @type int           $offset                 Number of logs to offset the query. Used to build LIMIT clause.
+	 * @type int $number                           Limit number of purchased solutions to retrieve.
+	 *                                              Does not support the '-1' value for unlimited number of results.
+	 *                                              Default 100.
+	 * @type int           $offset                 Number of purchased solutions to offset the query. Used to build LIMIT clause.
 	 *                                              Default 0.
 	 * @type bool          $no_found_rows          Whether to disable the `SQL_CALC_FOUND_ROWS` query. Default true.
 	 * @type string|array  $orderby                Accepts 'id', 'status', 'solution_id', 'user_id', 'order_id', 'order_item_id',
