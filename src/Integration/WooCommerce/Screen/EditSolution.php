@@ -153,8 +153,9 @@ class EditSolution extends AbstractHookProvider {
 
 			         Field::make( 'multiselect', 'solution_woocommerce_products', __( 'Linked Products', 'pixelgradelt_retailer' ) )
 			              ->set_help_text( __( 'These are all the WooCommerce products that, when purchased, <strong>will determine the availability of the current LT Solution.</strong><br>
-Bear in mind that <strong>a WooCommerce product can be linked to only one LT Solution.</strong> That is why the control will display <strong>only not previously linked products.</strong><br>
-As long as the order that includes one of these products remains valid ("completed" or active subscription) the current solution will be available to be used in LT Compositions.', 'pixelgradelt_retailer' ) )
+Bear in mind that <strong>a WooCommerce product can be linked to only one LT Solution.</strong> That is why the control will display <strong>only products not previously linked to any LT Solutions.</strong><br>
+As long as a order that includes one of these products remains valid ("completed" or active subscription) the current solution will be available to be used in LT Compositions.<br>
+<strong>Important:</strong> If you <strong>remove a linked product,</strong> all customers with existing orders that included that product will <strong>lose their purchased LT solutions.</strong> Think carefully about that!', 'pixelgradelt_retailer' ) )
 			              ->set_options( [ $this, 'get_available_products_options' ] )
 			              ->set_default_value( [] )
 			              ->set_required( false )
