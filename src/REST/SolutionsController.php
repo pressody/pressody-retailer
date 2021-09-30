@@ -123,19 +123,19 @@ class SolutionsController extends WP_REST_Controller {
 			$this->namespace,
 			'/' . $this->rest_base . '/(?P<id>[\d]+)',
 			[
-				'args'   => array(
-					'id' => array(
-						'description' => __( 'The solution post ID.', 'woocommerce' ),
+				'args'   => [
+					'id' => [
+						'description' => __( 'The solution post ID.', 'pixelgradelt_retailer' ),
 						'type'        => 'integer',
-					),
-				),
+					],
+				],
 				[
 					'methods'             => WP_REST_Server::READABLE,
 					'callback'            => [ $this, 'get_item' ],
 					'permission_callback' => [ $this, 'get_item_permissions_check' ],
-					'args'                => array(
-						'context' => $this->get_context_param( array( 'default' => 'view' ) ),
-					),
+					'args'                => [
+						'context' => $this->get_context_param( [ 'default' => 'view' ] ),
+					],
 				],
 				'schema' => [ $this, 'get_public_item_schema' ],
 			]
@@ -394,7 +394,11 @@ class SolutionsController extends WP_REST_Controller {
 	public function get_item( $request ) {
 		$package = $this->repository->first_where( [ 'managed_post_id' => $request->get_param( 'id' ) ] );
 		if ( empty( $package ) ) {
-			return new WP_Error( 'pixelgradelt_retailer_rest_invalid_id', __( 'Invalid solution post ID.', 'pixelgradelt_retailer' ), array( 'status' => 404 ) );
+			return new WP_Error(
+				'pixelgradelt_retailer_rest_invalid_id',
+				__( 'Invalid solution post ID.', 'pixelgradelt_retailer' ),
+				[ 'status' => HTTP::NOT_FOUND ]
+			);
 		}
 
 		$data = $this->prepare_item_for_response( $package, $request );
@@ -610,7 +614,7 @@ class SolutionsController extends WP_REST_Controller {
 	 *
 	 * @return array
 	 */
-	public function get_item_schema() {
+	public function get_item_schema(): array {
 		return [
 			'$schema'    => 'http://json-schema.org/draft-04/schema#',
 			'title'      => 'package',

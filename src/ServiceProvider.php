@@ -142,8 +142,10 @@ class ServiceProvider implements ServiceProviderInterface {
 			);
 		};
 
-		$container['hooks.capabilities'] = function () {
-			return new Provider\Capabilities();
+		$container['hooks.capabilities'] = function ( $container ) {
+			return new Provider\Capabilities(
+				$container['composition.manager']
+			);
 		};
 
 		$container['hooks.composition_post_type'] = function ( $container ) {
@@ -295,7 +297,7 @@ class ServiceProvider implements ServiceProviderInterface {
 			return new REST\CompositionsController(
 				'pixelgradelt_retailer/v1',
 				'compositions',
-				$container['repository.solutions'],
+				$container['composition.manager'],
 				$container['transformer.composer_package'],
 				$container['crypter']
 			);

@@ -156,7 +156,7 @@ class ListCompositions extends AbstractHookProvider {
 		if ( 'composition_required_solutions' === $column && ! empty( $composition_data['required_solutions'] ) ) {
 			$list = [];
 			foreach ( $composition_data['required_solutions'] as $solution_details ) {
-				$list[] = '<a class="package-list_link" href="' . esc_url( get_edit_post_link( $solution_details['managed_post_id'] ) ) . '" title="Edit Required LT Solution">' . get_the_title( $solution_details['managed_post_id'] ) . ' (' . $solution_details['pseudo_id'] . ')</a>';
+				$list[] = '<a class="package-list_link" href="' . esc_url( get_edit_post_link( $solution_details['managed_post_id'] ) ) . '" title="Edit Required LT Solution">' . get_the_title( $solution_details['managed_post_id'] ) . ' #' . $solution_details['managed_post_id'] . '</a>';
 			}
 
 			$output = implode( '<br>' . PHP_EOL, $list );

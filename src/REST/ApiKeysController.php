@@ -20,6 +20,7 @@ use WP_REST_Controller;
 use WP_REST_Request;
 use WP_REST_Response;
 use WP_REST_Server;
+use WP_Http as HTTP;
 
 /**
  * API Keys REST controller class.
@@ -236,7 +237,7 @@ class ApiKeysController extends WP_REST_Controller {
 		$request->set_param( 'context', 'edit' );
 		$response = $this->prepare_item_for_response( $api_key, $request );
 		$response = rest_ensure_response( $response );
-		$response->set_status( 201 );
+		$response->set_status( HTTP::CREATED );
 
 		return $response;
 	}
@@ -256,7 +257,7 @@ class ApiKeysController extends WP_REST_Controller {
 			return new WP_Error(
 				'rest_resource_invalid_id',
 				esc_html__( 'Invalid API Key token.', 'pixelgradelt_retailer' ),
-				[ 'status' => 404 ]
+				[ 'status' => HTTP::NOT_FOUND ]
 			);
 		}
 

@@ -57,6 +57,20 @@ final class Capabilities {
 	const MANAGE_SOLUTION_CATEGORIES = 'pixelgradelt_retailer_manage_package_categories';
 
 	/**
+	 * Meta capability for administering compositions (aimed at administrators, not regular users).
+	 *
+	 * @var string
+	 */
+	const MANAGE_COMPOSITIONS = 'pixelgradelt_retailer_manage_compositions';
+
+	/**
+	 * Meta capability for creating compositions.
+	 *
+	 * @var string
+	 */
+	const CREATE_COMPOSITIONS = 'pixelgradelt_retailer_create_compositions';
+
+	/**
 	 * Primitive capability for viewing compositions.
 	 *
 	 * @var string
@@ -82,7 +96,7 @@ final class Capabilities {
 	 *
 	 * @var string
 	 */
-	const EDIT_COMPOSITION = 'pixelgradelt_retailer_view_composition';
+	const EDIT_COMPOSITION = 'pixelgradelt_retailer_edit_composition';
 
 	/**
 	 * Register roles and capabilities.
@@ -96,6 +110,8 @@ final class Capabilities {
 		$wp_roles->add_cap( 'administrator', self::MANAGE_OPTIONS );
 		$wp_roles->add_cap( 'administrator', self::MANAGE_SOLUTION_TYPES );
 		$wp_roles->add_cap( 'administrator', self::MANAGE_SOLUTION_CATEGORIES );
+		$wp_roles->add_cap( 'administrator', self::MANAGE_COMPOSITIONS );
+		$wp_roles->add_cap( 'administrator', self::CREATE_COMPOSITIONS );
 		$wp_roles->add_cap( 'administrator', self::VIEW_COMPOSITIONS );
 		$wp_roles->add_cap( 'administrator', self::EDIT_COMPOSITIONS );
 

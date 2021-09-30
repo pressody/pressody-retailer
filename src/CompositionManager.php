@@ -197,18 +197,23 @@ class CompositionManager {
 				'title',
 				'custom-fields',
 			],
-			'capabilities'       => array(
-				'edit_post'          => Capabilities::EDIT_COMPOSITION,
-				'read_post'          => Capabilities::VIEW_COMPOSITION,
-				'delete_post'        => Capabilities::EDIT_COMPOSITION,
-				'edit_posts'         => Capabilities::EDIT_COMPOSITIONS,
-				'edit_others_posts'  => Capabilities::EDIT_COMPOSITIONS,
-				'delete_posts'       => Capabilities::EDIT_COMPOSITIONS,
-				//				'publish_posts'      => 'do_not_allow', // Removes support for the post status and publish
-				'read_private_posts' => Capabilities::VIEW_COMPOSITIONS,
-				//				'create_posts'       => 'do_not_allow', // Removes support for the "Add New" function
+			'capabilities' => array(
+				'edit_post'              => Capabilities::EDIT_COMPOSITION,
+				'read_post'              => Capabilities::VIEW_COMPOSITION,
+				'delete_post'            => Capabilities::EDIT_COMPOSITION,
+				'edit_posts'             => Capabilities::EDIT_COMPOSITIONS,
+				'edit_private_posts'     => Capabilities::EDIT_COMPOSITIONS,
+				'edit_published_posts'   => Capabilities::EDIT_COMPOSITIONS,
+				'edit_others_posts'      => Capabilities::EDIT_COMPOSITIONS, // Since all composition owners should be able to do this, we need to resolve it at mapping.
+				'publish_posts'          => Capabilities::EDIT_COMPOSITIONS,
+				'read_private_posts'     => Capabilities::VIEW_COMPOSITIONS,
+				'delete_posts'           => Capabilities::EDIT_COMPOSITIONS,
+				'delete_private_posts'   => Capabilities::EDIT_COMPOSITIONS,
+				'delete_published_posts' => Capabilities::EDIT_COMPOSITIONS,
+				'delete_others_posts'    => Capabilities::EDIT_COMPOSITIONS, // Since all composition owners should be able to do this, we need to resolve it at mapping.
+				'create_posts'           => Capabilities::CREATE_COMPOSITIONS,
 			),
-			'map_meta_cap'       => true,
+			'map_meta_cap'       => false,
 		], $args );
 	}
 
@@ -301,6 +306,18 @@ class CompositionManager {
 			$query_args['post_status'] = $args['post_status'];
 		}
 
+		if ( ! empty( $args['status'] ) ) {
+			if ( is_string( $args['status'] ) ) {
+				$args['status'] = [ $args['status'] ];
+			}
+
+			$query_args['meta_query'][] = [
+				'key'     => '_composition_status',
+				'value'   => $args['status'],
+				'compare' => 'IN',
+			];
+		}
+
 		if ( ! empty( $args['hashid'] ) ) {
 			if ( is_string( $args['hashid'] ) ) {
 				$args['hashid'] = [ $args['hashid'] ];
@@ -355,6 +372,7 @@ class CompositionManager {
 		}
 
 		$data['id']     = $post_ID;
+
 		$data['status'] = \get_post_meta( $post_ID, '_composition_status', true );
 		$data['hashid'] = \get_post_meta( $post_ID, '_composition_hashid', true );
 
@@ -403,7 +421,7 @@ class CompositionManager {
 	 * @type string $post_status                     The composition post status to set. Defaults to 'private'.
 	 * @type string $status                          The composition status. Should be a valid value from CompositionManager::STATUSES. Defaults to 'not_ready'.
 	 * @type string $hashid                          The hashid to assign to the composition. Will be used to search for existing compositions if $update is true. Defaults to a generated hashid from the new post ID.
-	 * @type int[]  $user_ids                        The user ID to assign the composition to. If the user with the provided user ID doesn't exist, the user ID will be ignored.
+	 * @type int[]  $user_ids                        List of user IDs to assign the composition to. If a user with a provided user ID doesn't exist, the user ID will be ignored.
 	 * @type int[]  $required_purchased_solution_ids List of required purchased-solution ids.
 	 * @type array  $required_manual_solutions       List of required solution details: `post_id` or `pseudo_id`, `reason`.
 	 * @type array  $keywords                        List of keywords to add to the composition.
@@ -909,7 +927,7 @@ class CompositionManager {
 	}
 
 	/**
-	 * Get the list of required purchased-solutions.
+	 * Get the list of required purchased-solutions details.
 	 *
 	 * @param int  $post_ID               The Composition post ID.
 	 * @param bool $include_context       Whether to include context data about each required solution
@@ -945,6 +963,22 @@ class CompositionManager {
 		} );
 
 		return $required_purchased_solutions;
+	}
+
+	/**
+	 * Get the list of required purchased-solutions IDs.
+	 *
+	 * @param int  $post_ID               The Composition post ID.
+	 *
+	 * @return array List of composition required purchased-solutions IDs.
+	 */
+	public function get_post_composition_required_purchased_solutions_ids( int $post_ID ): array {
+		$purchased_solution_ids = carbon_get_post_meta( $post_ID, 'composition_required_purchased_solutions' );
+		if ( empty( $purchased_solution_ids ) || ! is_array( $purchased_solution_ids ) ) {
+			return [];
+		}
+
+		return $purchased_solution_ids;
 	}
 
 	/**

@@ -906,7 +906,6 @@ class SolutionManager {
 			$error            = [];
 			$error['code']    = 'ltrecords_request_error';
 			$error['message'] = esc_html__( 'Something went wrong and we couldn\'t get the LT Records parts from the provided endpoint.', 'pixelgradelt_retailer' );
-			$error['data']    = [];
 
 			if ( is_wp_error( $response ) ) {
 				$error['data'] = [

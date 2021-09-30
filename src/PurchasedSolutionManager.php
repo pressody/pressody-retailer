@@ -173,9 +173,9 @@ class PurchasedSolutionManager {
 	 *
 	 * @since 0.14.0
 	 *
-	 * @param int $id
+	 * @param int $id The purchased solution ID.
 	 *
-	 * @return bool true if the purchased order was invalidate successfully, false if not.
+	 * @return bool true if the purchased solution was invalidate successfully, false if not.
 	 */
 	public function invalidate_purchased_solution( int $id ): bool {
 		$purchased_solutions = new Database\Queries\PurchasedSolution();
@@ -192,9 +192,9 @@ class PurchasedSolutionManager {
 	 *
 	 * @since 0.14.0
 	 *
-	 * @param int $id
+	 * @param int $id The purchased solution ID.
 	 *
-	 * @return bool true if the purchased order was readied successfully, false if not.
+	 * @return bool true if the purchased solution was readied successfully, false if not.
 	 */
 	public function ready_purchased_solution( int $id ): bool {
 		$purchased_solutions = new Database\Queries\PurchasedSolution();
@@ -210,16 +210,24 @@ class PurchasedSolutionManager {
 	 * Move a purchased solution to the `active` status.
 	 *
 	 * A composition ID must be provided to be able to activate a purchased solution.
+	 * But only if the purchased solution is ready.
 	 *
 	 * @since 0.14.0
 	 *
-	 * @param int $id
+	 * @param int $id The purchased solution ID.
 	 * @param int $composition_id The composition ID this purchased solution is active in.
 	 *
-	 * @return bool true if the purchased order was activated successfully, false if not.
+	 * @return bool true if the purchased solution was activated successfully, false if not.
 	 */
 	public function activate_purchased_solution( int $id, int $composition_id ): bool {
 		$purchased_solutions = new Database\Queries\PurchasedSolution();
+
+		// We can only activate ready purchased solutions. Any other status, and we will not activate.
+		/** @var PurchasedSolution $current */
+		$current = $purchased_solutions->get_item( $id );
+		if ( 'ready' !== $current->status ) {
+			return false;
+		}
 
 		$result = $purchased_solutions->update_item( $id, [
 			'status'         => 'active',
@@ -230,13 +238,53 @@ class PurchasedSolutionManager {
 	}
 
 	/**
+	 * Deactivate a previously attached purchased solution to a certain composition.
+	 *
+	 * Moves the purchased solution to the `ready` status and sets the composition ID to 0.
+	 * But only if the purchased solution is active.
+	 *
+	 * @since 0.15.0
+	 *
+	 * @param int $id The purchased solution ID.
+	 * @param int $composition_id Optional. The composition ID the purchased solution should be attached to prior to deactivation.
+	 *                            Set to 0 to not check for a match prior to detaching.
+	 *
+	 * @return bool true if the purchased solution was deactivated successfully, false if not.
+	 */
+	public function deactivate_purchased_solution( int $id, int $composition_id = 0 ): bool {
+		$purchased_solutions = new Database\Queries\PurchasedSolution();
+
+		/** @var PurchasedSolution $current */
+		$current = $purchased_solutions->get_item( $id );
+
+		// We can only deactivate active purchased solutions.
+		if ( 'active' !== $current->status ) {
+			return false;
+		}
+
+		// If provided with a composition ID we will only deactivate if the purchased solution is currently attached to that composition ID.
+		if ( $composition_id > 0 ) {
+			if ( ! empty( $current->composition_id ) && $composition_id !== $current->composition_id ) {
+				return false;
+			}
+		}
+
+		$result = $purchased_solutions->update_item( $id, [
+			'status'         => 'ready',
+			'composition_id' => 0,
+		] );
+
+		return $result !== false;
+	}
+
+	/**
 	 * Move a purchased solution to the `retired` status.
 	 *
 	 * @since 0.14.0
 	 *
-	 * @param int $id
+	 * @param int $id The purchased solution ID.
 	 *
-	 * @return bool true if the purchased order was retired successfully, false if not.
+	 * @return bool true if the purchased solution was retired successfully, false if not.
 	 */
 	public function retire_purchased_solution( int $id ): bool {
 		$purchased_solutions = new Database\Queries\PurchasedSolution();
@@ -253,7 +301,7 @@ class PurchasedSolutionManager {
 	 *
 	 * @since 0.14.0
 	 *
-	 * @param int $id
+	 * @param int $id The purchased solution ID.
 	 *
 	 * @return int|false `1` if the purchased solution was deleted successfully, false on error.
 	 */
@@ -277,7 +325,6 @@ class PurchasedSolutionManager {
 	public function get_purchased_solution( int $id = 0 ) {
 		$purchased_solutions = new Database\Queries\PurchasedSolution();
 
-		// Return purchased solution
 		return $purchased_solutions->get_item( $id );
 	}
 
@@ -294,7 +341,6 @@ class PurchasedSolutionManager {
 	public function get_purchased_solution_by( string $field = '', $value = '' ) {
 		$purchased_solutions = new Database\Queries\PurchasedSolution();
 
-		// Return purchased solution
 		return $purchased_solutions->get_item_by( $field, $value );
 	}
 

@@ -124,6 +124,8 @@ class EditComposition extends AbstractHookProvider {
 
 		// Handle post data retention before the post is updated in the DB (like changing the status).
 		$this->add_action( 'pre_post_update', 'remember_post_composition_data', 10, 1 );
+		$this->add_action( 'wp_trash_post', 'remember_post_composition_data', 10, 1 );
+		$this->add_action( 'before_delete_post', 'remember_post_composition_data', 10, 1 );
 		// These are programmatic changes.
 		$this->add_action( 'pixelgradelt_retailer/ltcomposition/before_update', 'remember_post_composition_data', 10, 1 );
 
@@ -141,9 +143,29 @@ class EditComposition extends AbstractHookProvider {
 		/*
 		 * HANDLE POST UPDATE CHANGES.
 		 */
-		// Just trigger the update action.
+		// Just trigger the trash action.
 		$this->add_action( 'wp_after_insert_post', 'do_update_action', 10, 3 );
 		$this->add_action( 'pixelgradelt_retailer/ltcomposition/update', 'handle_composition_update', 10, 3 );
+
+		/*
+		 * HANDLE POST TRASH CHANGES.
+		 */
+		// Just trigger the update action.
+		$this->add_action( 'trashed_post', 'do_trash_action', 10, 1 );
+		$this->add_action( 'pixelgradelt_retailer/ltcomposition/trash', 'handle_composition_trash', 10, 1 );
+
+		/*
+		 * HANDLE POST DELETE CHANGES.
+		 */
+		// Just trigger the delete action.
+		$this->add_action( 'deleted_post', 'do_delete_action', 10, 2 );
+		$this->add_action( 'pixelgradelt_retailer/ltcomposition/delete', 'handle_composition_delete', 10, 1 );
+
+
+		/*
+		 * HANDLE PURCHASED SOLUTIONS DETAILS UPDATES.
+		 */
+		$this->add_action( 'pixelgradelt_retailer/ltcomposition/required_purchased_solutions_change', 'handle_required_purchased_solutions_details_update', 10, 3 );
 
 		/*
 		 * HANDLE AUTOMATIC POST NOTES.
@@ -670,6 +692,10 @@ Manually included solutions are <strong>for internal use only</strong> and are n
 	 * @param bool     $update  Whether this is an existing post being updated.
 	 */
 	protected function do_update_action( int $post_id, \WP_Post $post, bool $update ) {
+		if ( $this->composition_manager::POST_TYPE !== $post->post_type ) {
+			return;
+		}
+
 		/**
 		 * Fires after LT composition update.
 		 *
@@ -901,6 +927,125 @@ Manually included solutions are <strong>for internal use only</strong> and are n
 			$current_composition,
 			$old_composition
 		);
+	}
+
+	/**
+	 * Handle purchased solutions details update on LT composition required purchased-solutions change.
+	 *
+	 * @since 0.15.0
+	 *
+	 * @param int   $post_id                          The composition post ID.
+	 * @param array $new_required_purchased_solutions The new composition required_purchased_solutions data.
+	 * @param array $old_required_purchased_solutions The old composition required_purchased_solutions data.
+	 */
+	protected function handle_required_purchased_solutions_details_update( int $post_id, array $new_required_purchased_solutions, array $old_required_purchased_solutions ) {
+		$old_required_purchased_solutions_ids = \wp_list_pluck( $old_required_purchased_solutions, 'purchased_solution_id' );
+		$new_required_purchased_solutions_ids = \wp_list_pluck( $new_required_purchased_solutions, 'purchased_solution_id' );
+
+		// Activate the added purchased solutions (aka attach to the current composition).
+		$added   = array_diff( $new_required_purchased_solutions_ids, $old_required_purchased_solutions_ids );
+		foreach ( $added as $ps_id ) {
+			$this->ps_manager->activate_purchased_solution( $ps_id, $post_id );
+		}
+
+		// Deactivate the removed purchased solutions (aka detach from the current composition and make them available for use in others).
+		$removed = array_diff( $old_required_purchased_solutions_ids, $new_required_purchased_solutions_ids );
+		foreach ( $removed as $ps_id ) {
+			$this->ps_manager->deactivate_purchased_solution( $ps_id, $post_id );
+		}
+	}
+
+	/**
+	 * Do the composition post trash action.
+	 *
+	 * @since 0.15.0
+	 *
+	 * @param int      $post_id Post ID.
+	 */
+	protected function do_trash_action( int $post_id ) {
+		if ( $this->composition_manager::POST_TYPE !== get_post_type( $post_id ) ) {
+			return;
+		}
+
+		/**
+		 * Fires after a LT composition is trashed.
+		 *
+		 * @since 0.15.0
+		 *
+		 * @param int      $post_id The trashed composition post ID
+		 */
+		do_action( 'pixelgradelt_retailer/ltcomposition/trash',
+			$post_id,
+		);
+	}
+
+	/**
+	 * Handle composition post trashed changes.
+	 *
+	 * @since 0.15.0
+	 *
+	 * @param int      $post_id Post ID.
+	 */
+	protected function handle_composition_trash( int $post_id ) {
+		// If we don't have the pre-trash composition data, we have nothing to compare to.
+		if ( empty( $this->pre_save_composition ) ) {
+			return;
+		}
+
+		// We want to make sure that the purchased solutions previously attached are detached.
+		$purchased_solutions_ids = \wp_list_pluck( $this->pre_save_composition['required_purchased_solutions'], 'purchased_solution_id' );
+		if ( ! empty( $purchased_solutions_ids ) ) {
+			foreach ( $purchased_solutions_ids as $purchased_solutions_id ) {
+				$this->ps_manager->deactivate_purchased_solution( $purchased_solutions_id, $post_id );
+			}
+		}
+	}
+
+	/**
+	 * Do the composition post delete action.
+	 *
+	 * @since 0.15.0
+	 *
+	 * @param int      $post_id Post ID.
+	 * @param \WP_Post $post   Post object.
+	 */
+	protected function do_delete_action( int $post_id, \WP_Post $post ) {
+		if ( $this->composition_manager::POST_TYPE !== $post->post_type ) {
+			return;
+		}
+
+		/**
+		 * Fires after a LT composition is deleted.
+		 *
+		 * @since 0.15.0
+		 *
+		 * @param int      $post_id The deleted composition post ID
+		 */
+		do_action( 'pixelgradelt_retailer/ltcomposition/delete',
+			$post_id,
+		);
+	}
+
+	/**
+	 * Handle composition post deleted changes.
+	 *
+	 * @since 0.15.0
+	 *
+	 * @param int      $post_id Post ID.
+	 */
+	protected function handle_composition_delete( int $post_id ) {
+		// If we don't have the pre-delete composition data, we have nothing to compare to.
+		if ( empty( $this->pre_save_composition ) ) {
+			return;
+		}
+
+		// We want to make sure that the purchased solutions previously attached are detached.
+		$purchased_solutions_ids = \wp_list_pluck( $this->pre_save_composition['required_purchased_solutions'], 'purchased_solution_id' );
+		if ( ! empty( $purchased_solutions_ids ) ) {
+			foreach ( $purchased_solutions_ids as $purchased_solutions_id ) {
+				$this->ps_manager->deactivate_purchased_solution( $purchased_solutions_id, $post_id );
+			}
+		}
 	}
 
 	/**
