@@ -371,6 +371,10 @@ class CompositionManager {
 			return $data;
 		}
 
+		// Since some of the internal workings of CarbonFields lose the current post ID, we need to set it as the global post ID.
+		$GLOBALS['post'] = $post_ID;
+		setup_postdata( $post_ID );
+
 		$data['id']     = $post_ID;
 
 		$data['status'] = \get_post_meta( $post_ID, '_composition_status', true );
@@ -386,7 +390,17 @@ class CompositionManager {
 		$data['required_manual_solutions']    = $this->get_post_composition_required_manual_solutions( $post_ID, $include_context, $pseudo_id_delimiter );
 		$data['composer_require']             = $this->get_post_composition_composer_require( $post_ID );
 
-		return $data;
+		wp_reset_postdata();
+
+		/**
+		 * Filters the composition ID data.
+		 *
+		 * @since 0.15.0
+		 *
+		 * @param array $solution_data The composition data.
+		 * @param int   $post_id       The composition post ID.
+		 */
+		return apply_filters( 'pixelgradelt_retailer/composition_id_data', $data, $post_ID );
 	}
 
 	/**

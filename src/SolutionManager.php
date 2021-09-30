@@ -394,6 +394,10 @@ class SolutionManager {
 			return $data;
 		}
 
+		// Since some of the internal workings of CarbonFields lose the current post ID, we need to set it as the global post ID.
+		$GLOBALS['post'] = $post_ID;
+		setup_postdata( $post_ID );
+
 		$data['is_managed']      = true;
 		$data['managed_post_id'] = $post_ID;
 		$data['visibility']      = $this->get_post_solution_visibility( $post_ID );
@@ -410,6 +414,8 @@ class SolutionManager {
 		$data['required_solutions']       = $this->get_post_solution_required_solutions( $post_ID );
 		$data['excluded_solutions']       = $this->get_post_solution_excluded_solutions( $post_ID );
 		$data['composer_require']         = $this->get_post_solution_composer_require( $post_ID );
+
+		wp_reset_postdata();
 
 		/**
 		 * Filters the solution ID data.

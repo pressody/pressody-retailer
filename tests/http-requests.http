@@ -7,12 +7,11 @@ Accept: application/json
 GET https://lt-retailer.local/wp-json/pixelgradelt_retailer/v1/solutions/parts
 Authorization: Basic Fry4YDsVZGs7UDvtLrHcR8fjEgdL8iG0 pixelgradelt_retailer
 Accept: application/json
+Content-Type: application/json
 
-###
-
-GET https://lt-retailer.local/wp-json/pixelgradelt_retailer/v1/solutions/processed
-Authorization: Basic Fry4YDsVZGs7UDvtLrHcR8fjEgdL8iG0 pixelgradelt_retailer
-Accept: application/json
+{
+	"postId": [9,22]
+}
 
 ###
 
@@ -22,6 +21,7 @@ Accept: application/json
 Content-Type: application/json
 
 {
+  "postId": [9,22],
   "solutionsContext": {
 	"pixelgradelt-retailer/first-solution": {
 	  "timestamp": 101
