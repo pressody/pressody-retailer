@@ -81,6 +81,13 @@ class BaseSolutionTest extends TestCase {
 		$this->assertSame( $expected, $this->package->get_license() );
 	}
 
+	public function test_categories() {
+		$expected                  = [ 'key0', 'key1', 'key2', 'key3', ];
+		$this->package->categories = $expected;
+
+		$this->assertSame( $expected, $this->package->get_categories() );
+	}
+
 	public function test_keywords() {
 		$expected                = [ 'key0', 'key1', 'key2', 'key3', ];
 		$this->package->keywords = $expected;
@@ -103,6 +110,28 @@ class BaseSolutionTest extends TestCase {
 		$this->assertSame( $expected, $this->package->get_managed_post_id() );
 	}
 
+	public function test_visibility() {
+		$expected                  = 'public';
+		$this->package->visibility = $expected;
+
+		$this->assertSame( $expected, $this->package->get_visibility() );
+	}
+
+	public function test_required_ltrecords_parts() {
+		$expected                          = [
+			'pixelgrade/test' => [
+				'package_name' => 'pixelgrade/test',
+				'composer_package_name' => 'pixelgrade/test',
+				'version_range'         => '*',
+				'stability'             => 'stable',
+			],
+		];
+		$this->package->required_ltrecords_parts = $expected;
+
+		$this->assertSame( $expected, $this->package->get_required_ltrecords_parts() );
+		$this->assertTrue( $this->package->has_required_ltrecords_parts() );
+	}
+
 	public function test_required_solutions() {
 		$expected                          = [
 			'some_pseudo_id' => [
@@ -115,6 +144,29 @@ class BaseSolutionTest extends TestCase {
 		$this->package->required_solutions = $expected;
 
 		$this->assertSame( $expected, $this->package->get_required_solutions() );
+		$this->assertSame( $expected, $this->package->get_required_packages() );
 		$this->assertTrue( $this->package->has_required_solutions() );
+	}
+
+	public function test_excluded_solutions() {
+		$expected                          = [
+			'some_pseudo_id' => [
+				'composer_package_name' => 'pixelgrade/test',
+				'version_range'         => '*',
+				'stability'             => 'stable',
+				'managed_post_id'       => 123,
+			],
+		];
+		$this->package->excluded_solutions = $expected;
+
+		$this->assertSame( $expected, $this->package->get_excluded_solutions() );
+		$this->assertTrue( $this->package->has_excluded_solutions() );
+	}
+
+	public function test_composer_package_name() {
+		$expected            = 'pixelgrade/test';
+		$this->package->composer_package_name = $expected;
+
+		$this->assertSame( $expected, $this->package->get_composer_package_name() );
 	}
 }

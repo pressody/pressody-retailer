@@ -344,7 +344,7 @@ class BaseSolution implements \ArrayAccess, Package {
 	/**
 	 * Retrieve the required packages.
 	 *
-	 * This is an alias for get_required_solution()
+	 * This is an alias for get_required_solutions()
 	 *
 	 * @since 0.1.0
 	 *
