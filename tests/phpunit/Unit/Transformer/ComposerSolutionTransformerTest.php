@@ -1,5 +1,5 @@
 <?php
-declare ( strict_types = 1 );
+declare ( strict_types=1 );
 
 namespace PixelgradeLT\Retailer\Tests\Unit\Transformer;
 
@@ -18,8 +18,8 @@ class ComposerSolutionTransformerTest extends TestCase {
 		parent::setUp();
 
 		$solution_manager = $this->getMockBuilder( SolutionManager::class )
-		                        ->disableOriginalConstructor()
-		                        ->getMock();
+		                         ->disableOriginalConstructor()
+		                         ->getMock();
 
 		$logger = new NullIO();
 

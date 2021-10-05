@@ -23,7 +23,7 @@ use Psr\Log\LoggerInterface;
  *
  * @since 0.1.0
  */
-class SolutionManager {
+class SolutionManager implements Manager {
 
 	const POST_TYPE = 'ltsolution';
 	const POST_TYPE_PLURAL = 'ltsolutions';

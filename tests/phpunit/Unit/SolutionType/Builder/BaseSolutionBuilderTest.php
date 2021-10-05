@@ -16,7 +16,7 @@ use PixelgradeLT\Retailer\SolutionType\SolutionTypes;
 use PixelgradeLT\Retailer\Tests\Unit\TestCase;
 
 class BaseSolutionBuilderTest extends TestCase {
-	protected $builder = null;
+	protected ?BaseSolutionBuilder $builder = null;
 
 	public function setUp(): void {
 		parent::setUp();
@@ -124,36 +124,6 @@ class BaseSolutionBuilderTest extends TestCase {
 		$this->assertSame( $expected, $package->description );
 	}
 
-	public function test_keywords_as_string() {
-		$keywords_comma_string = 'key1,key0, key2, key3   , ,,';
-
-		// We expect the keywords to be alphabetically sorted.
-		$expected = [ 'key0', 'key1', 'key2', 'key3', ];
-		$package  = $this->builder->set_keywords( $keywords_comma_string )->build();
-
-		$this->assertSame( $expected, $package->keywords );
-	}
-
-	public function test_keywords_as_array() {
-		$keywords = [ 'first' => 'key2', 'key3 ', 'some' => 'key0', ' key1 ', ];
-
-		// We expect the keywords to be alphabetically sorted.
-		$expected = [ 'key0', 'key1', 'key2', 'key3', ];
-		$package  = $this->builder->set_keywords( $keywords )->build();
-
-		$this->assertSame( $expected, $package->keywords );
-	}
-
-	public function test_clean_keywords() {
-		$keywords = [ 'first' => 'key2', '', 'key3 ', false, 'some' => 'key0', ' key1 ', ];
-
-		// We expect the keywords to be alphabetically sorted.
-		$expected = [ 'key0', 'key1', 'key2', 'key3', ];
-		$package  = $this->builder->set_keywords( $keywords )->build();
-
-		$this->assertSame( $expected, $package->keywords );
-	}
-
 	public function test_homepage() {
 		$expected = 'https://www.cedaro.com/';
 		$package  = $this->builder->set_homepage( $expected )->build();
@@ -185,6 +155,66 @@ class BaseSolutionBuilderTest extends TestCase {
 		$this->assertSame( $expected, $package->license );
 	}
 
+	public function test_categories_as_string() {
+		$categories_comma_string = 'key1,key0, key2, key3   , ,,';
+
+		// We expect the categories to be alphabetically sorted.
+		$expected = [ 'key0', 'key1', 'key2', 'key3', ];
+		$package  = $this->builder->set_categories( $categories_comma_string )->build();
+
+		$this->assertSame( $expected, $package->categories );
+	}
+
+	public function test_categories_as_array() {
+		$categories = [ 'first' => 'key2', 'key3 ', 'some' => 'key0', ' key1 ', ];
+
+		// We expect the categories to be alphabetically sorted.
+		$expected = [ 'key0', 'key1', 'key2', 'key3', ];
+		$package  = $this->builder->set_categories( $categories )->build();
+
+		$this->assertSame( $expected, $package->categories );
+	}
+
+	public function test_clean_categories() {
+		$categories = [ 'first' => 'key2', '', 'key3 ', false, 'some' => 'key0', ' key1 ', ];
+
+		// We expect the categories to be alphabetically sorted.
+		$expected = [ 'key0', 'key1', 'key2', 'key3', ];
+		$package  = $this->builder->set_categories( $categories )->build();
+
+		$this->assertSame( $expected, $package->categories );
+	}
+
+	public function test_keywords_as_string() {
+		$keywords_comma_string = 'key1,key0, key2, key3   , ,,';
+
+		// We expect the keywords to be alphabetically sorted.
+		$expected = [ 'key0', 'key1', 'key2', 'key3', ];
+		$package  = $this->builder->set_keywords( $keywords_comma_string )->build();
+
+		$this->assertSame( $expected, $package->keywords );
+	}
+
+	public function test_keywords_as_array() {
+		$keywords = [ 'first' => 'key2', 'key3 ', 'some' => 'key0', ' key1 ', ];
+
+		// We expect the keywords to be alphabetically sorted.
+		$expected = [ 'key0', 'key1', 'key2', 'key3', ];
+		$package  = $this->builder->set_keywords( $keywords )->build();
+
+		$this->assertSame( $expected, $package->keywords );
+	}
+
+	public function test_clean_keywords() {
+		$keywords = [ 'first' => 'key2', '', 'key3 ', false, 'some' => 'key0', ' key1 ', ];
+
+		// We expect the keywords to be alphabetically sorted.
+		$expected = [ 'key0', 'key1', 'key2', 'key3', ];
+		$package  = $this->builder->set_keywords( $keywords )->build();
+
+		$this->assertSame( $expected, $package->keywords );
+	}
+
 	public function test_is_managed() {
 		$expected = true;
 		$package  = $this->builder->set_is_managed( $expected )->build();
@@ -206,11 +236,327 @@ class BaseSolutionBuilderTest extends TestCase {
 		$this->assertSame( $expected, $package->visibility );
 	}
 
+	public function test_required_ltrecords_parts() {
+		$expected = [
+			'pixelgrade/test' => [
+				'package_name'          => 'pixelgrade/test',
+				'composer_package_name' => 'pixelgrade/test',
+				'version_range'         => '*',
+				'stability'             => 'stable',
+			],
+		];
+		$package  = $this->builder->set_required_ltrecords_parts( $expected )->build();
+
+		$this->assertSame( $expected, $package->get_required_ltrecords_parts() );
+		$this->assertTrue( $package->has_required_ltrecords_parts() );
+	}
+
+	public function test_normalize_required_ltrecords_parts() {
+		$expected                 = [
+			'pixelgrade/test' => [
+				'package_name'          => 'pixelgrade/test',
+				'composer_package_name' => 'pixelgrade/test',
+				'version_range'         => '*',
+				'stability'             => 'stable',
+			],
+		];
+		$required_ltrecords_parts = [
+			[ 'package_name' => 'pixelgrade/test', ],
+			[ 'composer_package_name' => 'pixelgrade/test2', ],
+			// This doesn't have 'package_name' so it should be ignored
+		];
+
+		$package = $this->builder->set_required_ltrecords_parts( $required_ltrecords_parts )->build();
+
+		$this->assertSame( $expected, $package->get_required_ltrecords_parts() );
+		$this->assertTrue( $package->has_required_ltrecords_parts() );
+	}
+
 	public function test_composer_require() {
 		$expected = [ 'test/test' => '*' ];
 		$package  = $this->builder->set_composer_require( $expected )->build();
 
 		$this->assertSame( $expected, $package->composer_require );
+	}
+
+	public function test_required_solutions() {
+		$expected = [
+			'some_pseudo_id' => [
+				'composer_package_name' => 'pixelgrade/test',
+				'version_range'         => '*',
+				'stability'             => 'stable',
+				'managed_post_id'       => 123,
+				'pseudo_id'             => 'some_pseudo_id',
+			],
+		];
+
+		// Provide direct getters.
+		$package = new class extends BaseSolution {
+			public function __get( $name ) {
+				return $this->$name;
+			}
+		};
+
+		// We need a new builder that uses a mocked SolutionManager since we need to mock its `get_solution_id_data` method.
+		$composer_version_parser = new ComposerVersionParser( new VersionParser() );
+		$composer_client         = new ComposerClient();
+		$logger                  = new NullIO();
+
+		$solution_manager = \Mockery::mock(
+			'PixelgradeLT\Retailer\SolutionManager',
+			'PixelgradeLT\Retailer\Manager',
+			[ $composer_client, $composer_version_parser, $logger ] )->makePartial();
+		$solution_manager->shouldReceive( 'get_solution_id_data' )
+		                 ->andReturn( [
+			                 'is_managed'      => true,
+			                 'managed_post_id' => 123,
+		                 ] );
+		$builder = new BaseSolutionBuilder( $package, $solution_manager, $logger );
+
+		$built_package = $builder->set_required_solutions( $expected )->build();
+
+		$this->assertSame( $expected, $built_package->get_required_solutions() );
+		$this->assertSame( $expected, $built_package->get_required_packages() );
+		$this->assertTrue( $built_package->has_required_solutions() );
+	}
+
+	public function test_normalize_required_solutions_minimal_details() {
+		$required_solutions = [
+			[
+				'managed_post_id' => 123,
+				'pseudo_id'       => 'some_pseudo_id',
+			],
+		];
+		$expected           = [
+			'some_pseudo_id' => [
+				'composer_package_name' => 'pixelgradelt-retailer/test',
+				'version_range'         => '*',
+				'stability'             => 'stable',
+				'managed_post_id'       => 123,
+				'pseudo_id'             => 'some_pseudo_id',
+			],
+		];
+
+		// Provide direct getters.
+		$package = new class extends BaseSolution {
+			public function __get( $name ) {
+				return $this->$name;
+			}
+		};
+
+		// We need a new builder that uses a mocked SolutionManager since we need to mock its `get_solution_id_data` method.
+		$composer_version_parser = new ComposerVersionParser( new VersionParser() );
+		$composer_client         = new ComposerClient();
+		$logger                  = new NullIO();
+
+		$solution_manager = \Mockery::mock(
+			'PixelgradeLT\Retailer\SolutionManager',
+			'PixelgradeLT\Retailer\Manager',
+			[ $composer_client, $composer_version_parser, $logger ] )->makePartial();
+		$solution_manager->shouldReceive( 'get_solution_id_data' )
+		                 ->andReturn( [
+			                 'is_managed'      => true,
+			                 'managed_post_id' => 123,
+			                 'slug'            => 'test',
+		                 ] );
+		$builder = new BaseSolutionBuilder( $package, $solution_manager, $logger );
+
+		$built_package = $builder->set_required_solutions( $required_solutions )->build();
+
+		$this->assertSame( $expected, $built_package->get_required_solutions() );
+		$this->assertSame( $expected, $built_package->get_required_packages() );
+		$this->assertTrue( $built_package->has_required_solutions() );
+	}
+
+	public function test_normalize_required_solutions_missing_composer_package_name() {
+		$required_solutions = [
+			[
+				'managed_post_id' => 123,
+				'version_range'   => '^2.1',
+				'stability'       => 'dev',
+				'pseudo_id'       => 'some_pseudo_id',
+			],
+		];
+		$expected           = [
+			'some_pseudo_id' => [
+				'composer_package_name' => 'pixelgradelt-retailer/test',
+				'version_range'         => '^2.1',
+				'stability'             => 'dev',
+				'managed_post_id'       => 123,
+				'pseudo_id'             => 'some_pseudo_id',
+			],
+		];
+
+		// Provide direct getters.
+		$package = new class extends BaseSolution {
+			public function __get( $name ) {
+				return $this->$name;
+			}
+		};
+
+		// We need a new builder that uses a mocked SolutionManager since we need to mock its `get_solution_id_data` method.
+		$composer_version_parser = new ComposerVersionParser( new VersionParser() );
+		$composer_client         = new ComposerClient();
+		$logger                  = new NullIO();
+
+		$solution_manager = \Mockery::mock(
+			'PixelgradeLT\Retailer\SolutionManager',
+			'PixelgradeLT\Retailer\Manager',
+			[ $composer_client, $composer_version_parser, $logger ] )->makePartial();
+		$solution_manager->shouldReceive( 'get_solution_id_data' )
+		                 ->andReturn( [
+			                 'is_managed'      => true,
+			                 'managed_post_id' => 123,
+			                 'slug'            => 'Test*', // This should be normalized to
+		                 ] );
+		$builder = new BaseSolutionBuilder( $package, $solution_manager, $logger );
+
+		$built_package = $builder->set_required_solutions( $required_solutions )->build();
+
+		$this->assertSame( $expected, $built_package->get_required_solutions() );
+		$this->assertSame( $expected, $built_package->get_required_packages() );
+		$this->assertTrue( $built_package->has_required_solutions() );
+	}
+
+	public function test_normalize_required_solutions_missing_pseudo_id() {
+		$required_solutions = [
+			'some_pseudo_id' => [
+				'composer_package_name' => 'pixelgrade/test',
+				'version_range'         => '*',
+				'stability'             => 'stable',
+				'managed_post_id'       => 123,
+			],
+		];
+		$expected           = [
+			'some_pseudo_id' => [
+				'composer_package_name' => 'pixelgrade/test',
+				'version_range'         => '*',
+				'stability'             => 'stable',
+				'managed_post_id'       => 123,
+				'pseudo_id'             => 'some_pseudo_id',
+			],
+		];
+
+		// Provide direct getters.
+		$package = new class extends BaseSolution {
+			public function __get( $name ) {
+				return $this->$name;
+			}
+		};
+
+		// We need a new builder that uses a mocked SolutionManager since we need to mock its `get_solution_id_data` method.
+		$composer_version_parser = new ComposerVersionParser( new VersionParser() );
+		$composer_client         = new ComposerClient();
+		$logger                  = new NullIO();
+
+		$solution_manager = \Mockery::mock(
+			'PixelgradeLT\Retailer\SolutionManager',
+			'PixelgradeLT\Retailer\Manager',
+			[ $composer_client, $composer_version_parser, $logger ] )->makePartial();
+		$solution_manager->shouldReceive( 'get_solution_id_data' )
+		                 ->andReturn( [
+			                 'is_managed'      => true,
+			                 'managed_post_id' => 123,
+		                 ] );
+		$builder = new BaseSolutionBuilder( $package, $solution_manager, $logger );
+
+		$built_package = $builder->set_required_solutions( $required_solutions )->build();
+
+		$this->assertSame( $expected, $built_package->get_required_solutions() );
+		$this->assertSame( $expected, $built_package->get_required_packages() );
+		$this->assertTrue( $built_package->has_required_solutions() );
+	}
+
+	public function test_normalize_required_solutions_missing_pseudo_id_failure() {
+		$required_solutions = [
+			[
+				'composer_package_name' => 'pixelgrade/test',
+				'version_range'         => '*',
+				'stability'             => 'stable',
+				'managed_post_id'       => 123,
+			],
+		];
+		$expected           = [];
+
+		// Provide direct getters.
+		$package = new class extends BaseSolution {
+			public function __get( $name ) {
+				return $this->$name;
+			}
+		};
+
+		// We need a new builder that uses a mocked SolutionManager since we need to mock its `get_solution_id_data` method.
+		$composer_version_parser = new ComposerVersionParser( new VersionParser() );
+		$composer_client         = new ComposerClient();
+		$logger                  = new NullIO();
+
+		$solution_manager = \Mockery::mock(
+			'PixelgradeLT\Retailer\SolutionManager',
+			'PixelgradeLT\Retailer\Manager',
+			[ $composer_client, $composer_version_parser, $logger ] )->makePartial();
+		$solution_manager->shouldReceive( 'get_solution_id_data' )
+		                 ->andReturn( [
+			                 'is_managed'      => true,
+			                 'managed_post_id' => 123,
+		                 ] );
+		$builder = new BaseSolutionBuilder( $package, $solution_manager, $logger );
+
+		$built_package = $builder->set_required_solutions( $required_solutions )->build();
+
+		$this->assertSame( $expected, $built_package->get_required_solutions() );
+		$this->assertSame( $expected, $built_package->get_required_packages() );
+		$this->assertFalse( $built_package->has_required_solutions() );
+	}
+
+	public function test_excluded_solutions() {
+		$expected = [
+			'some_pseudo_id' => [
+				'composer_package_name' => 'pixelgrade/test',
+				'version_range'         => '*',
+				'stability'             => 'stable',
+				'managed_post_id'       => 123,
+				'pseudo_id'             => 'some_pseudo_id',
+			],
+		];
+		$package  = $this->builder->set_excluded_solutions( $expected )->build();
+
+		$this->assertSame( $expected, $package->get_excluded_solutions() );
+		$this->assertTrue( $package->has_excluded_solutions() );
+	}
+
+	public function test_composer_package_name() {
+		$expected = 'pixelgrade/test';
+		$package  = $this->builder->set_composer_package_name( $expected )->build();
+
+		$this->assertSame( $expected, $package->get_composer_package_name() );
+	}
+
+	public function test_from_manager_missing_package_data() {
+		// Provide direct getters.
+		$package = new class extends BaseSolution {
+			public function __get( $name ) {
+				return $this->$name;
+			}
+		};
+
+		// We need a new builder that uses a mocked SolutionManager since we need to mock its `get_solution_id_data` method.
+		$composer_version_parser = new ComposerVersionParser( new VersionParser() );
+		$composer_client         = new ComposerClient();
+		$logger                  = new NullIO();
+
+		$solution_manager = \Mockery::mock(
+			'PixelgradeLT\Retailer\SolutionManager',
+			'PixelgradeLT\Retailer\Manager',
+			[ $composer_client, $composer_version_parser, $logger ] )->makePartial();
+		$solution_manager->shouldReceive( 'get_solution_id_data' )
+		                 ->andReturn( [] );
+		$solution_manager->shouldReceive( 'get_solution_data_by' )
+		                 ->andReturn( [] );
+		$builder = new BaseSolutionBuilder( $package, $solution_manager, $logger );
+
+		$built_package = $builder->from_manager( 123 )->build();
+
+		$this->assertFalse( $built_package->is_managed() );
 	}
 
 	public function test_from_package_data() {
@@ -360,10 +706,10 @@ class BaseSolutionBuilderTest extends TestCase {
 			],
 		];
 
-		$package_data['name']              = 'Plugin Name';
-		$package_data['slug']              = 'slug';
+		$package_data['name']               = 'Plugin Name';
+		$package_data['slug']               = 'slug';
 		$package_data['required_solutions'] = [
-			'some_pseudo_id2' => [
+			[
 				'composer_package_name' => 'pixelgrade/test2',
 				'version_range'         => '1.1',
 				'stability'             => 'dev',
@@ -416,17 +762,17 @@ class BaseSolutionBuilderTest extends TestCase {
 			],
 		];
 
-		$package_data['name']              = 'Plugin Name';
-		$package_data['slug']              = 'slug';
+		$package_data['name']               = 'Plugin Name';
+		$package_data['slug']               = 'slug';
 		$package_data['required_solutions'] = [
-			'some_pseudo_id'  => [
+			[
 				'composer_package_name' => 'pixelgrade/test2',
 				'version_range'         => '1.1',
 				'stability'             => 'dev',
 				'managed_post_id'       => 234,
 				'pseudo_id'             => 'some_pseudo_id',
 			],
-			'some_pseudo_id3' => [
+			[
 				'composer_package_name' => 'pixelgrade/test3',
 				'version_range'         => '1.1',
 				'stability'             => 'dev',

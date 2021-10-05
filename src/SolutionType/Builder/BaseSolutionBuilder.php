@@ -11,9 +11,9 @@ declare ( strict_types=1 );
 
 namespace PixelgradeLT\Retailer\SolutionType\Builder;
 
+use PixelgradeLT\Retailer\Manager;
 use PixelgradeLT\Retailer\Package;
 use PixelgradeLT\Retailer\SolutionManager;
-use PixelgradeLT\Retailer\SolutionType\BaseSolution;
 use PixelgradeLT\Retailer\Utils\ArrayHelpers;
 use Psr\Log\LoggerInterface;
 use ReflectionClass;
@@ -43,9 +43,9 @@ class BaseSolutionBuilder {
 	/**
 	 * Solution manager.
 	 *
-	 * @var SolutionManager
+	 * @var Manager|SolutionManager
 	 */
-	protected SolutionManager $solution_manager;
+	protected Manager $solution_manager;
 
 	/**
 	 * Logger.
@@ -60,12 +60,12 @@ class BaseSolutionBuilder {
 	 * @since 0.1.0
 	 *
 	 * @param Package         $solution         Solution instance to build.
-	 * @param SolutionManager $solution_manager Solutions manager.
+	 * @param Manager|SolutionManager $solution_manager Solutions manager.
 	 * @param LoggerInterface $logger           Logger.
 	 */
 	public function __construct(
 		Package $solution,
-		SolutionManager $solution_manager,
+		Manager $solution_manager,
 		LoggerInterface $logger
 	) {
 		$this->solution = $solution;
@@ -649,7 +649,12 @@ class BaseSolutionBuilder {
 		// The pseudo_id is completely unique to a solution since it encloses the title and the post ID. Totally unique.
 		// We will rely on this uniqueness to make sure the only one required package remains of each entity.
 		// Subsequent required solution data referring to the same solution post will overwrite previous ones.
-		foreach ( $required_solutions as $required_solution ) {
+		foreach ( $required_solutions as $key => $required_solution ) {
+			// If the key is a string and a `pseudo_id` entry is not provided, we will use the key instead.
+			if ( empty( $required_solution['pseudo_id'] ) && is_string( $key ) ) {
+				$required_solution['pseudo_id'] = $key;
+			}
+
 			if ( empty( $required_solution['pseudo_id'] )
 			     || empty( $required_solution['managed_post_id'] )
 			) {

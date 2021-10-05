@@ -14,6 +14,7 @@ namespace PixelgradeLT\Retailer\Logging;
 use Composer\IO\BaseIO;
 use Psr\Log\LogLevel;
 use function PixelgradeLT\Retailer\doing_it_wrong;
+use function PixelgradeLT\Retailer\is_running_unit_tests;
 
 /**
  * Default logger class.
@@ -131,6 +132,11 @@ final class Logger extends BaseIO {
 	 * @return bool
 	 */
 	protected function should_handle( string $level ): bool {
+		// If we are running tests, we should not log.
+		if ( is_running_unit_tests() ) {
+			return false;
+		}
+
 		return $this->minimum_level_severity >= 0 && $this->minimum_level_severity <= LogLevels::get_level_severity( $level );
 	}
 

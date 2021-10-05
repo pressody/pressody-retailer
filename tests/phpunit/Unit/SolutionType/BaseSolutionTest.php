@@ -118,9 +118,9 @@ class BaseSolutionTest extends TestCase {
 	}
 
 	public function test_required_ltrecords_parts() {
-		$expected                          = [
+		$expected                                = [
 			'pixelgrade/test' => [
-				'package_name' => 'pixelgrade/test',
+				'package_name'          => 'pixelgrade/test',
 				'composer_package_name' => 'pixelgrade/test',
 				'version_range'         => '*',
 				'stability'             => 'stable',
@@ -130,6 +130,13 @@ class BaseSolutionTest extends TestCase {
 
 		$this->assertSame( $expected, $this->package->get_required_ltrecords_parts() );
 		$this->assertTrue( $this->package->has_required_ltrecords_parts() );
+	}
+
+	public function test_composer_require() {
+		$expected                        = [ 'test/test' => '*' ];
+		$this->package->composer_require = $expected;
+
+		$this->assertSame( $expected, $this->package->get_composer_require() );
 	}
 
 	public function test_required_solutions() {
@@ -164,7 +171,7 @@ class BaseSolutionTest extends TestCase {
 	}
 
 	public function test_composer_package_name() {
-		$expected            = 'pixelgrade/test';
+		$expected                             = 'pixelgrade/test';
 		$this->package->composer_package_name = $expected;
 
 		$this->assertSame( $expected, $this->package->get_composer_package_name() );

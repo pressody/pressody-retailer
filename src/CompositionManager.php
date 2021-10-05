@@ -26,7 +26,7 @@ use Psr\Log\LoggerInterface;
  *
  * @since 0.11.0
  */
-class CompositionManager {
+class CompositionManager implements Manager {
 
 	const POST_TYPE = 'ltcomposition';
 	const POST_TYPE_PLURAL = 'ltcompositions';
@@ -931,7 +931,7 @@ class CompositionManager {
 		} );
 
 
-		// Since the same key encountered would be overwritten, we now have as values to keys to keep.
+		// Since the same key encountered would be overwritten, we now have as values the keys to keep.
 		$unique_solutions = [];
 		foreach ( $unique_solutions_with_keys as $key ) {
 			$unique_solutions[] = $required_solutions[ $key ];

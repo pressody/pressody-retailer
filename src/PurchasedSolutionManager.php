@@ -21,7 +21,7 @@ use Psr\Log\LoggerInterface;
  *
  * @since 0.14.0
  */
-class PurchasedSolutionManager {
+class PurchasedSolutionManager implements Manager {
 
 	/**
 	 * Used to create the pseudo IDs saved as values for a solution's required or excluded solutions.
