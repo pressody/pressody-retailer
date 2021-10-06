@@ -193,8 +193,11 @@ class SolutionsController extends WP_REST_Controller {
 		$items = [];
 
 		// Requests for processed items need to specify a list of items to process.
-		// Otherwise, all the solutions as processed and that doesn't make any sense.
-		if ( empty( $request['postId'] ) && empty( $request['postSlug'] ) && empty( $request['packageName'] ) ) {
+		// Otherwise, all the solutions are processed and that doesn't make any sense.
+		if ( empty( $request['postId'] )
+		     && empty( $request['postSlug'] )
+		     && empty( $request['packageName'] ) ) {
+
 			return new WP_Error(
 				'pixelgradelt_retailer_rest_no_list',
 				esc_html__( 'You need to define a subset of solutions to process.', 'pixelgradelt_retailer' ),

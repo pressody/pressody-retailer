@@ -91,73 +91,73 @@ And here is a quote from a customer:
 		// Create the test ltsolutions posts that will be dependencies to other posts that we test.
 		$dep_post_ids = [];
 		foreach ( self::$dep_posts_data as $key => $data ) {
-			$dep_post_ids[ $key] = $factory->post->create_object( $data );
+			$dep_post_ids[ $key ] = $factory->post->create_object( $data );
 		}
 
 		$post_ids = [];
 
 		// Requires the edd solution and excludes the blog one.
-		self::$posts_data = [];
+		self::$posts_data              = [];
 		self::$posts_data['ecommerce'] = [
-				'post_title'  => 'Ecommerce',
-				'post_status' => 'publish',
-				'post_name'   => 'ecommerce',
-				'post_type'   => self::$old_container['solution.manager']::POST_TYPE,
-				'tax_input'   => [
-					self::$old_container['solution.manager']::TYPE_TAXONOMY    => [ $package_type->term_id ],
-					self::$old_container['solution.manager']::KEYWORD_TAXONOMY => 'keyword1, keyword2, keyword3',
-				],
-				'meta_input'  => [
-					'_solution_details_description'                    => 'Package custom description (ecommerce).',
-					'_solution_details_longdescription'                => '<h2>Awesome eCommerce solution</h2>
+			'post_title'  => 'Ecommerce',
+			'post_status' => 'publish',
+			'post_name'   => 'ecommerce',
+			'post_type'   => self::$old_container['solution.manager']::POST_TYPE,
+			'tax_input'   => [
+				self::$old_container['solution.manager']::TYPE_TAXONOMY    => [ $package_type->term_id ],
+				self::$old_container['solution.manager']::KEYWORD_TAXONOMY => 'keyword1, keyword2, keyword3',
+			],
+			'meta_input'  => [
+				'_solution_details_description'                    => 'Package custom description (ecommerce).',
+				'_solution_details_longdescription'                => '<h2>Awesome eCommerce solution</h2>
 This is the <strong>long, rich-text description</strong> for this <em>solution.</em>
 
 And here is a quote from a customer:
 <blockquote>Pure bliss, man!</blockquote>',
-					'_solution_details_homepage'                       => 'https://package.homepage',
-					'_solution_required_parts|||0|value'               => '_',
-					'_solution_required_parts|package_name|0|0|value'  => 'pixelgradelt-records/part_yet-another',
-					'_solution_required_parts|version_range|0|0|value' => '1.2.9',
-					'_solution_required_parts|stability|0|0|value'     => 'stable',
-					'_solution_required_solutions|||0|value'           => '_',
-					'_solution_required_solutions|pseudo_id|0|0|value' => 'edd #' . $dep_post_ids['edd'],
-					'_solution_excluded_solutions|||0|value'           => '_',
-					'_solution_excluded_solutions|pseudo_id|0|0|value' => 'blog #' . $dep_post_ids['blog'],
-				],
-			];
+				'_solution_details_homepage'                       => 'https://package.homepage',
+				'_solution_required_parts|||0|value'               => '_',
+				'_solution_required_parts|package_name|0|0|value'  => 'pixelgradelt-records/part_yet-another',
+				'_solution_required_parts|version_range|0|0|value' => '1.2.9',
+				'_solution_required_parts|stability|0|0|value'     => 'stable',
+				'_solution_required_solutions|||0|value'           => '_',
+				'_solution_required_solutions|pseudo_id|0|0|value' => 'edd #' . $dep_post_ids['edd'],
+				'_solution_excluded_solutions|||0|value'           => '_',
+				'_solution_excluded_solutions|pseudo_id|0|0|value' => 'blog #' . $dep_post_ids['blog'],
+			],
+		];
 
-		$post_ids[ 'ecommerce' ] = $factory->post->create_object( self::$posts_data['ecommerce'] );
+		$post_ids['ecommerce'] = $factory->post->create_object( self::$posts_data['ecommerce'] );
 
 		// Requires the blog solution and excludes the ecommerce one.
 		self::$posts_data['presentation'] = [
-				'post_title'  => 'Presentation',
-				'post_status' => 'publish',
-				'post_name'   => 'presentation',
-				'post_type'   => self::$old_container['solution.manager']::POST_TYPE,
-				'tax_input'   => [
-					self::$old_container['solution.manager']::TYPE_TAXONOMY    => [ $package_type->term_id ],
-					self::$old_container['solution.manager']::KEYWORD_TAXONOMY => 'keyword9, keyword10, keyword11',
-				],
-				'meta_input'  => [
-					'_solution_details_description'                    => 'Package custom description (presentation).',
-					'_solution_details_longdescription'                => '<h2>Awesome presentation solution</h2>
+			'post_title'  => 'Presentation',
+			'post_status' => 'publish',
+			'post_name'   => 'presentation',
+			'post_type'   => self::$old_container['solution.manager']::POST_TYPE,
+			'tax_input'   => [
+				self::$old_container['solution.manager']::TYPE_TAXONOMY    => [ $package_type->term_id ],
+				self::$old_container['solution.manager']::KEYWORD_TAXONOMY => 'keyword9, keyword10, keyword11',
+			],
+			'meta_input'  => [
+				'_solution_details_description'                    => 'Package custom description (presentation).',
+				'_solution_details_longdescription'                => '<h2>Awesome presentation solution</h2>
 This is the <strong>long, rich-text description</strong> for this <em>solution.</em>
 
 And here is a quote from a customer:
 <blockquote>Pure bliss, man!</blockquote>',
-					'_solution_details_homepage'                       => 'https://package.homepage',
-					'_solution_required_parts|||0|value'               => '_',
-					'_solution_required_parts|package_name|0|0|value'  => 'pixelgradelt-records/part_yet-another',
-					'_solution_required_parts|version_range|0|0|value' => '1.2.9',
-					'_solution_required_parts|stability|0|0|value'     => 'stable',
-					'_solution_required_solutions|||0|value'           => '_',
-					'_solution_required_solutions|pseudo_id|0|0|value' => 'blog #' . $dep_post_ids['blog'],
-					'_solution_excluded_solutions|||0|value'           => '_',
-					'_solution_excluded_solutions|pseudo_id|0|0|value' => 'ecommerce #' . $post_ids[ 'ecommerce' ],
-				],
-			];
+				'_solution_details_homepage'                       => 'https://package.homepage',
+				'_solution_required_parts|||0|value'               => '_',
+				'_solution_required_parts|package_name|0|0|value'  => 'pixelgradelt-records/part_yet-another',
+				'_solution_required_parts|version_range|0|0|value' => '1.2.9',
+				'_solution_required_parts|stability|0|0|value'     => 'stable',
+				'_solution_required_solutions|||0|value'           => '_',
+				'_solution_required_solutions|pseudo_id|0|0|value' => 'blog #' . $dep_post_ids['blog'],
+				'_solution_excluded_solutions|||0|value'           => '_',
+				'_solution_excluded_solutions|pseudo_id|0|0|value' => 'ecommerce #' . $post_ids['ecommerce'],
+			],
+		];
 
-		$post_ids[ 'presentation' ] = $factory->post->create_object( self::$posts_data['presentation'] );
+		$post_ids['presentation'] = $factory->post->create_object( self::$posts_data['presentation'] );
 	}
 
 	public static function wpTearDownAfterClass() {
@@ -182,7 +182,7 @@ And here is a quote from a customer:
 
 		// Make a processed repository out of the filtered solutions repository.
 		$processed_repository = new ProcessedSolutions( $filtered_repo, [], $repository->get_factory(), $repository->get_solution_manager() );
-		$processed_solutions = $processed_repository->all();
+		$processed_solutions  = $processed_repository->all();
 
 		// We expect to have the ecommerce and edd solutions, but not the blog one since it is excluded by ecommerce.
 		$this->assertNotEmpty( $processed_solutions['pixelgradelt-retailer/edd'] );
@@ -213,17 +213,17 @@ And here is a quote from a customer:
 			'pixelgradelt-retailer/ecommerce' => [
 				'timestamp' => 100,
 			],
-			'pixelgradelt-retailer/edd' => [
+			'pixelgradelt-retailer/edd'       => [
 				'timestamp' => 200,
 			],
-			'pixelgradelt-retailer/blog' => [
+			'pixelgradelt-retailer/blog'      => [
 				'timestamp' => 300,
 			],
 		];
 
 		// Make a processed repository out of the filtered solutions repository.
 		$processed_repository = new ProcessedSolutions( $filtered_repo, $solutions_context, $repository->get_factory(), $repository->get_solution_manager() );
-		$processed_solutions = $processed_repository->all();
+		$processed_solutions  = $processed_repository->all();
 
 		// We expect to have the ecommerce and edd solutions, but not the blog one since it is excluded by ecommerce.
 		$this->assertNotEmpty( $processed_solutions['pixelgradelt-retailer/edd'] );
@@ -233,7 +233,10 @@ And here is a quote from a customer:
 		$this->assertNotContains( 'pixelgradelt-retailer/blog', array_keys( $processed_solutions ) );
 
 		// We also expect a certain order, alphabetically by the package name.
-		$this->assertSame( ['pixelgradelt-retailer/ecommerce', 'pixelgradelt-retailer/edd' ], array_keys( $processed_solutions ) );
+		$this->assertSame( [
+			'pixelgradelt-retailer/ecommerce',
+			'pixelgradelt-retailer/edd',
+		], array_keys( $processed_solutions ) );
 	}
 
 	public function test_multiple_exclusion_with_context_order() {
@@ -258,19 +261,18 @@ And here is a quote from a customer:
 			'pixelgradelt-retailer/presentation' => [
 				'timestamp' => 200,
 			],
-			'pixelgradelt-retailer/ecommerce' => [
+			'pixelgradelt-retailer/ecommerce'    => [
 				'timestamp' => 100,
 			],
-			'pixelgradelt-retailer/blog' => [
+			'pixelgradelt-retailer/blog'         => [
 				'timestamp' => 300,
 			],
 		];
 
 		// Make a processed repository out of the filtered solutions repository.
 		$processed_repository = new ProcessedSolutions( $filtered_repo, $solutions_context, $repository->get_factory(), $repository->get_solution_manager() );
-		$processed_solutions = $processed_repository->all();
+		$processed_solutions  = $processed_repository->all();
 
-		// We expect to have the ecommerce and edd solutions, but not the blog one since it is excluded by ecommerce.
 		$this->assertNotEmpty( $processed_solutions['pixelgradelt-retailer/blog'] );
 		$this->assertInstanceOf( BaseSolution::class, $processed_solutions['pixelgradelt-retailer/blog'] );
 		$this->assertNotEmpty( $processed_solutions['pixelgradelt-retailer/presentation'] );
@@ -279,6 +281,9 @@ And here is a quote from a customer:
 		$this->assertNotContains( 'pixelgradelt-retailer/edd', array_keys( $processed_solutions ) );
 
 		// We also expect a certain order, alphabetically by the package name.
-		$this->assertSame( ['pixelgradelt-retailer/blog', 'pixelgradelt-retailer/presentation' ], array_keys( $processed_solutions ) );
+		$this->assertSame( [
+			'pixelgradelt-retailer/blog',
+			'pixelgradelt-retailer/presentation',
+		], array_keys( $processed_solutions ) );
 	}
 }

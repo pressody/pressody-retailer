@@ -89,7 +89,7 @@ And here is a quote from a customer:
 		// First, create the test ltsolutions posts that will be dependencies to other posts that we test.
 		$dep_post_ids = [];
 		foreach ( self::$dep_posts_data as $key => $data ) {
-			$dep_post_ids[ $key] = $factory->post->create_object( $data );
+			$dep_post_ids[ $key ] = $factory->post->create_object( $data );
 		}
 
 		self::$posts_data = [
@@ -124,7 +124,7 @@ And here is a quote from a customer:
 
 		$post_ids = [];
 		foreach ( self::$posts_data as $key => $data ) {
-			$post_ids[ $key] = $factory->post->create_object( $data );
+			$post_ids[ $key ] = $factory->post->create_object( $data );
 		}
 	}
 
