@@ -11,6 +11,7 @@ declare ( strict_types=1 );
 
 namespace PixelgradeLT\Retailer\Repository;
 
+use Composer\Repository\FilterRepository;
 use PixelgradeLT\Retailer\Package;
 use PixelgradeLT\Retailer\SolutionFactory;
 use PixelgradeLT\Retailer\SolutionManager;
@@ -82,8 +83,27 @@ class ProcessedSolutions extends AbstractRepository implements PackageRepository
 	 * @return Package[]
 	 */
 	public function all(): array {
-		$flattened_repository = new FlattenedSolutions( $this->repository, $this->factory, $this->solution_manager );
+		// We run a processing only on the received repository to make sure that excluded solutions don't leave their dependencies behind.
+		$first_pass_processed_package_list = $this->process_solutions( $this->repository->all() );
+		// Make a list of composer package names.
+		$first_pass_processed_package_name_list = [];
+		foreach ( $first_pass_processed_package_list as $package ) {
+			$first_pass_processed_package_name_list[] = $package->get_composer_package_name();
+		}
 
+		// Filter the initial repo to only leave the solutions left after the first pass.
+		$first_pass_processed_repo = $this->repository->with_filter(
+			function ( $package ) use ( $first_pass_processed_package_name_list ) {
+				if ( ! in_array( $package->get_composer_package_name(), $first_pass_processed_package_name_list ) ) {
+					return false;
+				}
+
+				return true;
+			}
+		);
+
+		// Flatten and run processing again.
+		$flattened_repository = new FlattenedSolutions( $first_pass_processed_repo, $this->factory, $this->solution_manager );
 		return $this->process_solutions( $flattened_repository->all() );
 	}
 

@@ -72,7 +72,7 @@ class Solutions extends AbstractRepository implements SolutionRepository {
 			}
 
 			$package = $this->build( $post->ID );
-			$items[] = $package;
+			$items[ $package->get_composer_package_name() ] = $package;
 		}
 
 		ksort( $items );

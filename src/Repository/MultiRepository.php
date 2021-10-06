@@ -45,13 +45,15 @@ class MultiRepository extends AbstractRepository implements PackageRepository {
 	 * @return Package[]
 	 */
 	public function all(): array {
-		$packages = [];
+		$items = [];
 
 		foreach ( $this->repositories as $repository ) {
-			$packages = array_merge( $packages, $repository->all() );
+			$items = array_merge( $items, $repository->all() );
 		}
 
-		return $packages;
+		ksort( $items );
+
+		return $items;
 	}
 
 	/**

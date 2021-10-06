@@ -54,14 +54,16 @@ class FilteredRepository extends AbstractRepository implements PackageRepository
 	 * @return Package[]
 	 */
 	public function all(): array {
-		$packages = [];
+		$items = [];
 
 		foreach ( $this->repository->all() as $package ) {
 			if ( ( $this->callback )( $package ) ) {
-				$packages[] = $package;
+				$items[ $package->get_composer_package_name() ] = $package;
 			}
 		}
 
-		return $packages;
+		ksort( $items );
+
+		return $items;
 	}
 }

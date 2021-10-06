@@ -48,7 +48,7 @@ abstract class AbstractRepository implements PackageRepository {
 	 * @since 0.1.0
 	 *
 	 * @param array $args Map of key/value pairs.
-	 * @return array
+	 * @return Package[]
 	 */
 	public function where( array $args ): array {
 		$args       = $this->parse_args( $args );

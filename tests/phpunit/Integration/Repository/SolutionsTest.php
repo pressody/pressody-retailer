@@ -21,7 +21,7 @@ class SolutionsTest extends TestCase {
 	 */
 	public static function wpSetUpBeforeClass( $factory ) {
 		// We need to set a user with sufficient privileges to create packages and edit them.
-		set_current_user( 1 );
+		wp_set_current_user( 1 );
 
 		/** @var ContainerInterface $old_container */
 		self::$old_container = plugin()->get_container();
@@ -42,7 +42,7 @@ class SolutionsTest extends TestCase {
 		$register_solution_keyword_taxonomy = PHPUnitUtil::getProtectedMethod( self::$old_container['hooks.solution_post_type'], 'register_solution_keyword_taxonomy' );
 		$register_solution_keyword_taxonomy->invoke( self::$old_container['hooks.solution_post_type'] );
 
-		// Set this package as a basic solution type.
+		// Set this package as a regular solution type.
 		$package_type = get_term_by( 'slug', SolutionTypes::REGULAR, self::$old_container['solution.manager']::TYPE_TAXONOMY );
 
 		self::$dep_posts_data = [
