@@ -18,6 +18,7 @@ use PixelgradeLT\Retailer\Repository\ProcessedSolutions;
 use PixelgradeLT\Retailer\Repository\SolutionRepository;
 use PixelgradeLT\Retailer\SolutionType\SolutionTypes;
 use PixelgradeLT\Retailer\Transformer\ComposerSolutionTransformer;
+use PixelgradeLT\Retailer\Utils\ArrayHelpers;
 use WP_Error;
 use WP_REST_Controller;
 use WP_REST_Request;
@@ -277,7 +278,7 @@ class SolutionsController extends WP_REST_Controller {
 					];
 				}
 
-				// Add the version constraint to the version contraints list.
+				// Add the version constraint to the version constraints list.
 				$required_parts[ $part['composer_package_name'] ]['version_ranges'][] = $part['version_range'];
 
 				// Remember the solution that required this part.
@@ -336,6 +337,9 @@ class SolutionsController extends WP_REST_Controller {
 	 */
 	protected function prepare_items_parts_for_response( array $items_parts, WP_REST_Request $request ): array {
 		$parts = [];
+
+		// Order parts by their `composer_package_name`.
+		$items_parts = wp_list_sort( $items_parts, 'composer_package_name', 'ASC' );
 
 		foreach ( $items_parts as $items_part ) {
 			$version_range = '*';

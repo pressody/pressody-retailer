@@ -151,7 +151,7 @@ And here is a quote from a customer:
 				'_solution_details_homepage'                       => 'https://package.homepage',
 				'_solution_required_parts|||0|value'               => '_',
 				'_solution_required_parts|package_name|0|0|value'  => 'pixelgradelt-records/part_yet-another',
-				'_solution_required_parts|version_range|0|0|value' => '1.2.9',
+				'_solution_required_parts|version_range|0|0|value' => '^1',
 				'_solution_required_parts|stability|0|0|value'     => 'stable',
 				'_solution_required_solutions|||0|value'           => '_',
 				'_solution_required_solutions|pseudo_id|0|0|value' => 'blog #' . self::$post_ids['blog'],
@@ -182,9 +182,13 @@ And here is a quote from a customer:
 <blockquote>Pure bliss, man!</blockquote>',
 				'_solution_details_homepage'                       => 'https://package.homepage',
 				'_solution_required_parts|||0|value'               => '_',
+				'_solution_required_parts|||1|value'               => '_',
 				'_solution_required_parts|package_name|0|0|value'  => 'pixelgradelt-records/part_yet-another',
-				'_solution_required_parts|version_range|0|0|value' => '1.2.9',
+				'_solution_required_parts|version_range|0|0|value' => '^2',
 				'_solution_required_parts|stability|0|0|value'     => 'stable',
+				'_solution_required_parts|package_name|1|0|value'  => 'pixelgradelt-records/part_test-test',
+				'_solution_required_parts|version_range|1|0|value' => '^1.0',
+				'_solution_required_parts|stability|1|0|value'     => 'stable',
 				'_solution_required_solutions|||0|value'           => '_',
 				'_solution_required_solutions|pseudo_id|0|0|value' => 'blog #' . self::$post_ids['blog'],
 				'_solution_excluded_solutions|||0|value'           => '_',
@@ -462,5 +466,169 @@ And here is a quote from a customer:
 
 		$this->assertArrayNotHasKey( 'code', $solutions );
 		$this->assertSame( [ 'blog', 'presentation', ], wp_list_pluck( $solutions, 'slug' ) );
+	}
+
+	public function test_get_item() {
+		wp_set_current_user( 1 );
+
+		/**
+		 * Check for existing post ID.
+		 */
+		$solution = local_rest_call( '/pixelgradelt_retailer/v1/solutions/' . self::$post_ids['blog'], 'GET', [] );
+
+		$this->assertArrayNotHasKey( 'code', $solution );
+		$this->assertArrayHasKey( 'slug', $solution );
+		$this->assertSame( 'blog', $solution['slug'] );
+
+		/**
+		 * Check for non-existing post ID.
+		 */
+		$solution = local_rest_call( '/pixelgradelt_retailer/v1/solutions/' . 9999999, 'GET', [] );
+
+		// Should receive error about the parameter.
+		$this->assertArrayHasKey( 'code', $solution );
+		$this->assertArrayHasKey( 'message', $solution );
+		$this->assertArrayHasKey( 'data', $solution );
+		$this->assertArrayHasKey( 'status', $solution['data'] );
+		$this->assertSame( \WP_Http::NOT_FOUND, $solution['data']['status'] );
+		$this->assertSame( 'pixelgradelt_retailer_rest_invalid_id', $solution['code'] );
+	}
+
+	public function test_get_parts() {
+		wp_set_current_user( 1 );
+
+		/**
+		 * Check for parameter validations.
+		 */
+		// Single int post ID should be allowed since it is converted to an array.
+		// The blog solutions doesn't have any required parts.
+		$parts = local_rest_call( '/pixelgradelt_retailer/v1/solutions/parts', 'GET', [
+			'postId' => self::$post_ids['blog'],
+		] );
+
+		$this->assertArrayNotHasKey( 'code', $parts );
+		$this->assertSame( [], $parts );
+
+		// Invalid post IDs get ignored since wp_parse_id_list() will transform them to 0.
+		// We will get back required parts for all solutions processed.
+		$parts = local_rest_call( '/pixelgradelt_retailer/v1/solutions/parts', 'GET', [
+			'postId' => 'bogus',
+		] );
+
+		$this->assertArrayNotHasKey( 'code', $parts );
+		$this->assertCount( 2, $parts );
+
+		// Use an invalid package name. Should get error since we pattern check.
+		$parts = local_rest_call( '/pixelgradelt_retailer/v1/solutions/parts', 'GET', [
+			'packageName' => [ 'ecommerce', ],
+		] );
+
+		// Should receive error about the parameter.
+		$this->assertArrayHasKey( 'code', $parts );
+		$this->assertArrayHasKey( 'message', $parts );
+		$this->assertArrayHasKey( 'data', $parts );
+		$this->assertSame( 'rest_invalid_param', $parts['code'] );
+
+		/**
+		 * Get required parts for all solutions processed.
+		 */
+		$parts = local_rest_call( '/pixelgradelt_retailer/v1/solutions/parts', 'GET', [] );
+
+		// Should receive error that one needs to filter the solutions not just processed them whole.
+		$this->assertArrayHasKey( 'code', $parts );
+		$this->assertArrayHasKey( 'message', $parts );
+		$this->assertArrayHasKey( 'data', $parts );
+		$this->assertSame( 'pixelgradelt_retailer_rest_no_list', $parts['code'] );
+
+		/**
+		 * Get required parts for all solutions processed via their post IDs.
+		 */
+		$parts = local_rest_call( '/pixelgradelt_retailer/v1/solutions/parts', 'GET', [
+			'postId' => self::$post_ids,
+		] );
+
+		$this->assertArrayNotHasKey( 'code', $parts );
+		$this->assertCount( 2, $parts );
+
+		/**
+		 * Get required parts for certain solutions via their post slug.
+		 */
+		// ecommerce requires edd.
+		$parts = local_rest_call( '/pixelgradelt_retailer/v1/solutions/parts', 'GET', [
+			'postSlug' => [ 'ecommerce', ],
+		] );
+
+		$this->assertArrayNotHasKey( 'code', $parts );
+		$this->assertCount( 1, $parts );
+		$this->assertSame( 'pixelgradelt-records/part_yet-another', $parts[0]['name'] );
+		$this->assertSame( '1.2.9', $parts[0]['version'] );
+		$this->assertArrayHasKey( 'requiredBy', $parts[0] );
+
+		/**
+		 * Get required parts for solutions by their full Composer package name.
+		 */
+		// ecommerce requires edd.
+		$parts = local_rest_call( '/pixelgradelt_retailer/v1/solutions/parts', 'GET', [
+			'packageName' => [ 'pixelgradelt-retailer/ecommerce', ],
+		] );
+
+		$this->assertArrayNotHasKey( 'code', $parts );
+		$this->assertCount( 1, $parts );
+		$this->assertSame( 'pixelgradelt-records/part_yet-another', $parts[0]['name'] );
+		$this->assertSame( '1.2.9', $parts[0]['version'] );
+		$this->assertArrayHasKey( 'requiredBy', $parts[0] );
+
+		/**
+		 * Get required parts for solutions by their type.
+		 */
+		$parts = local_rest_call( '/pixelgradelt_retailer/v1/solutions/parts', 'GET', [
+			'type' => SolutionTypes::REGULAR,
+		] );
+
+		// Should receive error that one needs to filter the solutions not just processed them whole.
+		// type is not enough.
+		$this->assertArrayHasKey( 'code', $parts );
+		$this->assertArrayHasKey( 'message', $parts );
+		$this->assertArrayHasKey( 'data', $parts );
+		$this->assertSame( 'pixelgradelt_retailer_rest_no_list', $parts['code'] );
+
+		// Use bogus type.
+		$parts = local_rest_call( '/pixelgradelt_retailer/v1/solutions/parts', 'GET', [
+			'type' => [ 'bogus', ],
+		] );
+
+		// Should receive error that one needs to filter the solutions not just processed them whole.
+		// type is not enough.
+		$this->assertArrayHasKey( 'code', $parts );
+		$this->assertArrayHasKey( 'message', $parts );
+		$this->assertArrayHasKey( 'data', $parts );
+		$this->assertSame( 'pixelgradelt_retailer_rest_no_list', $parts['code'] );
+
+		/**
+		 * Get required parts for non-existent solution.
+		 */
+		$parts = local_rest_call( '/pixelgradelt_retailer/v1/solutions/parts', 'GET', [
+			'postId' => [ 123456789, ],
+		] );
+
+		$this->assertSame( [], $parts );
+
+		/**
+		 * Get required parts required by multiple solutions with different version ranges.
+		 */
+		$parts = local_rest_call( '/pixelgradelt_retailer/v1/solutions/parts', 'GET', [
+			'postSlug' => [ 'ecommerce', 'portfolio' ],
+		] );
+
+		$this->assertArrayNotHasKey( 'code', $parts );
+		$this->assertCount( 2, $parts );
+		$this->assertSame( 'pixelgradelt-records/part_test-test', $parts[0]['name'] );
+		$this->assertSame( '^1.0', $parts[0]['version'] );
+		$this->assertArrayHasKey( 'requiredBy', $parts[0] );
+		$this->assertCount( 1, $parts[0]['requiredBy'] );
+		$this->assertSame( 'pixelgradelt-records/part_yet-another', $parts[1]['name'] );
+		$this->assertSame( '1.2.9, ^2', $parts[1]['version'] );
+		$this->assertArrayHasKey( 'requiredBy', $parts[1] );
+		$this->assertCount( 2, $parts[1]['requiredBy'] );
 	}
 }
