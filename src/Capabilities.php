@@ -99,6 +99,20 @@ final class Capabilities {
 	const EDIT_COMPOSITION = 'pixelgradelt_retailer_edit_composition';
 
 	/**
+	 * User role for users that are customers (create and manage their own compositions).
+	 *
+	 * @var string
+	 */
+	const CUSTOMER_USER_ROLE = 'pixelgradelt_retailer_customer';
+
+	/**
+	 * User role for users intended to be used by REST API clients (mainly to fetch solutions).
+	 *
+	 * @var string
+	 */
+	const CLIENT_USER_ROLE = 'pixelgradelt_retailer_client';
+
+	/**
 	 * Register roles and capabilities.
 	 *
 	 * @since 0.1.0
@@ -115,8 +129,15 @@ final class Capabilities {
 		$wp_roles->add_cap( 'administrator', self::VIEW_COMPOSITIONS );
 		$wp_roles->add_cap( 'administrator', self::EDIT_COMPOSITIONS );
 
-		// Create a special role for users intended to be used by clients.
-		$wp_roles->add_role( 'pixelgradelt_retailer_client', 'LT Retailer Client', [
+		// Create a role for users that are customers (create and manage their own compositions).
+		$wp_roles->add_role( self::CUSTOMER_USER_ROLE, 'LT Retailer Customer', [
+			self::CREATE_COMPOSITIONS => true,
+			self::VIEW_COMPOSITION    => true,
+			self::EDIT_COMPOSITION    => true,
+		] );
+
+		// Create a special role for users intended to be used by REST API clients.
+		$wp_roles->add_role( self::CLIENT_USER_ROLE, 'LT Retailer Client', [
 			self::VIEW_SOLUTIONS    => true,
 		] );
 	}

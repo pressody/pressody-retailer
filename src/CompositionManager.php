@@ -372,6 +372,7 @@ class CompositionManager implements Manager {
 		}
 
 		// Since some of the internal workings of CarbonFields lose the current post ID, we need to set it as the global post ID.
+		$temp = $GLOBALS['post'];
 		$GLOBALS['post'] = $post_ID;
 		setup_postdata( $post_ID );
 
@@ -390,7 +391,8 @@ class CompositionManager implements Manager {
 		$data['required_manual_solutions']    = $this->get_post_composition_required_manual_solutions( $post_ID, $include_context, $pseudo_id_delimiter );
 		$data['composer_require']             = $this->get_post_composition_composer_require( $post_ID );
 
-		wp_reset_postdata();
+		// Restore the previous global post.
+		$GLOBALS['post'] = $temp;
 
 		/**
 		 * Filters the composition ID data.
