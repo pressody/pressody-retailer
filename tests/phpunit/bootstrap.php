@@ -34,9 +34,12 @@ $GLOBALS['wp_tests_options'] = [
 	],
 ];
 
-$suite->addFilter( 'muplugins_loaded', function() {
+// This is a standard function name that others might use to check for existence to determine if we are running tests.
+// Best to play ball.
+function _manually_load_plugin() {
 	require dirname( __DIR__, 2 ) . '/pixelgradelt-retailer.php';
-} );
+}
+$suite->addFilter( 'muplugins_loaded', '_manually_load_plugin' );
 
 $suite->addFilter( 'pixelgradelt_retailer/compose', function( $plugin, $container ) {
 	$container['logger'] = new NullLogger();
