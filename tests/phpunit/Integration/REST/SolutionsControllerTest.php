@@ -207,6 +207,7 @@ And here is a quote from a customer:
 
 	public function test_get_items() {
 		wp_set_current_user( 1 );
+		wp_set_auth_cookie( 1, true, false );
 
 		/**
 		 * Check for parameter validations.
@@ -320,6 +321,7 @@ And here is a quote from a customer:
 
 	public function test_get_processed_items() {
 		wp_set_current_user( 1 );
+		wp_set_auth_cookie( 1, true, false );
 
 		/**
 		 * Check for parameter validations.
@@ -470,6 +472,7 @@ And here is a quote from a customer:
 
 	public function test_get_item() {
 		wp_set_current_user( 1 );
+		wp_set_auth_cookie( 1, true, false );
 
 		/**
 		 * Check for existing post ID.
@@ -496,6 +499,7 @@ And here is a quote from a customer:
 
 	public function test_get_parts() {
 		wp_set_current_user( 1 );
+		wp_set_auth_cookie( 1, true, false );
 
 		/**
 		 * Check for parameter validations.

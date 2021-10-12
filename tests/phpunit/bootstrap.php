@@ -30,7 +30,7 @@ $GLOBALS['wp_tests_options'] = [
 	'_pixelgradelt_retailer_ltrecords_parts' => [
 		'pixelgradelt-records/part_yet-another',
 		'pixelgradelt-records/part_another-test',
-		'pixelgradelt-records/part_test-test'
+		'pixelgradelt-records/part_test-test',
 	],
 ];
 
