@@ -57,7 +57,7 @@ class ServiceProvider implements ServiceProviderInterface {
 		};
 
 		$container['authentication.servers'] = function ( $container ) {
-			$servers = apply_filters(
+			$servers = \apply_filters(
 				'pixelgradelt_retailer/authentication_servers',
 				[
 					20  => 'authentication.api_key',
@@ -218,7 +218,7 @@ class ServiceProvider implements ServiceProviderInterface {
 			$request = new Request( $_SERVER['REQUEST_METHOD'] ?? '' );
 
 			// phpcs:ignore WordPress.Security.NonceVerification.NoNonceVerification
-			$request->set_query_params( wp_unslash( $_GET ) );
+			$request->set_query_params( \wp_unslash( $_GET ) );
 			$request->set_header( 'Authorization', get_authorization_header() );
 
 			if ( isset( $_SERVER['PHP_AUTH_USER'] ) ) {
@@ -273,6 +273,7 @@ class ServiceProvider implements ServiceProviderInterface {
 		$container['purchased_solution.manager'] = function ( $container ) {
 			return new PurchasedSolutionManager(
 				$container['solution.manager'],
+				$container['db.purchased_solutions'],
 				$container['logs.logger']
 			);
 		};
@@ -397,7 +398,7 @@ class ServiceProvider implements ServiceProviderInterface {
 			$upload_config = \wp_upload_dir();
 			$path          = \path_join( $upload_config['basedir'], $container['storage.working_directory_name'] );
 
-			return (string) trailingslashit( apply_filters( 'pixelgradelt_retailer/working_directory', $path ) );
+			return (string) \trailingslashit( \apply_filters( 'pixelgradelt_retailer/working_directory', $path ) );
 		};
 
 		$container['storage.working_directory_name'] = function () {
@@ -448,7 +449,6 @@ class ServiceProvider implements ServiceProviderInterface {
 		$container['plugin.woocommerce'] = function ( $container ) {
 			return new Integration\WooCommerce(
 				$container['purchased_solution.manager'],
-				$container['db.purchased_solutions'],
 				$container['logs.logger']
 			);
 		};

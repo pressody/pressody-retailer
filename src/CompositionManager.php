@@ -54,6 +54,13 @@ class CompositionManager implements Manager {
 	public static array $STATUSES;
 
 	/**
+	 * The default status for newly create compositions.
+	 *
+	 * @since 0.16.0
+	 */
+	const DEFAULT_STATUS = 'not_ready';
+
+	/**
 	 * Solutions repository.
 	 *
 	 * @var PackageRepository
@@ -125,7 +132,7 @@ class CompositionManager implements Manager {
 		$this->logger                  = $logger;
 		$this->hasher                  = $hasher;
 
-		self::$STATUSES = apply_filters( 'pixelgradelt_retailer/composition_statuses', [
+		self::$STATUSES = \apply_filters( 'pixelgradelt_retailer/composition_statuses', [
 			'not_ready' => [
 				'id'       => 'not_ready',
 				'label'    => esc_html__( 'Not Ready', 'pixelgradelt_retailer' ),
@@ -195,22 +202,25 @@ class CompositionManager implements Manager {
 			'show_in_nav_menus'  => false,
 			'supports'           => [
 				'title',
+				'author',
 				'custom-fields',
 			],
-			'capabilities' => array(
+			'capabilities'       => array(
 				'edit_post'              => Capabilities::EDIT_COMPOSITION,
 				'read_post'              => Capabilities::VIEW_COMPOSITION,
 				'delete_post'            => Capabilities::EDIT_COMPOSITION,
 				'edit_posts'             => Capabilities::EDIT_COMPOSITIONS,
 				'edit_private_posts'     => Capabilities::EDIT_COMPOSITIONS,
 				'edit_published_posts'   => Capabilities::EDIT_COMPOSITIONS,
-				'edit_others_posts'      => Capabilities::EDIT_COMPOSITIONS, // Since all composition owners should be able to do this, we need to resolve it at mapping.
+				'edit_others_posts'      => Capabilities::EDIT_COMPOSITIONS,
+				// Since all composition owners should be able to do this, we need to resolve it at mapping.
 				'publish_posts'          => Capabilities::EDIT_COMPOSITIONS,
 				'read_private_posts'     => Capabilities::VIEW_COMPOSITIONS,
 				'delete_posts'           => Capabilities::EDIT_COMPOSITIONS,
 				'delete_private_posts'   => Capabilities::EDIT_COMPOSITIONS,
 				'delete_published_posts' => Capabilities::EDIT_COMPOSITIONS,
-				'delete_others_posts'    => Capabilities::EDIT_COMPOSITIONS, // Since all composition owners should be able to do this, we need to resolve it at mapping.
+				'delete_others_posts'    => Capabilities::EDIT_COMPOSITIONS,
+				// Since all composition owners should be able to do this, we need to resolve it at mapping.
 				'create_posts'           => Capabilities::CREATE_COMPOSITIONS,
 			),
 			'map_meta_cap'       => false,
@@ -278,6 +288,11 @@ class CompositionManager implements Manager {
 			$query_args['post_type'] = $args['post_type'];
 		}
 
+		// This allows us to query for compositions authored by a specific user.
+		if ( ! empty( $args['post_author'] ) ) {
+			$query_args['author'] = $args['post_author'];
+		}
+
 		if ( ! empty( $args['post_ids'] ) ) {
 			if ( ! is_array( $args['post_ids'] ) ) {
 				$args['post_ids'] = [ intval( $args['post_ids'] ) ];
@@ -335,8 +350,10 @@ class CompositionManager implements Manager {
 
 			// We rely on CarbonFields' integration with the WP_Query.
 			$query_args['meta_query'][] = [
-				'key'   => 'composition_user_ids',
-				'value' => $args['userid'],
+				'key'                   => 'composition_user_ids',
+				'carbon_field_property' => 'id',
+				'compare'               => 'IN',
+				'value'                 => $args['userid'],
 			];
 		}
 
@@ -371,16 +388,12 @@ class CompositionManager implements Manager {
 			return $data;
 		}
 
-		// Since some of the internal workings of CarbonFields lose the current post ID, we need to set it as the global post ID.
-		$temp = $GLOBALS['post'];
-		$GLOBALS['post'] = $post_ID;
-		setup_postdata( $post_ID );
-
-		$data['id']     = $post_ID;
+		$data['id'] = $post_ID;
 
 		$data['status'] = \get_post_meta( $post_ID, '_composition_status', true );
 		$data['hashid'] = \get_post_meta( $post_ID, '_composition_hashid', true );
 
+		$data['author']   = $this->get_post_composition_author( $post_ID );
 		$data['name']     = $this->get_post_composition_name( $post_ID );
 		$data['keywords'] = $this->get_post_composition_keywords( $post_ID );
 
@@ -391,9 +404,6 @@ class CompositionManager implements Manager {
 		$data['required_manual_solutions']    = $this->get_post_composition_required_manual_solutions( $post_ID, $include_context, $pseudo_id_delimiter );
 		$data['composer_require']             = $this->get_post_composition_composer_require( $post_ID );
 
-		// Restore the previous global post.
-		$GLOBALS['post'] = $temp;
-
 		/**
 		 * Filters the composition ID data.
 		 *
@@ -402,7 +412,7 @@ class CompositionManager implements Manager {
 		 * @param array $solution_data The composition data.
 		 * @param int   $post_id       The composition post ID.
 		 */
-		return apply_filters( 'pixelgradelt_retailer/composition_id_data', $data, $post_ID );
+		return \apply_filters( 'pixelgradelt_retailer/composition_id_data', $data, $post_ID );
 	}
 
 	/**
@@ -416,7 +426,7 @@ class CompositionManager implements Manager {
 		if ( empty( $post_ID ) ) {
 			return false;
 		}
-		$post = get_post( $post_ID );
+		$post = \get_post( $post_ID );
 		if ( empty( $post ) || static::POST_TYPE !== $post->post_type ) {
 			return false;
 		}
@@ -435,10 +445,11 @@ class CompositionManager implements Manager {
 	 * @type int    $post_id                         The composition post ID to search for and update. Only used if $update is true.
 	 * @type string $post_title                      The composition post title to set.
 	 * @type string $post_status                     The composition post status to set. Defaults to 'private'.
+	 * @type int    $post_author                     The composition post author user ID. Defaults to the current logged-in user.
 	 * @type string $status                          The composition status. Should be a valid value from CompositionManager::STATUSES. Defaults to 'not_ready'.
 	 * @type string $hashid                          The hashid to assign to the composition. Will be used to search for existing compositions if $update is true. Defaults to a generated hashid from the new post ID.
 	 * @type int[]  $user_ids                        List of user IDs to assign the composition to. If a user with a provided user ID doesn't exist, the user ID will be ignored.
-	 * @type int[]  $required_purchased_solution_ids List of required purchased-solution ids.
+	 * @type int[]  $required_purchased_solutions_ids List of required purchased-solution ids.
 	 * @type array  $required_manual_solutions       List of required solution details: `post_id` or `pseudo_id`, `reason`.
 	 * @type array  $keywords                        List of keywords to add to the composition.
 	 * }
@@ -454,7 +465,7 @@ class CompositionManager implements Manager {
 		if ( $update && ( ! empty( $args['post_id'] ) || ! empty( $args['hashid'] ) ) ) {
 			// Try to get a post by the provided post ID.
 			if ( ! empty( $args['post_id'] ) ) {
-				$post_to_update = get_post( $args['post_id'] );
+				$post_to_update = \get_post( $args['post_id'] );
 			}
 
 			if ( empty( $post_to_update ) && ! empty( $args['hashid'] ) ) {
@@ -468,21 +479,22 @@ class CompositionManager implements Manager {
 		}
 
 		$composition_author = false;
-		// The first user in the owners list is the author.
-		if ( ! empty( $args['user_ids'] ) ) {
-			$args['user_ids']   = array_map( 'intval', $args['user_ids'] );
-			$composition_author = get_user_by( 'id', reset( $args['user_ids'] ) );
+		if ( ! empty( $args['post_author'] ) ) {
+			$composition_author = \get_user_by( 'id', $args['post_author'] );
+		}
+		if ( empty( $composition_author ) ) {
+			$composition_author = \wp_get_current_user();
 		}
 
-		// We need to create a new post.
 		$created_new_post = false;
+		// We need to create a new post.
 		if ( empty( $post_to_update ) ) {
 			$post_title = $args['post_title'] ?? '';
 			// Generate a title if not provided.
 			if ( empty( $post_title ) ) {
 				$post_title = 'Composition ' . \wp_generate_password( 6, false );
 				if ( $composition_author instanceof \WP_User ) {
-					$post_title .= ' of ' . $composition_author->display_name;
+					$post_title .= ' by ' . $composition_author->display_name;
 				}
 			}
 			$new_post_args = [
@@ -495,8 +507,8 @@ class CompositionManager implements Manager {
 			}
 
 
-			$post_to_update = wp_insert_post( $new_post_args, false, false );
-			if ( is_wp_error( $post_to_update ) ) {
+			$post_to_update = \wp_insert_post( $new_post_args, true, false );
+			if ( \is_wp_error( $post_to_update ) ) {
 				// We have failed to create a new composition post.
 				$this->logger->error(
 					'Error inserting a new composition post: {message}',
@@ -511,7 +523,7 @@ class CompositionManager implements Manager {
 			}
 		}
 
-		$post_to_update = get_post( $post_to_update );
+		$post_to_update = \get_post( $post_to_update );
 
 		// Bail if we don't have a post.
 		if ( empty( $post_to_update ) ) {
@@ -529,7 +541,38 @@ class CompositionManager implements Manager {
 		 *
 		 * @param int $post_id The composition post ID.
 		 */
-		do_action( 'pixelgradelt_retailer/ltcomposition/before_update', $post_to_update->ID );
+		\do_action( 'pixelgradelt_retailer/ltcomposition/before_update', $post_to_update->ID );
+
+		// First update the data stored in the post, if that is the case.
+		if ( ! $created_new_post ) {
+			$update_post_args = [];
+			if ( ! empty( $args['post_title'] ) ) {
+				$update_post_args['post_title'] = $args['post_title'];
+			}
+			if ( ! empty( $args['post_author'] ) ) {
+				$update_post_args['post_author'] = intval( $args['post_author'] );
+			}
+			if ( ! empty( $args['post_status'] ) ) {
+				$update_post_args['post_status'] = $args['post_status'];
+			}
+			if ( ! empty( $update_post_args ) ) {
+				$update_post_args['ID'] = $post_to_update->ID;
+				$result = \wp_update_post( $update_post_args, false, false );
+				if ( \is_wp_error( $result ) ) {
+					// We have failed to update the post details.
+					$this->logger->error(
+						'Error updating composition post details: {message}',
+						[
+							'message'     => $result->get_error_message(),
+							'post_args'   => $update_post_args,
+							'logCategory' => 'composition_manager',
+						]
+					);
+
+					return 0;
+				}
+			}
+		}
 
 		if ( ! empty( $args['status'] ) && in_array( $args['status'], array_keys( CompositionManager::$STATUSES ) ) ) {
 			$this->set_post_composition_status( $post_to_update->ID, $args['status'], true );
@@ -549,8 +592,8 @@ class CompositionManager implements Manager {
 			$this->set_post_composition_user_ids( $post_to_update->ID, $args['user_ids'], true );
 		}
 
-		if ( isset( $args['required_purchased_solution_ids'] ) && is_array( $args['required_purchased_solution_ids'] ) ) {
-			$this->set_post_composition_required_purchased_solutions( $post_to_update->ID, $args['required_purchased_solution_ids'], true );
+		if ( isset( $args['required_purchased_solutions_ids'] ) && is_array( $args['required_purchased_solutions_ids'] ) ) {
+			$this->set_post_composition_required_purchased_solutions( $post_to_update->ID, $args['required_purchased_solutions_ids'], true );
 		}
 
 		if ( isset( $args['required_manual_solutions'] ) && is_array( $args['required_manual_solutions'] ) ) {
@@ -570,7 +613,7 @@ class CompositionManager implements Manager {
 		 * @param \WP_Post $post    The composition post object.
 		 * @param bool     $update  If this is an update.
 		 */
-		do_action( 'pixelgradelt_retailer/ltcomposition/update',
+		\do_action( 'pixelgradelt_retailer/ltcomposition/update',
 			$post_to_update->ID,
 			$post_to_update,
 			true
@@ -585,7 +628,7 @@ class CompositionManager implements Manager {
 			 * @param int      $post_id The newly created composition post ID
 			 * @param \WP_Post $post    The new composition post object.
 			 */
-			do_action( 'pixelgradelt_retailer/ltcomposition/new',
+			\do_action( 'pixelgradelt_retailer/ltcomposition/new',
 				$post_to_update->ID,
 				$post_to_update
 			);
@@ -596,6 +639,8 @@ class CompositionManager implements Manager {
 
 	/**
 	 * Get a composition post ID based on certain details about it.
+	 *
+	 * @since 0.14.0
 	 *
 	 * @see CompositionManager::get_composition_ids_by()
 	 *
@@ -616,6 +661,8 @@ class CompositionManager implements Manager {
 	/**
 	 * Identify a composition post ID based on certain details about it and return all configured data about it.
 	 *
+	 * @since 0.14.0
+	 *
 	 * @param array $args Array of package details to look for.
 	 * @param bool  $include_context
 	 *
@@ -633,8 +680,31 @@ class CompositionManager implements Manager {
 		return $this->get_composition_id_data( $found_package_id, $include_context );
 	}
 
+	/**
+	 * @since 0.16.0
+	 *
+	 * @param int $post_ID
+	 *
+	 * @return int
+	 */
+	public function get_post_composition_author( int $post_ID ): int {
+		$post = \get_post( $post_ID );
+		if ( empty( $post ) ) {
+			return 0;
+		}
+
+		return intval( $post->post_author );
+	}
+
+	/**
+	 * @since 0.14.0
+	 *
+	 * @param int $post_ID
+	 *
+	 * @return string
+	 */
 	public function get_post_composition_name( int $post_ID ): string {
-		$post = get_post( $post_ID );
+		$post = \get_post( $post_ID );
 		if ( empty( $post ) ) {
 			return '';
 		}
@@ -667,7 +737,7 @@ class CompositionManager implements Manager {
 			 *
 			 * @param int $post_id The composition post ID.
 			 */
-			do_action( 'pixelgradelt_retailer/ltcomposition/before_update', $post_id );
+			\do_action( 'pixelgradelt_retailer/ltcomposition/before_update', $post_id );
 		}
 
 		$result = ! ! \update_post_meta( $post_id, '_composition_status', $status );
@@ -684,7 +754,7 @@ class CompositionManager implements Manager {
 			 * @param \WP_Post $post    The composition post object.
 			 * @param bool     $update  If this is an update.
 			 */
-			do_action( 'pixelgradelt_retailer/ltcomposition/update',
+			\do_action( 'pixelgradelt_retailer/ltcomposition/update',
 				$post_id,
 				get_post( $post_id ),
 				true
@@ -711,8 +781,8 @@ class CompositionManager implements Manager {
 	}
 
 	public function get_post_composition_keywords( int $post_ID ): array {
-		$keywords = wp_get_post_terms( $post_ID, static::KEYWORD_TAXONOMY );
-		if ( is_wp_error( $keywords ) || empty( $keywords ) ) {
+		$keywords = \wp_get_post_terms( $post_ID, static::KEYWORD_TAXONOMY );
+		if ( \is_wp_error( $keywords ) || empty( $keywords ) ) {
 			return [];
 		}
 
@@ -727,8 +797,8 @@ class CompositionManager implements Manager {
 	}
 
 	public function set_post_composition_keywords( int $post_ID, array $keywords ): bool {
-		$result = wp_set_post_terms( $post_ID, $keywords, static::KEYWORD_TAXONOMY );
-		if ( false === $result || is_wp_error( $result ) ) {
+		$result = \wp_set_post_terms( $post_ID, $keywords, static::KEYWORD_TAXONOMY );
+		if ( false === $result || \is_wp_error( $result ) ) {
 			return false;
 		}
 
@@ -743,7 +813,15 @@ class CompositionManager implements Manager {
 	 * @return int[] List of user IDs.
 	 */
 	public function get_post_composition_user_ids( int $post_id ): array {
-		$composition_user_ids = carbon_get_post_meta( $post_id, 'composition_user_ids' );
+		// Since some of the internal workings of CarbonFields lose the current post ID, we need to set it as the global post ID.
+		$temp            = $GLOBALS['post'] ?? 0;
+		$GLOBALS['post'] = $post_id;
+
+		$composition_user_ids = \carbon_get_post_meta( $post_id, 'composition_user_ids' );
+
+		// Restore the previous global post.
+		$GLOBALS['post'] = $temp;
+
 		if ( empty( $composition_user_ids ) || ! is_array( $composition_user_ids ) ) {
 			return [];
 		}
@@ -772,7 +850,7 @@ class CompositionManager implements Manager {
 			 *
 			 * @param int $post_id The composition post ID.
 			 */
-			do_action( 'pixelgradelt_retailer/ltcomposition/before_update', $post_id );
+			\do_action( 'pixelgradelt_retailer/ltcomposition/before_update', $post_id );
 		}
 
 		// Decorate the user list according to the needs of the CarbonFields association field.
@@ -786,7 +864,7 @@ class CompositionManager implements Manager {
 		}, $user_ids );
 
 		// Update the DB value.
-		carbon_set_post_meta( $post_id, 'composition_user_ids', $values );
+		\carbon_set_post_meta( $post_id, 'composition_user_ids', $values );
 
 		if ( ! $silent ) {
 			/**
@@ -800,7 +878,7 @@ class CompositionManager implements Manager {
 			 * @param \WP_Post $post    The composition post object.
 			 * @param bool     $update  If this is an update.
 			 */
-			do_action( 'pixelgradelt_retailer/ltcomposition/update',
+			\do_action( 'pixelgradelt_retailer/ltcomposition/update',
 				$post_id,
 				get_post( $post_id ),
 				true
@@ -840,7 +918,7 @@ class CompositionManager implements Manager {
 			if ( empty( $user_details['id'] ) ) {
 				$user_details['id'] = 0;
 			} else {
-				$user_details['id'] = absint( $user_details['id'] );
+				$user_details['id'] = \absint( $user_details['id'] );
 			}
 
 			$list[ $user_details['id'] ] = $user_details;
@@ -953,8 +1031,8 @@ class CompositionManager implements Manager {
 	 *               Each solution has its type, purchased-solution ID, slug, managed post ID and maybe context information, if $include_context is true.
 	 */
 	public function get_post_composition_required_purchased_solutions( int $post_ID, bool $include_context = false ): array {
-		$purchased_solution_ids = carbon_get_post_meta( $post_ID, 'composition_required_purchased_solutions' );
-		if ( empty( $purchased_solution_ids ) || ! is_array( $purchased_solution_ids ) ) {
+		$purchased_solution_ids = $this->get_post_composition_required_purchased_solutions_ids( $post_ID );
+		if ( empty( $purchased_solution_ids ) ) {
 			return [];
 		}
 
@@ -984,12 +1062,20 @@ class CompositionManager implements Manager {
 	/**
 	 * Get the list of required purchased-solutions IDs.
 	 *
-	 * @param int  $post_ID               The Composition post ID.
+	 * @param int $post_ID The Composition post ID.
 	 *
 	 * @return array List of composition required purchased-solutions IDs.
 	 */
 	public function get_post_composition_required_purchased_solutions_ids( int $post_ID ): array {
-		$purchased_solution_ids = carbon_get_post_meta( $post_ID, 'composition_required_purchased_solutions' );
+		// Since some of the internal workings of CarbonFields lose the current post ID, we need to set it as the global post ID.
+		$temp            = $GLOBALS['post'] ?? 0;
+		$GLOBALS['post'] = $post_ID;
+
+		$purchased_solution_ids = \carbon_get_post_meta( $post_ID, 'composition_required_purchased_solutions' );
+
+		// Restore the previous global post.
+		$GLOBALS['post'] = $temp;
+
 		if ( empty( $purchased_solution_ids ) || ! is_array( $purchased_solution_ids ) ) {
 			return [];
 		}
@@ -1031,7 +1117,7 @@ class CompositionManager implements Manager {
 	 *                    null if the LT solution post could not be found.
 	 */
 	protected function normalize_purchased_solution( PurchasedSolution $purchased_solution, bool $include_context = false ): ?array {
-		$solution_post = \get_post( absint( $purchased_solution->solution_id ) );
+		$solution_post = \get_post( \absint( $purchased_solution->solution_id ) );
 		if ( empty( $solution_post ) ) {
 			return null;
 		}
@@ -1081,13 +1167,13 @@ class CompositionManager implements Manager {
 			 *
 			 * @param int $post_id The composition post ID.
 			 */
-			do_action( 'pixelgradelt_retailer/ltcomposition/before_update', $post_id );
+			\do_action( 'pixelgradelt_retailer/ltcomposition/before_update', $post_id );
 		}
 
 		// Make sure we have list of integers.
 		$purchased_solutions_ids = array_map( 'intval', $purchased_solutions_ids );
 
-		carbon_set_post_meta( $post_id, 'composition_required_purchased_solutions', $purchased_solutions_ids );
+		\carbon_set_post_meta( $post_id, 'composition_required_purchased_solutions', $purchased_solutions_ids );
 
 		if ( ! $silent ) {
 			/**
@@ -1101,7 +1187,7 @@ class CompositionManager implements Manager {
 			 * @param \WP_Post $post    The composition post object.
 			 * @param bool     $update  If this is an update.
 			 */
-			do_action( 'pixelgradelt_retailer/ltcomposition/update',
+			\do_action( 'pixelgradelt_retailer/ltcomposition/update',
 				$post_id,
 				get_post( $post_id ),
 				true
@@ -1135,30 +1221,30 @@ class CompositionManager implements Manager {
 			return false;
 		}
 
-		$required_purchased_solution_ids = carbon_get_post_meta( $composition_post->ID, 'composition_required_purchased_solutions' );
-		if ( empty( $required_purchased_solution_ids ) || ! is_array( $required_purchased_solution_ids ) ) {
-			$required_purchased_solution_ids = [];
+		$required_purchased_solutions_ids = $this->get_post_composition_required_purchased_solutions_ids( $composition_post->ID );
+		if ( empty( $required_purchased_solutions_ids ) ) {
+			$required_purchased_solutions_ids = [];
 		}
 
 		// It is already part of the list.
-		if ( in_array( $purchased_solution_id, $required_purchased_solution_ids ) ) {
+		if ( in_array( $purchased_solution_id, $required_purchased_solutions_ids ) ) {
 			return false;
 		}
 
-		$old_required_solutions = $required_purchased_solution_ids;
+		$old_required_solutions = $required_purchased_solutions_ids;
 
 		// Add it to the list.
-		$required_purchased_solution_ids[] = $purchased_solution_id;
+		$required_purchased_solutions_ids[] = $purchased_solution_id;
 
 		// Run the solutions list processing if we have been instructed to do so,
 		// but only if we actually added the solution to the list.
 		// @todo We may need to process the entire composition required solutions list, rather than only the manual list.
 		$did_process_solutions = false;
-		if ( $process_solutions && ! empty( $required_purchased_solution_ids ) ) {
+		if ( $process_solutions && ! empty( $required_purchased_solutions_ids ) ) {
 			// Gather all the required solutions IDs, the manual way.
 			$required_purchased_solutions = array_map( function ( $ps_id ) {
 				return $this->get_post_composition_required_purchased_solution( $ps_id );
-			}, $required_purchased_solution_ids );
+			}, $required_purchased_solutions_ids );
 			$required_purchased_solutions = array_filter( $required_purchased_solutions );
 			$solutionsIds                 = \wp_list_pluck( $required_purchased_solutions, 'managed_post_id' );
 
@@ -1187,8 +1273,8 @@ class CompositionManager implements Manager {
 						}
 					);
 
-					// Replace the $required_purchased_solution_ids with what required_purchased_solutions remained.
-					$required_purchased_solution_ids = array_values( \wp_list_pluck( $required_purchased_solutions, 'purchased_solution_id' ) );
+					// Replace the $required_purchased_solutions_ids with what required_purchased_solutions remained.
+					$required_purchased_solutions_ids = array_values( \wp_list_pluck( $required_purchased_solutions, 'purchased_solution_id' ) );
 				}
 			}
 		}
@@ -1204,15 +1290,15 @@ class CompositionManager implements Manager {
 		 * @param array $new_purchased_solution_id The added purchased-solution id.
 		 * @param bool  $processed                 Whether we have run the solution list processing logic after adding the solution.
 		 */
-		$required_purchased_solution_ids = apply_filters( 'pixelgradelt_retailer/ltcomposition/add_required_purchased_solution',
-			$required_purchased_solution_ids,
+		$required_purchased_solutions_ids = \apply_filters( 'pixelgradelt_retailer/ltcomposition/add_required_purchased_solution',
+			$required_purchased_solutions_ids,
 			$post_id,
 			$old_required_solutions,
 			$purchased_solution_id,
 			$did_process_solutions
 		);
 
-		$this->set_post_composition_required_purchased_solutions( $composition_post->ID, $required_purchased_solution_ids );
+		$this->set_post_composition_required_purchased_solutions( $composition_post->ID, $required_purchased_solutions_ids );
 
 		return true;
 	}
@@ -1223,9 +1309,9 @@ class CompositionManager implements Manager {
 	 * @since 0.14.0
 	 *
 	 * @param int $post_id               The composition post ID.
-	 * @param int $purchased_solution_id The purchased solution id to remove.
+	 * @param int $purchased_solution_id The purchased solution ID to remove.
 	 *
-	 * @return bool True on success. False if the solution was not found in the list of the $purchased_solution_id is invalid.
+	 * @return bool True on success. False if the purchased-solution was not found in the current list.
 	 */
 	public function remove_post_composition_required_purchased_solution( int $post_id, int $purchased_solution_id ): bool {
 		$composition_post = \get_post( $post_id );
@@ -1233,63 +1319,48 @@ class CompositionManager implements Manager {
 			return false;
 		}
 
-		$required_solutions = carbon_get_post_meta( $composition_post->ID, 'composition_required_manual_solutions' );
-		if ( empty( $required_solutions ) || ! is_array( $required_solutions ) ) {
+		$required_purchased_solutions_ids = $this->get_post_composition_required_purchased_solutions_ids( $composition_post->ID );
+		if ( empty( $required_purchased_solutions_ids ) ) {
 			// Nothing to remove.
 			return false;
 		}
 
-		$old_required_solutions = $required_solutions;
+		$old_required_purchased_solutions_ids = $required_purchased_solutions_ids;
 
-		$pseudo_id_to_remove = false;
-
-		// Try a given pseudo_id.
-		if ( is_string( $purchased_solution_id ) ) {
-			$pseudo_id_to_remove = $purchased_solution_id;
-		} else if ( is_numeric( $purchased_solution_id ) ) {
-			$required_solution_post = \get_post( absint( $purchased_solution_id ) );
-			if ( ! empty( $required_solution_post ) ) {
-				$pseudo_id_to_remove = $required_solution_post->post_name . self::PSEUDO_ID_DELIMITER . $required_solution_post->ID;
-			}
-		}
-
-		if ( empty( $pseudo_id_to_remove ) ) {
-			return false;
-		}
-
-		// Search if the target solution is present in the list.
-		$found_key = ArrayHelpers::findSubarrayByKeyValue( $required_solutions, 'pseudo_id', $pseudo_id_to_remove );
-		if ( false === $found_key ) {
+		// It is not part of the list.
+		if ( ! in_array( $purchased_solution_id, $required_purchased_solutions_ids ) ) {
 			return false;
 		}
 
 		// Remove it from the list.
-		unset( $required_solutions[ $found_key ] );
+		$found_key = array_search( $purchased_solution_id, $required_purchased_solutions_ids );
+		unset( $required_purchased_solutions_ids[ $found_key ] );
+		$required_purchased_solutions_ids = array_values( $required_purchased_solutions_ids );
 
 		/**
-		 * Filters the new composition required solutions list after removing a solution.
+		 * Filters the new composition required purchased-solution IDs list after removing a solution.
 		 *
 		 * @since 0.14.0
 		 *
-		 * @param array  $new_required_manual_solutions The new required manual-solutions list.
-		 * @param int    $post_id                       The composition post ID.
-		 * @param array  $old_required_manual_solutions The old required manual-solutions list.
-		 * @param string $removed_solution_pseudo_id    The removed solution pseudo_id.
+		 * @param array $new_required_solutions_ids     The new required purchased-solutions list.
+		 * @param int   $post_id                       The composition post ID.
+		 * @param array $old_required_solutions_ids     The old required purchased-solutions list.
+		 * @param array $removed_purchased_solution_id The removed purchased-solution id.
 		 */
-		$required_solutions = apply_filters( 'pixelgradelt_retailer/ltcomposition/remove_required_manual_solution',
-			$required_solutions,
+		$required_purchased_solutions_ids = \apply_filters( 'pixelgradelt_retailer/ltcomposition/remove_required_purchased_solution',
+			$required_purchased_solutions_ids,
 			$post_id,
-			$old_required_solutions,
-			$pseudo_id_to_remove
+			$old_required_purchased_solutions_ids,
+			$purchased_solution_id
 		);
 
-		$this->set_post_composition_required_manual_solutions( $composition_post->ID, $required_solutions );
+		$this->set_post_composition_required_purchased_solutions( $composition_post->ID, $required_purchased_solutions_ids );
 
 		return true;
 	}
 
 	/**
-	 * Get the list of required manual-solutions (not attached to a solution purchase).
+	 * Get the list of required manual-solutions (not attached to a purchased-solution).
 	 *
 	 * @param int    $post_ID             The Composition post ID.
 	 * @param bool   $include_context     Whether to include context data about each required solution
@@ -1300,7 +1371,15 @@ class CompositionManager implements Manager {
 	 *               Each solution has its type, pseudo ID, slug, managed post ID and maybe context information, if $include_context is true.
 	 */
 	public function get_post_composition_required_manual_solutions( int $post_ID, bool $include_context = false, string $pseudo_id_delimiter = '' ): array {
-		$manual_solutions = carbon_get_post_meta( $post_ID, 'composition_required_manual_solutions' );
+		// Since some of the internal workings of CarbonFields lose the current post ID, we need to set it as the global post ID.
+		$temp            = $GLOBALS['post'] ?? 0;
+		$GLOBALS['post'] = $post_ID;
+
+		$manual_solutions = \carbon_get_post_meta( $post_ID, 'composition_required_manual_solutions' );
+
+		// Restore the previous global post.
+		$GLOBALS['post'] = $temp;
+
 		if ( empty( $manual_solutions ) || ! is_array( $manual_solutions ) ) {
 			return [];
 		}
@@ -1352,7 +1431,7 @@ class CompositionManager implements Manager {
 			$pseudo_id_delimiter = self::PSEUDO_ID_DELIMITER;
 		}
 
-		if ( ! is_string( $pseudo_id ) || false === strpos( $pseudo_id, $pseudo_id_delimiter ) ) {
+		if ( false === strpos( $pseudo_id, $pseudo_id_delimiter ) ) {
 			return null;
 		}
 
@@ -1380,7 +1459,7 @@ class CompositionManager implements Manager {
 			 *
 			 * @param int $post_id The composition post ID.
 			 */
-			do_action( 'pixelgradelt_retailer/ltcomposition/before_update', $post_id );
+			\do_action( 'pixelgradelt_retailer/ltcomposition/before_update', $post_id );
 		}
 
 		// We need to normalize the received $required_solutions for the DB (the format that CarbonFields uses).
@@ -1393,7 +1472,7 @@ class CompositionManager implements Manager {
 
 			// Try a given post ID entry.
 			if ( ! empty( $solution['post_id'] ) ) {
-				$solution_post = \get_post( absint( $solution['post_id'] ) );
+				$solution_post = \get_post( \absint( $solution['post_id'] ) );
 				if ( ! empty( $solution_post ) ) {
 					// If we have been given a valid post ID, this overwrites any pseudo_id.
 					$normalized_solution['pseudo_id'] = $solution_post->post_name . self::PSEUDO_ID_DELIMITER . $solution_post->ID;
@@ -1414,7 +1493,7 @@ class CompositionManager implements Manager {
 			$solutions[ $key ] = $normalized_solution;
 		}
 
-		carbon_set_post_meta( $post_id, 'composition_required_manual_solutions', $solutions );
+		\carbon_set_post_meta( $post_id, 'composition_required_manual_solutions', $solutions );
 
 		if ( ! $silent ) {
 			/**
@@ -1428,7 +1507,7 @@ class CompositionManager implements Manager {
 			 * @param \WP_Post $post    The composition post object.
 			 * @param bool     $update  If this is an update.
 			 */
-			do_action( 'pixelgradelt_retailer/ltcomposition/update',
+			\do_action( 'pixelgradelt_retailer/ltcomposition/update',
 				$post_id,
 				get_post( $post_id ),
 				true
@@ -1462,8 +1541,8 @@ class CompositionManager implements Manager {
 			return false;
 		}
 
-		$required_solutions = carbon_get_post_meta( $composition_post->ID, 'composition_required_manual_solutions' );
-		if ( empty( $required_solutions ) || ! is_array( $required_solutions ) ) {
+		$required_solutions = $this->get_post_composition_required_manual_solutions( $composition_post->ID );
+		if ( empty( $required_solutions ) ) {
 			$required_solutions = [];
 		}
 
@@ -1476,7 +1555,7 @@ class CompositionManager implements Manager {
 
 		// Try a given post ID.
 		if ( ! empty( $required_solution['post_id'] ) ) {
-			$required_solution_post = \get_post( absint( $required_solution['post_id'] ) );
+			$required_solution_post = \get_post( \absint( $required_solution['post_id'] ) );
 			if ( ! empty( $required_solution_post ) ) {
 				$required_solution_post_id = $required_solution_post->ID;
 				// If we have been given a valid post ID, this overwrites any pseudo_id.
@@ -1586,7 +1665,7 @@ class CompositionManager implements Manager {
 		 * @param bool  $updated                Whether we have updated the details of an already existing solution.
 		 * @param bool  $processed              Whether we have run the solution list processing logic after adding the solution.
 		 */
-		$required_solutions = apply_filters( 'pixelgradelt_retailer/ltcomposition/add_required_manual_solution',
+		$required_solutions = \apply_filters( 'pixelgradelt_retailer/ltcomposition/add_required_manual_solution',
 			$required_solutions,
 			$post_id,
 			$old_required_solutions,
@@ -1616,8 +1695,8 @@ class CompositionManager implements Manager {
 			return false;
 		}
 
-		$required_solutions = carbon_get_post_meta( $composition_post->ID, 'composition_required_manual_solutions' );
-		if ( empty( $required_solutions ) || ! is_array( $required_solutions ) ) {
+		$required_solutions = $this->get_post_composition_required_manual_solutions( $composition_post->ID );
+		if ( empty( $required_solutions ) ) {
 			// Nothing to remove.
 			return false;
 		}
@@ -1630,7 +1709,7 @@ class CompositionManager implements Manager {
 		if ( is_string( $required_solution_id ) ) {
 			$pseudo_id_to_remove = $required_solution_id;
 		} else if ( is_numeric( $required_solution_id ) ) {
-			$required_solution_post = \get_post( absint( $required_solution_id ) );
+			$required_solution_post = \get_post( \absint( $required_solution_id ) );
 			if ( ! empty( $required_solution_post ) ) {
 				$pseudo_id_to_remove = $required_solution_post->post_name . self::PSEUDO_ID_DELIMITER . $required_solution_post->ID;
 			}
@@ -1659,7 +1738,7 @@ class CompositionManager implements Manager {
 		 * @param array  $old_required_manual_solutions The old required manual-solutions list.
 		 * @param string $removed_solution_pseudo_id    The removed solution pseudo_id.
 		 */
-		$required_solutions = apply_filters( 'pixelgradelt_retailer/ltcomposition/remove_required_manual_solution',
+		$required_solutions = \apply_filters( 'pixelgradelt_retailer/ltcomposition/remove_required_manual_solution',
 			$required_solutions,
 			$post_id,
 			$old_required_solutions,

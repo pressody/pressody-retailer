@@ -73,15 +73,15 @@ class Settings extends AbstractHookProvider {
 	 * @since 0.1.0
 	 */
 	public function register_hooks() {
-		if ( is_multisite() ) {
-			add_action( 'network_admin_menu', [ $this, 'add_menu_item' ] );
+		if ( \is_multisite() ) {
+			\add_action( 'network_admin_menu', [ $this, 'add_menu_item' ] );
 		} else {
-			add_action( 'admin_menu', [ $this, 'add_menu_item' ] );
+			\add_action( 'admin_menu', [ $this, 'add_menu_item' ] );
 		}
 
-		add_action( 'admin_init', [ $this, 'register_settings' ] );
-		add_action( 'admin_init', [ $this, 'add_sections' ] );
-		add_action( 'admin_init', [ $this, 'add_settings' ] );
+		\add_action( 'admin_init', [ $this, 'register_settings' ] );
+		\add_action( 'admin_init', [ $this, 'add_sections' ] );
+		\add_action( 'admin_init', [ $this, 'add_settings' ] );
 	}
 
 	/**
@@ -91,11 +91,11 @@ class Settings extends AbstractHookProvider {
 	 */
 	public function add_menu_item() {
 		$parent_slug = 'options-general.php';
-		if ( is_network_admin() ) {
+		if ( \is_network_admin() ) {
 			$parent_slug = 'settings.php';
 		}
 
-		$page_hook = add_submenu_page(
+		$page_hook = \add_submenu_page(
 				$parent_slug,
 				esc_html__( 'PixelgradeLT Retailer', 'pixelgradelt_retailer' ),
 				esc_html__( 'LT Retailer', 'pixelgradelt_retailer' ),
@@ -104,7 +104,7 @@ class Settings extends AbstractHookProvider {
 				[ $this, 'render_screen' ]
 		);
 
-		add_action( 'load-' . $page_hook, [ $this, 'load_screen' ] );
+		\add_action( 'load-' . $page_hook, [ $this, 'load_screen' ] );
 	}
 
 	/**
@@ -113,9 +113,9 @@ class Settings extends AbstractHookProvider {
 	 * @since 0.1.0
 	 */
 	public function load_screen() {
-		add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_assets' ] );
-		add_action( 'admin_notices', [ HealthCheck::class, 'display_authorization_notice' ] );
-		add_action( 'admin_notices', [ HealthCheck::class, 'display_permalink_notice' ] );
+		\add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_assets' ] );
+		\add_action( 'admin_notices', [ HealthCheck::class, 'display_authorization_notice' ] );
+		\add_action( 'admin_notices', [ HealthCheck::class, 'display_permalink_notice' ] );
 	}
 
 	/**
@@ -124,12 +124,12 @@ class Settings extends AbstractHookProvider {
 	 * @since 0.1.0
 	 */
 	public function enqueue_assets() {
-		wp_enqueue_script( 'pixelgradelt_retailer-admin' );
-		wp_enqueue_style( 'pixelgradelt_retailer-admin' );
-		wp_enqueue_script( 'pixelgradelt_retailer-access' );
-		wp_enqueue_script( 'pixelgradelt_retailer-repository' );
+		\wp_enqueue_script( 'pixelgradelt_retailer-admin' );
+		\wp_enqueue_style( 'pixelgradelt_retailer-admin' );
+		\wp_enqueue_script( 'pixelgradelt_retailer-access' );
+		\wp_enqueue_script( 'pixelgradelt_retailer-repository' );
 
-		wp_localize_script(
+		\wp_localize_script(
 				'pixelgradelt_retailer-access',
 				'_pixelgradeltRetailerAccessData',
 				[
@@ -137,7 +137,7 @@ class Settings extends AbstractHookProvider {
 				]
 		);
 
-		wp_localize_script(
+		\wp_localize_script(
 				'pixelgradelt_retailer-repository',
 				'_pixelgradeltRetailerRepositoryData',
 				[
@@ -149,7 +149,7 @@ class Settings extends AbstractHookProvider {
 				'/pixelgradelt_retailer/v1/solutions',
 		];
 
-		if ( current_user_can( Capabilities::MANAGE_OPTIONS ) ) {
+		if ( \current_user_can( Capabilities::MANAGE_OPTIONS ) ) {
 			$preload_paths = array_merge(
 					$preload_paths,
 					[
@@ -167,7 +167,7 @@ class Settings extends AbstractHookProvider {
 	 * @since 0.1.0
 	 */
 	public function register_settings() {
-		register_setting( 'pixelgradelt_retailer', 'pixelgradelt_retailer', [ $this, 'sanitize_settings' ] );
+		\register_setting( 'pixelgradelt_retailer', 'pixelgradelt_retailer', [ $this, 'sanitize_settings' ] );
 	}
 
 	/**
@@ -176,14 +176,14 @@ class Settings extends AbstractHookProvider {
 	 * @since 0.1.0
 	 */
 	public function add_sections() {
-		add_settings_section(
+		\add_settings_section(
 				'default',
 				esc_html__( 'General', 'pixelgradelt_retailer' ),
 				'__return_null',
 				'pixelgradelt_retailer'
 		);
 
-		add_settings_section(
+		\add_settings_section(
 				'ltrecords',
 				esc_html__( 'LT Records Communication', 'pixelgradelt_retailer' ),
 				'__return_null',
@@ -197,7 +197,7 @@ class Settings extends AbstractHookProvider {
 	 * @since 0.1.0
 	 */
 	public function add_settings() {
-		add_settings_field(
+		\add_settings_field(
 				'vendor',
 				'<label for="pixelgradelt_retailer-vendor">' . esc_html__( 'Vendor', 'pixelgradelt_retailer' ) . '</label>',
 				[ $this, 'render_field_vendor' ],
@@ -205,7 +205,7 @@ class Settings extends AbstractHookProvider {
 				'default'
 		);
 
-		add_settings_field(
+		\add_settings_field(
 				'github-oauth-token',
 				'<label for="pixelgradelt_retailer-github-oauth-token">' . esc_html__( 'Github OAuth Token', 'pixelgradelt_retailer' ) . '</label>',
 				[ $this, 'render_field_github_oauth_token' ],
@@ -213,7 +213,7 @@ class Settings extends AbstractHookProvider {
 				'default'
 		);
 
-		add_settings_field(
+		\add_settings_field(
 				'ltrecords-packages-repo-endpoint',
 				'<label for="pixelgradelt_retailer-ltrecords-packages-repo-endpoint">' . esc_html__( 'Packages Repository Endpoint', 'pixelgradelt_retailer' ) . '</label>',
 				[ $this, 'render_field_ltrecords_packages_repo_endpoint' ],
@@ -221,7 +221,7 @@ class Settings extends AbstractHookProvider {
 				'ltrecords'
 		);
 
-		add_settings_field(
+		\add_settings_field(
 				'ltrecords-parts-repo-endpoint',
 				'<label for="pixelgradelt_retailer-ltrecords-parts-repo-endpoint">' . esc_html__( 'Parts Repository Endpoint', 'pixelgradelt_retailer' ) . '</label>',
 				[ $this, 'render_field_ltrecords_parts_repo_endpoint' ],
@@ -229,7 +229,7 @@ class Settings extends AbstractHookProvider {
 				'ltrecords'
 		);
 
-		add_settings_field(
+		\add_settings_field(
 				'ltrecords-api-key',
 				'<label for="pixelgradelt_retailer-ltrecords-api-key">' . esc_html__( 'Access API Key', 'pixelgradelt_retailer' ) . '</label>',
 				[ $this, 'render_field_ltrecords_api_key' ],
@@ -257,18 +257,18 @@ class Settings extends AbstractHookProvider {
 		}
 
 		if ( ! empty( $value['ltrecords-packages-repo-endpoint'] ) ) {
-			$value['ltrecords-packages-repo-endpoint'] = esc_url( $value['ltrecords-packages-repo-endpoint'] );
+			$value['ltrecords-packages-repo-endpoint'] = \esc_url( $value['ltrecords-packages-repo-endpoint'] );
 		}
 
 		if ( ! empty( $value['ltrecords-parts-repo-endpoint'] ) ) {
-			$value['ltrecords-parts-repo-endpoint'] = esc_url( $value['ltrecords-parts-repo-endpoint'] );
+			$value['ltrecords-parts-repo-endpoint'] = \esc_url( $value['ltrecords-parts-repo-endpoint'] );
 		}
 
 		if ( ! empty( $value['ltrecords-api-key'] ) ) {
 			$value['ltrecords-api-key'] = trim( $value['ltrecords-api-key'] );
 		}
 
-		return (array) apply_filters( 'pixelgradelt_retailer/sanitize_settings', $value );
+		return (array) \apply_filters( 'pixelgradelt_retailer/sanitize_settings', $value );
 	}
 
 	/**
@@ -277,7 +277,7 @@ class Settings extends AbstractHookProvider {
 	 * @since 0.1.0
 	 */
 	public function render_screen() {
-		$solutions_permalink     = esc_url( get_solutions_permalink() );
+		$solutions_permalink     = \esc_url( get_solutions_permalink() );
 
 		$tabs = [
 				'repository' => [
@@ -319,7 +319,7 @@ class Settings extends AbstractHookProvider {
 		?>
 		<p>
 			<input type="text" name="pixelgradelt_retailer[vendor]" id="pixelgradelt_retailer-vendor"
-			       value="<?php echo esc_attr( $value ); ?>" placeholder="pixelgradelt-retailer"><br/>
+			       value="<?php echo \esc_attr( $value ); ?>" placeholder="pixelgradelt-retailer"><br/>
 			<span class="description">The default is <code>pixelgradelt-retailer</code><br>
 			This is the general vendor that will be used when exposing all the packages for consumption.<br>
 				<strong>For example:</strong> you have a managed package with the source on Packagist.org (say <a
@@ -338,7 +338,7 @@ class Settings extends AbstractHookProvider {
 		?>
 		<p>
 			<input type="password" size="80" name="pixelgradelt_retailer[github-oauth-token]"
-			       id="pixelgradelt_retailer-github-oauth-token" value="<?php echo esc_attr( $value ); ?>"><br/>
+			       id="pixelgradelt_retailer-github-oauth-token" value="<?php echo \esc_attr( $value ); ?>"><br/>
 			<span class="description">Github has <strong>a rate limit of 60 requests/hour</strong> on their API for <strong>requests not using an OAuth Token.</strong><br>
 				Since most packages on Packagist.org have their source on Github, and you may be using actual Github repos as sources, <strong>you should definitely generate a token and save it here.</strong><br>
 				Learn more about <strong>the steps to take <a
@@ -358,7 +358,7 @@ class Settings extends AbstractHookProvider {
 		<p>
 			<input type="url" size="80" name="pixelgradelt_retailer[ltrecords-packages-repo-endpoint]"
 			       id="pixelgradelt_retailer-ltrecords-packages-repo-endpoint"
-			       value="<?php echo esc_attr( $value ); ?>"><br/>
+			       value="<?php echo \esc_attr( $value ); ?>"><br/>
 			<span class="description">Provide here the LT Records Packages Repository endpoint URL.</span>
 		</p>
 		<?php
@@ -375,7 +375,7 @@ class Settings extends AbstractHookProvider {
 		<p>
 			<input type="url" size="80" name="pixelgradelt_retailer[ltrecords-parts-repo-endpoint]"
 			       id="pixelgradelt_retailer-ltrecords-parts-repo-endpoint"
-			       value="<?php echo esc_attr( $value ); ?>"><br/>
+			       value="<?php echo \esc_attr( $value ); ?>"><br/>
 			<span class="description">Provide here the LT Records Parts Repository endpoint URL.</span>
 		</p>
 		<?php
@@ -391,7 +391,7 @@ class Settings extends AbstractHookProvider {
 		?>
 		<p>
 			<input type="text" size="80" name="pixelgradelt_retailer[ltrecords-api-key]"
-			       id="pixelgradelt_retailer-ltrecords-api-key" value="<?php echo esc_attr( $value ); ?>"><br/>
+			       id="pixelgradelt_retailer-ltrecords-api-key" value="<?php echo \esc_attr( $value ); ?>"><br/>
 			<span class="description">Provide here <strong>a valid LT Records API key</strong> for LT Retailer to use to access the repositories above.</span>
 		</p>
 		<?php

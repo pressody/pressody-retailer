@@ -75,7 +75,7 @@ class SolutionPostType extends AbstractHookProvider {
 	 * @since 0.1.0
 	 */
 	protected function register_post_type() {
-		register_post_type( $this->solution_manager::POST_TYPE, $this->solution_manager->get_solution_post_type_args() );
+		\register_post_type( $this->solution_manager::POST_TYPE, $this->solution_manager->get_solution_post_type_args() );
 	}
 
 	/**
@@ -84,13 +84,13 @@ class SolutionPostType extends AbstractHookProvider {
 	 * @since 0.1.0
 	 */
 	protected function register_solution_category_taxonomy() {
-		if ( taxonomy_exists( $this->solution_manager::CATEGORY_TAXONOMY ) ) {
-			register_taxonomy_for_object_type(
+		if ( \taxonomy_exists( $this->solution_manager::CATEGORY_TAXONOMY ) ) {
+			\register_taxonomy_for_object_type(
 					$this->solution_manager::CATEGORY_TAXONOMY,
 					$this->solution_manager::POST_TYPE
 			);
 		} else {
-			register_taxonomy(
+			\register_taxonomy(
 					$this->solution_manager::CATEGORY_TAXONOMY,
 					[ $this->solution_manager::POST_TYPE ],
 					$this->solution_manager->get_solution_category_taxonomy_args()
@@ -104,13 +104,13 @@ class SolutionPostType extends AbstractHookProvider {
 	 * @since 0.1.0
 	 */
 	protected function register_solution_type_taxonomy() {
-		if ( taxonomy_exists( $this->solution_manager::TYPE_TAXONOMY ) ) {
-			register_taxonomy_for_object_type(
+		if ( \taxonomy_exists( $this->solution_manager::TYPE_TAXONOMY ) ) {
+			\register_taxonomy_for_object_type(
 					$this->solution_manager::TYPE_TAXONOMY,
 					$this->solution_manager::POST_TYPE
 			);
 		} else {
-			register_taxonomy(
+			\register_taxonomy(
 					$this->solution_manager::TYPE_TAXONOMY,
 					[ $this->solution_manager::POST_TYPE ],
 					$this->solution_manager->get_solution_type_taxonomy_args( [
@@ -131,8 +131,8 @@ class SolutionPostType extends AbstractHookProvider {
 	protected function insert_solution_type_taxonomy_terms() {
 		// Force the insertion of needed terms matching the SOLUTION TYPES.
 		foreach ( SolutionTypes::DETAILS as $term_slug => $term_details ) {
-			if ( ! term_exists( $term_slug, $this->solution_manager::TYPE_TAXONOMY ) ) {
-				wp_insert_term( $term_details['name'], $this->solution_manager::TYPE_TAXONOMY, [
+			if ( ! \term_exists( $term_slug, $this->solution_manager::TYPE_TAXONOMY ) ) {
+				\wp_insert_term( $term_details['name'], $this->solution_manager::TYPE_TAXONOMY, [
 						'slug'        => $term_slug,
 						'description' => $term_details['description'],
 				] );
@@ -146,13 +146,13 @@ class SolutionPostType extends AbstractHookProvider {
 	 * @since 0.1.0
 	 */
 	protected function register_solution_keyword_taxonomy() {
-		if ( taxonomy_exists( $this->solution_manager::KEYWORD_TAXONOMY ) ) {
-			register_taxonomy_for_object_type(
+		if ( \taxonomy_exists( $this->solution_manager::KEYWORD_TAXONOMY ) ) {
+			\register_taxonomy_for_object_type(
 					$this->solution_manager::KEYWORD_TAXONOMY,
 					$this->solution_manager::POST_TYPE
 			);
 		} else {
-			register_taxonomy(
+			\register_taxonomy(
 					$this->solution_manager::KEYWORD_TAXONOMY,
 					[ $this->solution_manager::POST_TYPE ],
 					$this->solution_manager->get_solution_keyword_taxonomy_args()
@@ -166,7 +166,7 @@ class SolutionPostType extends AbstractHookProvider {
 	 * @param \WP_Post $post
 	 */
 	public function solution_type_meta_box( \WP_Post $post ) {
-		$terms = get_terms( $this->solution_manager::TYPE_TAXONOMY, array(
+		$terms = \get_terms( $this->solution_manager::TYPE_TAXONOMY, array(
 				'hide_empty' => false,
 				'orderby'    => 'term_id',
 				'order'      => 'ASC',
@@ -182,7 +182,7 @@ class SolutionPostType extends AbstractHookProvider {
 			<label title="<?php esc_attr_e( $term->name ); ?>">
 				<input type="radio"
 				       name="<?php esc_attr_e( $this->solution_manager::TYPE_TAXONOMY_SINGULAR ); ?>"
-				       value="<?php esc_attr_e( $term->slug ); ?>" <?php checked( $term->slug, $current_solution_type ); ?>>
+				       value="<?php esc_attr_e( $term->slug ); ?>" <?php \checked( $term->slug, $current_solution_type ); ?>>
 				<span><?php esc_html_e( $term->name ); ?></span>
 			</label><br>
 			<?php
@@ -199,14 +199,14 @@ class SolutionPostType extends AbstractHookProvider {
 
 		if ( ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE )
 		     || ( defined( 'DOING_AJAX' ) && DOING_AJAX )
-		     || ! current_user_can( 'edit_post', $post_id )
-		     || false !== wp_is_post_revision( $post_id )
-		     || 'trash' == get_post_status( $post_id )
+		     || ! \current_user_can( 'edit_post', $post_id )
+		     || false !== \wp_is_post_revision( $post_id )
+		     || 'trash' == \get_post_status( $post_id )
 		     || isset( $post->post_status ) && 'auto-draft' == $post->post_status ) {
 			return;
 		}
 
-		$solution_type = isset( $_POST[ $this->solution_manager::TYPE_TAXONOMY_SINGULAR ] ) ? sanitize_text_field( $_POST[ $this->solution_manager::TYPE_TAXONOMY_SINGULAR ] ) : '';
+		$solution_type = isset( $_POST[ $this->solution_manager::TYPE_TAXONOMY_SINGULAR ] ) ? \sanitize_text_field( $_POST[ $this->solution_manager::TYPE_TAXONOMY_SINGULAR ] ) : '';
 		// A valid type is required, so force the default one.
 		if ( empty( $solution_type ) ) {
 			$solution_type = SolutionTypes::REGULAR;
@@ -219,9 +219,9 @@ class SolutionPostType extends AbstractHookProvider {
 			return;
 		}
 
-		$term = get_term_by( 'slug', $solution_type, $this->solution_manager::TYPE_TAXONOMY );
-		if ( ! empty( $term ) && ! is_wp_error( $term ) ) {
-			wp_set_object_terms( $post_id, $term->term_id, $this->solution_manager::TYPE_TAXONOMY, false );
+		$term = \get_term_by( 'slug', $solution_type, $this->solution_manager::TYPE_TAXONOMY );
+		if ( ! empty( $term ) && ! \is_wp_error( $term ) ) {
+			\wp_set_object_terms( $post_id, $term->term_id, $this->solution_manager::TYPE_TAXONOMY, false );
 		}
 	}
 }

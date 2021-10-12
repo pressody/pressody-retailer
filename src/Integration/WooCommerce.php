@@ -11,7 +11,6 @@ declare ( strict_types=1 );
 
 namespace PixelgradeLT\Retailer\Integration;
 
-use BerlinDB\Database\Table;
 use Cedaro\WP\Plugin\AbstractHookProvider;
 use PixelgradeLT\Retailer\Integration\WooCommerce\Order;
 use PixelgradeLT\Retailer\PurchasedSolutionManager;
@@ -40,15 +39,6 @@ class WooCommerce extends AbstractHookProvider {
 	protected PurchasedSolutionManager $ps_manager;
 
 	/**
-	 * The custom DB table.
-	 *
-	 * @since 0.14.0
-	 *
-	 * @var Table
-	 */
-	protected Table $db;
-
-	/**
 	 * Logger.
 	 *
 	 * @since 0.14.0
@@ -63,16 +53,13 @@ class WooCommerce extends AbstractHookProvider {
 	 * @since 0.14.0
 	 *
 	 * @param PurchasedSolutionManager $purchased_solution_manager Purchased Solutions Manager.
-	 * @param Table                    $db                         The instance handling the custom DB table.
 	 * @param LoggerInterface          $logger                     Logger.
 	 */
 	public function __construct(
 		PurchasedSolutionManager $purchased_solution_manager,
-		Table $db,
 		LoggerInterface $logger
 	) {
 		$this->ps_manager = $purchased_solution_manager;
-		$this->db         = $db;
 		$this->logger     = $logger;
 	}
 
@@ -681,6 +668,7 @@ class WooCommerce extends AbstractHookProvider {
 
 			$query_args['meta_query'][] = [
 				'key'   => 'solution_woocommerce_products',
+				'compare' => 'IN',
 				'value' => $args['woocommerce_product_id'],
 			];
 		}

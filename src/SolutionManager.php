@@ -367,7 +367,7 @@ class SolutionManager implements Manager {
 		 * @param array $query_args The query args.
 		 * @param array $args       The received args.
 		 */
-		$query_args = apply_filters( 'pixelgradelt_retailer/solution_ids_by_query_args', $query_args, $args );
+		$query_args = \apply_filters( 'pixelgradelt_retailer/solution_ids_by_query_args', $query_args, $args );
 
 		$query       = new \WP_Query( $query_args );
 		$package_ids = $query->get_posts();
@@ -394,10 +394,6 @@ class SolutionManager implements Manager {
 			return $data;
 		}
 
-		// Since some of the internal workings of CarbonFields lose the current post ID, we need to set it as the global post ID.
-		$temp = $GLOBALS['post'] ?? 0;
-		$GLOBALS['post'] = $post_ID;
-
 		$data['is_managed']      = true;
 		$data['managed_post_id'] = $post_ID;
 		$data['visibility']      = $this->get_post_solution_visibility( $post_ID );
@@ -415,9 +411,6 @@ class SolutionManager implements Manager {
 		$data['excluded_solutions']       = $this->get_post_solution_excluded_solutions( $post_ID );
 		$data['composer_require']         = $this->get_post_solution_composer_require( $post_ID );
 
-		// Restore the previous global post.
-		$GLOBALS['post'] = $temp;
-
 		/**
 		 * Filters the solution ID data.
 		 *
@@ -426,7 +419,7 @@ class SolutionManager implements Manager {
 		 * @param array $solution_data The solution data.
 		 * @param int   $post_id       The solution post ID.
 		 */
-		return apply_filters( 'pixelgradelt_retailer/solution_id_data', $data, $post_ID );
+		return \apply_filters( 'pixelgradelt_retailer/solution_id_data', $data, $post_ID );
 	}
 
 	/**
@@ -487,7 +480,7 @@ class SolutionManager implements Manager {
 	}
 
 	public function get_post_solution_name( int $post_ID ): string {
-		$post = get_post( $post_ID );
+		$post = \get_post( $post_ID );
 		if ( empty( $post ) ) {
 			return '';
 		}
@@ -497,8 +490,8 @@ class SolutionManager implements Manager {
 
 	public function get_post_solution_type( int $post_ID ): string {
 		/** @var \WP_Error|\WP_Term[] $package_type */
-		$package_type = wp_get_post_terms( $post_ID, static::TYPE_TAXONOMY );
-		if ( is_wp_error( $package_type ) || empty( $package_type ) ) {
+		$package_type = \wp_get_post_terms( $post_ID, static::TYPE_TAXONOMY );
+		if ( \is_wp_error( $package_type ) || empty( $package_type ) ) {
 			return '';
 		}
 		$package_type = reset( $package_type );
@@ -507,7 +500,7 @@ class SolutionManager implements Manager {
 	}
 
 	public function get_post_solution_slug( int $post_ID ): string {
-		$post = get_post( $post_ID );
+		$post = \get_post( $post_ID );
 		if ( empty( $post ) ) {
 			return '';
 		}
@@ -516,8 +509,8 @@ class SolutionManager implements Manager {
 	}
 
 	public function get_post_solution_categories( int $post_ID ): array {
-		$categories = wp_get_post_terms( $post_ID, static::CATEGORY_TAXONOMY );
-		if ( is_wp_error( $categories ) || empty( $categories ) ) {
+		$categories = \wp_get_post_terms( $post_ID, static::CATEGORY_TAXONOMY );
+		if ( \is_wp_error( $categories ) || empty( $categories ) ) {
 			return [];
 		}
 
@@ -532,8 +525,8 @@ class SolutionManager implements Manager {
 	}
 
 	public function set_post_solution_categories( int $post_ID, array $categories ): bool {
-		$result = wp_set_post_terms( $post_ID, $categories, static::CATEGORY_TAXONOMY );
-		if ( false === $result || is_wp_error( $result ) ) {
+		$result = \wp_set_post_terms( $post_ID, $categories, static::CATEGORY_TAXONOMY );
+		if ( false === $result || \is_wp_error( $result ) ) {
 			return false;
 		}
 
@@ -541,8 +534,8 @@ class SolutionManager implements Manager {
 	}
 
 	public function get_post_solution_keywords( int $post_ID ): array {
-		$keywords = wp_get_post_terms( $post_ID, static::KEYWORD_TAXONOMY );
-		if ( is_wp_error( $keywords ) || empty( $keywords ) ) {
+		$keywords = \wp_get_post_terms( $post_ID, static::KEYWORD_TAXONOMY );
+		if ( \is_wp_error( $keywords ) || empty( $keywords ) ) {
 			return [];
 		}
 
@@ -557,8 +550,8 @@ class SolutionManager implements Manager {
 	}
 
 	public function set_post_solution_keywords( int $post_ID, array $keywords ): bool {
-		$result = wp_set_post_terms( $post_ID, $keywords, static::KEYWORD_TAXONOMY );
-		if ( false === $result || is_wp_error( $result ) ) {
+		$result = \wp_set_post_terms( $post_ID, $keywords, static::KEYWORD_TAXONOMY );
+		if ( false === $result || \is_wp_error( $result ) ) {
 			return false;
 		}
 
@@ -566,7 +559,15 @@ class SolutionManager implements Manager {
 	}
 
 	public function get_post_solution_required_solutions( int $post_ID, string $container_id = '', string $pseudo_id_delimiter = '' ): array {
-		$required_solutions = carbon_get_post_meta( $post_ID, 'solution_required_solutions', $container_id );
+		// Since some of the internal workings of CarbonFields lose the current post ID, we need to set it as the global post ID.
+		$temp = $GLOBALS['post'] ?? 0;
+		$GLOBALS['post'] = $post_ID;
+
+		$required_solutions = \carbon_get_post_meta( $post_ID, 'solution_required_solutions', $container_id );
+
+		// Restore the previous global post.
+		$GLOBALS['post'] = $temp;
+
 		if ( empty( $required_solutions ) || ! is_array( $required_solutions ) ) {
 			return [];
 		}
@@ -600,11 +601,19 @@ class SolutionManager implements Manager {
 	}
 
 	public function set_post_solution_required_solutions( int $post_ID, array $required_solutions, string $container_id = '' ) {
-		carbon_set_post_meta( $post_ID, 'solution_required_solutions', $required_solutions, $container_id );
+		\carbon_set_post_meta( $post_ID, 'solution_required_solutions', $required_solutions, $container_id );
 	}
 
 	public function get_post_solution_excluded_solutions( int $post_ID, string $container_id = '', string $pseudo_id_delimiter = '' ): array {
-		$excluded_solutions = carbon_get_post_meta( $post_ID, 'solution_excluded_solutions', $container_id );
+		// Since some of the internal workings of CarbonFields lose the current post ID, we need to set it as the global post ID.
+		$temp = $GLOBALS['post'] ?? 0;
+		$GLOBALS['post'] = $post_ID;
+
+		$excluded_solutions = \carbon_get_post_meta( $post_ID, 'solution_excluded_solutions', $container_id );
+
+		// Restore the previous global post.
+		$GLOBALS['post'] = $temp;
+
 		if ( empty( $excluded_solutions ) || ! is_array( $excluded_solutions ) ) {
 			return [];
 		}
@@ -638,12 +647,19 @@ class SolutionManager implements Manager {
 	}
 
 	public function set_post_solution_excluded_solutions( int $post_ID, array $excluded_solutions, string $container_id = '' ) {
-		carbon_set_post_meta( $post_ID, 'solution_excluded_solutions', $excluded_solutions, $container_id );
+		\carbon_set_post_meta( $post_ID, 'solution_excluded_solutions', $excluded_solutions, $container_id );
 	}
 
 
 	public function get_post_solution_required_parts( int $post_ID, string $container_id = '' ): array {
-		$required_parts = carbon_get_post_meta( $post_ID, 'solution_required_parts', $container_id );
+		// Since some of the internal workings of CarbonFields lose the current post ID, we need to set it as the global post ID.
+		$temp = $GLOBALS['post'] ?? 0;
+		$GLOBALS['post'] = $post_ID;
+
+		$required_parts = \carbon_get_post_meta( $post_ID, 'solution_required_parts', $container_id );
+
+		// Restore the previous global post.
+		$GLOBALS['post'] = $temp;
 
 		if ( empty( $required_parts ) || ! is_array( $required_parts ) ) {
 			return [];
@@ -667,7 +683,7 @@ class SolutionManager implements Manager {
 	}
 
 	public function set_post_solution_required_parts( int $post_ID, array $required_parts, string $container_id = '' ) {
-		carbon_set_post_meta( $post_ID, 'solution_required_parts', $required_parts, $container_id );
+		\carbon_set_post_meta( $post_ID, 'solution_required_parts', $required_parts, $container_id );
 	}
 
 	public function get_post_solution_composer_require( int $post_ID, string $container_id = '', string $pseudo_id_delimiter = '' ): array {
@@ -851,8 +867,8 @@ class SolutionManager implements Manager {
 
 		// Second, use the cache.
 		if ( ! $skip_cache ) {
-			$parts   = get_option( '_pixelgradelt_retailer_ltrecords_parts' );
-			$timeout = get_option( '_pixelgradelt_retailer_ltrecords_parts_timeout' );
+			$parts   = \get_option( '_pixelgradelt_retailer_ltrecords_parts' );
+			$timeout = \get_option( '_pixelgradelt_retailer_ltrecords_parts_timeout' );
 			// If the cache isn't expired, use it.
 			if ( $timeout > time() ) {
 				$this->ltrecords_parts = $parts;
@@ -865,15 +881,15 @@ class SolutionManager implements Manager {
 		$remote_parts = $this->fetch_ltrecords_parts();
 		// If we have received remote parts, use them.
 		// Otherwise, we will keep the already cached data (if we haven't been instructed to skip the cache).
-		if ( ! empty( $remote_parts ) && ! is_wp_error( $remote_parts ) ) {
+		if ( ! empty( $remote_parts ) && ! \is_wp_error( $remote_parts ) ) {
 			$parts = $remote_parts;
 			// Cache the results in an option with an expiration timestamp.
 			// Like a transient but without the automatic delete logic since we want to keep existing data if we are not able to fetch.
-			update_option( '_pixelgradelt_retailer_ltrecords_parts', $parts, true );
-			update_option( '_pixelgradelt_retailer_ltrecords_parts_timeout', time() + MINUTE_IN_SECONDS * 15, true );
+			\update_option( '_pixelgradelt_retailer_ltrecords_parts', $parts, true );
+			\update_option( '_pixelgradelt_retailer_ltrecords_parts_timeout', time() + MINUTE_IN_SECONDS * 15, true );
 		}
 
-		if ( is_wp_error( $remote_parts ) ) {
+		if ( \is_wp_error( $remote_parts ) ) {
 			$parts = $remote_parts;
 		}
 
@@ -908,13 +924,13 @@ class SolutionManager implements Manager {
 			'sslverify' => ! ( is_debug_mode() || is_dev_url( $ltrecords_parts_repo_url ) ),
 		];
 
-		$response = wp_remote_get( $ltrecords_parts_repo_url, $request_args );
-		if ( is_wp_error( $response ) || wp_remote_retrieve_response_code( $response ) !== 200 ) {
+		$response = \wp_remote_get( $ltrecords_parts_repo_url, $request_args );
+		if ( \is_wp_error( $response ) || \wp_remote_retrieve_response_code( $response ) !== 200 ) {
 			$error            = [];
 			$error['code']    = 'ltrecords_request_error';
 			$error['message'] = esc_html__( 'Something went wrong and we couldn\'t get the LT Records parts from the provided endpoint.', 'pixelgradelt_retailer' );
 
-			if ( is_wp_error( $response ) ) {
+			if ( \is_wp_error( $response ) ) {
 				$error['data'] = [
 					'request_error' => [
 						'code'    => $response->get_error_code(),
@@ -924,7 +940,7 @@ class SolutionManager implements Manager {
 				];
 			} else {
 				// Add the data we received from LT Records.
-				$response_body = json_decode( wp_remote_retrieve_body( $response ), true );
+				$response_body = json_decode( \wp_remote_retrieve_body( $response ), true );
 				$error['data'] = [
 					'ltrecords' => [
 						'code'    => $response_body['code'] ?? '',
@@ -943,7 +959,7 @@ class SolutionManager implements Manager {
 
 		// We get back the entire repo with it's Composer-specific structure.
 		// Retain only the parts package-names list.
-		$repo = json_decode( wp_remote_retrieve_body( $response ), true );
+		$repo = json_decode( \wp_remote_retrieve_body( $response ), true );
 		if ( ! empty( $repo['packages'] ) && is_array( $repo['packages'] ) ) {
 			foreach ( $repo['packages'] as $package_name => $package_releases ) {
 				if ( empty( $package_releases ) ) {

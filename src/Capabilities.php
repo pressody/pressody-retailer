@@ -99,6 +99,20 @@ final class Capabilities {
 	const EDIT_COMPOSITION = 'pixelgradelt_retailer_edit_composition';
 
 	/**
+	 * Primitive capability for deleting compositions.
+	 *
+	 * @var string
+	 */
+	const DELETE_COMPOSITIONS = 'pixelgradelt_retailer_delete_compositions';
+
+	/**
+	 * Meta capability for deleting a specific composition.
+	 *
+	 * @var string
+	 */
+	const DELETE_COMPOSITION = 'pixelgradelt_retailer_delete_composition';
+
+	/**
 	 * User role for users that are customers (create and manage their own compositions).
 	 *
 	 * @var string
@@ -128,17 +142,19 @@ final class Capabilities {
 		$wp_roles->add_cap( 'administrator', self::CREATE_COMPOSITIONS );
 		$wp_roles->add_cap( 'administrator', self::VIEW_COMPOSITIONS );
 		$wp_roles->add_cap( 'administrator', self::EDIT_COMPOSITIONS );
+		$wp_roles->add_cap( 'administrator', self::DELETE_COMPOSITIONS );
 
 		// Create a role for users that are customers (create and manage their own compositions).
 		$wp_roles->add_role( self::CUSTOMER_USER_ROLE, 'LT Retailer Customer', [
 			self::CREATE_COMPOSITIONS => true,
-			self::VIEW_COMPOSITION    => true,
-			self::EDIT_COMPOSITION    => true,
+			self::VIEW_COMPOSITIONS   => true,
+			self::EDIT_COMPOSITIONS   => true,
+			self::DELETE_COMPOSITIONS => true,
 		] );
 
 		// Create a special role for users intended to be used by REST API clients.
 		$wp_roles->add_role( self::CLIENT_USER_ROLE, 'LT Retailer Client', [
-			self::VIEW_SOLUTIONS    => true,
+			self::VIEW_SOLUTIONS => true,
 		] );
 	}
 }

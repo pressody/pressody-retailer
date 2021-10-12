@@ -80,10 +80,10 @@ abstract class LogHandler implements LogHandlerInterface {
 			unset( $temp_context['logCategory'] );
 		}
 		if ( ! empty( $temp_context ) ) {
-			$entry .= ' ' . wp_json_encode( $temp_context, \JSON_UNESCAPED_SLASHES );
+			$entry .= ' ' . \wp_json_encode( $temp_context, \JSON_UNESCAPED_SLASHES );
 		}
 
-		return apply_filters(
+		return \apply_filters(
 			'pixelgradelt_retailer/format_log_entry',
 			$entry,
 			[
@@ -109,7 +109,7 @@ abstract class LogHandler implements LogHandlerInterface {
 		} elseif ( is_object( $value ) && method_exists( '__toString', $value ) ) {
 			$value = (string) $value;
 		} elseif ( ! is_scalar( $value ) ) {
-			$value = wp_json_encode( $value, \JSON_UNESCAPED_SLASHES, 128 );
+			$value = \wp_json_encode( $value, \JSON_UNESCAPED_SLASHES, 128 );
 		}
 
 		return (string) $value;

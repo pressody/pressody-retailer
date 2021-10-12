@@ -437,7 +437,7 @@ As long as a order that includes one of these products remains valid ("completed
 				 * @param array $old_product_ids The old solution WooCommerce product IDs.
 				 * @param array $new_solution    The new solution data.
 				 */
-				do_action( 'pixelgradelt_retailer/ltsolution/woocommerce_products_change',
+				\do_action( 'pixelgradelt_retailer/ltsolution/woocommerce_products_change',
 					$post_id,
 					$new_products,
 					$old_products,

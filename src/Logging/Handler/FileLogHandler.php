@@ -61,7 +61,7 @@ class FileLogHandler extends LogHandler {
 		}
 
 		/** @noinspection PhpFieldAssignmentTypeMismatchInspection */
-		$this->log_size_limit = apply_filters( 'pixelgradelt_retailer/log_file_size_limit', $log_size_limit );
+		$this->log_size_limit = \apply_filters( 'pixelgradelt_retailer/log_file_size_limit', $log_size_limit );
 
 		add_action( 'plugins_loaded', array( $this, 'write_cached_logs' ) );
 	}
@@ -150,7 +150,7 @@ class FileLogHandler extends LogHandler {
 		// Since the trace may contain in a step's args circular references, we need to replace such references with a string.
 		// This is to avoid infinite recursion when attempting to json_encode().
 		$trace = JSONCleaner::clean( $e->getTrace(), 6 );
-		$encoded_exception = wp_json_encode(
+		$encoded_exception = \wp_json_encode(
 			[
 				'message' => $e->getMessage(),
 				'code'    => $e->getCode(),
@@ -185,7 +185,7 @@ class FileLogHandler extends LogHandler {
 
 		if ( $file ) {
 			if ( ! file_exists( $file ) ) {
-				if ( ! wp_mkdir_p( \dirname( $file ) ) ) {
+				if ( ! \wp_mkdir_p( \dirname( $file ) ) ) {
 					return false;
 				}
 
@@ -282,7 +282,7 @@ class FileLogHandler extends LogHandler {
 			$result = true;
 		}
 
-		do_action( 'pixelgradelt_retailer/log_clear', $handle );
+		\do_action( 'pixelgradelt_retailer/log_clear', $handle );
 
 		return $result;
 	}
@@ -297,15 +297,16 @@ class FileLogHandler extends LogHandler {
 	public function remove( string $handle ): bool {
 		$removed = false;
 		$logs    = $this->get_log_files();
-		$handle  = sanitize_title( $handle );
+		$handle  = \sanitize_title( $handle );
 
 		if ( isset( $logs[ $handle ] ) && $logs[ $handle ] ) {
-			$file = realpath( trailingslashit( LOG_DIR ) . $logs[ $handle ] );
+			$file = realpath( \trailingslashit( LOG_DIR ) . $logs[ $handle ] );
 			if ( 0 === stripos( $file, realpath( trailingslashit( LOG_DIR ) ) ) && is_file( $file ) && is_writable( $file ) ) { // phpcs:ignore WordPress.VIP.FileSystemWritesDisallow.file_ops_is_writable
 				$this->close( $file ); // Close first to be certain no processes keep it alive after it is unlinked.
 				$removed = unlink( $file ); // phpcs:ignore WordPress.VIP.FileSystemWritesDisallow.file_ops_unlink
 			}
-			do_action( 'pixelgradelt_retailer/log_remove', $handle, $removed );
+
+			\do_action( 'pixelgradelt_retailer/log_remove', $handle, $removed );
 		}
 		return $removed;
 	}
@@ -397,7 +398,7 @@ class FileLogHandler extends LogHandler {
 	 */
 	public static function get_log_file_path( string $handle ) {
 		if ( function_exists( 'wp_hash' ) ) {
-			return trailingslashit( LOG_DIR ) . self::get_log_file_name( $handle );
+			return \trailingslashit( LOG_DIR ) . self::get_log_file_name( $handle );
 		} else {
 			doing_it_wrong( __METHOD__, __( 'This method should not be called before plugins_loaded.', 'pixelgradelt_retailer' ), '0.1.0' );
 			return false;
@@ -418,8 +419,8 @@ class FileLogHandler extends LogHandler {
 	public static function get_log_file_name( string $handle ) {
 		if ( function_exists( 'wp_hash' ) ) {
 			$date_suffix = date( 'Y-m-d', time() );
-			$hash_suffix = wp_hash( $handle );
-			return sanitize_file_name( implode( '-', [ $handle, $date_suffix, $hash_suffix ] ) . '.log' );
+			$hash_suffix = \wp_hash( $handle );
+			return \sanitize_file_name( implode( '-', [ $handle, $date_suffix, $hash_suffix ] ) . '.log' );
 		} else {
 			doing_it_wrong( __METHOD__, __( 'This method should not be called before plugins_loaded.', 'pixelgradelt_retailer' ), '0.9.0' );
 			return false;
@@ -463,10 +464,10 @@ class FileLogHandler extends LogHandler {
 		$log_files = self::get_log_files();
 
 		foreach ( $log_files as $log_file ) {
-			$last_modified = filemtime( trailingslashit( LOG_DIR ) . $log_file );
+			$last_modified = filemtime( \trailingslashit( LOG_DIR ) . $log_file );
 
 			if ( $last_modified < $timestamp ) {
-				@unlink( trailingslashit( LOG_DIR ) . $log_file ); // @codingStandardsIgnoreLine.
+				@unlink( \trailingslashit( LOG_DIR ) . $log_file ); // @codingStandardsIgnoreLine.
 			}
 		}
 	}
@@ -485,7 +486,7 @@ class FileLogHandler extends LogHandler {
 			foreach ( $files as $key => $value ) {
 				if ( ! in_array( $value, [ '.', '..', ], true ) ) {
 					if ( ! is_dir( $value ) && strstr( $value, '.log' ) ) {
-						$result[ sanitize_title( $value ) ] = $value;
+						$result[ \sanitize_title( $value ) ] = $value;
 					}
 				}
 			}

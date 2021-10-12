@@ -105,6 +105,7 @@ class Capabilities extends AbstractHookProvider {
 
 				$caps = [ Caps::VIEW_COMPOSITIONS ]; // VIEW_COMPOSITION maps to VIEW_COMPOSITIONS.
 				break;
+
 			case Caps::EDIT_COMPOSITION :
 				// Besides post IDs, we also use hashids to identify compositions (mainly via REST API).
 				if ( is_numeric( $args[0] ) ) {
@@ -140,6 +141,43 @@ class Capabilities extends AbstractHookProvider {
 				}
 
 				$caps = [ Caps::EDIT_COMPOSITIONS ];
+				break;
+
+			case Caps::DELETE_COMPOSITION :
+				// Besides post IDs, we also use hashids to identify compositions (mainly via REST API).
+				if ( is_numeric( $args[0] ) ) {
+					$post = get_post( $args[0] );
+				} else {
+					$post = get_post( $this->composition_manager->get_composition_post_id_by( [ 'hashid' => $args[0] ] ) );
+				}
+
+				if ( empty( $post ) ) {
+					$caps[] = 'do_not_allow';
+					break;
+				}
+
+				if ( 'revision' === $post->post_type ) {
+					$post = get_post( $post->post_parent );
+					if ( empty( $post ) ) {
+						$caps[] = 'do_not_allow';
+						break;
+					}
+				}
+
+				// If the user can manage compositions, he or she is good to go.
+				if ( user_can( $user_id, Caps::MANAGE_COMPOSITIONS ) ) {
+					$caps = [ Caps::DELETE_COMPOSITIONS ]; // DELETE_COMPOSITION maps to DELETE_COMPOSITIONS.
+					break;
+				}
+
+				// Get the composition author. Only authors can delete compositions.
+				$composition_author_id = $this->composition_manager->get_post_composition_author( $post->ID );
+				if ( $user_id !== $composition_author_id ) {
+					$caps = [ 'do_not_allow' ];
+					break;
+				}
+
+				$caps = [ Caps::DELETE_COMPOSITIONS ];
 				break;
 		}
 

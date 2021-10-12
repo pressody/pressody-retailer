@@ -63,7 +63,7 @@ class ComposerPackages implements Route {
 	 * @return Response
 	 */
 	public function handle( Request $request ): Response {
-		if ( ! current_user_can( Capabilities::VIEW_SOLUTIONS ) ) {
+		if ( ! \current_user_can( Capabilities::VIEW_SOLUTIONS ) ) {
 			throw HttpException::forForbiddenResource();
 		}
 

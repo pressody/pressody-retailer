@@ -98,8 +98,8 @@ class EditSolution extends AbstractHookProvider {
 	 */
 	public function register_hooks() {
 		// Assets.
-		add_action( 'load-post.php', [ $this, 'load_screen' ] );
-		add_action( 'load-post-new.php', [ $this, 'load_screen' ] );
+		\add_action( 'load-post.php', [ $this, 'load_screen' ] );
+		\add_action( 'load-post-new.php', [ $this, 'load_screen' ] );
 
 		// Logic.
 		// Make sure that the post has a title.
@@ -158,12 +158,12 @@ class EditSolution extends AbstractHookProvider {
 	 * @since 0.1.0
 	 */
 	public function load_screen() {
-		$screen = get_current_screen();
+		$screen = \get_current_screen();
 		if ( $this->solution_manager::POST_TYPE !== $screen->post_type ) {
 			return;
 		}
 
-		add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_assets' ] );
+		\add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_assets' ] );
 	}
 
 	/**
@@ -172,16 +172,16 @@ class EditSolution extends AbstractHookProvider {
 	 * @since 0.1.0
 	 */
 	public function enqueue_assets() {
-		wp_enqueue_script( 'pixelgradelt_retailer-admin' );
-		wp_enqueue_style( 'pixelgradelt_retailer-admin' );
+		\wp_enqueue_script( 'pixelgradelt_retailer-admin' );
+		\wp_enqueue_style( 'pixelgradelt_retailer-admin' );
 
-		wp_enqueue_script( 'pixelgradelt_retailer-edit-solution' );
+		\wp_enqueue_script( 'pixelgradelt_retailer-edit-solution' );
 
-		wp_localize_script(
+		\wp_localize_script(
 				'pixelgradelt_retailer-edit-solution',
 				'_pixelgradeltRetailerEditSolutionData',
 				[
-						'editedPostId' => get_the_ID(),
+						'editedPostId' => \get_the_ID(),
 				]
 		);
 
@@ -200,18 +200,18 @@ class EditSolution extends AbstractHookProvider {
 	 * @param int $post_id The ID of the post that's being saved.
 	 */
 	protected function prevent_post_save_without_title( int $post_id ) {
-		$post = get_post( $post_id );
+		$post = \get_post( $post_id );
 
 		if ( ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE )
 		     || ( defined( 'DOING_AJAX' ) && DOING_AJAX )
-		     || ! current_user_can( 'edit_post', $post_id )
-		     || false !== wp_is_post_revision( $post_id )
-		     || 'trash' == get_post_status( $post_id )
+		     || ! \current_user_can( 'edit_post', $post_id )
+		     || false !== \wp_is_post_revision( $post_id )
+		     || 'trash' == \get_post_status( $post_id )
 		     || isset( $post->post_status ) && 'auto-draft' == $post->post_status ) {
 			return;
 		}
 
-		$package_title = isset( $_POST['post_title'] ) ? sanitize_text_field( $_POST['post_title'] ) : '';
+		$package_title = isset( $_POST['post_title'] ) ? \sanitize_text_field( $_POST['post_title'] ) : '';
 
 		// A valid title is required, so don't let this get published without one
 		if ( empty( $package_title ) ) {
@@ -222,7 +222,7 @@ class EditSolution extends AbstractHookProvider {
 					'ID'          => $post_id,
 					'post_status' => 'draft',
 			);
-			wp_update_post( $postdata );
+			\wp_update_post( $postdata );
 
 			// This way we avoid the "published" admin message.
 			unset( $_POST['publish'] );
@@ -230,7 +230,7 @@ class EditSolution extends AbstractHookProvider {
 	}
 
 	protected function change_title_placeholder( string $placeholder, \WP_Post $post ): string {
-		if ( $this->solution_manager::POST_TYPE !== get_post_type( $post ) ) {
+		if ( $this->solution_manager::POST_TYPE !== \get_post_type( $post ) ) {
 			return $placeholder;
 		}
 
@@ -239,12 +239,12 @@ class EditSolution extends AbstractHookProvider {
 
 	protected function add_post_slug_description( string $post_name, $post ): string {
 		// We want this only on the edit post screen.
-		if ( $this->solution_manager::POST_TYPE !== get_current_screen()->id ) {
+		if ( $this->solution_manager::POST_TYPE !== \get_current_screen()->id ) {
 			return $post_name;
 		}
 
 		// Only on our post type.
-		if ( $this->solution_manager::POST_TYPE !== get_post_type( $post ) ) {
+		if ( $this->solution_manager::POST_TYPE !== \get_post_type( $post ) ) {
 			return $post_name;
 		}
 		// Just output it since there is no way to add it other way. ?>
@@ -417,7 +417,7 @@ The excluded solutions only take effect in <strong>a purchase context (add to ca
 	public function add_solution_current_state_meta_box() {
 		$post_type    = $this->solution_manager::POST_TYPE;
 		$container_id = $post_type . '_current_state_details';
-		add_meta_box(
+		\add_meta_box(
 				$container_id,
 				esc_html__( 'Current Solution State Details', 'pixelgradelt_retailer' ),
 				array( $this, 'display_solution_current_state_meta_box' ),
@@ -426,7 +426,7 @@ The excluded solutions only take effect in <strong>a purchase context (add to ca
 				'core'
 		);
 
-		add_filter( "postbox_classes_{$post_type}_{$container_id}", [
+		\add_filter( "postbox_classes_{$post_type}_{$container_id}", [
 				$this,
 				'add_solution_current_state_box_classes',
 		] );
@@ -453,7 +453,7 @@ The excluded solutions only take effect in <strong>a purchase context (add to ca
 	public function display_solution_current_state_meta_box( \WP_Post $post ) {
 		// Wrap it for spacing.
 		echo '<div class="cf-container"><div class="cf-field">';
-		echo '<p>This is <strong>the same info</strong> shown in the full solution-details list available <a href="' . esc_url( admin_url( 'options-general.php?page=pixelgradelt_retailer#pixelgradelt_retailer-solutions' ) ) . '">here</a>. <strong>The definitive source of truth is the packages JSON</strong> available <a href="' . esc_url( get_solutions_permalink() ) . '">here</a>.</p>';
+		echo '<p>This is <strong>the same info</strong> shown in the full solution-details list available <a href="' . \esc_url( \admin_url( 'options-general.php?page=pixelgradelt_retailer#pixelgradelt_retailer-solutions' ) ) . '">here</a>. <strong>The definitive source of truth is the packages JSON</strong> available <a href="' . \esc_url( get_solutions_permalink() ) . '">here</a>.</p>';
 		require $this->plugin->get_path( 'views/solution-preview.php' );
 		echo '</div></div>';
 	}
@@ -506,12 +506,12 @@ The excluded solutions only take effect in <strong>a purchase context (add to ca
 			}
 			$message .= 'There should be additional information in the PixelgradeLT Retailer logs.';
 			$message .= '</p>';
-			update_post_meta( $post_ID, '_package_require_dry_run_result', [
+			\update_post_meta( $post_ID, '_package_require_dry_run_result', [
 					'type'    => 'error',
 					'message' => $message,
 			] );
 		} else {
-			update_post_meta( $post_ID, '_package_require_dry_run_result', '' );
+			\update_post_meta( $post_ID, '_package_require_dry_run_result', '' );
 		}
 	}
 
@@ -574,7 +574,7 @@ The excluded solutions only take effect in <strong>a purchase context (add to ca
 	 */
 	protected function get_ltrecords_parts( bool $skip_cache = false ): array {
 		$parts = $this->solution_manager->get_ltrecords_parts( $skip_cache );
-		if ( is_wp_error( $parts ) ) {
+		if ( \is_wp_error( $parts ) ) {
 			$this->add_user_message( 'error', sprintf(
 					'<p>%s</p>',
 					$parts->get_error_message()
@@ -596,7 +596,7 @@ The excluded solutions only take effect in <strong>a purchase context (add to ca
 	 * @param \WP_Post The current post object.
 	 */
 	protected function check_solution_post( \WP_Post $post ) {
-		if ( $this->solution_manager::POST_TYPE !== get_post_type( $post ) || 'auto-draft' === get_post_status( $post ) ) {
+		if ( $this->solution_manager::POST_TYPE !== \get_post_type( $post ) || 'auto-draft' === \get_post_status( $post ) ) {
 			return;
 		}
 
@@ -609,7 +609,7 @@ The excluded solutions only take effect in <strong>a purchase context (add to ca
 		}
 
 		// Display an error regarding that the solution type is required.
-		$solution_type = wp_get_object_terms( $post->ID, $this->solution_manager::TYPE_TAXONOMY, array(
+		$solution_type = \wp_get_object_terms( $post->ID, $this->solution_manager::TYPE_TAXONOMY, array(
 				'orderby' => 'term_id',
 				'order'   => 'ASC',
 		) );
@@ -623,7 +623,7 @@ The excluded solutions only take effect in <strong>a purchase context (add to ca
 			$solution_type = reset( $solution_type );
 		}
 
-		$dry_run_results = get_post_meta( $post->ID, '_package_require_dry_run_result', true );
+		$dry_run_results = \get_post_meta( $post->ID, '_package_require_dry_run_result', true );
 		if ( ! empty( $dry_run_results ) ) {
 			if ( is_string( $dry_run_results ) ) {
 				$dry_run_results = [
@@ -665,11 +665,11 @@ The excluded solutions only take effect in <strong>a purchase context (add to ca
 	 * @param \WP_Post The current post object.
 	 */
 	protected function show_user_messages( \WP_Post $post ) {
-		if ( $this->solution_manager::POST_TYPE !== get_post_type( $post ) || 'auto-draft' === get_post_status( $post ) ) {
+		if ( $this->solution_manager::POST_TYPE !== \get_post_type( $post ) || 'auto-draft' === \get_post_status( $post ) ) {
 			return;
 		}
 
-		$messages = apply_filters( 'pixelgradelt_retailer/editsolution_show_user_messages', $this->user_messages, $post );
+		$messages = \apply_filters( 'pixelgradelt_retailer/editsolution_show_user_messages', $this->user_messages, $post );
 		if ( empty( $messages ) ) {
 			return;
 		}
@@ -707,13 +707,13 @@ The excluded solutions only take effect in <strong>a purchase context (add to ca
 	 * @param \WP_Post The current post object.
 	 */
 	protected function show_publish_message( \WP_Post $post ) {
-		if ( $this->solution_manager::POST_TYPE !== get_post_type( $post ) ) {
+		if ( $this->solution_manager::POST_TYPE !== \get_post_type( $post ) ) {
 			return;
 		}
 
 		printf(
 				'<div class="message patience"><p>%s</p></div>',
-				wp_kses_post( __( 'Please bear in mind that Publish/Update may take a while since we do some heavy lifting behind the scenes.<br>Exercise patience 🦉', 'pixelgradelt_retailer' ) )
+				\wp_kses_post( __( 'Please bear in mind that Publish/Update may take a while since we do some heavy lifting behind the scenes.<br>Exercise patience 🦉', 'pixelgradelt_retailer' ) )
 		);
 	}
 
@@ -740,7 +740,7 @@ The excluded solutions only take effect in <strong>a purchase context (add to ca
 		 * @param \WP_Post $post    The post object.
 		 * @param bool     $update  If the operation was an update.
 		 */
-		do_action( 'pixelgradelt_retailer/ltsolution/save',
+		\do_action( 'pixelgradelt_retailer/ltsolution/save',
 				$post_id,
 				$post,
 				$update
@@ -774,7 +774,7 @@ The excluded solutions only take effect in <strong>a purchase context (add to ca
 			 * @param string $old_visibility The old solution visibility.
 			 * @param array  $new_solution   The new solution data.
 			 */
-			do_action( 'pixelgradelt_retailer/ltsolution/visibility_change',
+			\do_action( 'pixelgradelt_retailer/ltsolution/visibility_change',
 					$post_id,
 					$current_solution['visibility'],
 					$old_solution['visibility'],
@@ -796,7 +796,7 @@ The excluded solutions only take effect in <strong>a purchase context (add to ca
 			 * @param string $old_type     The old solution type.
 			 * @param array  $new_solution The new solution data.
 			 */
-			do_action( 'pixelgradelt_retailer/ltsolution/type_change',
+			\do_action( 'pixelgradelt_retailer/ltsolution/type_change',
 					$post_id,
 					$current_solution['type'],
 					$old_solution['type'],
@@ -818,7 +818,7 @@ The excluded solutions only take effect in <strong>a purchase context (add to ca
 			 * @param string $old_slug     The old solution slug.
 			 * @param array  $new_solution The new solution data.
 			 */
-			do_action( 'pixelgradelt_retailer/ltsolution/slug_change',
+			\do_action( 'pixelgradelt_retailer/ltsolution/slug_change',
 					$post_id,
 					$current_solution['slug'],
 					$old_solution['slug'],
@@ -834,7 +834,7 @@ The excluded solutions only take effect in <strong>a purchase context (add to ca
 		$old_required_ltparts_package_name = \wp_list_pluck( $old_solution['required_ltrecords_parts'], 'package_name' );
 		sort( $old_required_ltparts_package_name );
 
-		$current_required_ltparts_package_name = wp_list_pluck( $current_solution['required_ltrecords_parts'], 'package_name' );
+		$current_required_ltparts_package_name = \wp_list_pluck( $current_solution['required_ltrecords_parts'], 'package_name' );
 		sort( $current_required_ltparts_package_name );
 
 		if ( serialize( $old_required_ltparts_package_name ) !== serialize( $current_required_ltparts_package_name ) ) {
@@ -848,7 +848,7 @@ The excluded solutions only take effect in <strong>a purchase context (add to ca
 			 * @param array $old_required_ltparts The old solution required_ltparts.
 			 * @param array $new_solution         The new solution data.
 			 */
-			do_action( 'pixelgradelt_retailer/ltsolution/required_ltparts_change',
+			\do_action( 'pixelgradelt_retailer/ltsolution/required_ltparts_change',
 					$post_id,
 					$current_solution['required_ltrecords_parts'],
 					$old_solution['required_ltrecords_parts'],
@@ -888,7 +888,7 @@ The excluded solutions only take effect in <strong>a purchase context (add to ca
 			 * @param array $old_required_solutions The old solution required_solutions.
 			 * @param array $new_solution           The new solution data.
 			 */
-			do_action( 'pixelgradelt_retailer/ltsolution/required_solutions_change',
+			\do_action( 'pixelgradelt_retailer/ltsolution/required_solutions_change',
 					$post_id,
 					$current_required_solutions,
 					$old_required_solutions,
@@ -928,7 +928,7 @@ The excluded solutions only take effect in <strong>a purchase context (add to ca
 			 * @param array $old_excluded_solutions The old solution excluded_solutions.
 			 * @param array $new_solution           The new solution data.
 			 */
-			do_action( 'pixelgradelt_retailer/ltsolution/excluded_solutions_change',
+			\do_action( 'pixelgradelt_retailer/ltsolution/excluded_solutions_change',
 					$post_id,
 					$current_excluded_solutions,
 					$old_excluded_solutions,
@@ -945,7 +945,7 @@ The excluded solutions only take effect in <strong>a purchase context (add to ca
 		 * @param array $new_solution The new solution data.
 		 * @param array $old_solution The old solution data.
 		 */
-		do_action( 'pixelgradelt_retailer/ltsolution/update',
+		\do_action( 'pixelgradelt_retailer/ltsolution/update',
 				$post_id,
 				$current_solution,
 				$old_solution
@@ -987,7 +987,7 @@ WHERE m.meta_key LIKE '%pseudo_id%' AND p.post_type <> 'revision'", $prev_soluti
 
 		// Flush the entire cache since we don't know what post IDs might have been affected.
 		// It is OK since this is a rare operation.
-		wp_cache_flush();
+		\wp_cache_flush();
 	}
 
 	/**

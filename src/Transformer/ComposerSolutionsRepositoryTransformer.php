@@ -90,7 +90,7 @@ class ComposerSolutionsRepositoryTransformer implements PackageRepositoryTransfo
 
 		foreach ( $repository->all() as $package ) {
 			// We will not include packages without releases or packages that are not public (except for admin users).
-			if ( ! ( current_user_can( Capabilities::MANAGE_OPTIONS ) || $this->solution_manager->is_solution_public( $package ) ) ) {
+			if ( ! ( \current_user_can( Capabilities::MANAGE_OPTIONS ) || $this->solution_manager->is_solution_public( $package ) ) ) {
 				continue;
 			}
 
@@ -142,7 +142,7 @@ class ComposerSolutionsRepositoryTransformer implements PackageRepositoryTransfo
 		}
 
 		// Finally, allow others to have a say.
-		$require = apply_filters( 'pixelgradelt_retailer/composer_solution_require', $require, $package );
+		$require = \apply_filters( 'pixelgradelt_retailer/composer_solution_require', $require, $package );
 
 		$excluded_solutions = [];
 		if ( $package->has_excluded_solutions() ) {

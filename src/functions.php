@@ -148,7 +148,7 @@ function get_composer_vendor(): string {
 	/**
 	 * The custom vendor configured via the Settings page is hooked through @see CustomVendor::register_hooks()
 	 */
-	$vendor = apply_filters( 'pixelgradelt_retailer/vendor', 'pixelgradelt-retailer' );
+	$vendor = \apply_filters( 'pixelgradelt_retailer/vendor', 'pixelgradelt-retailer' );
 	if ( empty( $vendor ) || ! is_string( $vendor ) ) {
 		throw new InvalidComposerVendor( "The PixelgradeLT Retailer Composer vendor must be a string and it can't be empty or falsy." );
 	}
@@ -190,7 +190,7 @@ function get_edited_user_id(): int {
  * @return mixed
  */
 function carbon_get_raw_post_meta( int $id, string $name, string $container_id = '' ) {
-	$id = apply_filters( 'carbon_get_post_meta_post_id', $id, $name, $container_id );
+	$id = \apply_filters( 'carbon_get_post_meta_post_id', $id, $name, $container_id );
 
 	return Helper::with_field_clone(
 		$id,
@@ -267,13 +267,13 @@ function is_debug_mode(): bool {
 
 function doing_it_wrong( $function, $message, $version ) {
 	// @codingStandardsIgnoreStart
-	$message .= ' Backtrace: ' . wp_debug_backtrace_summary();
+	$message .= ' Backtrace: ' . \wp_debug_backtrace_summary();
 
 	if ( wp_doing_ajax() || is_rest_request() ) {
-		do_action( 'doing_it_wrong_run', $function, $message, $version );
+		\do_action( 'doing_it_wrong_run', $function, $message, $version );
 		error_log( "{$function} was called incorrectly. {$message}. This message was added in version {$version}." );
 	} else {
-		_doing_it_wrong( $function, $message, $version );
+		\_doing_it_wrong( $function, $message, $version );
 	}
 }
 
@@ -282,10 +282,10 @@ function is_rest_request() {
 		return false;
 	}
 
-	$rest_prefix         = trailingslashit( rest_get_url_prefix() );
+	$rest_prefix         = \trailingslashit( \rest_get_url_prefix() );
 	$is_rest_api_request = ( false !== strpos( $_SERVER['REQUEST_URI'], $rest_prefix ) ); // phpcs:disable WordPress.Security.ValidatedSanitizedInput.MissingUnslash, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 
-	return apply_filters( 'pixelgradelt_retailer/is_rest_api_request', $is_rest_api_request );
+	return \apply_filters( 'pixelgradelt_retailer/is_rest_api_request', $is_rest_api_request );
 }
 
 /**
@@ -339,7 +339,7 @@ function ensure_packages_json_url( string $url ): string {
 		return $url;
 	}
 
-	return path_join( $url, 'packages.json' );
+	return \path_join( $url, 'packages.json' );
 }
 
 /**
@@ -356,7 +356,7 @@ function preload_rest_data( array $paths ) {
 		[]
 	);
 
-	wp_add_inline_script(
+	\wp_add_inline_script(
 		'wp-api-fetch',
 		sprintf( 'wp.apiFetch.use( wp.apiFetch.createPreloadingMiddleware( %s ) );', wp_json_encode( $preload_data ) ),
 		'after'
@@ -386,8 +386,8 @@ function local_rest_call( string $route, string $method = 'GET', array $query_pa
 		$request->set_body_params( $body_params );
 	}
 
-	$response = rest_do_request( $request );
-	$server   = rest_get_server();
+	$response = \rest_do_request( $request );
+	$server   = \rest_get_server();
 
 	return $server->response_to_data( $response, false );
 }

@@ -97,7 +97,7 @@ class SolutionsController extends WP_REST_Controller {
 			'/' . $this->rest_base,
 			[
 				[
-					'methods'             => WP_REST_Server::READABLE,
+					'methods'             => \WP_REST_Server::READABLE,
 					'callback'            => [ $this, 'get_items' ],
 					'permission_callback' => [ $this, 'get_items_permissions_check' ],
 					'args'                => $this->get_collection_params(),
@@ -111,7 +111,7 @@ class SolutionsController extends WP_REST_Controller {
 			'/' . $this->rest_base . '/processed',
 			[
 				[
-					'methods'             => WP_REST_Server::READABLE,
+					'methods'             => \WP_REST_Server::READABLE,
 					'callback'            => [ $this, 'get_processed_items' ],
 					'permission_callback' => [ $this, 'get_items_permissions_check' ],
 					'args'                => $this->get_collection_params(),
@@ -126,12 +126,12 @@ class SolutionsController extends WP_REST_Controller {
 			[
 				'args'   => [
 					'id' => [
-						'description' => __( 'The solution post ID.', 'pixelgradelt_retailer' ),
+						'description' => esc_html__( 'The solution post ID.', 'pixelgradelt_retailer' ),
 						'type'        => 'integer',
 					],
 				],
 				[
-					'methods'             => WP_REST_Server::READABLE,
+					'methods'             => \WP_REST_Server::READABLE,
 					'callback'            => [ $this, 'get_item' ],
 					'permission_callback' => [ $this, 'get_item_permissions_check' ],
 					'args'                => [
@@ -147,7 +147,7 @@ class SolutionsController extends WP_REST_Controller {
 			'/' . $this->rest_base . '/parts',
 			[
 				[
-					'methods'             => WP_REST_Server::READABLE,
+					'methods'             => \WP_REST_Server::READABLE,
 					'callback'            => [ $this, 'get_items_parts' ],
 					'permission_callback' => [ $this, 'get_items_permissions_check' ],
 					'args'                => $this->get_collection_params(),
@@ -176,7 +176,7 @@ class SolutionsController extends WP_REST_Controller {
 			$items[] = $this->prepare_response_for_collection( $data );
 		}
 
-		return rest_ensure_response( $items );
+		return \rest_ensure_response( $items );
 	}
 
 	/**
@@ -199,7 +199,7 @@ class SolutionsController extends WP_REST_Controller {
 		     && empty( $request['postSlug'] )
 		     && empty( $request['packageName'] ) ) {
 
-			return new WP_Error(
+			return new \WP_Error(
 				'pixelgradelt_retailer_rest_no_list',
 				esc_html__( 'You need to define a subset of solutions to process.', 'pixelgradelt_retailer' ),
 				[ 'status' => HTTP::NOT_ACCEPTABLE ]
@@ -222,7 +222,7 @@ class SolutionsController extends WP_REST_Controller {
 			$items[] = $this->prepare_response_for_collection( $data );
 		}
 
-		return rest_ensure_response( $items );
+		return \rest_ensure_response( $items );
 	}
 
 	/**
@@ -240,7 +240,7 @@ class SolutionsController extends WP_REST_Controller {
 		// Requests for processed items need to specify a list of items to process.
 		// Otherwise, all the solutions as processed and that doesn't make any sense.
 		if ( empty( $request['postId'] ) && empty( $request['postSlug'] ) && empty( $request['packageName'] ) ) {
-			return new WP_Error(
+			return new \WP_Error(
 				'pixelgradelt_retailer_rest_no_list',
 				esc_html__( 'You need to define a subset of solutions to process.', 'pixelgradelt_retailer' ),
 				[ 'status' => HTTP::NOT_ACCEPTABLE ]
@@ -289,7 +289,7 @@ class SolutionsController extends WP_REST_Controller {
 			}
 		}
 
-		return rest_ensure_response( $this->prepare_items_parts_for_response( $required_parts, $request ) );
+		return \rest_ensure_response( $this->prepare_items_parts_for_response( $required_parts, $request ) );
 	}
 
 	/**
@@ -339,7 +339,7 @@ class SolutionsController extends WP_REST_Controller {
 		$parts = [];
 
 		// Order parts by their `composer_package_name`.
-		$items_parts = wp_list_sort( $items_parts, 'composer_package_name', 'ASC' );
+		$items_parts = \wp_list_sort( $items_parts, 'composer_package_name', 'ASC' );
 
 		foreach ( $items_parts as $items_part ) {
 			$version_range = '*';
@@ -378,8 +378,8 @@ class SolutionsController extends WP_REST_Controller {
 	 * @return true|WP_Error True if the request has read access, WP_Error object otherwise.
 	 */
 	public function get_items_permissions_check( $request ) {
-		if ( ! current_user_can( Capabilities::VIEW_SOLUTIONS ) ) {
-			return new WP_Error(
+		if ( ! \current_user_can( Capabilities::VIEW_SOLUTIONS ) ) {
+			return new \WP_Error(
 				'rest_cannot_read',
 				esc_html__( 'Sorry, you are not allowed to view solutions.', 'pixelgradelt_retailer' ),
 				[ 'status' => rest_authorization_required_code() ]
@@ -401,16 +401,16 @@ class SolutionsController extends WP_REST_Controller {
 	public function get_item( $request ) {
 		$package = $this->repository->first_where( [ 'managed_post_id' => $request->get_param( 'id' ) ] );
 		if ( empty( $package ) ) {
-			return new WP_Error(
+			return new \WP_Error(
 				'pixelgradelt_retailer_rest_invalid_id',
-				__( 'Invalid solution post ID.', 'pixelgradelt_retailer' ),
+				esc_html__( 'Invalid solution post ID.', 'pixelgradelt_retailer' ),
 				[ 'status' => HTTP::NOT_FOUND ]
 			);
 		}
 
 		$data = $this->prepare_item_for_response( $package, $request );
 
-		return rest_ensure_response( $data );
+		return \rest_ensure_response( $data );
 	}
 
 	/**
@@ -423,11 +423,11 @@ class SolutionsController extends WP_REST_Controller {
 	 * @return true|WP_Error True if the request has read access, WP_Error object otherwise.
 	 */
 	public function get_item_permissions_check( $request ) {
-		if ( ! current_user_can( Capabilities::VIEW_SOLUTION, $request->get_param( 'id' ) ) ) {
-			return new WP_Error(
+		if ( ! \current_user_can( Capabilities::VIEW_SOLUTION, $request->get_param( 'id' ) ) ) {
+			return new \WP_Error(
 				'rest_cannot_read',
 				esc_html__( 'Sorry, you are not allowed to view the requested solution.', 'pixelgradelt_retailer' ),
-				[ 'status' => rest_authorization_required_code() ]
+				[ 'status' => \rest_authorization_required_code() ]
 			);
 		}
 
@@ -536,7 +536,7 @@ class SolutionsController extends WP_REST_Controller {
 
 		$data = $this->filter_response_by_context( $data, $request['context'] );
 
-		return rest_ensure_response( $data );
+		return \rest_ensure_response( $data );
 	}
 
 	/**
@@ -563,7 +563,7 @@ class SolutionsController extends WP_REST_Controller {
 
 			$edit_link = '#';
 			if ( ! empty( $requiredPackage['managed_post_id'] ) ) {
-				$edit_link = get_edit_post_link( $requiredPackage['managed_post_id'], $request['context'] );
+				$edit_link = \get_edit_post_link( $requiredPackage['managed_post_id'], $request['context'] );
 			}
 
 			$requiredPackages[] = [
@@ -599,7 +599,7 @@ class SolutionsController extends WP_REST_Controller {
 
 			$edit_link = '#';
 			if ( ! empty( $replacedPackage['managed_post_id'] ) ) {
-				$edit_link = get_edit_post_link( $replacedPackage['managed_post_id'], $request['context'] );
+				$edit_link = \get_edit_post_link( $replacedPackage['managed_post_id'], $request['context'] );
 			}
 
 			$excludedPackages[] = [
@@ -640,13 +640,13 @@ class SolutionsController extends WP_REST_Controller {
 					'readonly'    => true,
 					'properties'  => [
 						'name' => [
-							'description' => __( 'Composer package name.', 'pixelgradelt_retailer' ),
+							'description' => esc_html__( 'Composer package name.', 'pixelgradelt_retailer' ),
 							'type'        => 'string',
 							'context'     => [ 'view', 'edit', 'embed' ],
 							'readonly'    => true,
 						],
 						'type' => [
-							'description' => __( 'Composer package type.', 'pixelgradelt_retailer' ),
+							'description' => esc_html__( 'Composer package type.', 'pixelgradelt_retailer' ),
 							'type'        => 'string',
 							'enum'        => [ 'wordpress-plugin', 'wordpress-theme' ],
 							'context'     => [ 'view', 'edit', 'embed' ],
@@ -717,7 +717,7 @@ class SolutionsController extends WP_REST_Controller {
 						'readonly'   => true,
 						'properties' => [
 							'name'        => [
-								'description' => __( 'Composer package name.', 'pixelgradelt_retailer' ),
+								'description' => esc_html__( 'Composer package name.', 'pixelgradelt_retailer' ),
 								'type'        => 'string',
 								'context'     => [ 'view', 'edit', 'embed' ],
 								'readonly'    => true,
@@ -760,7 +760,7 @@ class SolutionsController extends WP_REST_Controller {
 						'readonly'   => true,
 						'properties' => [
 							'name'        => [
-								'description' => __( 'Composer package name.', 'pixelgradelt_retailer' ),
+								'description' => esc_html__( 'Composer package name.', 'pixelgradelt_retailer' ),
 								'type'        => 'string',
 								'context'     => [ 'view', 'edit' ],
 								'readonly'    => true,
@@ -840,7 +840,7 @@ class SolutionsController extends WP_REST_Controller {
 			'type'       => 'object',
 			'properties' => [
 				'name'       => [
-					'description' => __( 'The part\'s Composer package name.', 'pixelgradelt_retailer' ),
+					'description' => esc_html__( 'The part\'s Composer package name.', 'pixelgradelt_retailer' ),
 					'type'        => 'string',
 					'context'     => [ 'view', 'edit', 'embed' ],
 					'readonly'    => true,
@@ -859,7 +859,7 @@ class SolutionsController extends WP_REST_Controller {
 						'readonly'   => true,
 						'properties' => [
 							'name'            => [
-								'description' => __( 'Solution composer package name.', 'pixelgradelt_retailer' ),
+								'description' => esc_html__( 'Solution composer package name.', 'pixelgradelt_retailer' ),
 								'type'        => 'string',
 								'context'     => [ 'view', 'edit' ],
 								'readonly'    => true,

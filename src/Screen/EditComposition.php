@@ -183,12 +183,12 @@ class EditComposition extends AbstractHookProvider {
 	 * @since 0.11.0
 	 */
 	public function load_screen() {
-		$screen = get_current_screen();
+		$screen = \get_current_screen();
 		if ( $this->composition_manager::POST_TYPE !== $screen->post_type ) {
 			return;
 		}
 
-		add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_assets' ] );
+		\add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_assets' ] );
 	}
 
 	/**
@@ -197,10 +197,10 @@ class EditComposition extends AbstractHookProvider {
 	 * @since 0.11.0
 	 */
 	public function enqueue_assets() {
-		wp_enqueue_script( 'pixelgradelt_retailer-admin' );
-		wp_enqueue_style( 'pixelgradelt_retailer-admin' );
+		\wp_enqueue_script( 'pixelgradelt_retailer-admin' );
+		\wp_enqueue_style( 'pixelgradelt_retailer-admin' );
 
-		wp_enqueue_script( 'pixelgradelt_retailer-edit-composition' );
+		\wp_enqueue_script( 'pixelgradelt_retailer-edit-composition' );
 
 		// Gather all the contained solutions in the composition.
 		$composition_data = $this->composition_manager->get_composition_id_data( get_the_ID(), true );
@@ -210,11 +210,11 @@ class EditComposition extends AbstractHookProvider {
 		// Get the encrypted form of the composition's LT details.
 		$encrypted_ltdetails = $this->composition_manager->get_post_composition_encrypted_ltdetails( $composition_data );
 
-		wp_localize_script(
+		\wp_localize_script(
 			'pixelgradelt_retailer-edit-composition',
 			'_pixelgradeltRetailerEditCompositionData',
 			[
-				'editedPostId'             => get_the_ID(),
+				'editedPostId'             => \get_the_ID(),
 				'editedHashId'             => $composition_data['hashid'],
 				'encryptedLTDetails'       => $encrypted_ltdetails,
 				'solutionIds'              => $solutionsIds,
@@ -339,7 +339,7 @@ Manually included solutions are <strong>for internal use only</strong> and are n
 	public function add_solution_current_state_meta_box() {
 		$post_type    = $this->composition_manager::POST_TYPE;
 		$container_id = $post_type . '_current_state_details';
-		add_meta_box(
+		\add_meta_box(
 			$container_id,
 			esc_html__( 'Current Composition State Details', 'pixelgradelt_retailer' ),
 			[ $this, 'display_composition_current_state_meta_box' ],
@@ -348,7 +348,7 @@ Manually included solutions are <strong>for internal use only</strong> and are n
 			'core'
 		);
 
-		add_filter( "postbox_classes_{$post_type}_{$container_id}", [
+		\add_filter( "postbox_classes_{$post_type}_{$container_id}", [
 			$this,
 			'add_composition_current_state_box_classes',
 		] );
@@ -389,12 +389,13 @@ Manually included solutions are <strong>for internal use only</strong> and are n
 	protected function fill_hashid( int $post_ID, Container\Post_Meta_Container $meta_container ) {
 		// At the moment, we are only interested in the source_configuration container.
 		// This way we avoid running this logic unnecessarily for other containers.
-		if ( empty( $meta_container->get_id() ) || 'carbon_fields_container_general_configuration_' . $this->composition_manager::POST_TYPE !== $meta_container->get_id() ) {
+		if ( empty( $meta_container->get_id() )
+		     || 'carbon_fields_container_general_configuration_' . $this->composition_manager::POST_TYPE !== $meta_container->get_id() ) {
 			return;
 		}
 
-		if ( empty( carbon_get_post_meta( $post_ID, 'composition_hashid' ) ) ) {
-			carbon_set_post_meta( $post_ID, 'composition_hashid', $this->composition_manager->hash_encode_id( $post_ID ) );
+		if ( empty( \carbon_get_post_meta( $post_ID, 'composition_hashid' ) ) ) {
+			\carbon_set_post_meta( $post_ID, 'composition_hashid', $this->composition_manager->hash_encode_id( $post_ID ) );
 		}
 	}
 
@@ -408,7 +409,8 @@ Manually included solutions are <strong>for internal use only</strong> and are n
 	protected function check_required( int $post_ID, Container\Post_Meta_Container $meta_container ) {
 		// At the moment, we are only interested in the solutions_configuration container.
 		// This way we avoid running this logic unnecessarily for other containers.
-		if ( empty( $meta_container->get_id() ) || 'carbon_fields_container_solutions_configuration_' . $this->composition_manager::POST_TYPE !== $meta_container->get_id() ) {
+		if ( empty( $meta_container->get_id() )
+		     || 'carbon_fields_container_solutions_configuration_' . $this->composition_manager::POST_TYPE !== $meta_container->get_id() ) {
 			return;
 		}
 
@@ -416,7 +418,7 @@ Manually included solutions are <strong>for internal use only</strong> and are n
 		$composition_required_solutions = $this->composition_manager->get_post_composition_required_solutions( $post_ID );
 		$solutions                      = $this->composition_manager->get_post_composition_required_solutions_packages( $composition_required_solutions );
 		if ( empty( $solutions ) ) {
-			update_post_meta( $post_ID, '_package_require_dry_run_result', '' );
+			\update_post_meta( $post_ID, '_package_require_dry_run_result', '' );
 
 			return;
 		}
@@ -437,12 +439,12 @@ Manually included solutions are <strong>for internal use only</strong> and are n
 			}
 			$message .= 'There should be additional information in the PixelgradeLT Retailer logs.';
 			$message .= '</p>';
-			update_post_meta( $post_ID, '_package_require_dry_run_result', [
+			\update_post_meta( $post_ID, '_package_require_dry_run_result', [
 				'type'    => 'error',
 				'message' => $message,
 			] );
 		} else {
-			update_post_meta( $post_ID, '_package_require_dry_run_result', '' );
+			\update_post_meta( $post_ID, '_package_require_dry_run_result', '' );
 		}
 	}
 
@@ -484,18 +486,18 @@ Manually included solutions are <strong>for internal use only</strong> and are n
 		$purchased_solutions = $this->ps_manager->get_purchased_solutions( [
 			'user_id__in'        => $owner_ids,
 			'status__not_in'     => [ 'retired', ],
-			'composition_id__in' => [ 0, get_the_ID(), ],
+			'composition_id__in' => [ 0, \get_the_ID(), ],
 			'number'             => 100,
 		] );
 
-		if ( empty( $purchased_solutions ) || ! is_array( $purchased_solutions ) ) {
+		if ( empty( $purchased_solutions ) ) {
 			return [ null => esc_html__( 'There are no (usable) purchased solutions from the current composition owners..', 'pixelgradelt_retailer' ) ];
 		}
 
 		$options = [];
 		/** @var \PixelgradeLT\Retailer\PurchasedSolution $ps */
 		foreach ( $purchased_solutions as $ps ) {
-			$customer = get_userdata( $ps->user_id );
+			$customer = \get_userdata( $ps->user_id );
 			if ( empty( $customer ) ) {
 				continue;
 			}
@@ -584,11 +586,11 @@ Manually included solutions are <strong>for internal use only</strong> and are n
 	 * @param \WP_Post The current post object.
 	 */
 	protected function check_composition_post( \WP_Post $post ) {
-		if ( $this->composition_manager::POST_TYPE !== get_post_type( $post ) || 'auto-draft' === get_post_status( $post ) ) {
+		if ( $this->composition_manager::POST_TYPE !== \get_post_type( $post ) || 'auto-draft' === \get_post_status( $post ) ) {
 			return;
 		}
 
-		$dry_run_results = get_post_meta( $post->ID, '_package_require_dry_run_result', true );
+		$dry_run_results = \get_post_meta( $post->ID, '_package_require_dry_run_result', true );
 		if ( ! empty( $dry_run_results ) ) {
 			if ( is_string( $dry_run_results ) ) {
 				$dry_run_results = [
@@ -630,11 +632,11 @@ Manually included solutions are <strong>for internal use only</strong> and are n
 	 * @param \WP_Post The current post object.
 	 */
 	protected function show_user_messages( \WP_Post $post ) {
-		if ( $this->composition_manager::POST_TYPE !== get_post_type( $post ) || 'auto-draft' === get_post_status( $post ) ) {
+		if ( $this->composition_manager::POST_TYPE !== get_post_type( $post ) || 'auto-draft' === \get_post_status( $post ) ) {
 			return;
 		}
 
-		$messages = apply_filters( 'pixelgradelt_retailer/editcomposition_show_user_messages', $this->user_messages, $post );
+		$messages = \apply_filters( 'pixelgradelt_retailer/editcomposition_show_user_messages', $this->user_messages, $post );
 		if ( empty( $messages ) ) {
 			return;
 		}
@@ -672,13 +674,13 @@ Manually included solutions are <strong>for internal use only</strong> and are n
 	 * @param \WP_Post The current post object.
 	 */
 	protected function show_publish_message( \WP_Post $post ) {
-		if ( $this->composition_manager::POST_TYPE !== get_post_type( $post ) ) {
+		if ( $this->composition_manager::POST_TYPE !== \get_post_type( $post ) ) {
 			return;
 		}
 
 		printf(
 			'<div class="message patience"><p>%s</p></div>',
-			wp_kses_post( __( 'Please bear in mind that Publish/Update may take a while since we do some heavy lifting behind the scenes.<br>Exercise patience 🦉', 'pixelgradelt_retailer' ) )
+			\wp_kses_post( __( 'Please bear in mind that Publish/Update may take a while since we do some heavy lifting behind the scenes.<br>Exercise patience 🦉', 'pixelgradelt_retailer' ) )
 		);
 	}
 
@@ -705,7 +707,7 @@ Manually included solutions are <strong>for internal use only</strong> and are n
 		 * @param \WP_Post $post    The composition post object.
 		 * @param bool     $update  If this is an update.
 		 */
-		do_action( 'pixelgradelt_retailer/ltcomposition/update',
+		\do_action( 'pixelgradelt_retailer/ltcomposition/update',
 			$post_id,
 			$post,
 			$update
@@ -752,7 +754,7 @@ Manually included solutions are <strong>for internal use only</strong> and are n
 			 * @param string $old_status      The old composition status.
 			 * @param array  $new_composition The entire new composition data.
 			 */
-			do_action( 'pixelgradelt_retailer/ltcomposition/status_change',
+			\do_action( 'pixelgradelt_retailer/ltcomposition/status_change',
 				$post_id,
 				$current_composition['status'],
 				$old_composition['status'],
@@ -772,7 +774,7 @@ Manually included solutions are <strong>for internal use only</strong> and are n
 			 * @param string $old_hashid      The old composition hashid.
 			 * @param array  $new_composition The entire new composition data.
 			 */
-			do_action( 'pixelgradelt_retailer/ltcomposition/hashid_change',
+			\do_action( 'pixelgradelt_retailer/ltcomposition/hashid_change',
 				$post_id,
 				$current_composition['hashid'],
 				$old_composition['hashid'],
@@ -802,7 +804,7 @@ Manually included solutions are <strong>for internal use only</strong> and are n
 			 * @param array $old_users       The old composition users details.
 			 * @param array $new_composition The entire new composition data.
 			 */
-			do_action( 'pixelgradelt_retailer/ltcomposition/user_change',
+			\do_action( 'pixelgradelt_retailer/ltcomposition/user_change',
 				$post_id,
 				$current_composition['users'],
 				$old_composition['users'],
@@ -833,7 +835,7 @@ Manually included solutions are <strong>for internal use only</strong> and are n
 			 * @param array $old_required_purchased_solutions The old composition required_purchased_solutions details.
 			 * @param array $new_composition                  The entire new composition data.
 			 */
-			do_action( 'pixelgradelt_retailer/ltcomposition/required_purchased_solutions_change',
+			\do_action( 'pixelgradelt_retailer/ltcomposition/required_purchased_solutions_change',
 				$post_id,
 				$current_composition['required_purchased_solutions'],
 				$old_composition['required_purchased_solutions'],
@@ -866,7 +868,7 @@ Manually included solutions are <strong>for internal use only</strong> and are n
 			 * @param array $old_required_manual_solutions The old composition required_manual_solutions details.
 			 * @param array $new_composition               The entire new composition data.
 			 */
-			do_action( 'pixelgradelt_retailer/ltcomposition/required_manual_solutions_change',
+			\do_action( 'pixelgradelt_retailer/ltcomposition/required_manual_solutions_change',
 				$post_id,
 				$current_composition['required_manual_solutions'],
 				$old_composition['required_manual_solutions'],
@@ -903,7 +905,7 @@ Manually included solutions are <strong>for internal use only</strong> and are n
 			 * @param array $old_required_solutions The old composition required_solutions.
 			 * @param array $new_composition        The entire new composition data.
 			 */
-			do_action( 'pixelgradelt_retailer/ltcomposition/required_solutions_change',
+			\do_action( 'pixelgradelt_retailer/ltcomposition/required_solutions_change',
 				$post_id,
 				$current_composition['required_solutions'],
 				$old_composition['required_solutions'],
@@ -922,7 +924,7 @@ Manually included solutions are <strong>for internal use only</strong> and are n
 		 * @param array $new_composition The entire new composition data.
 		 * @param array $old_composition The entire old composition data.
 		 */
-		do_action( 'pixelgradelt_retailer/ltcomposition/after_update',
+		\do_action( 'pixelgradelt_retailer/ltcomposition/after_update',
 			$post_id,
 			$current_composition,
 			$old_composition
@@ -963,7 +965,7 @@ Manually included solutions are <strong>for internal use only</strong> and are n
 	 * @param int      $post_id Post ID.
 	 */
 	protected function do_trash_action( int $post_id ) {
-		if ( $this->composition_manager::POST_TYPE !== get_post_type( $post_id ) ) {
+		if ( $this->composition_manager::POST_TYPE !== \get_post_type( $post_id ) ) {
 			return;
 		}
 
@@ -974,7 +976,7 @@ Manually included solutions are <strong>for internal use only</strong> and are n
 		 *
 		 * @param int      $post_id The trashed composition post ID
 		 */
-		do_action( 'pixelgradelt_retailer/ltcomposition/trash',
+		\do_action( 'pixelgradelt_retailer/ltcomposition/trash',
 			$post_id,
 		);
 	}
@@ -1021,7 +1023,7 @@ Manually included solutions are <strong>for internal use only</strong> and are n
 		 *
 		 * @param int      $post_id The deleted composition post ID
 		 */
-		do_action( 'pixelgradelt_retailer/ltcomposition/delete',
+		\do_action( 'pixelgradelt_retailer/ltcomposition/delete',
 			$post_id,
 		);
 	}
@@ -1110,7 +1112,7 @@ Manually included solutions are <strong>for internal use only</strong> and are n
 			$removed_list = [];
 			foreach ( $removed as $removed_user_id ) {
 				$item = '#' . $removed_user_id;
-				$user = get_userdata( $removed_user_id );
+				$user = \get_userdata( $removed_user_id );
 				if ( false !== $user ) {
 					$item = $user->user_login . ' ' . $item;
 				}
@@ -1135,7 +1137,7 @@ Manually included solutions are <strong>for internal use only</strong> and are n
 			$added_list = [];
 			foreach ( $added as $added_user_id ) {
 				$item = '#' . $added_user_id;
-				$user = get_userdata( $added_user_id );
+				$user = \get_userdata( $added_user_id );
 				if ( false !== $user ) {
 					$item = $user->user_login . ' ' . $item;
 				}

@@ -12,6 +12,7 @@ declare ( strict_types=1 );
 namespace PixelgradeLT\Retailer;
 
 use BerlinDB\Database\Query;
+use BerlinDB\Database\Table;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -48,6 +49,15 @@ class PurchasedSolutionManager implements Manager {
 	protected SolutionManager $solution_manager;
 
 	/**
+	 * The custom DB table.
+	 *
+	 * @since 0.14.0
+	 *
+	 * @var Table
+	 */
+	protected Table $db;
+
+	/**
 	 * Logger.
 	 *
 	 * @var LoggerInterface
@@ -60,16 +70,19 @@ class PurchasedSolutionManager implements Manager {
 	 * @since 0.14.0
 	 *
 	 * @param SolutionManager $solution_manager Solutions manager.
+	 * @param Table           $db               The instance handling the custom DB table.
 	 * @param LoggerInterface $logger           Logger.
 	 */
 	public function __construct(
 		SolutionManager $solution_manager,
+		Table $db,
 		LoggerInterface $logger
 	) {
 		$this->solution_manager = $solution_manager;
+		$this->db               = $db;
 		$this->logger           = $logger;
 
-		self::$STATUSES = apply_filters( 'pixelgradelt_retailer/purchased_solution_statuses', [
+		self::$STATUSES = \apply_filters( 'pixelgradelt_retailer/purchased_solution_statuses', [
 			'ready'   => [
 				'id'       => 'ready',
 				'label'    => esc_html__( 'Ready', 'pixelgradelt_retailer' ),
@@ -214,7 +227,7 @@ class PurchasedSolutionManager implements Manager {
 	 *
 	 * @since 0.14.0
 	 *
-	 * @param int $id The purchased solution ID.
+	 * @param int $id             The purchased solution ID.
 	 * @param int $composition_id The composition ID this purchased solution is active in.
 	 *
 	 * @return bool true if the purchased solution was activated successfully, false if not.
@@ -245,7 +258,7 @@ class PurchasedSolutionManager implements Manager {
 	 *
 	 * @since 0.15.0
 	 *
-	 * @param int $id The purchased solution ID.
+	 * @param int $id             The purchased solution ID.
 	 * @param int $composition_id Optional. The composition ID the purchased solution should be attached to prior to deactivation.
 	 *                            Set to 0 to not check for a match prior to detaching.
 	 *
@@ -360,7 +373,7 @@ class PurchasedSolutionManager implements Manager {
 		$purchased_solutions = new Database\Queries\PurchasedSolution();
 
 		// Parse args.
-		$args = wp_parse_args( $args, array(
+		$args = \wp_parse_args( $args, array(
 			'number' => 50,
 		) );
 
@@ -382,7 +395,7 @@ class PurchasedSolutionManager implements Manager {
 	 */
 	public function count_purchased_solutions( array $args = [] ): int {
 		// Parse args.
-		$args = wp_parse_args( $args, array(
+		$args = \wp_parse_args( $args, array(
 			'count' => true,
 		) );
 
@@ -390,7 +403,7 @@ class PurchasedSolutionManager implements Manager {
 		$purchased_solutions = new Database\Queries\PurchasedSolution( $args );
 
 		// Return count(s).
-		return absint( $purchased_solutions->found_items );
+		return \absint( $purchased_solutions->found_items );
 	}
 
 	/**
@@ -408,7 +421,7 @@ class PurchasedSolutionManager implements Manager {
 	public function get_purchased_solution_counts( array $args = [] ): array {
 
 		// Parse args
-		$args = wp_parse_args( $args, array(
+		$args = \wp_parse_args( $args, array(
 			'count'   => true,
 			'groupby' => 'status',
 		) );
@@ -441,8 +454,8 @@ class PurchasedSolutionManager implements Manager {
 		if ( ! empty( $counts->items ) ) {
 			// Loop through statuses
 			foreach ( $counts->items as $count ) {
-				$c[ $count[ $groupby ] ] = absint( $count['count'] );
-				$c['total'] += $c[ $count[ $groupby ] ];
+				$c[ $count[ $groupby ] ] = \absint( $count['count'] );
+				$c['total']              += $c[ $count[ $groupby ] ];
 			}
 
 		}

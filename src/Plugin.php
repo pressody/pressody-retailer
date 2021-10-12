@@ -36,7 +36,7 @@ class Plugin extends BasePlugin implements Composable {
 		 * @param Plugin             $plugin    Main plugin instance.
 		 * @param ContainerInterface $container Dependency container.
 		 */
-		do_action( 'pixelgradelt_retailer/compose', $this, $container );
+		\do_action( 'pixelgradelt_retailer/compose', $this, $container );
 
 		// Register hook providers.
 		$this
@@ -59,7 +59,7 @@ class Plugin extends BasePlugin implements Composable {
 			->register_hooks( $container->get( 'screen.edit_solution' ) );
 
 
-		if ( is_admin() ) {
+		if ( \is_admin() ) {
 			$this
 				->register_hooks( $container->get( 'hooks.upgrade' ) )
 				->register_hooks( $container->get( 'hooks.admin_assets' ) )
@@ -74,7 +74,7 @@ class Plugin extends BasePlugin implements Composable {
 			$this->register_hooks( $container->get( 'plugin.woocommerce' ) );
 			$this->register_hooks( $container->get( 'plugin.woocommerce.screen.edit_solution' ) );
 
-			if ( is_admin() ) {
+			if ( \is_admin() ) {
 				$this
 					->register_hooks( $container->get( 'plugin.woocommerce.screen.list_solutions' ) )
 					->register_hooks( $container->get( 'plugin.woocommerce.screen.list_wooproducts' ) );
@@ -93,11 +93,11 @@ class Plugin extends BasePlugin implements Composable {
 		 * @param Plugin             $plugin    Main plugin instance.
 		 * @param ContainerInterface $container Dependency container.
 		 */
-		do_action( 'pixelgradelt_retailer/composed', $this, $container );
+		\do_action( 'pixelgradelt_retailer/composed', $this, $container );
 	}
 
 	public function define_constants(): Plugin {
-		$upload_dir = wp_upload_dir( null, false );
+		$upload_dir = \wp_upload_dir( null, false );
 
 		if ( ! defined( 'PixelgradeLT\Retailer\LOG_DIR' ) ) {
 			define( 'PixelgradeLT\Retailer\LOG_DIR', $upload_dir['basedir'] . '/pixelgradelt-retailer-logs/' );

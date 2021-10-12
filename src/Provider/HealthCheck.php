@@ -45,7 +45,7 @@ class HealthCheck extends AbstractHookProvider {
 	 * @since 0.1.0
 	 */
 	public function register_hooks() {
-		add_action( 'admin_post_nopriv_pixelgradelt_retailer_check_authorization_header', [ $this, 'handle_authorization_request' ] );
+		\add_action( 'admin_post_nopriv_pixelgradelt_retailer_check_authorization_header', [ $this, 'handle_authorization_request' ] );
 	}
 
 	/**
@@ -59,7 +59,7 @@ class HealthCheck extends AbstractHookProvider {
 		printf(
 			'<div class="notice notice-error"><p><strong>%s:</strong> %s</p></div>',
 			esc_html__( 'Health Check', 'pixelgradelt_retailer' ),
-			wp_kses(
+			\wp_kses(
 				$message,
 				[
 					'a' => [
@@ -99,7 +99,7 @@ class HealthCheck extends AbstractHookProvider {
 		$message = sprintf(
 			/* translators: %s: permalink screen URL */
 			__( 'PixelgradeLT Retailer requires pretty permalinks to be enabled. <a href="%s">Enable permalinks</a>.', 'pixelgradelt_retailer' ),
-			esc_url( admin_url( 'options-permalink.php' ) )
+			\esc_url( \admin_url( 'options-permalink.php' ) )
 		);
 
 		self::display_notice( $message );
@@ -115,14 +115,14 @@ class HealthCheck extends AbstractHookProvider {
 	 * @return bool True if authorization headers are supported.
 	 */
 	public static function check_authorization_header() {
-		$url = add_query_arg(
+		$url = \add_query_arg(
 			[
 				'action' => 'pixelgradelt_retailer_check_authorization_header',
 			],
-			admin_url( 'admin-post.php' )
+			\admin_url( 'admin-post.php' )
 		);
 
-		$response = wp_remote_get(
+		$response = \wp_remote_get(
 			$url,
 			[
 				'headers'   => [
@@ -131,11 +131,11 @@ class HealthCheck extends AbstractHookProvider {
 				],
 				'timeout'   => 10,
 				// phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound
-				'sslverify' => apply_filters( 'https_local_ssl_verify', false ),
+				'sslverify' => \apply_filters( 'https_local_ssl_verify', false ),
 			]
 		);
 
-		if ( is_wp_error( $response ) ) {
+		if ( \is_wp_error( $response ) ) {
 			throw new \UnexpectedValueException(
 				sprintf(
 					'The authorization header check encountered an unexpected error. %s',
@@ -144,7 +144,7 @@ class HealthCheck extends AbstractHookProvider {
 			);
 		}
 
-		$json = json_decode( wp_remote_retrieve_body( $response ) );
+		$json = json_decode( \wp_remote_retrieve_body( $response ) );
 
 		if ( ! isset( $json->success ) ) {
 			throw new \UnexpectedValueException( 'The authorization header check failed; the response could not be parsed as JSON.' );
@@ -190,7 +190,7 @@ class HealthCheck extends AbstractHookProvider {
 			);
 		}
 
-		wp_send_json_success();
+		\wp_send_json_success();
 	}
 
 	/**
@@ -203,7 +203,7 @@ class HealthCheck extends AbstractHookProvider {
 	 * @param  int    $status  Optional. HTTP status code. Defaults to 401.
 	 */
 	protected function send_json_error( string $code, string $message, int $status = HTTP::UNAUTHORIZED ) {
-		wp_send_json_error(
+		\wp_send_json_error(
 			[
 				'code'    => $code,
 				'message' => $message,
