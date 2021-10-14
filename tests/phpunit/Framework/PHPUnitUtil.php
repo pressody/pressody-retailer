@@ -99,4 +99,66 @@ class PHPUnitUtil {
 		return self::getPrivateMethod( $obj, $name );
 	}
 
+	/**
+	 * Get a private property value for testing/documentation purposes.
+	 * How to use for MyClass->foo:
+	 *      $cls = new MyClass();
+	 *      $foo = PHPUnitUtil::getPrivateProperty($cls, 'foo');
+	 *
+	 * @param object $obj  The instantiated instance of your class
+	 * @param string $name The name of your private property
+	 *
+	 * @return mixed The value of the property you've asked for.
+	 */
+	public static function getPrivateProperty( object $obj, string $name ) {
+		$class    = new ReflectionClass( $obj );
+		$property = $class->getProperty( $name );
+		$property->setAccessible( true );
+
+		return $property->getValue( $obj );
+	}
+
+	/**
+	 * Get a protected property value for testing/documentation purposes.
+	 * How to use for MyClass->foo:
+	 *      $cls = new MyClass();
+	 *      $foo = PHPUnitUtil::getProtectedProperty($cls, 'foo');
+	 *
+	 * @param object $obj  The instantiated instance of your class
+	 * @param string $name The name of your protected property
+	 *
+	 * @return mixed The value of the property you've asked for.
+	 */
+	public static function getProtectedProperty( object $obj, string $name ) {
+		return self::getPrivateProperty( $obj, $name );
+	}
+
+	/**
+	 * Get a private property value for testing/documentation purposes.
+	 * How to use for MyClass->foo:
+	 *      $cls = new MyClass();
+	 *      $foo = PHPUnitUtil::setPrivateProperty($cls, 'foo', 'value');
+	 *
+	 * @param object $obj  The instantiated instance of your class
+	 * @param string $name The name of your private property
+	 */
+	public static function setPrivateProperty( object $obj, string $name, $value ) {
+		$class    = new ReflectionClass( $obj );
+		$property = $class->getProperty( $name );
+		$property->setAccessible( true );
+		$property->setValue( $obj, $value );
+	}
+
+	/**
+	 * Set a protected property value for testing/documentation purposes.
+	 * How to use for MyClass->foo:
+	 *      $cls = new MyClass();
+	 *      $foo = PHPUnitUtil::setProtectedProperty($cls, 'foo', 'value');
+	 *
+	 * @param object $obj  The instantiated instance of your class
+	 * @param string $name The name of your protected property
+	 */
+	public static function setProtectedProperty( object $obj, string $name, $value ) {
+		self::setPrivateProperty( $obj, $name, $value );
+	}
 }

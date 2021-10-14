@@ -44,6 +44,23 @@ $suite->addFilter( 'muplugins_loaded', '_manually_load_plugin' );
 $suite->addFilter( 'pixelgradelt_retailer/compose', function( $plugin, $container ) {
 	$container['logger'] = new NullLogger();
 	$container['storage.working_directory'] = \PixelgradeLT\Retailer\TESTS_DIR . '/Fixture/wp-content/uploads/pixelgradelt-retailer/';
+
+	// Prevent the remote fetch of LT Records parts.
+	$solution_manager = \Mockery::mock(
+		'PixelgradeLT\Retailer\SolutionManager',
+		'PixelgradeLT\Retailer\Manager',
+		[
+			$container['client.composer'],
+			$container['version.parser'],
+			$container['logs.logger'],
+		] )->makePartial();
+	$solution_manager->shouldReceive( 'get_ltrecords_parts' )
+	                 ->andReturn( [
+		                 'pixelgradelt-records/part_yet-another',
+		                 'pixelgradelt-records/part_another-test',
+		                 'pixelgradelt-records/part_test-test',
+	                 ] );
+	$container['solution.manager'] = $solution_manager;
 }, 10, 2 );
 
 $suite->bootstrap();

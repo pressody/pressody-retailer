@@ -17,7 +17,7 @@ use function PixelgradeLT\Retailer\plugin;
 class MultiRepositoryTest extends TestCase {
 	protected static $posts_data;
 	protected static $dep_posts_data;
-	protected static $old_container;
+	protected static $container;
 
 	/**
 	 * @param \WP_UnitTest_Factory $factory
@@ -26,27 +26,27 @@ class MultiRepositoryTest extends TestCase {
 		// We need to set a user with sufficient privileges to create packages and edit them.
 		wp_set_current_user( 1 );
 
-		/** @var ContainerInterface $old_container */
-		self::$old_container = plugin()->get_container();
+		/** @var ContainerInterface $container */
+		self::$container = plugin()->get_container();
 
 		// Register ltsolution post type
-		$register_post_type = PHPUnitUtil::getProtectedMethod( self::$old_container['hooks.solution_post_type'], 'register_post_type' );
-		$register_post_type->invoke( self::$old_container['hooks.solution_post_type'] );
+		$register_post_type = PHPUnitUtil::getProtectedMethod( self::$container['hooks.solution_post_type'], 'register_post_type' );
+		$register_post_type->invoke( self::$container['hooks.solution_post_type'] );
 
 		// Register and populate the taxonomies.
-		$register_solution_type_taxonomy = PHPUnitUtil::getProtectedMethod( self::$old_container['hooks.solution_post_type'], 'register_solution_type_taxonomy' );
-		$register_solution_type_taxonomy->invoke( self::$old_container['hooks.solution_post_type'] );
-		$insert_solution_type_taxonomy_terms = PHPUnitUtil::getProtectedMethod( self::$old_container['hooks.solution_post_type'], 'insert_solution_type_taxonomy_terms' );
-		$insert_solution_type_taxonomy_terms->invoke( self::$old_container['hooks.solution_post_type'] );
+		$register_solution_type_taxonomy = PHPUnitUtil::getProtectedMethod( self::$container['hooks.solution_post_type'], 'register_solution_type_taxonomy' );
+		$register_solution_type_taxonomy->invoke( self::$container['hooks.solution_post_type'] );
+		$insert_solution_type_taxonomy_terms = PHPUnitUtil::getProtectedMethod( self::$container['hooks.solution_post_type'], 'insert_solution_type_taxonomy_terms' );
+		$insert_solution_type_taxonomy_terms->invoke( self::$container['hooks.solution_post_type'] );
 
-		$register_solution_category_taxonomy = PHPUnitUtil::getProtectedMethod( self::$old_container['hooks.solution_post_type'], 'register_solution_category_taxonomy' );
-		$register_solution_category_taxonomy->invoke( self::$old_container['hooks.solution_post_type'] );
+		$register_solution_category_taxonomy = PHPUnitUtil::getProtectedMethod( self::$container['hooks.solution_post_type'], 'register_solution_category_taxonomy' );
+		$register_solution_category_taxonomy->invoke( self::$container['hooks.solution_post_type'] );
 
-		$register_solution_keyword_taxonomy = PHPUnitUtil::getProtectedMethod( self::$old_container['hooks.solution_post_type'], 'register_solution_keyword_taxonomy' );
-		$register_solution_keyword_taxonomy->invoke( self::$old_container['hooks.solution_post_type'] );
+		$register_solution_keyword_taxonomy = PHPUnitUtil::getProtectedMethod( self::$container['hooks.solution_post_type'], 'register_solution_keyword_taxonomy' );
+		$register_solution_keyword_taxonomy->invoke( self::$container['hooks.solution_post_type'] );
 
 		// Set this package as a regular solution type.
-		$package_type = get_term_by( 'slug', SolutionTypes::REGULAR, self::$old_container['solution.manager']::TYPE_TAXONOMY );
+		$package_type = get_term_by( 'slug', SolutionTypes::REGULAR, self::$container['solution.manager']::TYPE_TAXONOMY );
 
 		// These are solutions that others depend upon.
 		self::$dep_posts_data = [
@@ -54,10 +54,10 @@ class MultiRepositoryTest extends TestCase {
 				'post_title'  => 'Blog',
 				'post_status' => 'publish',
 				'post_name'   => 'blog',
-				'post_type'   => self::$old_container['solution.manager']::POST_TYPE,
+				'post_type'   => self::$container['solution.manager']::POST_TYPE,
 				'tax_input'   => [
-					self::$old_container['solution.manager']::TYPE_TAXONOMY    => [ $package_type->term_id ],
-					self::$old_container['solution.manager']::KEYWORD_TAXONOMY => 'keyword1, keyword2, keyword3',
+					self::$container['solution.manager']::TYPE_TAXONOMY    => [ $package_type->term_id ],
+					self::$container['solution.manager']::KEYWORD_TAXONOMY => 'keyword1, keyword2, keyword3',
 				],
 				'meta_input'  => [
 					'_solution_details_description'     => 'Package custom description (blog).',
@@ -73,10 +73,10 @@ And here is a quote from a customer:
 				'post_title'  => 'EDD',
 				'post_status' => 'publish',
 				'post_name'   => 'edd',
-				'post_type'   => self::$old_container['solution.manager']::POST_TYPE,
+				'post_type'   => self::$container['solution.manager']::POST_TYPE,
 				'tax_input'   => [
-					self::$old_container['solution.manager']::TYPE_TAXONOMY    => [ $package_type->term_id ],
-					self::$old_container['solution.manager']::KEYWORD_TAXONOMY => 'keyword1, keyword2, keyword3',
+					self::$container['solution.manager']::TYPE_TAXONOMY    => [ $package_type->term_id ],
+					self::$container['solution.manager']::KEYWORD_TAXONOMY => 'keyword1, keyword2, keyword3',
 				],
 				'meta_input'  => [
 					'_solution_details_description'     => 'Package custom description (edd).',
@@ -104,10 +104,10 @@ And here is a quote from a customer:
 			'post_title'  => 'Ecommerce',
 			'post_status' => 'publish',
 			'post_name'   => 'ecommerce',
-			'post_type'   => self::$old_container['solution.manager']::POST_TYPE,
+			'post_type'   => self::$container['solution.manager']::POST_TYPE,
 			'tax_input'   => [
-				self::$old_container['solution.manager']::TYPE_TAXONOMY    => [ $package_type->term_id ],
-				self::$old_container['solution.manager']::KEYWORD_TAXONOMY => 'keyword1, keyword2, keyword3',
+				self::$container['solution.manager']::TYPE_TAXONOMY    => [ $package_type->term_id ],
+				self::$container['solution.manager']::KEYWORD_TAXONOMY => 'keyword1, keyword2, keyword3',
 			],
 			'meta_input'  => [
 				'_solution_details_description'                    => 'Package custom description (ecommerce).',
@@ -133,10 +133,10 @@ And here is a quote from a customer:
 			'post_title'  => 'Presentation',
 			'post_status' => 'publish',
 			'post_name'   => 'presentation',
-			'post_type'   => self::$old_container['solution.manager']::POST_TYPE,
+			'post_type'   => self::$container['solution.manager']::POST_TYPE,
 			'tax_input'   => [
-				self::$old_container['solution.manager']::TYPE_TAXONOMY    => [ $package_type->term_id ],
-				self::$old_container['solution.manager']::KEYWORD_TAXONOMY => 'keyword9, keyword10, keyword11',
+				self::$container['solution.manager']::TYPE_TAXONOMY    => [ $package_type->term_id ],
+				self::$container['solution.manager']::KEYWORD_TAXONOMY => 'keyword9, keyword10, keyword11',
 			],
 			'meta_input'  => [
 				'_solution_details_description'                    => 'Package custom description (presentation).',
