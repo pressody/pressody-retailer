@@ -145,7 +145,7 @@ class ApiKeysController extends WP_REST_Controller {
 	public function get_items_permissions_check( $request ) {
 		if ( ! \current_user_can( Capabilities::MANAGE_OPTIONS ) ) {
 			return new \WP_Error(
-				'rest_cannot_read',
+				'pixelgradelt_retailer_rest_cannot_read',
 				esc_html__( 'Sorry, you are not allowed to view API keys.', 'pixelgradelt_retailer' ),
 				[ 'status' => \rest_authorization_required_code() ]
 			);
@@ -153,7 +153,7 @@ class ApiKeysController extends WP_REST_Controller {
 
 		if ( ! \current_user_can( 'edit_user', $request['user'] ) ) {
 			return new \WP_Error(
-				'rest_cannot_read',
+				'pixelgradelt_retailer_rest_cannot_read',
 				esc_html__( 'Sorry, you are not allowed to view API keys for this user.', 'pixelgradelt_retailer' ),
 				[ 'status' => \rest_authorization_required_code() ]
 			);
@@ -195,7 +195,7 @@ class ApiKeysController extends WP_REST_Controller {
 	public function create_item_permissions_check( $request ) {
 		if ( ! \current_user_can( Capabilities::MANAGE_OPTIONS ) ) {
 			return new \WP_Error(
-				'rest_cannot_create',
+				'pixelgradelt_retailer_rest_cannot_create',
 				esc_html__( 'Sorry, you are not allowed to create API keys.', 'pixelgradelt_retailer' ),
 				[ 'status' => \rest_authorization_required_code() ]
 			);
@@ -203,7 +203,7 @@ class ApiKeysController extends WP_REST_Controller {
 
 		if ( ! \current_user_can( 'edit_user', $request['user'] ) ) {
 			return new \WP_Error(
-				'rest_cannot_read',
+				'pixelgradelt_retailer_rest_cannot_read',
 				esc_html__( 'Sorry, you are not allowed to create API keys for this user.', 'pixelgradelt_retailer' ),
 				[ 'status' => \rest_authorization_required_code() ]
 			);
@@ -255,7 +255,7 @@ class ApiKeysController extends WP_REST_Controller {
 		$api_key = $this->repository->find_by_token( $request['token'] );
 		if ( null === $api_key ) {
 			return new \WP_Error(
-				'rest_resource_invalid_id',
+				'pixelgradelt_retailer_rest_resource_invalid_id',
 				esc_html__( 'Invalid API Key token.', 'pixelgradelt_retailer' ),
 				[ 'status' => HTTP::NOT_FOUND ]
 			);
@@ -263,7 +263,7 @@ class ApiKeysController extends WP_REST_Controller {
 
 		if ( ! \current_user_can( Capabilities::MANAGE_OPTIONS ) ) {
 			return new \WP_Error(
-				'rest_cannot_delete',
+				'pixelgradelt_retailer_rest_cannot_delete',
 				esc_html__( 'Sorry, you are not allowed to delete API keys.', 'pixelgradelt_retailer' ),
 				[ 'status' => \rest_authorization_required_code() ]
 			);
@@ -271,7 +271,7 @@ class ApiKeysController extends WP_REST_Controller {
 
 		if ( ! \current_user_can( 'edit_user', $request['user'] ) ) {
 			return new \WP_Error(
-				'rest_cannot_read',
+				'pixelgradelt_retailer_rest_cannot_read',
 				esc_html__( 'Sorry, you are not allowed to delete API Keys for this user.', 'pixelgradelt_retailer' ),
 				[ 'status' => \rest_authorization_required_code() ]
 			);

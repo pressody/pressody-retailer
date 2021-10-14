@@ -96,9 +96,10 @@ class Capabilities extends AbstractHookProvider {
 					break;
 				}
 
-				// Get the composition owners.
-				$composition_user_ids = $this->composition_manager->get_post_composition_user_ids( $post->ID );
-				if ( ! in_array( $user_id, $composition_user_ids ) ) {
+				// Check the composition author and owners.
+				if ( $user_id !== $this->composition_manager->get_post_composition_author( $post->ID )
+				     && ! in_array( $user_id, $this->composition_manager->get_post_composition_user_ids( $post->ID ) ) ) {
+
 					$caps = [ 'do_not_allow' ];
 					break;
 				}
@@ -133,9 +134,10 @@ class Capabilities extends AbstractHookProvider {
 					break;
 				}
 
-				// Get the composition owners.
-				$composition_user_ids = $this->composition_manager->get_post_composition_user_ids( $post->ID );
-				if ( ! in_array( $user_id, $composition_user_ids ) ) {
+				// Check the composition author and owners.
+				if ( $user_id !== $this->composition_manager->get_post_composition_author( $post->ID )
+				     && ! in_array( $user_id, $this->composition_manager->get_post_composition_user_ids( $post->ID ) ) ) {
+
 					$caps = [ 'do_not_allow' ];
 					break;
 				}

@@ -380,7 +380,7 @@ class SolutionsController extends WP_REST_Controller {
 	public function get_items_permissions_check( $request ) {
 		if ( ! \current_user_can( Capabilities::VIEW_SOLUTIONS ) ) {
 			return new \WP_Error(
-				'rest_cannot_read',
+				'pixelgradelt_retailer_rest_cannot_read',
 				esc_html__( 'Sorry, you are not allowed to view solutions.', 'pixelgradelt_retailer' ),
 				[ 'status' => rest_authorization_required_code() ]
 			);
@@ -425,7 +425,7 @@ class SolutionsController extends WP_REST_Controller {
 	public function get_item_permissions_check( $request ) {
 		if ( ! \current_user_can( Capabilities::VIEW_SOLUTION, $request->get_param( 'id' ) ) ) {
 			return new \WP_Error(
-				'rest_cannot_read',
+				'pixelgradelt_retailer_rest_cannot_read',
 				esc_html__( 'Sorry, you are not allowed to view the requested solution.', 'pixelgradelt_retailer' ),
 				[ 'status' => \rest_authorization_required_code() ]
 			);

@@ -133,11 +133,13 @@ final class Capabilities {
 	 */
 	public static function register() {
 		$wp_roles = wp_roles();
+
 		// Add all capabilities to the administrator role.
 		$wp_roles->add_cap( 'administrator', self::VIEW_SOLUTIONS );
 		$wp_roles->add_cap( 'administrator', self::MANAGE_OPTIONS );
 		$wp_roles->add_cap( 'administrator', self::MANAGE_SOLUTION_TYPES );
 		$wp_roles->add_cap( 'administrator', self::MANAGE_SOLUTION_CATEGORIES );
+
 		$wp_roles->add_cap( 'administrator', self::MANAGE_COMPOSITIONS );
 		$wp_roles->add_cap( 'administrator', self::CREATE_COMPOSITIONS );
 		$wp_roles->add_cap( 'administrator', self::VIEW_COMPOSITIONS );
@@ -145,16 +147,22 @@ final class Capabilities {
 		$wp_roles->add_cap( 'administrator', self::DELETE_COMPOSITIONS );
 
 		// Create a role for users that are customers (create and manage their own compositions).
-		$wp_roles->add_role( self::CUSTOMER_USER_ROLE, 'LT Retailer Customer', [
-			self::CREATE_COMPOSITIONS => true,
-			self::VIEW_COMPOSITIONS   => true,
-			self::EDIT_COMPOSITIONS   => true,
-			self::DELETE_COMPOSITIONS => true,
-		] );
+		// First, make sure that we clean it up to avoid leftover capabilities.
+		$wp_roles->remove_role( self::CUSTOMER_USER_ROLE );
+		$wp_roles->add_role( self::CUSTOMER_USER_ROLE, esc_html__( 'LT Retailer Customer', 'pixelgradelt_retailer' ) );
+		// Add the needed capabilities.
+		$wp_roles->add_cap( self::CUSTOMER_USER_ROLE, self::VIEW_SOLUTIONS );
+
+		$wp_roles->add_cap( self::CUSTOMER_USER_ROLE, self::CREATE_COMPOSITIONS );
+		$wp_roles->add_cap( self::CUSTOMER_USER_ROLE, self::VIEW_COMPOSITIONS );
+		$wp_roles->add_cap( self::CUSTOMER_USER_ROLE, self::EDIT_COMPOSITIONS );
+		$wp_roles->add_cap( self::CUSTOMER_USER_ROLE, self::DELETE_COMPOSITIONS );
 
 		// Create a special role for users intended to be used by REST API clients.
-		$wp_roles->add_role( self::CLIENT_USER_ROLE, 'LT Retailer Client', [
-			self::VIEW_SOLUTIONS => true,
-		] );
+		// First, make sure that we clean it up to avoid leftover capabilities.
+		$wp_roles->remove_role( self::CLIENT_USER_ROLE );
+		$wp_roles->add_role( self::CLIENT_USER_ROLE, esc_html__( 'LT Retailer Client', 'pixelgradelt_retailer' ) );
+		// Add the needed capabilities.
+		$wp_roles->add_cap( self::CLIENT_USER_ROLE, self::VIEW_SOLUTIONS );
 	}
 }

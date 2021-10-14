@@ -248,13 +248,19 @@ class CompositionsController extends WP_REST_Controller {
 							'context'     => [ 'view', 'edit' ],
 							'required'    => false,
 						],
+						'author'                           => [
+							'description' => esc_html__( 'The composition\'s author ID.', 'pixelgradelt_retailer' ),
+							'type'        => 'integer',
+							'context'     => [ 'edit' ],
+							'required'    => false,
+						],
 						'userids'                          => [
-							'description' => esc_html__( 'The owner/user IDs list.', 'pixelgradelt_retailer' ),
+							'description' => esc_html__( 'The composition\'s user/owner IDs list.', 'pixelgradelt_retailer' ),
 							'type'        => 'array',
 							'items'       => [
 								'type' => 'integer',
 							],
-							'context'     => [ 'view', 'edit' ],
+							'context'     => [ 'edit' ],
 							'required'    => false,
 						],
 						'required_purchased_solutions_ids' => [
@@ -294,7 +300,7 @@ class CompositionsController extends WP_REST_Controller {
 					'args'                => [
 						'context'       => $this->get_context_param( [ 'default' => 'edit' ] ),
 						'userids'       => [
-							'description' => esc_html__( 'The owner/user IDs list.', 'pixelgradelt_retailer' ),
+							'description' => esc_html__( 'The user/owner IDs list.', 'pixelgradelt_retailer' ),
 							'type'        => 'array',
 							'items'       => [
 								'type' => 'integer',
@@ -382,7 +388,7 @@ class CompositionsController extends WP_REST_Controller {
 	public function get_items_permissions_check( $request ) {
 		if ( ! \current_user_can( Capabilities::VIEW_COMPOSITIONS ) ) {
 			return new \WP_Error(
-				'rest_cannot_read',
+				'pixelgradelt_retailer_rest_cannot_read',
 				esc_html__( 'Sorry, you are not allowed to view compositions.', 'pixelgradelt_retailer' ),
 				[ 'status' => \rest_authorization_required_code() ]
 			);
@@ -404,7 +410,7 @@ class CompositionsController extends WP_REST_Controller {
 		$current_user_id = \get_current_user_id();
 		if ( empty( $current_user_id ) ) {
 			return new \WP_Error(
-				'rest_cannot_read',
+				'pixelgradelt_retailer_rest_cannot_read',
 				esc_html__( 'You need to be logged in to view compositions.', 'pixelgradelt_retailer' ),
 				[ 'status' => \rest_authorization_required_code() ]
 			);
@@ -505,7 +511,7 @@ class CompositionsController extends WP_REST_Controller {
 	public function create_item_permissions_check( $request ) {
 		if ( ! \current_user_can( Capabilities::CREATE_COMPOSITIONS ) ) {
 			return new \WP_Error(
-				'rest_cannot_create',
+				'pixelgradelt_retailer_rest_cannot_create',
 				esc_html__( 'Sorry, you are not allowed to create compositions.', 'pixelgradelt_retailer' ),
 				[ 'status' => \rest_authorization_required_code() ]
 			);
@@ -577,7 +583,7 @@ class CompositionsController extends WP_REST_Controller {
 	public function get_item_permissions_check( $request ) {
 		if ( ! \current_user_can( Capabilities::VIEW_COMPOSITION, $request->get_param( 'compositionid' ) ) ) {
 			return new \WP_Error(
-				'rest_cannot_read',
+				'pixelgradelt_retailer_rest_cannot_read',
 				esc_html__( 'Sorry, you are not allowed to view the requested composition.', 'pixelgradelt_retailer' ),
 				[ 'status' => \rest_authorization_required_code() ]
 			);
@@ -624,7 +630,7 @@ class CompositionsController extends WP_REST_Controller {
 	public function edit_item_permissions_check( $request ) {
 		if ( ! \current_user_can( Capabilities::EDIT_COMPOSITION, $request->get_param( 'compositionid' ) ) ) {
 			return new \WP_Error(
-				'rest_cannot_edit',
+				'pixelgradelt_retailer_rest_cannot_edit',
 				esc_html__( 'Sorry, you are not allowed to edit the requested composition.', 'pixelgradelt_retailer' ),
 				[ 'status' => \rest_authorization_required_code() ]
 			);
@@ -656,12 +662,60 @@ class CompositionsController extends WP_REST_Controller {
 
 		$args = [
 			'post_id'                          => $composition_data['id'],
+			'post_author'                      => $request->get_param( 'author' ),
 			'post_title'                       => $request->get_param( 'name' ),
 			'status'                           => $request->get_param( 'status' ),
 			'keywords'                         => $request->get_param( 'keywords' ),
 			'user_ids'                         => $request->get_param( 'userids' ),
 			'required_purchased_solutions_ids' => $request->get_param( 'required_purchased_solutions_ids' ),
 		];
+
+		$current_user = wp_get_current_user();
+
+		// Only composition post authors and compositions managers can change the composition post author.
+		if ( ! empty( $args['post_author'] )
+		     && $args['post_author'] !== $composition_data['author']
+		     && ! \current_user_can( Capabilities::MANAGE_COMPOSITIONS )
+		     && $current_user->ID !== $composition_data['author'] ) {
+
+			return new \WP_Error(
+				'pixelgradelt_retailer_rest_cannot_edit',
+				esc_html__( 'Operation failed. Only composition authors can change the composition\'s author.', 'pixelgradelt_retailer' ),
+				[ 'status' => \rest_authorization_required_code() ]
+			);
+		}
+
+		// Only composition post authors and compositions managers can modify the users/owners list.
+		if ( ! empty( $args['user_ids'] ) ) {
+			$current_user_ids = ! empty( $composition_data['users'] ) ? array_values( \wp_list_pluck( $composition_data['users'], 'id' ) ) : [];
+			sort( $current_user_ids );
+			$new_user_ids = $args['user_ids'];
+			sort( $new_user_ids );
+			if ( $new_user_ids !== $composition_data['users']
+			     && ! \current_user_can( Capabilities::MANAGE_COMPOSITIONS )
+			     && $current_user->ID !== $composition_data['author'] ) {
+
+				return new \WP_Error(
+					'pixelgradelt_retailer_rest_cannot_edit',
+					esc_html__( 'Operation failed. Only composition authors can modify the composition users/owners list.', 'pixelgradelt_retailer' ),
+					[ 'status' => \rest_authorization_required_code() ]
+				);
+			}
+		}
+
+		// Only compositions managers can modify the composition status (manually).
+		if ( ! empty( $args['status'] )
+		     && $args['status'] !== $composition_data['status']
+		     && ! \current_user_can( Capabilities::MANAGE_COMPOSITIONS ) ) {
+
+			return new \WP_Error(
+				'pixelgradelt_retailer_rest_cannot_edit',
+				esc_html__( 'Operation failed. Only compositions managers can manually change the composition\'s status.', 'pixelgradelt_retailer' ),
+				[ 'status' => \rest_authorization_required_code() ]
+			);
+		}
+
+		// @todo We should only allow adding and removing the current user's purchased solutions, not other's. Unless it is the composition author or a manager.
 
 		// Do the actual updating (since we already checked for existence, it is sure to be an update).
 		$result = $this->composition_manager->save_composition( $args, true );
@@ -692,7 +746,7 @@ class CompositionsController extends WP_REST_Controller {
 	public function delete_item_permissions_check( $request ) {
 		if ( ! \current_user_can( Capabilities::DELETE_COMPOSITION, $request->get_param( 'compositionid' ) ) ) {
 			return new \WP_Error(
-				'rest_cannot_delete',
+				'pixelgradelt_retailer_rest_cannot_delete',
 				esc_html__( 'Sorry, you are not allowed to delete the composition.', 'pixelgradelt_retailer' ),
 				[ 'status' => \rest_authorization_required_code() ]
 			);
@@ -717,7 +771,7 @@ class CompositionsController extends WP_REST_Controller {
 		if ( empty( $composition_data ) ) {
 			return new \WP_Error(
 				'pixelgradelt_retailer_rest_invalid_id',
-				__( 'Invalid composition ID.', 'pixelgradelt_retailer' ),
+				esc_html__( 'Invalid composition ID.', 'pixelgradelt_retailer' ),
 				[ 'status' => HTTP::NOT_FOUND ]
 			);
 		}
@@ -1034,9 +1088,10 @@ class CompositionsController extends WP_REST_Controller {
 	 * @return true|WP_Error True if the request has read access, WP_Error object otherwise.
 	 */
 	public function encrypt_ltdetails_permissions_check( WP_REST_Request $request ) {
+		// This is a loose check for now. Only checking if at least an LT Retailer Client is being used.
 		if ( ! \current_user_can( Capabilities::VIEW_SOLUTIONS ) ) {
 			return new \WP_Error(
-				'rest_cannot_read',
+				'pixelgradelt_retailer_rest_cannot_encrypt',
 				esc_html__( 'Sorry, you are not allowed to encrypt composition LT details.', 'pixelgradelt_retailer' ),
 				[ 'status' => \rest_authorization_required_code() ]
 			);
@@ -1055,9 +1110,10 @@ class CompositionsController extends WP_REST_Controller {
 	 * @return true|WP_Error True if the request has read access, WP_Error object otherwise.
 	 */
 	public function check_items_details_permissions_check( WP_REST_Request $request ) {
+		// This is a loose check for now. Only checking if at least an LT Retailer Client is being used.
 		if ( ! \current_user_can( Capabilities::VIEW_SOLUTIONS ) ) {
 			return new \WP_Error(
-				'rest_cannot_read',
+				'pixelgradelt_retailer_rest_cannot_check',
 				esc_html__( 'Sorry, you are not allowed to check composition LT details.', 'pixelgradelt_retailer' ),
 				[ 'status' => \rest_authorization_required_code() ]
 			);
@@ -1076,9 +1132,10 @@ class CompositionsController extends WP_REST_Controller {
 	 * @return true|WP_Error True if the request has read access, WP_Error object otherwise.
 	 */
 	public function update_items_details_permissions_check( WP_REST_Request $request ) {
+		// This is a loose check for now. Only checking if at least an LT Retailer Client is being used.
 		if ( ! \current_user_can( Capabilities::VIEW_SOLUTIONS ) ) {
 			return new \WP_Error(
-				'rest_cannot_read',
+				'pixelgradelt_retailer_rest_cannot_update',
 				esc_html__( 'Sorry, you are not allowed to update composition details.', 'pixelgradelt_retailer' ),
 				[ 'status' => \rest_authorization_required_code() ]
 			);
@@ -1123,7 +1180,7 @@ class CompositionsController extends WP_REST_Controller {
 			$this->validate_ltdetails( $details );
 		} catch ( RestException $e ) {
 			return new \WP_Error(
-				'rest_invalid_composition_ltdetails',
+				'pixelgradelt_retailer_rest_invalid_composition_ltdetails',
 				$e->getMessage(),
 				[ 'status' => $e->getStatusCode(), ]
 			);
@@ -1134,7 +1191,7 @@ class CompositionsController extends WP_REST_Controller {
 			$encrypted_details = $this->crypter->encrypt( json_encode( $details ) );
 		} catch ( CrypterEnvironmentIsBrokenException $e ) {
 			return new \WP_Error(
-				'rest_unable_to_encrypt',
+				'pixelgradelt_retailer_rest_unable_to_encrypt',
 				esc_html__( 'We could not encrypt. Please contact the administrator and let them know that something is wrong. Thanks in advance!', 'pixelgradelt_retailer' ),
 				[
 					'status'  => HTTP::INTERNAL_SERVER_ERROR,
@@ -1164,13 +1221,13 @@ class CompositionsController extends WP_REST_Controller {
 			$details = $this->decrypt_ltdetails( $request['ltdetails'] );
 		} catch ( CrypterBadFormatException | CrypterWrongKeyOrModifiedCiphertextException | RestException $e ) {
 			return new \WP_Error(
-				'rest_invalid_ltdetails',
+				'pixelgradelt_retailer_rest_invalid_ltdetails',
 				$e->getMessage(),
 				[ 'status' => HTTP::NOT_ACCEPTABLE, ]
 			);
 		} catch ( CrypterEnvironmentIsBrokenException $e ) {
 			return new \WP_Error(
-				'rest_unable_to_encrypt',
+				'pixelgradelt_retailer_rest_unable_to_encrypt',
 				esc_html__( 'We could not decrypt. Please contact the administrator and let them know that something is wrong. Thanks in advance!', 'pixelgradelt_retailer' ),
 				[
 					'status'  => HTTP::INTERNAL_SERVER_ERROR,
@@ -1184,7 +1241,7 @@ class CompositionsController extends WP_REST_Controller {
 			$this->validate_ltdetails( $details );
 		} catch ( RestException $e ) {
 			return new \WP_Error(
-				'rest_invalid_ltdetails',
+				'pixelgradelt_retailer_rest_invalid_ltdetails',
 				$e->getMessage(),
 				[ 'status' => $e->getStatusCode(), ]
 			);
@@ -1271,7 +1328,7 @@ class CompositionsController extends WP_REST_Controller {
 			$this->validate_schema( $this->standardize_to_object( $composition ) );
 		} catch ( JsonValidationException $e ) {
 			return new \WP_Error(
-				'rest_json_invalid',
+				'pixelgradelt_retailer_rest_json_invalid',
 				esc_html__( 'Could not validate the received composition against the Composer JSON schema.', 'pixelgradelt_retailer' ),
 				[
 					'status'  => HTTP::NOT_ACCEPTABLE,
@@ -1285,22 +1342,28 @@ class CompositionsController extends WP_REST_Controller {
 		 */
 		if ( empty( $composition['extra'][ self::LTDETAILS_KEY ] ) ) {
 			return new \WP_Error(
-				'rest_missing_composition_ltdetails',
+				'pixelgradelt_retailer_rest_missing_composition_ltdetails',
 				esc_html__( 'The composition is missing the encrypted LT details.', 'pixelgradelt_retailer' ),
 				[ 'status' => HTTP::NOT_ACCEPTABLE, ]
 			);
 		}
 		try {
 			$composition_ltdetails = $this->decrypt_ltdetails( $composition['extra'][ self::LTDETAILS_KEY ] );
-		} catch ( CrypterBadFormatException | CrypterWrongKeyOrModifiedCiphertextException | RestException $e ) {
+		} catch ( RestException $e ) {
 			return new \WP_Error(
-				'rest_invalid_composition_ltdetails',
+				'pixelgradelt_retailer_rest_invalid_composition_ltdetails',
 				$e->getMessage(),
 				[ 'status' => $e->getStatusCode(), ]
 			);
+		} catch ( CrypterBadFormatException | CrypterWrongKeyOrModifiedCiphertextException $e ) {
+			return new \WP_Error(
+				'pixelgradelt_retailer_rest_invalid_composition_ltdetails',
+				$e->getMessage(),
+				[ 'status' => HTTP::NOT_ACCEPTABLE ]
+			);
 		} catch ( CrypterEnvironmentIsBrokenException $e ) {
 			return new \WP_Error(
-				'rest_unable_to_encrypt',
+				'pixelgradelt_retailer_rest_unable_to_encrypt',
 				esc_html__( 'We could not decrypt. Please contact the administrator and let them know that something is wrong. Thanks in advance!', 'pixelgradelt_retailer' ),
 				[
 					'status'  => HTTP::INTERNAL_SERVER_ERROR,
@@ -1314,7 +1377,7 @@ class CompositionsController extends WP_REST_Controller {
 			$this->validate_ltdetails( $composition_ltdetails );
 		} catch ( RestException $e ) {
 			return new \WP_Error(
-				'rest_invalid_composition_ltdetails',
+				'pixelgradelt_retailer_rest_invalid_composition_ltdetails',
 				$e->getMessage(),
 				[ 'status' => $e->getStatusCode(), ]
 			);
@@ -1345,13 +1408,13 @@ class CompositionsController extends WP_REST_Controller {
 			$message .= implode( ' ; ' . PHP_EOL, $instructions_to_update->get_error_messages() );
 
 			return new \WP_Error(
-				'rest_rejected',
+				'pixelgradelt_retailer_rest_rejected',
 				$message,
 				[ 'status' => HTTP::NOT_ACCEPTABLE, ]
 			);
 		} elseif ( false === $instructions_to_update ) {
 			return new \WP_Error(
-				'rest_rejected',
+				'pixelgradelt_retailer_rest_rejected',
 				esc_html__( 'Your attempt to determine what to update in the composition was rejected.', 'pixelgradelt_retailer' ),
 				[ 'status' => HTTP::NOT_ACCEPTABLE, ]
 			);

@@ -368,6 +368,49 @@ class CompositionManager implements Manager {
 	}
 
 	/**
+	 * Get a composition post ID based on certain details about it.
+	 *
+	 * @since 0.14.0
+	 *
+	 * @see   CompositionManager::get_composition_ids_by()
+	 *
+	 * @param array $args Query args.
+	 *
+	 * @return int The found post ID.
+	 */
+	public function get_composition_post_id_by( array $args ): int {
+		$found_composition_ids = $this->get_composition_ids_by( $args );
+		if ( empty( $found_composition_ids ) ) {
+			return 0;
+		}
+
+		// Make sure we only tackle the first composition found.
+		return reset( $found_composition_ids );
+	}
+
+	/**
+	 * Identify a composition post ID based on certain details about it and return all configured data about it.
+	 *
+	 * @since 0.14.0
+	 *
+	 * @param array $args Array of package details to look for.
+	 * @param bool  $include_context
+	 *
+	 * @return array The found package data.
+	 */
+	public function get_composition_data_by( array $args, bool $include_context = false ): array {
+		$found_package_id = $this->get_composition_ids_by( $args );
+		if ( empty( $found_package_id ) ) {
+			return [];
+		}
+
+		// Make sure we only tackle the first package found.
+		$found_package_id = reset( $found_package_id );
+
+		return $this->get_composition_id_data( $found_package_id, $include_context );
+	}
+
+	/**
 	 * Gather all the data about a composition ID.
 	 *
 	 * @param int    $post_ID The composition post ID.
@@ -439,23 +482,23 @@ class CompositionManager implements Manager {
 	 *
 	 * @since 0.14.0
 	 *
-	 * @param array $args                            {
-	 *                                               List of composition details.
+	 * @param array $args                             {
+	 *                                                List of composition details.
 	 *
-	 * @type int    $post_id                         The composition post ID to search for and update. Only used if $update is true.
-	 * @type string $post_title                      The composition post title to set.
-	 * @type string $post_status                     The composition post status to set. Defaults to 'private'.
-	 * @type int    $post_author                     The composition post author user ID. Defaults to the current logged-in user.
-	 * @type string $status                          The composition status. Should be a valid value from CompositionManager::STATUSES. Defaults to 'not_ready'.
-	 * @type string $hashid                          The hashid to assign to the composition. Will be used to search for existing compositions if $update is true. Defaults to a generated hashid from the new post ID.
-	 * @type int[]  $user_ids                        List of user IDs to assign the composition to. If a user with a provided user ID doesn't exist, the user ID will be ignored.
+	 * @type int    $post_id                          The composition post ID to search for and update. Only used if $update is true.
+	 * @type string $post_title                       The composition post title to set.
+	 * @type string $post_status                      The composition post status to set. Defaults to 'private'.
+	 * @type int    $post_author                      The composition post author user ID. Defaults to the current logged-in user.
+	 * @type string $status                           The composition status. Should be a valid value from CompositionManager::STATUSES. Defaults to 'not_ready'.
+	 * @type string $hashid                           The hashid to assign to the composition. Will be used to search for existing compositions if $update is true. Defaults to a generated hashid from the new post ID.
+	 * @type int[]  $user_ids                         List of user IDs to assign the composition to. If a user with a provided user ID doesn't exist, the user ID will be ignored.
 	 * @type int[]  $required_purchased_solutions_ids List of required purchased-solution ids.
-	 * @type array  $required_manual_solutions       List of required solution details: `post_id` or `pseudo_id`, `reason`.
-	 * @type array  $keywords                        List of keywords to add to the composition.
+	 * @type array  $required_manual_solutions        List of required solution details: `post_id` or `pseudo_id`, `reason`.
+	 * @type array  $keywords                         List of keywords to add to the composition.
 	 * }
 	 *
-	 * @param bool  $update                          Whether to update if the composition already exists.
-	 *                                               We will identify an existing composition by details such as post_id or hashid.
+	 * @param bool  $update                           Whether to update if the composition already exists.
+	 *                                                We will identify an existing composition by details such as post_id or hashid.
 	 *
 	 * @return int The newly created or updated composition post ID. 0 on failure.
 	 */
@@ -505,7 +548,6 @@ class CompositionManager implements Manager {
 			if ( $composition_author instanceof \WP_User ) {
 				$new_post_args['post_author'] = $composition_author->ID;
 			}
-
 
 			$post_to_update = \wp_insert_post( $new_post_args, true, false );
 			if ( \is_wp_error( $post_to_update ) ) {
@@ -557,7 +599,7 @@ class CompositionManager implements Manager {
 			}
 			if ( ! empty( $update_post_args ) ) {
 				$update_post_args['ID'] = $post_to_update->ID;
-				$result = \wp_update_post( $update_post_args, false, false );
+				$result                 = \wp_update_post( $update_post_args, false, false );
 				if ( \is_wp_error( $result ) ) {
 					// We have failed to update the post details.
 					$this->logger->error(
@@ -635,49 +677,6 @@ class CompositionManager implements Manager {
 		}
 
 		return $post_to_update->ID;
-	}
-
-	/**
-	 * Get a composition post ID based on certain details about it.
-	 *
-	 * @since 0.14.0
-	 *
-	 * @see CompositionManager::get_composition_ids_by()
-	 *
-	 * @param array $args Query args.
-	 *
-	 * @return int The found post ID.
-	 */
-	public function get_composition_post_id_by( array $args ): int {
-		$found_composition_ids = $this->get_composition_ids_by( $args );
-		if ( empty( $found_composition_ids ) ) {
-			return 0;
-		}
-
-		// Make sure we only tackle the first package found.
-		return reset( $found_composition_ids );
-	}
-
-	/**
-	 * Identify a composition post ID based on certain details about it and return all configured data about it.
-	 *
-	 * @since 0.14.0
-	 *
-	 * @param array $args Array of package details to look for.
-	 * @param bool  $include_context
-	 *
-	 * @return array The found package data.
-	 */
-	public function get_composition_data_by( array $args, bool $include_context = false ): array {
-		$found_package_id = $this->get_composition_ids_by( $args );
-		if ( empty( $found_package_id ) ) {
-			return [];
-		}
-
-		// Make sure we only tackle the first package found.
-		$found_package_id = reset( $found_package_id );
-
-		return $this->get_composition_id_data( $found_package_id, $include_context );
 	}
 
 	/**
@@ -1342,9 +1341,9 @@ class CompositionManager implements Manager {
 		 *
 		 * @since 0.14.0
 		 *
-		 * @param array $new_required_solutions_ids     The new required purchased-solutions list.
+		 * @param array $new_required_solutions_ids    The new required purchased-solutions list.
 		 * @param int   $post_id                       The composition post ID.
-		 * @param array $old_required_solutions_ids     The old required purchased-solutions list.
+		 * @param array $old_required_solutions_ids    The old required purchased-solutions list.
 		 * @param array $removed_purchased_solution_id The removed purchased-solution id.
 		 */
 		$required_purchased_solutions_ids = \apply_filters( 'pixelgradelt_retailer/ltcomposition/remove_required_purchased_solution',
@@ -1447,7 +1446,7 @@ class CompositionManager implements Manager {
 
 	/**
 	 * @param int   $post_id   The composition post ID.
-	 * @param array $solutions List of required solution details: `post_id` or `pseudo_id`, `order_id`, `order_item_id`.
+	 * @param array $solutions List of required solution details: `post_id` or `pseudo_id`. You can optionally provide a `reason` for inclusion.
 	 * @param bool  $silent    Optional. Whether to trigger action hooks. Default is to trigger the action hooks.
 	 */
 	public function set_post_composition_required_manual_solutions( int $post_id, array $solutions, bool $silent = false ) {
@@ -1463,25 +1462,17 @@ class CompositionManager implements Manager {
 		}
 
 		// We need to normalize the received $required_solutions for the DB (the format that CarbonFields uses).
+		$accepted_keys = array_fill_keys( [ 'post_id', 'pseudo_id', 'reason' ], '' );
 		foreach ( $solutions as $key => $solution ) {
-			$normalized_solution = [
-				'pseudo_id'     => '',
-				'order_id'      => $solution['order_id'] ?? '',
-				'order_item_id' => $solution['order_item_id'] ?? '',
-			];
+			$normalized_solution = array_replace( $accepted_keys, array_intersect_key( $solution, $accepted_keys ) );
 
 			// Try a given post ID entry.
-			if ( ! empty( $solution['post_id'] ) ) {
-				$solution_post = \get_post( \absint( $solution['post_id'] ) );
+			if ( ! empty( $normalized_solution['post_id'] ) ) {
+				$solution_post = \get_post( \absint( $normalized_solution['post_id'] ) );
 				if ( ! empty( $solution_post ) ) {
 					// If we have been given a valid post ID, this overwrites any pseudo_id.
 					$normalized_solution['pseudo_id'] = $solution_post->post_name . self::PSEUDO_ID_DELIMITER . $solution_post->ID;
 				}
-			}
-
-			// Try the pseudo_id entry.
-			if ( empty( $normalized_solution['pseudo_id'] ) && ! empty( $solution['pseudo_id'] ) ) {
-				$normalized_solution['pseudo_id'] = $solution['pseudo_id'];
 			}
 
 			// We reject a solution for which we don't have a pseudo_id.
@@ -1489,6 +1480,8 @@ class CompositionManager implements Manager {
 				unset( $solutions[ $key ] );
 				continue;
 			}
+
+			// @todo We should check a pseudo_id by exploding it like add_post_composition_required_manual_solution() does it.
 
 			$solutions[ $key ] = $normalized_solution;
 		}

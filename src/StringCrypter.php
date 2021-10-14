@@ -29,9 +29,9 @@ class StringCrypter implements CrypterInterface {
 	/**
 	 * Defuse encryption key.
 	 *
-	 * @var Key
+	 * @var Key|null
 	 */
-	protected Key $key;
+	protected ?Key $key;
 
 	public function __construct() {
 	}

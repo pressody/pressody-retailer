@@ -115,7 +115,7 @@ class Compositions extends AbstractHookProvider {
 			// Check if at least a provided, valid user is among the current composition owners.
 			$composition_user_ids = array_filter( array_keys( $composition_data['users'] ) );
 			sort( $composition_user_ids );
-			if ( ! empty( $composition_user_ids ) && array_intersect( $valid_user_ids, $composition_user_ids ) ) {
+			if ( ! empty( $composition_user_ids ) && empty( array_intersect( $valid_user_ids, $composition_user_ids ) ) ) {
 				$errors->add( 'invalid', esc_html__( 'None of the provided users is among the composition\'s current owners.', 'pixelgradelt_retailer' ) );
 			}
 		}

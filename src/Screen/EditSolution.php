@@ -200,6 +200,12 @@ class EditSolution extends AbstractHookProvider {
 	 * @param int $post_id The ID of the post that's being saved.
 	 */
 	protected function prevent_post_save_without_title( int $post_id ) {
+		// We only want to do this when editing via WP Admin.
+		$screen = get_current_screen();
+		if ( empty( $screen ) || $this->solution_manager::POST_TYPE !== $screen->post_type ) {
+			return;
+		}
+
 		$post = \get_post( $post_id );
 
 		if ( ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE )

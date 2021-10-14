@@ -111,222 +111,6 @@ class PurchasedSolutionManager implements Manager {
 	}
 
 	/**
-	 * Add a purchased solution entry.
-	 *
-	 * @since 0.14.0
-	 *
-	 * @param array $data           {
-	 *                              Array of purchased solution data. Default empty.
-	 *
-	 *     The `date_created` and `date_modified` parameters do not need to be passed.
-	 *     They will be automatically populated if empty.
-	 *
-	 * @type string $status         Optional. Purchased solution status. This is related to the solution, user, order and composition.
-	 *                                        See PurchasedSolutionManager::$STATUSES for possible values.
-	 *                                        Default `invalid`.
-	 * @type int    $solution_id    Solution ID linked to the product being purchased. Default 0.
-	 * @type int    $user_id        WordPress user ID linked to the customer of the order. Default 0.
-	 * @type int    $order_id       ID of the order containing among its items the product linked to the solution. Default 0.
-	 * @type int    $order_item_id  ID of the order item containing the product linked to the solution. Default 0.
-	 * @type int    $composition_id The composition ID this purchased solution is currently part of. Default 0.
-	 * @type string $date_created   Optional. Automatically calculated on add/edit.
-	 *                                        The date & time the purchased solution was inserted.
-	 *                                        Format: YYYY-MM-DD HH:MM:SS. Default empty.
-	 * @type string $date_modified  Optional. Automatically calculated on add/edit.
-	 *                                        The date & time the purchased solution was last modified.
-	 *                                        Format: YYYY-MM-DD HH:MM:SS. Default empty.
-	 * }
-	 * @return int|false ID of newly created purchased solution, false on error.
-	 */
-	public function add_purchased_solution( array $data ) {
-		$purchased_solutions = new Database\Queries\PurchasedSolution();
-
-		return $purchased_solutions->add_item( $data );
-	}
-
-	/**
-	 * Update a purchased solution entry.
-	 *
-	 * @since 0.14.0
-	 *
-	 * @param int   $id             Purchased solution ID.
-	 * @param array $data           {
-	 *                              Array of purchased solution data. Default empty.
-	 *
-	 *     The `date_created` and `date_modified` parameters do not need to be passed.
-	 *     They will be automatically populated if empty.
-	 *
-	 * @type string $status         Purchased solution status. This is related to the solution, user, order and composition.
-	 *                              See PurchasedSolutionManager::$STATUSES for possible values.
-	 *                              Default `invalid`.
-	 * @type int    $solution_id    Solution ID linked to the product being purchased. Default 0.
-	 * @type int    $user_id        WordPress user ID linked to the customer of the order. Default 0.
-	 * @type int    $order_id       ID of the order containing among its items the product linked to the solution. Default 0.
-	 * @type int    $order_item_id  ID of the order item containing the product linked to the solution. Default 0.
-	 * @type int    $composition_id The composition ID this purchased solution is currently part of. Default 0.
-	 * @type string $date_created   Optional. Automatically calculated on add/edit.
-	 *                                        The date & time the purchased solution was inserted.
-	 *                                        Format: YYYY-MM-DD HH:MM:SS. Default empty.
-	 * @type string $date_modified  Optional. Automatically calculated on add/edit.
-	 *                                        The date & time the purchased solution was last modified.
-	 *                                        Format: YYYY-MM-DD HH:MM:SS. Default empty.
-	 * }
-	 * @return bool Whether the purchased solution was updated.
-	 */
-	public function update_purchased_solution( int $id, array $data ): bool {
-		$purchased_solutions = new Database\Queries\PurchasedSolution();
-
-		$result = $purchased_solutions->update_item( $id, $data );
-
-		return $result !== false;
-	}
-
-	/**
-	 * Move a purchased solution to the `invalid` status.
-	 *
-	 * @since 0.14.0
-	 *
-	 * @param int $id The purchased solution ID.
-	 *
-	 * @return bool true if the purchased solution was invalidate successfully, false if not.
-	 */
-	public function invalidate_purchased_solution( int $id ): bool {
-		$purchased_solutions = new Database\Queries\PurchasedSolution();
-
-		$result = $purchased_solutions->update_item( $id, [
-			'status' => 'invalid',
-		] );
-
-		return $result !== false;
-	}
-
-	/**
-	 * Move a purchased solution to the `ready` status.
-	 *
-	 * @since 0.14.0
-	 *
-	 * @param int $id The purchased solution ID.
-	 *
-	 * @return bool true if the purchased solution was readied successfully, false if not.
-	 */
-	public function ready_purchased_solution( int $id ): bool {
-		$purchased_solutions = new Database\Queries\PurchasedSolution();
-
-		$result = $purchased_solutions->update_item( $id, [
-			'status' => 'ready',
-		] );
-
-		return $result !== false;
-	}
-
-	/**
-	 * Move a purchased solution to the `active` status.
-	 *
-	 * A composition ID must be provided to be able to activate a purchased solution.
-	 * But only if the purchased solution is ready.
-	 *
-	 * @since 0.14.0
-	 *
-	 * @param int $id             The purchased solution ID.
-	 * @param int $composition_id The composition ID this purchased solution is active in.
-	 *
-	 * @return bool true if the purchased solution was activated successfully, false if not.
-	 */
-	public function activate_purchased_solution( int $id, int $composition_id ): bool {
-		$purchased_solutions = new Database\Queries\PurchasedSolution();
-
-		// We can only activate ready purchased solutions. Any other status, and we will not activate.
-		/** @var PurchasedSolution $current */
-		$current = $purchased_solutions->get_item( $id );
-		if ( 'ready' !== $current->status ) {
-			return false;
-		}
-
-		$result = $purchased_solutions->update_item( $id, [
-			'status'         => 'active',
-			'composition_id' => $composition_id,
-		] );
-
-		return $result !== false;
-	}
-
-	/**
-	 * Deactivate a previously attached purchased solution to a certain composition.
-	 *
-	 * Moves the purchased solution to the `ready` status and sets the composition ID to 0.
-	 * But only if the purchased solution is active.
-	 *
-	 * @since 0.15.0
-	 *
-	 * @param int $id             The purchased solution ID.
-	 * @param int $composition_id Optional. The composition ID the purchased solution should be attached to prior to deactivation.
-	 *                            Set to 0 to not check for a match prior to detaching.
-	 *
-	 * @return bool true if the purchased solution was deactivated successfully, false if not.
-	 */
-	public function deactivate_purchased_solution( int $id, int $composition_id = 0 ): bool {
-		$purchased_solutions = new Database\Queries\PurchasedSolution();
-
-		/** @var PurchasedSolution $current */
-		$current = $purchased_solutions->get_item( $id );
-
-		// We can only deactivate active purchased solutions.
-		if ( 'active' !== $current->status ) {
-			return false;
-		}
-
-		// If provided with a composition ID we will only deactivate if the purchased solution is currently attached to that composition ID.
-		if ( $composition_id > 0 ) {
-			if ( ! empty( $current->composition_id ) && $composition_id !== $current->composition_id ) {
-				return false;
-			}
-		}
-
-		$result = $purchased_solutions->update_item( $id, [
-			'status'         => 'ready',
-			'composition_id' => 0,
-		] );
-
-		return $result !== false;
-	}
-
-	/**
-	 * Move a purchased solution to the `retired` status.
-	 *
-	 * @since 0.14.0
-	 *
-	 * @param int $id The purchased solution ID.
-	 *
-	 * @return bool true if the purchased solution was retired successfully, false if not.
-	 */
-	public function retire_purchased_solution( int $id ): bool {
-		$purchased_solutions = new Database\Queries\PurchasedSolution();
-
-		$result = $purchased_solutions->update_item( $id, [
-			'status' => 'retired',
-		] );
-
-		return $result !== false;
-	}
-
-	/**
-	 * Delete a purchased solution.
-	 *
-	 * @since 0.14.0
-	 *
-	 * @param int $id The purchased solution ID.
-	 *
-	 * @return int|false `1` if the purchased solution was deleted successfully, false on error.
-	 */
-	public function delete_purchased_solution( int $id ): bool {
-		$purchased_solutions = new Database\Queries\PurchasedSolution();
-
-		$result = $purchased_solutions->delete_item( $id );
-
-		return $result !== false;
-	}
-
-	/**
 	 * Get a purchased solution by ID.
 	 *
 	 * @since 0.14.0
@@ -462,5 +246,221 @@ class PurchasedSolutionManager implements Manager {
 
 		// Return array of counts
 		return $c;
+	}
+
+	/**
+	 * Add a purchased solution entry.
+	 *
+	 * @since 0.14.0
+	 *
+	 * @param array $data           {
+	 *                              Array of purchased solution data. Default empty.
+	 *
+	 *     The `date_created` and `date_modified` parameters do not need to be passed.
+	 *     They will be automatically populated if empty.
+	 *
+	 * @type string $status         Optional. Purchased solution status. This is related to the solution, user, order and composition.
+	 *                                        See PurchasedSolutionManager::$STATUSES for possible values.
+	 *                                        Default `invalid`.
+	 * @type int    $solution_id    Solution ID linked to the product being purchased. Default 0.
+	 * @type int    $user_id        WordPress user ID linked to the customer of the order. Default 0.
+	 * @type int    $order_id       ID of the order containing among its items the product linked to the solution. Default 0.
+	 * @type int    $order_item_id  ID of the order item containing the product linked to the solution. Default 0.
+	 * @type int    $composition_id The composition ID this purchased solution is currently part of. Default 0.
+	 * @type string $date_created   Optional. Automatically calculated on add/edit.
+	 *                                        The date & time the purchased solution was inserted.
+	 *                                        Format: YYYY-MM-DD HH:MM:SS. Default empty.
+	 * @type string $date_modified  Optional. Automatically calculated on add/edit.
+	 *                                        The date & time the purchased solution was last modified.
+	 *                                        Format: YYYY-MM-DD HH:MM:SS. Default empty.
+	 * }
+	 * @return int|false ID of newly created purchased solution, false on error.
+	 */
+	public function add_purchased_solution( array $data ) {
+		$purchased_solutions = new Database\Queries\PurchasedSolution();
+
+		return $purchased_solutions->add_item( $data );
+	}
+
+	/**
+	 * Update a purchased solution entry.
+	 *
+	 * @since 0.14.0
+	 *
+	 * @param int   $id             Purchased solution ID.
+	 * @param array $data           {
+	 *                              Array of purchased solution data. Default empty.
+	 *
+	 *     The `date_created` and `date_modified` parameters do not need to be passed.
+	 *     They will be automatically populated if empty.
+	 *
+	 * @type string $status         Purchased solution status. This is related to the solution, user, order and composition.
+	 *                              See PurchasedSolutionManager::$STATUSES for possible values.
+	 *                              Default `invalid`.
+	 * @type int    $solution_id    Solution ID linked to the product being purchased. Default 0.
+	 * @type int    $user_id        WordPress user ID linked to the customer of the order. Default 0.
+	 * @type int    $order_id       ID of the order containing among its items the product linked to the solution. Default 0.
+	 * @type int    $order_item_id  ID of the order item containing the product linked to the solution. Default 0.
+	 * @type int    $composition_id The composition ID this purchased solution is currently part of. Default 0.
+	 * @type string $date_created   Optional. Automatically calculated on add/edit.
+	 *                                        The date & time the purchased solution was inserted.
+	 *                                        Format: YYYY-MM-DD HH:MM:SS. Default empty.
+	 * @type string $date_modified  Optional. Automatically calculated on add/edit.
+	 *                                        The date & time the purchased solution was last modified.
+	 *                                        Format: YYYY-MM-DD HH:MM:SS. Default empty.
+	 * }
+	 * @return bool Whether the purchased solution was updated.
+	 */
+	public function update_purchased_solution( int $id, array $data ): bool {
+		$purchased_solutions = new Database\Queries\PurchasedSolution();
+
+		$result = $purchased_solutions->update_item( $id, $data );
+
+		return $result !== false;
+	}
+
+	/**
+	 * Move a purchased solution to the `invalid` status.
+	 *
+	 * @since 0.14.0
+	 *
+	 * @param int $id The purchased solution ID.
+	 *
+	 * @return bool true if the purchased solution was invalidated successfully, false if not.
+	 */
+	public function invalidate_purchased_solution( int $id ): bool {
+		$purchased_solutions = new Database\Queries\PurchasedSolution();
+
+		$result = $purchased_solutions->update_item( $id, [
+			'status' => 'invalid',
+		] );
+
+		return $result !== false;
+	}
+
+	/**
+	 * Move a purchased solution to the `ready` status.
+	 *
+	 * @since 0.14.0
+	 *
+	 * @param int $id The purchased solution ID.
+	 *
+	 * @return bool true if the purchased solution was readied successfully, false if not.
+	 */
+	public function ready_purchased_solution( int $id ): bool {
+		$purchased_solutions = new Database\Queries\PurchasedSolution();
+
+		$result = $purchased_solutions->update_item( $id, [
+			'status' => 'ready',
+		] );
+
+		return $result !== false;
+	}
+
+	/**
+	 * Move a purchased solution to the `active` status.
+	 *
+	 * A composition ID must be provided to be able to activate a purchased solution.
+	 * But only if the purchased solution is ready.
+	 *
+	 * @since 0.14.0
+	 *
+	 * @param int $id             The purchased solution ID.
+	 * @param int $composition_id The composition ID this purchased solution is active in.
+	 *
+	 * @return bool true if the purchased solution was activated successfully, false if not.
+	 */
+	public function activate_purchased_solution( int $id, int $composition_id ): bool {
+		$purchased_solutions = new Database\Queries\PurchasedSolution();
+
+		// We can only activate ready purchased solutions. Any other status, and we will not activate.
+		/** @var PurchasedSolution $current */
+		$current = $purchased_solutions->get_item( $id );
+		if ( 'ready' !== $current->status ) {
+			return false;
+		}
+
+		$result = $purchased_solutions->update_item( $id, [
+			'status'         => 'active',
+			'composition_id' => $composition_id,
+		] );
+
+		return $result !== false;
+	}
+
+	/**
+	 * Deactivate a previously attached purchased solution to a certain composition.
+	 *
+	 * Moves the purchased solution to the `ready` status and sets the composition ID to 0.
+	 * But only if the purchased solution is active.
+	 *
+	 * @since 0.15.0
+	 *
+	 * @param int $id             The purchased solution ID.
+	 * @param int $composition_id Optional. The composition ID the purchased solution should be attached to prior to deactivation.
+	 *                            Set to 0 to not check for a match prior to detaching.
+	 *
+	 * @return bool true if the purchased solution was deactivated successfully, false if not.
+	 */
+	public function deactivate_purchased_solution( int $id, int $composition_id = 0 ): bool {
+		$purchased_solutions = new Database\Queries\PurchasedSolution();
+
+		/** @var PurchasedSolution $current */
+		$current = $purchased_solutions->get_item( $id );
+
+		// We can only deactivate active purchased solutions.
+		if ( 'active' !== $current->status ) {
+			return false;
+		}
+
+		// If provided with a composition ID we will only deactivate if the purchased solution is currently attached to that composition ID.
+		if ( $composition_id > 0 ) {
+			if ( ! empty( $current->composition_id ) && $composition_id !== $current->composition_id ) {
+				return false;
+			}
+		}
+
+		$result = $purchased_solutions->update_item( $id, [
+			'status'         => 'ready',
+			'composition_id' => 0,
+		] );
+
+		return $result !== false;
+	}
+
+	/**
+	 * Move a purchased solution to the `retired` status.
+	 *
+	 * @since 0.14.0
+	 *
+	 * @param int $id The purchased solution ID.
+	 *
+	 * @return bool true if the purchased solution was retired successfully, false if not.
+	 */
+	public function retire_purchased_solution( int $id ): bool {
+		$purchased_solutions = new Database\Queries\PurchasedSolution();
+
+		$result = $purchased_solutions->update_item( $id, [
+			'status' => 'retired',
+		] );
+
+		return $result !== false;
+	}
+
+	/**
+	 * Delete a purchased solution.
+	 *
+	 * @since 0.14.0
+	 *
+	 * @param int $id The purchased solution ID.
+	 *
+	 * @return int|false `1` if the purchased solution was deleted successfully, false on error.
+	 */
+	public function delete_purchased_solution( int $id ): bool {
+		$purchased_solutions = new Database\Queries\PurchasedSolution();
+
+		$result = $purchased_solutions->delete_item( $id );
+
+		return $result !== false;
 	}
 }
