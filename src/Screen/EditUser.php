@@ -49,8 +49,8 @@ class EditUser extends AbstractHookProvider {
 	public function register_hooks() {
 		$user_id = get_edited_user_id();
 
-		// Only load the screen for users that can view solutions.
-		if ( ! user_can( $user_id, Capabilities::VIEW_SOLUTIONS ) ) {
+		// Only load the screen for users that can manage options.
+		if ( ! user_can( $user_id, Capabilities::MANAGE_OPTIONS ) ) {
 			return;
 		}
 
