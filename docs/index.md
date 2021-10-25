@@ -9,11 +9,11 @@ Packages are exposed via a `packages.json` file for inclusion as a Composer repo
 ## Table of Contents
 
 1. [Installation](installation.md)
-1. Managing
-	1. [Settings](settings.md)
-	1. [Packages](packages.md)
-	1. [Security](security.md)
-1. [Using Composer](composer.md)
-1. [Logging](logging.md)
-1. [Integrations](integrations.md)
-1. [Troubleshooting](troubleshooting.md)
+2. Managing
+    1. [Settings](settings.md)
+    2. [Packages](packages.md)
+    3. [Security](security.md)
+3. [Using Composer](composer.md)
+4. [Logging](logging.md)
+5. [Integrations](integrations.md)
+6. [Troubleshooting](troubleshooting.md)

@@ -27,7 +27,7 @@ final class Logs extends Table {
 	 * @since  0.14.0
 	 * @var string
 	 */
-	protected string $name = 'lt_retailer_logs';
+	protected $name = 'lt_retailer_logs';
 
 	/**
 	 * Database version.
