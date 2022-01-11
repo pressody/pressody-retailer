@@ -27,7 +27,7 @@ final class PurchasedSolutions extends Table {
 	 * @since  0.14.0
 	 * @var string
 	 */
-	protected $name = 'lt_retailer_purchased_solutions';
+	protected string $name = 'lt_retailer_purchased_solutions';
 
 	/**
 	 * Database version.

@@ -27,7 +27,7 @@ class PurchasedSolutions extends Schema {
 	 * @access public
 	 * @var array
 	 */
-	public $columns = array(
+	public array $columns = array(
 
 		// id
 		array(

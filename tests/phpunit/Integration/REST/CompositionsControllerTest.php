@@ -1759,12 +1759,6 @@ And here is a quote from a customer:
 						'homepage' => 'https://pixelgrade.com',
 						'role'     => 'Development and product development',
 					],
-					[
-						'name'     => 'Mădălin Gorbănescu',
-						'email'    => 'madalin@pixelgrade.com',
-						'homepage' => 'https://pixelgrade.com',
-						'role'     => 'Development',
-					],
 				],
 				'keywords'          => [
 					'pixelgradelt',
