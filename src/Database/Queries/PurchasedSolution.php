@@ -40,7 +40,7 @@ class PurchasedSolution extends Query {
 	 * @access public
 	 * @var string
 	 */
-	protected $table_alias = 'ltrtps';
+	protected $table_alias = 'pdrtps';
 
 	/**
 	 * Name of class used to set up the database schema
@@ -89,7 +89,7 @@ class PurchasedSolution extends Query {
 	 * @access public
 	 * @var string
 	 */
-	protected $cache_group = 'lt_rt_purchased_solutions';
+	protected $cache_group = 'pd_rt_purchased_solutions';
 
 	/** Methods ***************************************************************/
 

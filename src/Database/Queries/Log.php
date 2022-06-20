@@ -40,7 +40,7 @@ class Log extends Query {
 	 * @access public
 	 * @var string
 	 */
-	protected $table_alias = 'ltrtl';
+	protected $table_alias = 'pdrtl';
 
 	/**
 	 * Name of class used to set up the database schema
@@ -89,7 +89,7 @@ class Log extends Query {
 	 * @access public
 	 * @var string
 	 */
-	protected $cache_group = 'lt_rt_logs';
+	protected $cache_group = 'pd_rt_logs';
 
 	/** Methods ***************************************************************/
 
