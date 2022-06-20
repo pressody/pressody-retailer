@@ -1743,7 +1743,7 @@ And here is a quote from a customer:
 				'authors'           => [
 					[
 						'name'     => 'Vlad Olaru',
-						'email'    => 'vlad@pixelgrade.com',
+						'email'    => 'vladpotter85@gmail.com',
 						'homepage' => 'https://thinkwritecode.com',
 						'role'     => 'Development, infrastructure, and product development',
 					],
@@ -1904,7 +1904,7 @@ And here is a quote from a customer:
 				'authors'      => [
 					[
 						'name'     => 'Vlad Olaru',
-						'email'    => 'vlad@pixelgrade.com',
+						'email'    => 'vladpotter85@gmail.com',
 						'homepage' => 'https://thinkwritecode.com',
 						'role'     => 'Development, infrastructure, and product development',
 					],
@@ -1965,7 +1965,7 @@ And here is a quote from a customer:
 				'authors'      => [
 					[
 						'name'     => 'Vlad Olaru',
-						'email'    => 'vlad@pixelgrade.com',
+						'email'    => 'vladpotter85@gmail.com',
 						'homepage' => 'https://thinkwritecode.com',
 						'role'     => 'Development, infrastructure, and product development',
 					],
@@ -2026,7 +2026,7 @@ And here is a quote from a customer:
 				'authors'      => [
 					[
 						'name'     => 'Vlad Olaru',
-						'email'    => 'vlad@pixelgrade.com',
+						'email'    => 'vladpotter85@gmail.com',
 						'homepage' => 'https://thinkwritecode.com',
 						'role'     => 'Development, infrastructure, and product development',
 					],
