@@ -207,7 +207,7 @@ class Settings extends AbstractHookProvider {
 
 		\add_settings_field(
 				'github-oauth-token',
-				'<label for="pressody_retailer-github-oauth-token">' . esc_html__( 'Github OAuth Token', 'pressody_retailer' ) . '</label>',
+				'<label for="pressody_retailer-github-oauth-token">' . esc_html__( 'GitHub OAuth Token', 'pressody_retailer' ) . '</label>',
 				[ $this, 'render_field_github_oauth_token' ],
 				'pressody_retailer',
 				'default'
@@ -329,7 +329,7 @@ class Settings extends AbstractHookProvider {
 	}
 
 	/**
-	 * Display a field for defining the Github OAuth Token.
+	 * Display a field for defining the GitHub OAuth Token.
 	 *
 	 * @since 0.1.0
 	 */
@@ -339,8 +339,8 @@ class Settings extends AbstractHookProvider {
 		<p>
 			<input type="password" size="80" name="pressody_retailer[github-oauth-token]"
 			       id="pressody_retailer-github-oauth-token" value="<?php echo \esc_attr( $value ); ?>"><br/>
-			<span class="description">Github has <strong>a rate limit of 60 requests/hour</strong> on their API for <strong>requests not using an OAuth Token.</strong><br>
-				Since most packages on Packagist.org have their source on Github, and you may be using actual Github repos as sources, <strong>you should definitely generate a token and save it here.</strong><br>
+			<span class="description">GitHub has <strong>a rate limit of 60 requests/hour</strong> on their API for <strong>requests not using an OAuth Token.</strong><br>
+				Since most packages on Packagist.org have their source on GitHub, and you may be using actual GitHub repos as sources, <strong>you should definitely generate a token and save it here.</strong><br>
 				Learn more about <strong>the steps to take <a
 							href="https://getcomposer.org/doc/articles/authentication-for-private-packages.md#github-oauth">here</a>.</strong> <strong>Be careful about the permissions you grant on the generated token!</strong></span>
 		</p>
