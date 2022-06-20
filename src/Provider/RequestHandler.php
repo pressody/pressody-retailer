@@ -1,26 +1,26 @@
 <?php
 /**
- * PixelgradeLT Retailer request handler.
+ * Pressody Retailer request handler.
  *
- * @package PixelgradeLT
+ * @package Pressody
  * @license GPL-2.0-or-later
  * @since 0.1.0
  */
 
 declare ( strict_types = 1 );
 
-namespace PixelgradeLT\Retailer\Provider;
+namespace Pressody\Retailer\Provider;
 
 use Cedaro\WP\Plugin\AbstractHookProvider;
 use Psr\Container\ContainerInterface;
-use PixelgradeLT\Retailer\Exception\AuthenticationException;
-use PixelgradeLT\Retailer\HTTP\Request;
-use PixelgradeLT\Retailer\HTTP\Response;
-use PixelgradeLT\Retailer\Route\Route;
+use Pressody\Retailer\Exception\AuthenticationException;
+use Pressody\Retailer\HTTP\Request;
+use Pressody\Retailer\HTTP\Response;
+use Pressody\Retailer\Route\Route;
 use WP;
 use WP_REST_Server;
-use function PixelgradeLT\Retailer\is_debug_mode;
-use function PixelgradeLT\Retailer\is_running_unit_tests;
+use function Pressody\Retailer\is_debug_mode;
+use function Pressody\Retailer\is_running_unit_tests;
 
 /**
  * Request handler class.
@@ -73,15 +73,15 @@ class RequestHandler extends AbstractHookProvider {
 	 * @throws \Exception If an exception is caught and debug mode is enabled.
 	 */
 	public function dispatch( WP $wp ) {
-		if ( empty( $wp->query_vars['pixelgradelt_retailer_route'] ) ) {
+		if ( empty( $wp->query_vars['pressody_retailer_route'] ) ) {
 			return;
 		}
 
-		$route = $wp->query_vars['pixelgradelt_retailer_route'];
+		$route = $wp->query_vars['pressody_retailer_route'];
 		$this->request->set_route( $route );
 
-		if ( ! empty( $wp->query_vars['pixelgradelt_retailer_params'] ) ) {
-			$this->request->set_url_params( $wp->query_vars['pixelgradelt_retailer_params'] );
+		if ( ! empty( $wp->query_vars['pressody_retailer_params'] ) ) {
+			$this->request->set_url_params( $wp->query_vars['pressody_retailer_params'] );
 		}
 
 		try {

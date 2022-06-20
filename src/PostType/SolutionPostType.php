@@ -4,17 +4,17 @@
  *
  * @since   0.1.0
  * @license GPL-2.0-or-later
- * @package PixelgradeLT
+ * @package Pressody
  */
 
 declare ( strict_types=1 );
 
-namespace PixelgradeLT\Retailer\PostType;
+namespace Pressody\Retailer\PostType;
 
 use Cedaro\WP\Plugin\AbstractHookProvider;
 use Pixelgrade\WPPostNotes\PostNotes;
-use PixelgradeLT\Retailer\SolutionType\SolutionTypes;
-use PixelgradeLT\Retailer\SolutionManager;
+use Pressody\Retailer\SolutionType\SolutionTypes;
+use Pressody\Retailer\SolutionManager;
 
 /**
  * The Solution custom post type provider: provides the interface for and stores the information about each solution.

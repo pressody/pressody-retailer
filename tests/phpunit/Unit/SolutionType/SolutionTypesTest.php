@@ -1,10 +1,10 @@
 <?php
 declare ( strict_types=1 );
 
-namespace PixelgradeLT\Retailer\Tests\Unit\SolutionType;
+namespace Pressody\Retailer\Tests\Unit\SolutionType;
 
-use PixelgradeLT\Retailer\SolutionType\SolutionTypes;
-use PixelgradeLT\Retailer\Tests\Unit\TestCase;
+use Pressody\Retailer\SolutionType\SolutionTypes;
+use Pressody\Retailer\Tests\Unit\TestCase;
 
 class SolutionTypesTest extends TestCase {
 

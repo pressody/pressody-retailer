@@ -4,19 +4,19 @@
  *
  * @since   0.11.0
  * @license GPL-2.0-or-later
- * @package PixelgradeLT
+ * @package Pressody
  */
 
 declare ( strict_types=1 );
 
-namespace PixelgradeLT\Retailer;
+namespace Pressody\Retailer;
 
 use Carbon_Fields\Value_Set\Value_Set;
 use Env\Env;
-use PixelgradeLT\Retailer\Authentication\ApiKey\Server;
-use PixelgradeLT\Retailer\Client\ComposerClient;
-use PixelgradeLT\Retailer\Repository\PackageRepository;
-use PixelgradeLT\Retailer\Utils\ArrayHelpers;
+use Pressody\Retailer\Authentication\ApiKey\Server;
+use Pressody\Retailer\Client\ComposerClient;
+use Pressody\Retailer\Repository\PackageRepository;
+use Pressody\Retailer\Utils\ArrayHelpers;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -28,13 +28,13 @@ use Psr\Log\LoggerInterface;
  */
 class CompositionManager implements Manager {
 
-	const POST_TYPE = 'ltcomposition';
-	const POST_TYPE_PLURAL = 'ltcompositions';
+	const POST_TYPE = 'pdcomposition';
+	const POST_TYPE_PLURAL = 'pdcompositions';
 
-	const KEYWORD_TAXONOMY = 'ltcomposition_keywords';
-	const KEYWORD_TAXONOMY_SINGULAR = 'ltcomposition_keyword';
+	const KEYWORD_TAXONOMY = 'pdcomposition_keywords';
+	const KEYWORD_TAXONOMY_SINGULAR = 'pdcomposition_keyword';
 
-	const LTRECORDS_API_PWD = 'pixelgradelt_records';
+	const PDRECORDS_API_PWD = 'pressody_records';
 
 	/**
 	 * Used to create the pseudo IDs saved as values for a composition's contained solutions.
@@ -58,7 +58,7 @@ class CompositionManager implements Manager {
 	 *
 	 * @since 0.16.0
 	 */
-	const DEFAULT_STATUS = 'not_ready';
+	const DEFAUPD_STATUS = 'not_ready';
 
 	/**
 	 * Solutions repository.
@@ -132,29 +132,29 @@ class CompositionManager implements Manager {
 		$this->logger                  = $logger;
 		$this->hasher                  = $hasher;
 
-		self::$STATUSES = \apply_filters( 'pixelgradelt_retailer/composition_statuses', [
+		self::$STATUSES = \apply_filters( 'pressody_retailer/composition_statuses', [
 			'not_ready' => [
 				'id'       => 'not_ready',
-				'label'    => esc_html__( 'Not Ready', 'pixelgradelt_retailer' ),
-				'desc'     => esc_html__( 'The composition is not ready for use on a site. It needs more work to be ready.', 'pixelgradelt_retailer' ),
+				'label'    => esc_html__( 'Not Ready', 'pressody_retailer' ),
+				'desc'     => esc_html__( 'The composition is not ready for use on a site. It needs more work to be ready.', 'pressody_retailer' ),
 				'internal' => false,
 			],
 			'ready'     => [
 				'id'       => 'ready',
-				'label'    => esc_html__( 'Ready', 'pixelgradelt_retailer' ),
-				'desc'     => esc_html__( 'The composition is ready for use on a site.', 'pixelgradelt_retailer' ),
+				'label'    => esc_html__( 'Ready', 'pressody_retailer' ),
+				'desc'     => esc_html__( 'The composition is ready for use on a site.', 'pressody_retailer' ),
 				'internal' => false,
 			],
 			'active'    => [
 				'id'       => 'active',
-				'label'    => esc_html__( 'Active', 'pixelgradelt_retailer' ),
-				'desc'     => esc_html__( 'The composition is being used on a site.', 'pixelgradelt_retailer' ),
+				'label'    => esc_html__( 'Active', 'pressody_retailer' ),
+				'desc'     => esc_html__( 'The composition is being used on a site.', 'pressody_retailer' ),
 				'internal' => false,
 			],
 			'retired'   => [
 				'id'       => 'retired',
-				'label'    => esc_html__( 'Retired', 'pixelgradelt_retailer' ),
-				'desc'     => esc_html__( 'The composition has been retired and is no longer available for use.', 'pixelgradelt_retailer' ),
+				'label'    => esc_html__( 'Retired', 'pressody_retailer' ),
+				'desc'     => esc_html__( 'The composition has been retired and is no longer available for use.', 'pressody_retailer' ),
 				'internal' => false,
 			],
 		] );
@@ -169,27 +169,27 @@ class CompositionManager implements Manager {
 	 */
 	public function get_composition_post_type_args( array $args = [] ): array {
 		$labels = [
-			'name'                  => esc_html__( 'LT Compositions', 'pixelgradelt_retailer' ),
-			'singular_name'         => esc_html__( 'LT Composition', 'pixelgradelt_retailer' ),
-			'menu_name'             => esc_html_x( 'LT Compositions', 'Admin Menu text', 'pixelgradelt_retailer' ),
-			'add_new'               => esc_html_x( 'Add New', 'LT Composition', 'pixelgradelt_retailer' ),
-			'add_new_item'          => esc_html__( 'Add New LT Composition', 'pixelgradelt_retailer' ),
-			'new_item'              => esc_html__( 'New LT Composition', 'pixelgradelt_retailer' ),
-			'edit_item'             => esc_html__( 'Edit LT Composition', 'pixelgradelt_retailer' ),
-			'view_item'             => esc_html__( 'View LT Composition', 'pixelgradelt_retailer' ),
-			'all_items'             => esc_html__( 'View Compositions', 'pixelgradelt_retailer' ),
-			'search_items'          => esc_html__( 'Search Compositions', 'pixelgradelt_retailer' ),
-			'not_found'             => esc_html__( 'No solutions found.', 'pixelgradelt_retailer' ),
-			'not_found_in_trash'    => esc_html__( 'No solutions found in Trash.', 'pixelgradelt_retailer' ),
-			'uploaded_to_this_item' => esc_html__( 'Uploaded to this solution', 'pixelgradelt_retailer' ),
-			'filter_items_list'     => esc_html__( 'Filter solutions list', 'pixelgradelt_retailer' ),
-			'items_list_navigation' => esc_html__( 'Compositions list navigation', 'pixelgradelt_retailer' ),
-			'items_list'            => esc_html__( 'LT Compositions list', 'pixelgradelt_retailer' ),
+			'name'                  => esc_html__( 'PD Compositions', 'pressody_retailer' ),
+			'singular_name'         => esc_html__( 'PD Composition', 'pressody_retailer' ),
+			'menu_name'             => esc_html_x( 'PD Compositions', 'Admin Menu text', 'pressody_retailer' ),
+			'add_new'               => esc_html_x( 'Add New', 'PD Composition', 'pressody_retailer' ),
+			'add_new_item'          => esc_html__( 'Add New PD Composition', 'pressody_retailer' ),
+			'new_item'              => esc_html__( 'New PD Composition', 'pressody_retailer' ),
+			'edit_item'             => esc_html__( 'Edit PD Composition', 'pressody_retailer' ),
+			'view_item'             => esc_html__( 'View PD Composition', 'pressody_retailer' ),
+			'all_items'             => esc_html__( 'View Compositions', 'pressody_retailer' ),
+			'search_items'          => esc_html__( 'Search Compositions', 'pressody_retailer' ),
+			'not_found'             => esc_html__( 'No solutions found.', 'pressody_retailer' ),
+			'not_found_in_trash'    => esc_html__( 'No solutions found in Trash.', 'pressody_retailer' ),
+			'uploaded_to_this_item' => esc_html__( 'Uploaded to this solution', 'pressody_retailer' ),
+			'filter_items_list'     => esc_html__( 'Filter solutions list', 'pressody_retailer' ),
+			'items_list_navigation' => esc_html__( 'Compositions list navigation', 'pressody_retailer' ),
+			'items_list'            => esc_html__( 'PD Compositions list', 'pressody_retailer' ),
 		];
 
 		return array_merge( [
 			'labels'             => $labels,
-			'description'        => esc_html__( 'Compositions are created when a user configures a new site out of PixelgradeLT solutions. E-commerce order items are linked to a composition.', 'pixelgradelt_retailer' ),
+			'description'        => esc_html__( 'Compositions are created when a user configures a new site out of Pressody solutions. E-commerce order items are linked to a composition.', 'pressody_retailer' ),
 			'hierarchical'       => false,
 			'public'             => false,
 			'publicly_queryable' => false,
@@ -236,23 +236,23 @@ class CompositionManager implements Manager {
 	 */
 	public function get_solution_keyword_taxonomy_args( array $args = [] ): array {
 		$labels = [
-			'name'                       => esc_html__( 'Keywords', 'pixelgradelt_retailer' ),
-			'singular_name'              => esc_html__( 'Composition Keyword', 'pixelgradelt_retailer' ),
-			'add_new'                    => esc_html_x( 'Add New', 'LT Composition Keyword', 'pixelgradelt_retailer' ),
-			'add_new_item'               => esc_html__( 'Add New Composition Keyword', 'pixelgradelt_retailer' ),
-			'update_item'                => esc_html__( 'Update Composition Keyword', 'pixelgradelt_retailer' ),
-			'new_item_name'              => esc_html__( 'New Composition Keyword Name', 'pixelgradelt_retailer' ),
-			'edit_item'                  => esc_html__( 'Edit Composition Keyword', 'pixelgradelt_retailer' ),
-			'all_items'                  => esc_html__( 'All Composition Keywords', 'pixelgradelt_retailer' ),
-			'search_items'               => esc_html__( 'Search Composition Keywords', 'pixelgradelt_retailer' ),
-			'not_found'                  => esc_html__( 'No solution keywords found.', 'pixelgradelt_retailer' ),
-			'no_terms'                   => esc_html__( 'No solution keywords.', 'pixelgradelt_retailer' ),
-			'separate_items_with_commas' => esc_html__( 'Separate keywords with commas.', 'pixelgradelt_retailer' ),
-			'choose_from_most_used'      => esc_html__( 'Choose from the most used keywords.', 'pixelgradelt_retailer' ),
-			'most_used'                  => esc_html__( 'Most used.', 'pixelgradelt_retailer' ),
-			'items_list_navigation'      => esc_html__( 'Composition Keywords list navigation', 'pixelgradelt_retailer' ),
-			'items_list'                 => esc_html__( 'Composition Keywords list', 'pixelgradelt_retailer' ),
-			'back_to_items'              => esc_html__( '&larr; Go to Composition Keywords', 'pixelgradelt_retailer' ),
+			'name'                       => esc_html__( 'Keywords', 'pressody_retailer' ),
+			'singular_name'              => esc_html__( 'Composition Keyword', 'pressody_retailer' ),
+			'add_new'                    => esc_html_x( 'Add New', 'PD Composition Keyword', 'pressody_retailer' ),
+			'add_new_item'               => esc_html__( 'Add New Composition Keyword', 'pressody_retailer' ),
+			'update_item'                => esc_html__( 'Update Composition Keyword', 'pressody_retailer' ),
+			'new_item_name'              => esc_html__( 'New Composition Keyword Name', 'pressody_retailer' ),
+			'edit_item'                  => esc_html__( 'Edit Composition Keyword', 'pressody_retailer' ),
+			'all_items'                  => esc_html__( 'All Composition Keywords', 'pressody_retailer' ),
+			'search_items'               => esc_html__( 'Search Composition Keywords', 'pressody_retailer' ),
+			'not_found'                  => esc_html__( 'No solution keywords found.', 'pressody_retailer' ),
+			'no_terms'                   => esc_html__( 'No solution keywords.', 'pressody_retailer' ),
+			'separate_items_with_commas' => esc_html__( 'Separate keywords with commas.', 'pressody_retailer' ),
+			'choose_from_most_used'      => esc_html__( 'Choose from the most used keywords.', 'pressody_retailer' ),
+			'most_used'                  => esc_html__( 'Most used.', 'pressody_retailer' ),
+			'items_list_navigation'      => esc_html__( 'Composition Keywords list navigation', 'pressody_retailer' ),
+			'items_list'                 => esc_html__( 'Composition Keywords list', 'pressody_retailer' ),
+			'back_to_items'              => esc_html__( '&larr; Go to Composition Keywords', 'pressody_retailer' ),
 		];
 
 		return array_merge( [
@@ -455,7 +455,7 @@ class CompositionManager implements Manager {
 		 * @param array $solution_data The composition data.
 		 * @param int   $post_id       The composition post ID.
 		 */
-		return \apply_filters( 'pixelgradelt_retailer/composition_id_data', $data, $post_ID );
+		return \apply_filters( 'pressody_retailer/composition_id_data', $data, $post_ID );
 	}
 
 	/**
@@ -577,13 +577,13 @@ class CompositionManager implements Manager {
 		 */
 
 		/**
-		 * Fires before LT composition update.
+		 * Fires before PD composition update.
 		 *
 		 * @since 0.14.0
 		 *
 		 * @param int $post_id The composition post ID.
 		 */
-		\do_action( 'pixelgradelt_retailer/ltcomposition/before_update', $post_to_update->ID );
+		\do_action( 'pressody_retailer/pdcomposition/before_update', $post_to_update->ID );
 
 		// First update the data stored in the post, if that is the case.
 		if ( ! $created_new_post ) {
@@ -647,7 +647,7 @@ class CompositionManager implements Manager {
 		}
 
 		/**
-		 * Fires after update LT composition.
+		 * Fires after update PD composition.
 		 *
 		 * @since 0.14.0
 		 *
@@ -655,7 +655,7 @@ class CompositionManager implements Manager {
 		 * @param \WP_Post $post    The composition post object.
 		 * @param bool     $update  If this is an update.
 		 */
-		\do_action( 'pixelgradelt_retailer/ltcomposition/update',
+		\do_action( 'pressody_retailer/pdcomposition/update',
 			$post_to_update->ID,
 			$post_to_update,
 			true
@@ -663,14 +663,14 @@ class CompositionManager implements Manager {
 
 		if ( $created_new_post ) {
 			/**
-			 * Fires after a new LT composition is created.
+			 * Fires after a new PD composition is created.
 			 *
 			 * @since 0.14.0
 			 *
 			 * @param int      $post_id The newly created composition post ID
 			 * @param \WP_Post $post    The new composition post object.
 			 */
-			\do_action( 'pixelgradelt_retailer/ltcomposition/new',
+			\do_action( 'pressody_retailer/pdcomposition/new',
 				$post_to_update->ID,
 				$post_to_update
 			);
@@ -730,20 +730,20 @@ class CompositionManager implements Manager {
 
 		if ( ! $silent ) {
 			/**
-			 * Fires before LT composition update.
+			 * Fires before PD composition update.
 			 *
 			 * @since 0.14.0
 			 *
 			 * @param int $post_id The composition post ID.
 			 */
-			\do_action( 'pixelgradelt_retailer/ltcomposition/before_update', $post_id );
+			\do_action( 'pressody_retailer/pdcomposition/before_update', $post_id );
 		}
 
 		$result = ! ! \update_post_meta( $post_id, '_composition_status', $status );
 
 		if ( ! $silent ) {
 			/**
-			 * Fires after LT composition update.
+			 * Fires after PD composition update.
 			 *
 			 * The provided parameters are compatible with the 'wp_after_insert_post' core action, so we can use the same handlers.
 			 *
@@ -753,7 +753,7 @@ class CompositionManager implements Manager {
 			 * @param \WP_Post $post    The composition post object.
 			 * @param bool     $update  If this is an update.
 			 */
-			\do_action( 'pixelgradelt_retailer/ltcomposition/update',
+			\do_action( 'pressody_retailer/pdcomposition/update',
 				$post_id,
 				get_post( $post_id ),
 				true
@@ -843,13 +843,13 @@ class CompositionManager implements Manager {
 	public function set_post_composition_user_ids( int $post_id, array $user_ids, bool $silent = false ): bool {
 		if ( ! $silent ) {
 			/**
-			 * Fires before LT composition update.
+			 * Fires before PD composition update.
 			 *
 			 * @since 0.14.0
 			 *
 			 * @param int $post_id The composition post ID.
 			 */
-			\do_action( 'pixelgradelt_retailer/ltcomposition/before_update', $post_id );
+			\do_action( 'pressody_retailer/pdcomposition/before_update', $post_id );
 		}
 
 		// Decorate the user list according to the needs of the CarbonFields association field.
@@ -867,7 +867,7 @@ class CompositionManager implements Manager {
 
 		if ( ! $silent ) {
 			/**
-			 * Fires after LT composition update.
+			 * Fires after PD composition update.
 			 *
 			 * The provided parameters are compatible with the 'wp_after_insert_post' core action, so we can use the same handlers.
 			 *
@@ -877,7 +877,7 @@ class CompositionManager implements Manager {
 			 * @param \WP_Post $post    The composition post object.
 			 * @param bool     $update  If this is an update.
 			 */
-			\do_action( 'pixelgradelt_retailer/ltcomposition/update',
+			\do_action( 'pressody_retailer/pdcomposition/update',
 				$post_id,
 				get_post( $post_id ),
 				true
@@ -931,8 +931,8 @@ class CompositionManager implements Manager {
 	 *
 	 * @return string
 	 */
-	public function get_post_composition_encrypted_ltdetails( array $composition_data ): string {
-		$encrypted = local_rest_call( '/pixelgradelt_retailer/v1/compositions/encrypt_ltdetails', 'POST', [], [
+	public function get_post_composition_encrypted_pddetails( array $composition_data ): string {
+		$encrypted = local_rest_call( '/pressody_retailer/v1/compositions/encrypt_pddetails', 'POST', [], [
 			'userids'       => array_keys( $composition_data['users'] ),
 			'compositionid' => $composition_data['hashid'],
 			'extra'         => [
@@ -940,7 +940,7 @@ class CompositionManager implements Manager {
 			],
 		] );
 		if ( ! is_string( $encrypted ) ) {
-			// This means there was an error. Maybe the composition LT details failed validation, etc.
+			// This means there was an error. Maybe the composition PD details failed validation, etc.
 			$encrypted = '';
 		}
 
@@ -951,7 +951,7 @@ class CompositionManager implements Manager {
 	 * Get the final list of required solutions.
 	 *
 	 * The various types of required solutions will be merged.
-	 * We will also ensure uniqueness by LT Solution.
+	 * We will also ensure uniqueness by PD Solution.
 	 *
 	 * @param int    $post_ID             The Composition post ID.
 	 * @param bool   $include_context     Whether to include context data about each required solution
@@ -966,10 +966,10 @@ class CompositionManager implements Manager {
 		$manual_solutions    = $this->get_post_composition_required_manual_solutions( $post_ID, $include_context, $pseudo_id_delimiter );
 
 		// Merge the two lists by giving precedence to manual solutions:
-		// - we want unique LT solutions (by their managed_post_id);
-		// - if both a purchased and manual LT solution exist, we leave in only the manual one.
+		// - we want unique PD solutions (by their managed_post_id);
+		// - if both a purchased and manual PD solution exist, we leave in only the manual one.
 
-		// First, ensure that each holds unique LT solutions.
+		// First, ensure that each holds unique PD solutions.
 		$purchased_solutions = $this->unique_required_solutions_list( $purchased_solutions );
 		$manual_solutions    = $this->unique_required_solutions_list( $manual_solutions );
 
@@ -979,7 +979,7 @@ class CompositionManager implements Manager {
 	}
 
 	/**
-	 * Given a required solutions list (regardless of type), ensure uniqueness by the LT Solution managed_post_id entry.
+	 * Given a required solutions list (regardless of type), ensure uniqueness by the PD Solution managed_post_id entry.
 	 *
 	 * When required solutions with the same managed_post_id are encountered the last one takes precedence.
 	 *
@@ -1092,7 +1092,7 @@ class CompositionManager implements Manager {
 	 * @param bool $include_context       Whether to include context data about the required purchased-solution
 	 *                                    (things like orders, timestamps, etc).
 	 *
-	 * @return array|null Details of the required purchased-solution. Null if the purchased-solution was not found or its LT solution could not be found.
+	 * @return array|null Details of the required purchased-solution. Null if the purchased-solution was not found or its PD solution could not be found.
 	 *               Each solution has its type, purchased-solution ID, slug, managed post ID and maybe context information, if $include_context is true.
 	 */
 	public function get_post_composition_required_purchased_solution( int $purchased_solution_id, bool $include_context = false ): ?array {
@@ -1113,7 +1113,7 @@ class CompositionManager implements Manager {
 	 *                                              (things like orders, timestamps, etc).
 	 *
 	 * @return array|null The normalized details to be used in a composition data context.
-	 *                    null if the LT solution post could not be found.
+	 *                    null if the PD solution post could not be found.
 	 */
 	protected function normalize_purchased_solution( PurchasedSolution $purchased_solution, bool $include_context = false ): ?array {
 		$solution_post = \get_post( \absint( $purchased_solution->solution_id ) );
@@ -1160,13 +1160,13 @@ class CompositionManager implements Manager {
 	public function set_post_composition_required_purchased_solutions( int $post_id, array $purchased_solutions_ids, bool $silent = false ) {
 		if ( ! $silent ) {
 			/**
-			 * Fires before LT composition update.
+			 * Fires before PD composition update.
 			 *
 			 * @since 0.14.0
 			 *
 			 * @param int $post_id The composition post ID.
 			 */
-			\do_action( 'pixelgradelt_retailer/ltcomposition/before_update', $post_id );
+			\do_action( 'pressody_retailer/pdcomposition/before_update', $post_id );
 		}
 
 		// Make sure we have list of integers.
@@ -1176,7 +1176,7 @@ class CompositionManager implements Manager {
 
 		if ( ! $silent ) {
 			/**
-			 * Fires after LT composition update.
+			 * Fires after PD composition update.
 			 *
 			 * The provided parameters are compatible with the 'wp_after_insert_post' core action, so we can use the same handlers.
 			 *
@@ -1186,7 +1186,7 @@ class CompositionManager implements Manager {
 			 * @param \WP_Post $post    The composition post object.
 			 * @param bool     $update  If this is an update.
 			 */
-			\do_action( 'pixelgradelt_retailer/ltcomposition/update',
+			\do_action( 'pressody_retailer/pdcomposition/update',
 				$post_id,
 				get_post( $post_id ),
 				true
@@ -1206,7 +1206,7 @@ class CompositionManager implements Manager {
 	 *                                    Default false.
 	 * @param bool $process_solutions     Optional. Whether to run the solution list processing logic after adding the solution.
 	 *                                    This way, solutions that are excluded by the newly added solution will be removed.
-	 *                                    See \PixelgradeLT\Retailer\Repository\ProcessedSolutions::process_solutions()
+	 *                                    See \Pressody\Retailer\Repository\ProcessedSolutions::process_solutions()
 	 *                                    The processing will run only when the solution is added to the list,
 	 *                                    not when it is already present, regardless of the $update value.
 	 *                                    Default false.
@@ -1248,7 +1248,7 @@ class CompositionManager implements Manager {
 			$solutionsIds                 = \wp_list_pluck( $required_purchased_solutions, 'managed_post_id' );
 
 			if ( ! empty( $solutionsIds ) ) {
-				$processed_required_solutions = local_rest_call( '/pixelgradelt_retailer/v1/solutions/processed', 'GET', [
+				$processed_required_solutions = local_rest_call( '/pressody_retailer/v1/solutions/processed', 'GET', [
 					'postId' => array_values( $solutionsIds ),
 				] );
 
@@ -1265,7 +1265,7 @@ class CompositionManager implements Manager {
 					);
 				} elseif ( ! empty( $processed_required_solutions ) ) {
 					$did_process_solutions = true;
-					// Leave only the required purchased-solutions with LT solutions that are still in the processed list.
+					// Leave only the required purchased-solutions with PD solutions that are still in the processed list.
 					$required_purchased_solutions = array_filter( $required_purchased_solutions,
 						function ( $ps ) use ( $processed_required_solutions ) {
 							return false !== ArrayHelpers::findSubarrayByKeyValue( $processed_required_solutions, 'id', $ps['managed_post_id'] );
@@ -1289,7 +1289,7 @@ class CompositionManager implements Manager {
 		 * @param array $new_purchased_solution_id The added purchased-solution id.
 		 * @param bool  $processed                 Whether we have run the solution list processing logic after adding the solution.
 		 */
-		$required_purchased_solutions_ids = \apply_filters( 'pixelgradelt_retailer/ltcomposition/add_required_purchased_solution',
+		$required_purchased_solutions_ids = \apply_filters( 'pressody_retailer/pdcomposition/add_required_purchased_solution',
 			$required_purchased_solutions_ids,
 			$post_id,
 			$old_required_solutions,
@@ -1346,7 +1346,7 @@ class CompositionManager implements Manager {
 		 * @param array $old_required_solutions_ids    The old required purchased-solutions list.
 		 * @param array $removed_purchased_solution_id The removed purchased-solution id.
 		 */
-		$required_purchased_solutions_ids = \apply_filters( 'pixelgradelt_retailer/ltcomposition/remove_required_purchased_solution',
+		$required_purchased_solutions_ids = \apply_filters( 'pressody_retailer/pdcomposition/remove_required_purchased_solution',
 			$required_purchased_solutions_ids,
 			$post_id,
 			$old_required_purchased_solutions_ids,
@@ -1452,13 +1452,13 @@ class CompositionManager implements Manager {
 	public function set_post_composition_required_manual_solutions( int $post_id, array $solutions, bool $silent = false ) {
 		if ( ! $silent ) {
 			/**
-			 * Fires before LT composition update.
+			 * Fires before PD composition update.
 			 *
 			 * @since 0.14.0
 			 *
 			 * @param int $post_id The composition post ID.
 			 */
-			\do_action( 'pixelgradelt_retailer/ltcomposition/before_update', $post_id );
+			\do_action( 'pressody_retailer/pdcomposition/before_update', $post_id );
 		}
 
 		// We need to normalize the received $required_solutions for the DB (the format that CarbonFields uses).
@@ -1490,7 +1490,7 @@ class CompositionManager implements Manager {
 
 		if ( ! $silent ) {
 			/**
-			 * Fires after LT composition update.
+			 * Fires after PD composition update.
 			 *
 			 * The provided parameters are compatible with the 'wp_after_insert_post' core action, so we can use the same handlers.
 			 *
@@ -1500,7 +1500,7 @@ class CompositionManager implements Manager {
 			 * @param \WP_Post $post    The composition post object.
 			 * @param bool     $update  If this is an update.
 			 */
-			\do_action( 'pixelgradelt_retailer/ltcomposition/update',
+			\do_action( 'pressody_retailer/pdcomposition/update',
 				$post_id,
 				get_post( $post_id ),
 				true
@@ -1520,7 +1520,7 @@ class CompositionManager implements Manager {
 	 *                                  Default false.
 	 * @param bool  $process_solutions  Optional. Whether to run the solution list processing logic after adding the solution.
 	 *                                  This way, solutions that are excluded by the newly added solution will be removed.
-	 *                                  See \PixelgradeLT\Retailer\Repository\ProcessedSolutions::process_solutions()
+	 *                                  See \Pressody\Retailer\Repository\ProcessedSolutions::process_solutions()
 	 *                                  The processing will run only when the solution is added to the list,
 	 *                                  not when it is already present, regardless of the $update value.
 	 *                                  Default false.
@@ -1617,7 +1617,7 @@ class CompositionManager implements Manager {
 			}, $required_solutions ) );
 
 			if ( ! empty( $solutionsIds ) ) {
-				$processed_required_solutions = local_rest_call( '/pixelgradelt_retailer/v1/solutions/processed', 'GET', [
+				$processed_required_solutions = local_rest_call( '/pressody_retailer/v1/solutions/processed', 'GET', [
 					'postId' => $solutionsIds,
 				] );
 
@@ -1658,7 +1658,7 @@ class CompositionManager implements Manager {
 		 * @param bool  $updated                Whether we have updated the details of an already existing solution.
 		 * @param bool  $processed              Whether we have run the solution list processing logic after adding the solution.
 		 */
-		$required_solutions = \apply_filters( 'pixelgradelt_retailer/ltcomposition/add_required_manual_solution',
+		$required_solutions = \apply_filters( 'pressody_retailer/pdcomposition/add_required_manual_solution',
 			$required_solutions,
 			$post_id,
 			$old_required_solutions,
@@ -1731,7 +1731,7 @@ class CompositionManager implements Manager {
 		 * @param array  $old_required_manual_solutions The old required manual-solutions list.
 		 * @param string $removed_solution_pseudo_id    The removed solution pseudo_id.
 		 */
-		$required_solutions = \apply_filters( 'pixelgradelt_retailer/ltcomposition/remove_required_manual_solution',
+		$required_solutions = \apply_filters( 'pressody_retailer/pdcomposition/remove_required_manual_solution',
 			$required_solutions,
 			$post_id,
 			$old_required_solutions,
@@ -1824,12 +1824,12 @@ class CompositionManager implements Manager {
 			return false;
 		}
 
-		if ( empty( $ltrecords_repo_url = ensure_packages_json_url( get_setting( 'ltrecords-packages-repo-endpoint' ) ) )
-		     || empty( $ltrecords_api_key = get_setting( 'ltrecords-api-key' ) ) ) {
+		if ( empty( $pdrecords_repo_url = ensure_packages_json_url( get_setting( 'pdrecords-packages-repo-endpoint' ) ) )
+		     || empty( $pdrecords_api_key = get_setting( 'pdrecords-api-key' ) ) ) {
 
 			$this->logger->error(
 				'Error during Composer require dry-run for composition "{name}" #{post_id}.' . PHP_EOL
-				. esc_html__( 'Missing LT Records Repo URL and/or LT Records API key in Settings > LT Retailer.', 'pixelgradelt_retailer' ),
+				. esc_html__( 'Missing PD Records Repo URL and/or PD Records API key in Settings > PD Retailer.', 'pressody_retailer' ),
 				[
 					'name'    => $composition->post_title,
 					'post_id' => $composition_id,
@@ -1851,23 +1851,23 @@ class CompositionManager implements Manager {
 								'verify_peer' => ! is_debug_mode(),
 							],
 							'http' => [
-								'header' => ! empty( Env::get( 'LTRETAILER_PHP_AUTH_USER' ) ) ? [
-									'Authorization: Basic ' . base64_encode( Env::get( 'LTRETAILER_PHP_AUTH_USER' ) . ':' . Server::AUTH_PWD ),
+								'header' => ! empty( Env::get( 'PDRETAILER_PHP_AUTH_USER' ) ) ? [
+									'Authorization: Basic ' . base64_encode( Env::get( 'PDRETAILER_PHP_AUTH_USER' ) . ':' . Server::AUTH_PWD ),
 								] : [],
 							],
 						],
 					],
 					[
-						// The LT Records Repo (includes all LT Records packages and parts).
+						// The PD Records Repo (includes all PD Records packages and parts).
 						'type'    => 'composer',
-						'url'     => esc_url( $ltrecords_repo_url ),
+						'url'     => esc_url( $pdrecords_repo_url ),
 						'options' => [
 							'ssl'  => [
 								'verify_peer' => ! is_debug_mode(),
 							],
 							'http' => [
 								'header' => [
-									'Authorization: Basic ' . base64_encode( $ltrecords_api_key . ':' . self::LTRECORDS_API_PWD ),
+									'Authorization: Basic ' . base64_encode( $pdrecords_api_key . ':' . self::PDRECORDS_API_PWD ),
 								],
 							],
 						],

@@ -1,12 +1,12 @@
 <?php
 declare ( strict_types=1 );
 
-namespace PixelgradeLT\Retailer\Tests\Unit\SolutionType;
+namespace Pressody\Retailer\Tests\Unit\SolutionType;
 
-use PixelgradeLT\Retailer\Package;
-use PixelgradeLT\Retailer\SolutionType\BaseSolution;
-use PixelgradeLT\Retailer\SolutionType\SolutionTypes;
-use PixelgradeLT\Retailer\Tests\Unit\TestCase;
+use Pressody\Retailer\Package;
+use Pressody\Retailer\SolutionType\BaseSolution;
+use Pressody\Retailer\SolutionType\SolutionTypes;
+use Pressody\Retailer\Tests\Unit\TestCase;
 
 class BaseSolutionTest extends TestCase {
 	protected $package = null;
@@ -26,7 +26,7 @@ class BaseSolutionTest extends TestCase {
 	}
 
 	public function test_name() {
-		$expected            = 'PixelgradeLT Retailer';
+		$expected            = 'Pressody Retailer';
 		$this->package->name = $expected;
 
 		$this->assertSame( $expected, $this->package->get_name() );
@@ -40,7 +40,7 @@ class BaseSolutionTest extends TestCase {
 	}
 
 	public function test_slug() {
-		$expected            = 'pixelgradelt_retailer';
+		$expected            = 'pressody_retailer';
 		$this->package->slug = $expected;
 
 		$this->assertSame( $expected, $this->package->get_slug() );
@@ -49,8 +49,8 @@ class BaseSolutionTest extends TestCase {
 	public function test_authors() {
 		$expected               = [
 			[
-				'name'     => 'Pixelgrade',
-				'email'    => 'contact@pixelgrade.com',
+				'name'     => 'Pressody',
+				'email'    => 'contact@getpressody.com',
 				'homepage' => 'https://pixelgrade.com',
 				'role'     => 'Maker',
 			],
@@ -117,7 +117,7 @@ class BaseSolutionTest extends TestCase {
 		$this->assertSame( $expected, $this->package->get_visibility() );
 	}
 
-	public function test_required_ltrecords_parts() {
+	public function test_required_pdrecords_parts() {
 		$expected                                = [
 			'pixelgrade/test' => [
 				'package_name'          => 'pixelgrade/test',
@@ -126,10 +126,10 @@ class BaseSolutionTest extends TestCase {
 				'stability'             => 'stable',
 			],
 		];
-		$this->package->required_ltrecords_parts = $expected;
+		$this->package->required_pdrecords_parts = $expected;
 
-		$this->assertSame( $expected, $this->package->get_required_ltrecords_parts() );
-		$this->assertTrue( $this->package->has_required_ltrecords_parts() );
+		$this->assertSame( $expected, $this->package->get_required_pdrecords_parts() );
+		$this->assertTrue( $this->package->has_required_pdrecords_parts() );
 	}
 
 	public function test_composer_require() {

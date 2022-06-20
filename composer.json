@@ -1,27 +1,26 @@
 {
-  "name": "pixelgradelt/pixelgradelt-retailer",
-  "version": "0.13.0",
-  "description": "Define and manage PixelgradeLT solutions to be purchased and used on customers' websites.",
+  "name": "pressody/pressody-retailer",
+  "version": "0.16.0",
+  "description": "Define and manage Pressody (PD) solutions to be purchased and used on customers' websites.",
   "keywords": [
-	"pixelgradelt",
-	"pixelgrade",
+	"pressody",
 	"infrastructure",
 	"wordpress",
 	"composer"
   ],
   "type": "wordpress-plugin",
-  "homepage": "https://github.com/pixelgradelt/pixelgradelt-retailer",
+  "homepage": "https://github.com/pressody/pressody-retailer",
   "license": "GPL-2.0-or-later",
   "authors": [
 	{
 	  "name": "Vlad Olaru",
-	  "email": "vlad@pixelgrade.com",
-	  "homepage": "https://pixelgrade.com/"
+	  "email": "vladpotter85@gmail.com",
+	  "homepage": "https://thinkwritecode.com/"
 	}
   ],
   "support": {
-	"issues": "https://github.com/pixelgradelt/pixelgradelt-retailer/issues",
-	"source": "https://github.com/pixelgradelt/pixelgradelt-retailer"
+	"issues": "https://github.com/pressody/pressody-retailer/issues",
+	"source": "https://github.com/pressody/pressody-retailer"
   },
   "config": {
 	"optimize-autoloader": true,
@@ -71,7 +70,7 @@
   },
   "autoload": {
 	"psr-4": {
-	  "PixelgradeLT\\Retailer\\": "src/"
+	  "Pressody\\Retailer\\": "src/"
 	},
 	"files": [
 	  "src/functions.php"
@@ -79,7 +78,7 @@
   },
   "autoload-dev": {
 	"psr-4": {
-	  "PixelgradeLT\\Retailer\\Tests\\": "tests/phpunit/"
+	  "Pressody\\Retailer\\Tests\\": "tests/phpunit/"
 	},
 	"files": [
 	]
@@ -93,7 +92,7 @@
 	"tests": "./vendor/bin/phpunit --colors=always",
 	"tests-unit": "./vendor/bin/phpunit --testsuite=Unit --colors=always",
 	"tests-integration": "./vendor/bin/phpunit --testsuite=Integration --colors=always",
-	"makepot": "./vendor/bin/wp i18n make-pot . languages/pixelgradelt-retailer.pot",
+	"makepot": "./vendor/bin/wp i18n make-pot . languages/pressody-retailer.pot",
 	"prepare-for-release": [
 	  "composer install",
 	  "composer makepot",

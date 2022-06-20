@@ -4,17 +4,17 @@
  *
  * @since   0.1.0
  * @license GPL-2.0-or-later
- * @package PixelgradeLT
+ * @package Pressody
  */
 
 declare ( strict_types=1 );
 
-namespace PixelgradeLT\Retailer\SolutionType\Builder;
+namespace Pressody\Retailer\SolutionType\Builder;
 
-use PixelgradeLT\Retailer\Manager;
-use PixelgradeLT\Retailer\Package;
-use PixelgradeLT\Retailer\SolutionManager;
-use PixelgradeLT\Retailer\Utils\ArrayHelpers;
+use Pressody\Retailer\Manager;
+use Pressody\Retailer\Package;
+use Pressody\Retailer\SolutionManager;
+use Pressody\Retailer\Utils\ArrayHelpers;
 use Psr\Log\LoggerInterface;
 use ReflectionClass;
 
@@ -412,16 +412,16 @@ class BaseSolutionBuilder {
 	}
 
 	/**
-	 * Set the required LT Records Parts.
+	 * Set the required PD Records Parts.
 	 *
 	 * @since 0.1.0
 	 *
-	 * @param array $required_ltrecords_parts
+	 * @param array $required_pdrecords_parts
 	 *
 	 * @return $this
 	 */
-	public function set_required_ltrecords_parts( array $required_ltrecords_parts ): self {
-		return $this->set( 'required_ltrecords_parts', $this->normalize_required_ltrecords_parts( $required_ltrecords_parts ) );
+	public function set_required_pdrecords_parts( array $required_pdrecords_parts ): self {
+		return $this->set( 'required_pdrecords_parts', $this->normalize_required_pdrecords_parts( $required_pdrecords_parts ) );
 	}
 
 	/**
@@ -611,15 +611,15 @@ class BaseSolutionBuilder {
 			);
 		}
 
-		if ( ! empty( $package_data['required_ltrecords_parts'] ) ) {
+		if ( ! empty( $package_data['required_pdrecords_parts'] ) ) {
 			// We need to normalize before the merge since we need the keys to be in the same format.
 			// A bit inefficient, I know.
-			$package_data['required_ltrecords_parts'] = $this->normalize_required_ltrecords_parts( $package_data['required_ltrecords_parts'] );
+			$package_data['required_pdrecords_parts'] = $this->normalize_required_pdrecords_parts( $package_data['required_pdrecords_parts'] );
 			// We will merge the required solutions into the existing ones.
-			$this->set_required_ltrecords_parts(
+			$this->set_required_pdrecords_parts(
 				ArrayHelpers::array_merge_recursive_distinct(
-					$this->solution->get_required_ltrecords_parts(),
-					$package_data['required_ltrecords_parts']
+					$this->solution->get_required_pdrecords_parts(),
+					$package_data['required_pdrecords_parts']
 				)
 			);
 		}
@@ -705,7 +705,7 @@ class BaseSolutionBuilder {
 	}
 
 	/**
-	 * Make sure that the required LT Records Parts are in a format expected by BaseSolution.
+	 * Make sure that the required PD Records Parts are in a format expected by BaseSolution.
 	 *
 	 * @since 0.1.0
 	 *
@@ -713,7 +713,7 @@ class BaseSolutionBuilder {
 	 *
 	 * @return array
 	 */
-	protected function normalize_required_ltrecords_parts( array $required_parts ): array {
+	protected function normalize_required_pdrecords_parts( array $required_parts ): array {
 		if ( empty( $required_parts ) ) {
 			return [];
 		}
@@ -725,7 +725,7 @@ class BaseSolutionBuilder {
 		foreach ( $required_parts as $required_part ) {
 			if ( empty( $required_part['package_name'] ) ) {
 				$this->logger->error(
-					'Invalid required LT Records Part details for solution "{solution}" #{solution_post_id}.',
+					'Invalid required PD Records Part details for solution "{solution}" #{solution_post_id}.',
 					[
 						'solution'         => $this->solution->get_name(),
 						'solution_post_id' => $this->solution->get_managed_post_id(),
@@ -794,7 +794,7 @@ class BaseSolutionBuilder {
 			->set_composer_require( $package->get_composer_require() )
 			->set_required_solutions( $package->get_required_solutions() )
 			->set_excluded_solutions( $package->get_excluded_solutions() )
-			->set_required_ltrecords_parts( $package->get_required_ltrecords_parts() )
+			->set_required_pdrecords_parts( $package->get_required_pdrecords_parts() )
 			->set_composer_package_name( $package->get_composer_package_name() );
 
 		return $this;

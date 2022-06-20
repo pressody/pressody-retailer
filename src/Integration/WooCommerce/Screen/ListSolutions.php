@@ -4,16 +4,16 @@
  *
  * @since   0.14.0
  * @license GPL-2.0-or-later
- * @package PixelgradeLT
+ * @package Pressody
  */
 
 declare ( strict_types=1 );
 
-namespace PixelgradeLT\Retailer\Integration\WooCommerce\Screen;
+namespace Pressody\Retailer\Integration\WooCommerce\Screen;
 
 use Cedaro\WP\Plugin\AbstractHookProvider;
-use PixelgradeLT\Retailer\SolutionManager;
-use PixelgradeLT\Retailer\Utils\ArrayHelpers;
+use Pressody\Retailer\SolutionManager;
+use Pressody\Retailer\Utils\ArrayHelpers;
 
 /**
  * List Solutions screen provider class.
@@ -62,7 +62,7 @@ class ListSolutions extends AbstractHookProvider {
 		// Insert after the title columns for dependencies.
 		$columns = ArrayHelpers::insertAfterKey( $columns, 'title',
 			[
-				'solution_linked_products' => esc_html__( 'Linked Products', 'pixelgradelt_retailer' ),
+				'solution_linked_products' => esc_html__( 'Linked Products', 'pressody_retailer' ),
 			]
 		);
 
@@ -82,7 +82,7 @@ class ListSolutions extends AbstractHookProvider {
 		if ( 'solution_linked_products' === $column && ! empty( $solution_data['woocommerce_products'] ) ) {
 			$list = [];
 			foreach ( $solution_data['woocommerce_products'] as $product_id ) {
-				$list[] = '<a class="package-list_link" href="' . get_edit_post_link( $product_id ) . '" title="' . esc_attr__( 'Edit WooCommerce Product', 'pixelgradelt_retailer' ) . '">' . get_the_title( $product_id ) . '</a>';
+				$list[] = '<a class="package-list_link" href="' . get_edit_post_link( $product_id ) . '" title="' . esc_attr__( 'Edit WooCommerce Product', 'pressody_retailer' ) . '">' . get_the_title( $product_id ) . '</a>';
 			}
 
 			$output = implode( '<br>' . PHP_EOL, $list );

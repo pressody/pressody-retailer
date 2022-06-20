@@ -1,19 +1,19 @@
 <?php
 declare ( strict_types=1 );
 
-namespace PixelgradeLT\Retailer\Tests\Unit\SolutionType\Builder;
+namespace Pressody\Retailer\Tests\Unit\SolutionType\Builder;
 
 use Brain\Monkey\Functions;
 use Composer\IO\NullIO;
 use Composer\Semver\VersionParser;
-use PixelgradeLT\Retailer\Client\ComposerClient;
-use PixelgradeLT\Retailer\ComposerVersionParser;
-use PixelgradeLT\Retailer\Package;
-use PixelgradeLT\Retailer\SolutionManager;
-use PixelgradeLT\Retailer\SolutionType\BaseSolution;
-use PixelgradeLT\Retailer\SolutionType\Builder\BaseSolutionBuilder;
-use PixelgradeLT\Retailer\SolutionType\SolutionTypes;
-use PixelgradeLT\Retailer\Tests\Unit\TestCase;
+use Pressody\Retailer\Client\ComposerClient;
+use Pressody\Retailer\ComposerVersionParser;
+use Pressody\Retailer\Package;
+use Pressody\Retailer\SolutionManager;
+use Pressody\Retailer\SolutionType\BaseSolution;
+use Pressody\Retailer\SolutionType\Builder\BaseSolutionBuilder;
+use Pressody\Retailer\SolutionType\SolutionTypes;
+use Pressody\Retailer\Tests\Unit\TestCase;
 
 class BaseSolutionBuilderTest extends TestCase {
 	protected ?BaseSolutionBuilder $builder = null;
@@ -50,7 +50,7 @@ class BaseSolutionBuilderTest extends TestCase {
 	}
 
 	public function test_name() {
-		$expected = 'PixelgradeLT Retailer';
+		$expected = 'Pressody Retailer';
 		$package  = $this->builder->set_name( $expected )->build();
 
 		$this->assertSame( $expected, $package->name );
@@ -64,7 +64,7 @@ class BaseSolutionBuilderTest extends TestCase {
 	}
 
 	public function test_slug() {
-		$expected = 'pixelgradelt_retailer';
+		$expected = 'pressody_retailer';
 		$package  = $this->builder->set_slug( $expected )->build();
 
 		$this->assertSame( $expected, $package->slug );
@@ -73,8 +73,8 @@ class BaseSolutionBuilderTest extends TestCase {
 	public function test_authors() {
 		$expected = [
 			[
-				'name'     => 'Pixelgrade',
-				'email'    => 'contact@pixelgrade.com',
+				'name'     => 'Pressody',
+				'email'    => 'contact@getpressody.com',
 				'homepage' => 'https://pixelgrade.com',
 				'role'     => 'Maker',
 			],
@@ -86,7 +86,7 @@ class BaseSolutionBuilderTest extends TestCase {
 
 	public function test_string_authors() {
 		$expected = [
-			[ 'name' => 'Pixelgrade', ],
+			[ 'name' => 'Pressody', ],
 			[ 'name' => 'Wordpressorg', ],
 		];
 
@@ -99,12 +99,12 @@ class BaseSolutionBuilderTest extends TestCase {
 
 	public function test_clean_authors() {
 		$expected = [
-			[ 'name' => 'Pixelgrade', ],
+			[ 'name' => 'Pressody', ],
 			[ 'name' => 'Wordpressorg', ],
 		];
 
 		$authors = [
-			'Pixelgrade',
+			'Pressody',
 			[],
 			'Wordpressorg',
 			'',
@@ -236,7 +236,7 @@ class BaseSolutionBuilderTest extends TestCase {
 		$this->assertSame( $expected, $package->visibility );
 	}
 
-	public function test_required_ltrecords_parts() {
+	public function test_required_pdrecords_parts() {
 		$expected = [
 			'pixelgrade/test' => [
 				'package_name'          => 'pixelgrade/test',
@@ -245,13 +245,13 @@ class BaseSolutionBuilderTest extends TestCase {
 				'stability'             => 'stable',
 			],
 		];
-		$package  = $this->builder->set_required_ltrecords_parts( $expected )->build();
+		$package  = $this->builder->set_required_pdrecords_parts( $expected )->build();
 
-		$this->assertSame( $expected, $package->get_required_ltrecords_parts() );
-		$this->assertTrue( $package->has_required_ltrecords_parts() );
+		$this->assertSame( $expected, $package->get_required_pdrecords_parts() );
+		$this->assertTrue( $package->has_required_pdrecords_parts() );
 	}
 
-	public function test_normalize_required_ltrecords_parts() {
+	public function test_normalize_required_pdrecords_parts() {
 		$expected                 = [
 			'pixelgrade/test' => [
 				'package_name'          => 'pixelgrade/test',
@@ -260,16 +260,16 @@ class BaseSolutionBuilderTest extends TestCase {
 				'stability'             => 'stable',
 			],
 		];
-		$required_ltrecords_parts = [
+		$required_pdrecords_parts = [
 			[ 'package_name' => 'pixelgrade/test', ],
 			[ 'composer_package_name' => 'pixelgrade/test2', ],
 			// This doesn't have 'package_name' so it should be ignored
 		];
 
-		$package = $this->builder->set_required_ltrecords_parts( $required_ltrecords_parts )->build();
+		$package = $this->builder->set_required_pdrecords_parts( $required_pdrecords_parts )->build();
 
-		$this->assertSame( $expected, $package->get_required_ltrecords_parts() );
-		$this->assertTrue( $package->has_required_ltrecords_parts() );
+		$this->assertSame( $expected, $package->get_required_pdrecords_parts() );
+		$this->assertTrue( $package->has_required_pdrecords_parts() );
 	}
 
 	public function test_composer_require() {
@@ -303,8 +303,8 @@ class BaseSolutionBuilderTest extends TestCase {
 		$logger                  = new NullIO();
 
 		$solution_manager = \Mockery::mock(
-			'PixelgradeLT\Retailer\SolutionManager',
-			'PixelgradeLT\Retailer\Manager',
+			'Pressody\Retailer\SolutionManager',
+			'Pressody\Retailer\Manager',
 			[ $composer_client, $composer_version_parser, $logger ] )->makePartial();
 		$solution_manager->shouldReceive( 'get_solution_id_data' )
 		                 ->andReturn( [
@@ -329,7 +329,7 @@ class BaseSolutionBuilderTest extends TestCase {
 		];
 		$expected           = [
 			'some_pseudo_id' => [
-				'composer_package_name' => 'pixelgradelt-retailer/test',
+				'composer_package_name' => 'pressody-retailer/test',
 				'version_range'         => '*',
 				'stability'             => 'stable',
 				'managed_post_id'       => 123,
@@ -350,8 +350,8 @@ class BaseSolutionBuilderTest extends TestCase {
 		$logger                  = new NullIO();
 
 		$solution_manager = \Mockery::mock(
-			'PixelgradeLT\Retailer\SolutionManager',
-			'PixelgradeLT\Retailer\Manager',
+			'Pressody\Retailer\SolutionManager',
+			'Pressody\Retailer\Manager',
 			[ $composer_client, $composer_version_parser, $logger ] )->makePartial();
 		$solution_manager->shouldReceive( 'get_solution_id_data' )
 		                 ->andReturn( [
@@ -379,7 +379,7 @@ class BaseSolutionBuilderTest extends TestCase {
 		];
 		$expected           = [
 			'some_pseudo_id' => [
-				'composer_package_name' => 'pixelgradelt-retailer/test',
+				'composer_package_name' => 'pressody-retailer/test',
 				'version_range'         => '^2.1',
 				'stability'             => 'dev',
 				'managed_post_id'       => 123,
@@ -400,8 +400,8 @@ class BaseSolutionBuilderTest extends TestCase {
 		$logger                  = new NullIO();
 
 		$solution_manager = \Mockery::mock(
-			'PixelgradeLT\Retailer\SolutionManager',
-			'PixelgradeLT\Retailer\Manager',
+			'Pressody\Retailer\SolutionManager',
+			'Pressody\Retailer\Manager',
 			[ $composer_client, $composer_version_parser, $logger ] )->makePartial();
 		$solution_manager->shouldReceive( 'get_solution_id_data' )
 		                 ->andReturn( [
@@ -450,8 +450,8 @@ class BaseSolutionBuilderTest extends TestCase {
 		$logger                  = new NullIO();
 
 		$solution_manager = \Mockery::mock(
-			'PixelgradeLT\Retailer\SolutionManager',
-			'PixelgradeLT\Retailer\Manager',
+			'Pressody\Retailer\SolutionManager',
+			'Pressody\Retailer\Manager',
 			[ $composer_client, $composer_version_parser, $logger ] )->makePartial();
 		$solution_manager->shouldReceive( 'get_solution_id_data' )
 		                 ->andReturn( [
@@ -491,8 +491,8 @@ class BaseSolutionBuilderTest extends TestCase {
 		$logger                  = new NullIO();
 
 		$solution_manager = \Mockery::mock(
-			'PixelgradeLT\Retailer\SolutionManager',
-			'PixelgradeLT\Retailer\Manager',
+			'Pressody\Retailer\SolutionManager',
+			'Pressody\Retailer\Manager',
 			[ $composer_client, $composer_version_parser, $logger ] )->makePartial();
 		$solution_manager->shouldReceive( 'get_solution_id_data' )
 		                 ->andReturn( [
@@ -545,8 +545,8 @@ class BaseSolutionBuilderTest extends TestCase {
 		$logger                  = new NullIO();
 
 		$solution_manager = \Mockery::mock(
-			'PixelgradeLT\Retailer\SolutionManager',
-			'PixelgradeLT\Retailer\Manager',
+			'Pressody\Retailer\SolutionManager',
+			'Pressody\Retailer\Manager',
 			[ $composer_client, $composer_version_parser, $logger ] )->makePartial();
 		$solution_manager->shouldReceive( 'get_solution_id_data' )
 		                 ->andReturn( [] );
@@ -597,7 +597,7 @@ class BaseSolutionBuilderTest extends TestCase {
 				'pseudo_id'             => 'some_pseudo_id2',
 			],
 		];
-		$expected['required_ltrecords_parts'] = [
+		$expected['required_pdrecords_parts'] = [
 			'pixelgrade/part2' => [
 				'package_name'          => 'pixelgrade/part2',
 				'composer_package_name' => 'pixelgrade/part2',
@@ -628,7 +628,7 @@ class BaseSolutionBuilderTest extends TestCase {
 		$this->assertSame( $expected['composer_require'], $package->composer_require );
 		$this->assertSame( $expected['required_solutions'], $package->required_solutions );
 		$this->assertSame( $expected['excluded_solutions'], $package->excluded_solutions );
-		$this->assertSame( $expected['required_ltrecords_parts'], $package->required_ltrecords_parts );
+		$this->assertSame( $expected['required_pdrecords_parts'], $package->required_pdrecords_parts );
 	}
 
 	public function test_from_package_data_do_not_overwrite() {
@@ -649,7 +649,7 @@ class BaseSolutionBuilderTest extends TestCase {
 				'name' => 'Some Theme Author',
 			],
 		];
-		$expected->homepage         = 'https://pixelgradelt.com';
+		$expected->homepage         = 'https://pressody.com';
 		$expected->description      = 'Some awesome description.';
 		$expected->keywords         = [ 'keyword1', 'keyword2' ];
 		$expected->license          = 'GPL-2.0-only';
@@ -843,7 +843,7 @@ class BaseSolutionBuilderTest extends TestCase {
 				'pseudo_id'             => 'some_pseudo_id2',
 			],
 		];
-		$expected->required_ltrecords_parts = [
+		$expected->required_pdrecords_parts = [
 			'pixelgrade/part2' => [
 				'package_name'          => 'pixelgrade/part2',
 				'composer_package_name' => 'pixelgrade/part2',
@@ -874,6 +874,6 @@ class BaseSolutionBuilderTest extends TestCase {
 		$this->assertSame( $expected->composer_require, $package->composer_require );
 		$this->assertSame( $expected->required_solutions, $package->required_solutions );
 		$this->assertSame( $expected->excluded_solutions, $package->excluded_solutions );
-		$this->assertSame( $expected->required_ltrecords_parts, $package->required_ltrecords_parts );
+		$this->assertSame( $expected->required_pdrecords_parts, $package->required_pdrecords_parts );
 	}
 }

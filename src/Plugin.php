@@ -4,12 +4,12 @@
  *
  * @since   0.1.0
  * @license GPL-2.0-or-later
- * @package PixelgradeLT
+ * @package Pressody
  */
 
 declare ( strict_types=1 );
 
-namespace PixelgradeLT\Retailer;
+namespace Pressody\Retailer;
 
 use Cedaro\WP\Plugin\Plugin as BasePlugin;
 use Psr\Container\ContainerInterface;
@@ -29,14 +29,14 @@ class Plugin extends BasePlugin implements Composable {
 		$container = $this->get_container();
 
 		/**
-		 * Start composing the object graph in PixelgradeLT Retailer.
+		 * Start composing the object graph in Pressody Retailer.
 		 *
 		 * @since 0.1.0
 		 *
 		 * @param Plugin             $plugin    Main plugin instance.
 		 * @param ContainerInterface $container Dependency container.
 		 */
-		\do_action( 'pixelgradelt_retailer/compose', $this, $container );
+		\do_action( 'pressody_retailer/compose', $this, $container );
 
 		// Register hook providers.
 		$this
@@ -86,21 +86,21 @@ class Plugin extends BasePlugin implements Composable {
 		}
 
 		/**
-		 * Finished composing the object graph in PixelgradeLT Retailer.
+		 * Finished composing the object graph in Pressody Retailer.
 		 *
 		 * @since 0.1.0
 		 *
 		 * @param Plugin             $plugin    Main plugin instance.
 		 * @param ContainerInterface $container Dependency container.
 		 */
-		\do_action( 'pixelgradelt_retailer/composed', $this, $container );
+		\do_action( 'pressody_retailer/composed', $this, $container );
 	}
 
 	public function define_constants(): Plugin {
 		$upload_dir = \wp_upload_dir( null, false );
 
-		if ( ! defined( 'PixelgradeLT\Retailer\LOG_DIR' ) ) {
-			define( 'PixelgradeLT\Retailer\LOG_DIR', $upload_dir['basedir'] . '/pixelgradelt-retailer-logs/' );
+		if ( ! defined( 'Pressody\Retailer\LOG_DIR' ) ) {
+			define( 'Pressody\Retailer\LOG_DIR', $upload_dir['basedir'] . '/pressody-retailer-logs/' );
 		}
 
 		return $this;

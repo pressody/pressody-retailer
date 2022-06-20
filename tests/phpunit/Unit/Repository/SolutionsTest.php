@@ -1,17 +1,17 @@
 <?php
 declare ( strict_types=1 );
 
-namespace PixelgradeLT\Retailer\Tests\Unit\Repository;
+namespace Pressody\Retailer\Tests\Unit\Repository;
 
 use Brain\Monkey\Functions;
 use Composer\IO\NullIO;
 use Composer\Semver\VersionParser;
-use PixelgradeLT\Retailer\Client\ComposerClient;
-use PixelgradeLT\Retailer\ComposerVersionParser;
-use PixelgradeLT\Retailer\Repository\Solutions;
-use PixelgradeLT\Retailer\SolutionFactory;
-use PixelgradeLT\Retailer\SolutionManager;
-use PixelgradeLT\Retailer\Tests\Unit\TestCase;
+use Pressody\Retailer\Client\ComposerClient;
+use Pressody\Retailer\ComposerVersionParser;
+use Pressody\Retailer\Repository\Solutions;
+use Pressody\Retailer\SolutionFactory;
+use Pressody\Retailer\SolutionManager;
+use Pressody\Retailer\Tests\Unit\TestCase;
 
 class SolutionsTest extends TestCase {
 	protected $solutionsRepository = null;

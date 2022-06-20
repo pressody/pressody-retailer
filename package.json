@@ -1,21 +1,21 @@
 {
-	"name": "pixelgradelt-retailer",
-	"version": "0.13.0",
-	"description": "Define and manage PixelgradeLT solutions to be purchased and used on customers' websites.",
+	"name": "pressody-retailer",
+	"version": "0.16.0",
+	"description": "Define and manage Pressody (PD) solutions to be purchased and used on customers' websites.",
 	"repository": {
 		"type": "git",
-		"url": "https://github.com/pixelgradelt/pixelgradelt-retailer.git"
+		"url": "https://github.com/pressody/pressody-retailer.git"
 	},
 	"author": {
 		"name": "Vlad Olaru",
-		"email": "vlad@pixelgrade.com",
-		"url": "https://pixelgrade.com/"
+		"email": "vladpotter85@gmail.com",
+		"url": "https://thinkwritecode.com/"
 	},
 	"license": "GPL-2.0+",
 	"bugs": {
-		"url": "https://github.com/pixelgradelt/pixelgradelt-retailer/issues"
+		"url": "https://github.com/pressody/pressody-retailer/issues"
 	},
-	"homepage": "https://github.com/pixelgradelt/pixelgradelt-retailer",
+	"homepage": "https://github.com/pressody/pressody-retailer",
 	"devDependencies": {
 		"archiver": "^5.2.0",
 		"fs-extra": "^9.0.1",
@@ -27,7 +27,7 @@
 		"makepot": "wpi18n makepot --poedit"
 	},
 	"distFiles": [
-		"pixelgradelt-retailer.php",
+		"pressody-retailer.php",
 		"README.md",
 		"{assets,languages,src,views}/**",
 		"vendor/autoload.php",

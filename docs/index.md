@@ -1,6 +1,6 @@
-# PixelgradeLT Retailer Documentation
+# Pressody Retailer Documentation
 
-Define and manage PixelgradeLT parts and packages (plugins and themes) to be used on customers' websites. Also, provide a Composer repository for the defined WordPress plugins, themes and parts.
+Define and manage Pressody (PD) parts and packages (plugins and themes) to be used on customers' websites. Also, provide a Composer repository for the defined WordPress plugins, themes and parts.
 
 ## Why a WordPress Installation?
 

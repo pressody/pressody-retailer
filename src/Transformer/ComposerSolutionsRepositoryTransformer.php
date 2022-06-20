@@ -4,19 +4,19 @@
  *
  * @since   0.1.0
  * @license GPL-2.0-or-later
- * @package PixelgradeLT
+ * @package Pressody
  */
 
 declare ( strict_types=1 );
 
-namespace PixelgradeLT\Retailer\Transformer;
+namespace Pressody\Retailer\Transformer;
 
-use PixelgradeLT\Retailer\SolutionManager;
+use Pressody\Retailer\SolutionManager;
 use Psr\Log\LoggerInterface;
-use PixelgradeLT\Retailer\Capabilities;
-use PixelgradeLT\Retailer\Package;
-use PixelgradeLT\Retailer\Repository\PackageRepository;
-use PixelgradeLT\Retailer\VersionParser;
+use Pressody\Retailer\Capabilities;
+use Pressody\Retailer\Package;
+use Pressody\Retailer\Repository\PackageRepository;
+use Pressody\Retailer\VersionParser;
 
 /**
  * Composer solutions repository transformer class.
@@ -136,13 +136,13 @@ class ComposerSolutionsRepositoryTransformer implements PackageRepositoryTransfo
 			$require = array_merge( $require, $this->composer_transformer->transform_required_packages( $package->get_required_solutions() ) );
 		}
 
-		// Merge the required LT Records parts, if any.
-		if ( $package->has_required_ltrecords_parts() ) {
-			$require = array_merge( $require, $this->composer_transformer->transform_required_packages( $package->get_required_ltrecords_parts() ) );
+		// Merge the required PD Records parts, if any.
+		if ( $package->has_required_pdrecords_parts() ) {
+			$require = array_merge( $require, $this->composer_transformer->transform_required_packages( $package->get_required_pdrecords_parts() ) );
 		}
 
 		// Finally, allow others to have a say.
-		$require = \apply_filters( 'pixelgradelt_retailer/composer_solution_require', $require, $package );
+		$require = \apply_filters( 'pressody_retailer/composer_solution_require', $require, $package );
 
 		$excluded_solutions = [];
 		if ( $package->has_excluded_solutions() ) {
@@ -161,7 +161,7 @@ class ComposerSolutionsRepositoryTransformer implements PackageRepositoryTransfo
 			'homepage'           => $package->get_homepage(),
 			'license'            => $package->get_license(),
 			'extra' => [
-				'exclude_ltsolutions' => $excluded_solutions,
+				'exclude_pdsolutions' => $excluded_solutions,
 			],
 		];
 

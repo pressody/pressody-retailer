@@ -14,7 +14,7 @@ function AccessTable( props ) {
 		onRevokeApiKey,
 	} = props;
 
-	let body = html`<tr><td colSpan=6>${ __( 'Add an API Key to access the PixelgradeLT Retailer repository.', 'pixelgradelt_retailer' ) }</td></tr>`;
+	let body = html`<tr><td colSpan=6>${ __( 'Add an API Key to access the Pressody Retailer repository.', 'pressody_retailer' ) }</td></tr>`;
 
 	if ( apiKeys.length ) {
 		body = apiKeys.map( ( item, index ) => {
@@ -29,14 +29,14 @@ function AccessTable( props ) {
 	}
 
 	return html`
-		<table className="pixelgradelt_retailer-api-key-table widefat">
+		<table className="pressody_retailer-api-key-table widefat">
 			<thead>
 				<tr>
-					<th>${ __( 'Name', 'pixelgradelt_retailer' ) }</th>
-					<th className="column-user">${ __( 'User', 'pixelgradelt_retailer' ) }</th>
-					<th>${ __( 'API Key', 'pixelgradelt_retailer' ) }</th>
-					<th>${ __( 'Last Used', 'pixelgradelt_retailer' ) }</th>
-					<th>${ __( 'Created', 'pixelgradelt_retailer' ) }</th>
+					<th>${ __( 'Name', 'pressody_retailer' ) }</th>
+					<th className="column-user">${ __( 'User', 'pressody_retailer' ) }</th>
+					<th>${ __( 'API Key', 'pressody_retailer' ) }</th>
+					<th>${ __( 'Last Used', 'pressody_retailer' ) }</th>
+					<th>${ __( 'Created', 'pressody_retailer' ) }</th>
 					<th></th>
 
 				</tr>
@@ -44,7 +44,7 @@ function AccessTable( props ) {
 			<tbody>${ body }</tbody>
 			<tfoot>
 				<tr>
-					<td colSpan="6" className="pixelgradelt_retailer-api-key-form">
+					<td colSpan="6" className="pressody_retailer-api-key-form">
 						<${ ApiKeyForm }
 							onSubmit=${ onCreateApiKey }
 						/>
@@ -82,11 +82,11 @@ function AccessTableRow( props ) {
 			<td className="column-created">${ created }</td>
 			<td className="column-actions">
 				<${ DropdownMenu }
-					label=${ __( 'Toggle dropdown', 'pixelgradelt_retailer' ) }
+					label=${ __( 'Toggle dropdown', 'pressody_retailer' ) }
 					icon=${ moreVertical }
 					controls=${ [
 						{
-							title: __( 'Revoke', 'pixelgradelt_retailer' ),
+							title: __( 'Revoke', 'pressody_retailer' ),
 							onClick: () => { onRevokeApiKey( token, user ) }
 						}
 					] }

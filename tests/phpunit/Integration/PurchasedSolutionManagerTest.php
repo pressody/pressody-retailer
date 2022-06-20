@@ -1,16 +1,16 @@
 <?php
 declare ( strict_types=1 );
 
-namespace PixelgradeLT\Retailer\Tests\Integration;
+namespace Pressody\Retailer\Tests\Integration;
 
-use PixelgradeLT\Retailer\Capabilities;
-use PixelgradeLT\Retailer\Database\Rows\PurchasedSolution;
-use PixelgradeLT\Retailer\PurchasedSolutionManager;
-use PixelgradeLT\Retailer\SolutionType\SolutionTypes;
-use PixelgradeLT\Retailer\Tests\Framework\PHPUnitUtil;
+use Pressody\Retailer\Capabilities;
+use Pressody\Retailer\Database\Rows\PurchasedSolution;
+use Pressody\Retailer\PurchasedSolutionManager;
+use Pressody\Retailer\SolutionType\SolutionTypes;
+use Pressody\Retailer\Tests\Framework\PHPUnitUtil;
 
 use Psr\Container\ContainerInterface;
-use function PixelgradeLT\Retailer\plugin;
+use function Pressody\Retailer\plugin;
 
 class PurchasedSolutionManagerTest extends TestCase {
 	protected static $solutions_post_data;
@@ -34,7 +34,7 @@ class PurchasedSolutionManagerTest extends TestCase {
 		/** @var ContainerInterface $container */
 		self::$container = plugin()->get_container();
 
-		// Register ltsolution post type
+		// Register pdsolution post type
 		$register_post_type = PHPUnitUtil::getProtectedMethod( self::$container['hooks.solution_post_type'], 'register_post_type' );
 		$register_post_type->invoke( self::$container['hooks.solution_post_type'] );
 
@@ -97,7 +97,7 @@ And here is a quote from a customer:
 			],
 		];
 
-		// Create the test ltsolutions posts that will be dependencies to other posts that we test.
+		// Create the test pdsolutions posts that will be dependencies to other posts that we test.
 		foreach ( self::$solutions_dep_post_data as $key => $data ) {
 			self::$solution_ids[ $key ] = $factory->post->create_object( $data );
 		}
@@ -122,7 +122,7 @@ And here is a quote from a customer:
 <blockquote>Pure bliss, man!</blockquote>',
 				'_solution_details_homepage'                       => 'https://package.homepage',
 				'_solution_required_parts|||0|value'               => '_',
-				'_solution_required_parts|package_name|0|0|value'  => 'pixelgradelt-records/part_yet-another',
+				'_solution_required_parts|package_name|0|0|value'  => 'pressody-records/part_yet-another',
 				'_solution_required_parts|version_range|0|0|value' => '1.2.9',
 				'_solution_required_parts|stability|0|0|value'     => 'stable',
 				'_solution_required_solutions|||0|value'           => '_',
@@ -154,7 +154,7 @@ And here is a quote from a customer:
 <blockquote>Pure bliss, man!</blockquote>',
 				'_solution_details_homepage'                       => 'https://package.homepage',
 				'_solution_required_parts|||0|value'               => '_',
-				'_solution_required_parts|package_name|0|0|value'  => 'pixelgradelt-records/part_yet-another',
+				'_solution_required_parts|package_name|0|0|value'  => 'pressody-records/part_yet-another',
 				'_solution_required_parts|version_range|0|0|value' => '^1',
 				'_solution_required_parts|stability|0|0|value'     => 'stable',
 				'_solution_required_solutions|||0|value'           => '_',
@@ -187,10 +187,10 @@ And here is a quote from a customer:
 				'_solution_details_homepage'                       => 'https://package.homepage',
 				'_solution_required_parts|||0|value'               => '_',
 				'_solution_required_parts|||1|value'               => '_',
-				'_solution_required_parts|package_name|0|0|value'  => 'pixelgradelt-records/part_yet-another',
+				'_solution_required_parts|package_name|0|0|value'  => 'pressody-records/part_yet-another',
 				'_solution_required_parts|version_range|0|0|value' => '^2',
 				'_solution_required_parts|stability|0|0|value'     => 'stable',
-				'_solution_required_parts|package_name|1|0|value'  => 'pixelgradelt-records/part_test-test',
+				'_solution_required_parts|package_name|1|0|value'  => 'pressody-records/part_test-test',
 				'_solution_required_parts|version_range|1|0|value' => '^1.0',
 				'_solution_required_parts|stability|1|0|value'     => 'stable',
 				'_solution_required_solutions|||0|value'           => '_',
@@ -214,45 +214,45 @@ And here is a quote from a customer:
 		self::$user_ids['customer1'] = $factory->user->create( [
 			'user_pass'  => 'pass',
 			'user_login' => 'customer1',
-			'user_email' => 'customer1@lt-retailer.local',
+			'user_email' => 'customer1@pd-retailer.local',
 			'first_name' => 'Customer1',
-			'last_name'  => 'LTRetailer',
+			'last_name'  => 'PDRetailer',
 			'role'       => Capabilities::CUSTOMER_USER_ROLE,
 		] );
 
 		self::$user_ids['customer2'] = $factory->user->create( [
 			'user_pass'  => 'pass',
 			'user_login' => 'customer2',
-			'user_email' => 'customer2@lt-retailer.local',
+			'user_email' => 'customer2@pd-retailer.local',
 			'first_name' => 'Customer2',
-			'last_name'  => 'LTRetailer',
+			'last_name'  => 'PDRetailer',
 			'role'       => Capabilities::CUSTOMER_USER_ROLE,
 		] );
 
 		self::$user_ids['customer3'] = $factory->user->create( [
 			'user_pass'  => 'pass',
 			'user_login' => 'customer3',
-			'user_email' => 'customer3@lt-retailer.local',
+			'user_email' => 'customer3@pd-retailer.local',
 			'first_name' => 'Customer3',
-			'last_name'  => 'LTRetailer',
+			'last_name'  => 'PDRetailer',
 			'role'       => Capabilities::CUSTOMER_USER_ROLE,
 		] );
 
 		self::$user_ids['customer4'] = $factory->user->create( [
 			'user_pass'  => 'pass',
 			'user_login' => 'customer4',
-			'user_email' => 'customer4@lt-retailer.local',
+			'user_email' => 'customer4@pd-retailer.local',
 			'first_name' => 'Customer4',
-			'last_name'  => 'LTRetailer',
+			'last_name'  => 'PDRetailer',
 			'role'       => Capabilities::CUSTOMER_USER_ROLE,
 		] );
 
 		self::$user_ids['customer5'] = $factory->user->create( [
 			'user_pass'  => 'pass',
 			'user_login' => 'customer5',
-			'user_email' => 'customer5@lt-retailer.local',
+			'user_email' => 'customer5@pd-retailer.local',
 			'first_name' => 'Customer5',
-			'last_name'  => 'LTRetailer',
+			'last_name'  => 'PDRetailer',
 			'role'       => Capabilities::CUSTOMER_USER_ROLE,
 		] );
 
@@ -260,7 +260,7 @@ And here is a quote from a customer:
 		 * CREATE PURCHASED SOLUTIONS.
 		 */
 
-		$purchased_solutions          = new \PixelgradeLT\Retailer\Database\Queries\PurchasedSolution();
+		$purchased_solutions          = new \Pressody\Retailer\Database\Queries\PurchasedSolution();
 		self::$purchased_solution_ids = [];
 
 		self::$purchased_solution_ids['customer1_ecommerce'] = $purchased_solutions->add_item( [

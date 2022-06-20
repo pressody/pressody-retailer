@@ -4,12 +4,12 @@
  *
  * @since   0.1.0
  * @license GPL-2.0-or-later
- * @package PixelgradeLT
+ * @package Pressody
  */
 
 declare ( strict_types=1 );
 
-namespace PixelgradeLT\Retailer;
+namespace Pressody\Retailer;
 
 use Cedaro\WP\Plugin\Provider\I18n;
 use Composer\Semver\VersionParser;
@@ -18,21 +18,21 @@ use Pimple\Container as PimpleContainer;
 use Pimple\Psr11\ServiceLocator;
 use Pimple\ServiceIterator;
 use Pimple\ServiceProviderInterface;
-use PixelgradeLT\Retailer\Exception\PixelgradeltRetailerException;
-use PixelgradeLT\Retailer\Transformer\ComposerSolutionsRepositoryTransformer;
-use PixelgradeLT\Retailer\Logging\Handler\FileLogHandler;
-use PixelgradeLT\Retailer\Logging\Logger;
-use PixelgradeLT\Retailer\Logging\LogsManager;
-use PixelgradeLT\Retailer\Transformer\ComposerSolutionTransformer;
+use Pressody\Retailer\Exception\PressodyRetailerException;
+use Pressody\Retailer\Transformer\ComposerSolutionsRepositoryTransformer;
+use Pressody\Retailer\Logging\Handler\FileLogHandler;
+use Pressody\Retailer\Logging\Logger;
+use Pressody\Retailer\Logging\LogsManager;
+use Pressody\Retailer\Transformer\ComposerSolutionTransformer;
 use Psr\Log\LogLevel;
-use PixelgradeLT\Retailer\Authentication\ApiKey;
-use PixelgradeLT\Retailer\Authentication;
-use PixelgradeLT\Retailer\HTTP\Request;
-use PixelgradeLT\Retailer\Integration;
-use PixelgradeLT\Retailer\Provider;
-use PixelgradeLT\Retailer\Repository;
-use PixelgradeLT\Retailer\Screen;
-use PixelgradeLT\Retailer\Storage;
+use Pressody\Retailer\Authentication\ApiKey;
+use Pressody\Retailer\Authentication;
+use Pressody\Retailer\HTTP\Request;
+use Pressody\Retailer\Integration;
+use Pressody\Retailer\Provider;
+use Pressody\Retailer\Repository;
+use Pressody\Retailer\Screen;
+use Pressody\Retailer\Storage;
 
 /**
  * Plugin service provider class.
@@ -58,7 +58,7 @@ class ServiceProvider implements ServiceProviderInterface {
 
 		$container['authentication.servers'] = function ( $container ) {
 			$servers = \apply_filters(
-				'pixelgradelt_retailer/authentication_servers',
+				'pressody_retailer/authentication_servers',
 				[
 					20  => 'authentication.api_key',
 					100 => 'authentication.unauthorized', // The last server to take action.
@@ -103,8 +103,8 @@ class ServiceProvider implements ServiceProviderInterface {
 			$crypter = new StringCrypter();
 			// Load the encryption key from the environment.
 			try {
-				$crypter->loadEncryptionKey( Env::get('LTRETAILER_ENCRYPTION_KEY') );
-			} catch ( PixelgradeltRetailerException $e ) {
+				$crypter->loadEncryptionKey( Env::get('PDRETAILER_ENCRYPTION_KEY') );
+			} catch ( PressodyRetailerException $e ) {
 				// Do nothing right now.
 				// We should handle a failed encryption setup through health checks and when attempting to encrypt or decrypt.
 			}
@@ -287,7 +287,7 @@ class ServiceProvider implements ServiceProviderInterface {
 
 		$container['rest.controller.api_keys'] = function ( $container ) {
 			return new REST\ApiKeysController(
-				'pixelgradelt_retailer/v1',
+				'pressody_retailer/v1',
 				'apikeys',
 				$container['api_key.factory'],
 				$container['api_key.repository']
@@ -296,7 +296,7 @@ class ServiceProvider implements ServiceProviderInterface {
 
 		$container['rest.controller.compositions'] = function ( $container ) {
 			return new REST\CompositionsController(
-				'pixelgradelt_retailer/v1',
+				'pressody_retailer/v1',
 				'compositions',
 				$container['composition.manager'],
 				$container['transformer.composer_package'],
@@ -306,7 +306,7 @@ class ServiceProvider implements ServiceProviderInterface {
 
 		$container['rest.controller.solutions'] = function ( $container ) {
 			return new REST\SolutionsController(
-				'pixelgradelt_retailer/v1',
+				'pressody_retailer/v1',
 				'solutions',
 				$container['repository.solutions'],
 				$container['transformer.composer_package']
@@ -391,28 +391,28 @@ class ServiceProvider implements ServiceProviderInterface {
 		};
 
 		$container['storage.working_directory'] = function ( $container ) {
-			if ( \defined( 'PixelgradeLT\Retailer\WORKING_DIRECTORY' ) ) {
-				return \PixelgradeLT\Retailer\WORKING_DIRECTORY;
+			if ( \defined( 'Pressody\Retailer\WORKING_DIRECTORY' ) ) {
+				return \Pressody\Retailer\WORKING_DIRECTORY;
 			}
 
 			$upload_config = \wp_upload_dir();
 			$path          = \path_join( $upload_config['basedir'], $container['storage.working_directory_name'] );
 
-			return (string) \trailingslashit( \apply_filters( 'pixelgradelt_retailer/working_directory', $path ) );
+			return (string) \trailingslashit( \apply_filters( 'pressody_retailer/working_directory', $path ) );
 		};
 
 		$container['storage.working_directory_name'] = function () {
-			$directory = \get_option( 'pixelgradelt_retailer_working_directory' );
+			$directory = \get_option( 'pressody_retailer_working_directory' );
 
 			if ( ! empty( $directory ) ) {
 				return $directory;
 			}
 
 			// Append a random string to help hide it from nosey visitors.
-			$directory = sprintf( 'pixelgradelt_retailer-%s', generate_random_string() );
+			$directory = sprintf( 'pressody_retailer-%s', generate_random_string() );
 
 			// Save the working directory so we will always use the same directory.
-			\update_option( 'pixelgradelt_retailer_working_directory', $directory );
+			\update_option( 'pressody_retailer_working_directory', $directory );
 
 			return $directory;
 		};

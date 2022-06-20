@@ -4,16 +4,16 @@
  *
  * @since   0.1.0
  * @license GPL-2.0-or-later
- * @package PixelgradeLT
+ * @package Pressody
  */
 
 declare ( strict_types=1 );
 
-namespace PixelgradeLT\Retailer;
+namespace Pressody\Retailer;
 
 use Env\Env;
-use PixelgradeLT\Retailer\Authentication\ApiKey\Server;
-use PixelgradeLT\Retailer\Client\ComposerClient;
+use Pressody\Retailer\Authentication\ApiKey\Server;
+use Pressody\Retailer\Client\ComposerClient;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -25,19 +25,19 @@ use Psr\Log\LoggerInterface;
  */
 class SolutionManager implements Manager {
 
-	const POST_TYPE = 'ltsolution';
-	const POST_TYPE_PLURAL = 'ltsolutions';
+	const POST_TYPE = 'pdsolution';
+	const POST_TYPE_PLURAL = 'pdsolutions';
 
-	const TYPE_TAXONOMY = 'ltsolution_types';
-	const TYPE_TAXONOMY_SINGULAR = 'ltsolution_type';
+	const TYPE_TAXONOMY = 'pdsolution_types';
+	const TYPE_TAXONOMY_SINGULAR = 'pdsolution_type';
 
-	const CATEGORY_TAXONOMY = 'ltsolution_categories';
-	const CATEGORY_TAXONOMY_SINGULAR = 'ltsolution_category';
+	const CATEGORY_TAXONOMY = 'pdsolution_categories';
+	const CATEGORY_TAXONOMY_SINGULAR = 'pdsolution_category';
 
-	const KEYWORD_TAXONOMY = 'ltsolution_keywords';
-	const KEYWORD_TAXONOMY_SINGULAR = 'ltsolution_keyword';
+	const KEYWORD_TAXONOMY = 'pdsolution_keywords';
+	const KEYWORD_TAXONOMY_SINGULAR = 'pdsolution_keyword';
 
-	const LTRECORDS_API_PWD = 'pixelgradelt_records';
+	const PDRECORDS_API_PWD = 'pressody_records';
 
 	/**
 	 * Used to create the pseudo IDs saved as values for a solution's required or excluded solutions.
@@ -46,11 +46,11 @@ class SolutionManager implements Manager {
 	const PSEUDO_ID_DELIMITER = ' #';
 
 	/**
-	 * Local cache of LT Records parts.
+	 * Local cache of PD Records parts.
 	 *
 	 * @var array|null|\WP_Error
 	 */
-	protected $ltrecords_parts = null;
+	protected $pdrecords_parts = null;
 
 	/**
 	 * External Composer repository client.
@@ -102,27 +102,27 @@ class SolutionManager implements Manager {
 	 */
 	public function get_solution_post_type_args( array $args = [] ): array {
 		$labels = [
-			'name'                  => esc_html__( 'LT Solutions', 'pixelgradelt_retailer' ),
-			'singular_name'         => esc_html__( 'LT Solution', 'pixelgradelt_retailer' ),
-			'menu_name'             => esc_html_x( 'LT Solutions', 'Admin Menu text', 'pixelgradelt_retailer' ),
-			'add_new'               => esc_html_x( 'Add New', 'LT Solution', 'pixelgradelt_retailer' ),
-			'add_new_item'          => esc_html__( 'Add New LT Solution', 'pixelgradelt_retailer' ),
-			'new_item'              => esc_html__( 'New LT Solution', 'pixelgradelt_retailer' ),
-			'edit_item'             => esc_html__( 'Edit LT Solution', 'pixelgradelt_retailer' ),
-			'view_item'             => esc_html__( 'View LT Solution', 'pixelgradelt_retailer' ),
-			'all_items'             => esc_html__( 'All Solutions', 'pixelgradelt_retailer' ),
-			'search_items'          => esc_html__( 'Search Solutions', 'pixelgradelt_retailer' ),
-			'not_found'             => esc_html__( 'No solutions found.', 'pixelgradelt_retailer' ),
-			'not_found_in_trash'    => esc_html__( 'No solutions found in Trash.', 'pixelgradelt_retailer' ),
-			'uploaded_to_this_item' => esc_html__( 'Uploaded to this solution', 'pixelgradelt_retailer' ),
-			'filter_items_list'     => esc_html__( 'Filter solutions list', 'pixelgradelt_retailer' ),
-			'items_list_navigation' => esc_html__( 'Solutions list navigation', 'pixelgradelt_retailer' ),
-			'items_list'            => esc_html__( 'LT Solutions list', 'pixelgradelt_retailer' ),
+			'name'                  => esc_html__( 'PD Solutions', 'pressody_retailer' ),
+			'singular_name'         => esc_html__( 'PD Solution', 'pressody_retailer' ),
+			'menu_name'             => esc_html_x( 'PD Solutions', 'Admin Menu text', 'pressody_retailer' ),
+			'add_new'               => esc_html_x( 'Add New', 'PD Solution', 'pressody_retailer' ),
+			'add_new_item'          => esc_html__( 'Add New PD Solution', 'pressody_retailer' ),
+			'new_item'              => esc_html__( 'New PD Solution', 'pressody_retailer' ),
+			'edit_item'             => esc_html__( 'Edit PD Solution', 'pressody_retailer' ),
+			'view_item'             => esc_html__( 'View PD Solution', 'pressody_retailer' ),
+			'all_items'             => esc_html__( 'All Solutions', 'pressody_retailer' ),
+			'search_items'          => esc_html__( 'Search Solutions', 'pressody_retailer' ),
+			'not_found'             => esc_html__( 'No solutions found.', 'pressody_retailer' ),
+			'not_found_in_trash'    => esc_html__( 'No solutions found in Trash.', 'pressody_retailer' ),
+			'uploaded_to_this_item' => esc_html__( 'Uploaded to this solution', 'pressody_retailer' ),
+			'filter_items_list'     => esc_html__( 'Filter solutions list', 'pressody_retailer' ),
+			'items_list_navigation' => esc_html__( 'Solutions list navigation', 'pressody_retailer' ),
+			'items_list'            => esc_html__( 'PD Solutions list', 'pressody_retailer' ),
 		];
 
 		return array_merge( [
 			'labels'             => $labels,
-			'description'        => esc_html__( 'Solutions to be purchased and used to determine the PixelgradeLT parts delivered to PixelgradeLT users.', 'pixelgradelt_retailer' ),
+			'description'        => esc_html__( 'Solutions to be purchased and used to determine the Pressody parts delivered to Pressody users.', 'pressody_retailer' ),
 			'hierarchical'       => false,
 			'public'             => false,
 			'publicly_queryable' => false,
@@ -151,22 +151,22 @@ class SolutionManager implements Manager {
 	 */
 	public function get_solution_type_taxonomy_args( array $args = [] ): array {
 		$labels = [
-			'name'                  => esc_html__( 'Solution Types', 'pixelgradelt_retailer' ),
-			'singular_name'         => esc_html__( 'Solution Type', 'pixelgradelt_retailer' ),
-			'add_new'               => esc_html_x( 'Add New', 'LT Solution Type', 'pixelgradelt_retailer' ),
-			'add_new_item'          => esc_html__( 'Add New Solution Type', 'pixelgradelt_retailer' ),
-			'update_item'           => esc_html__( 'Update Solution Type', 'pixelgradelt_retailer' ),
-			'new_item_name'         => esc_html__( 'New Solution Type Name', 'pixelgradelt_retailer' ),
-			'edit_item'             => esc_html__( 'Edit Solution Type', 'pixelgradelt_retailer' ),
-			'all_items'             => esc_html__( 'All Solution Types', 'pixelgradelt_retailer' ),
-			'search_items'          => esc_html__( 'Search Solution Types', 'pixelgradelt_retailer' ),
-			'parent_item'           => esc_html__( 'Parent Solution Type', 'pixelgradelt_retailer' ),
-			'parent_item_colon'     => esc_html__( 'Parent Solution Type:', 'pixelgradelt_retailer' ),
-			'not_found'             => esc_html__( 'No solution types found.', 'pixelgradelt_retailer' ),
-			'no_terms'              => esc_html__( 'No solution types.', 'pixelgradelt_retailer' ),
-			'items_list_navigation' => esc_html__( 'Solution Types list navigation', 'pixelgradelt_retailer' ),
-			'items_list'            => esc_html__( 'Solution Types list', 'pixelgradelt_retailer' ),
-			'back_to_items'         => esc_html__( '&larr; Go to Solution Types', 'pixelgradelt_retailer' ),
+			'name'                  => esc_html__( 'Solution Types', 'pressody_retailer' ),
+			'singular_name'         => esc_html__( 'Solution Type', 'pressody_retailer' ),
+			'add_new'               => esc_html_x( 'Add New', 'PD Solution Type', 'pressody_retailer' ),
+			'add_new_item'          => esc_html__( 'Add New Solution Type', 'pressody_retailer' ),
+			'update_item'           => esc_html__( 'Update Solution Type', 'pressody_retailer' ),
+			'new_item_name'         => esc_html__( 'New Solution Type Name', 'pressody_retailer' ),
+			'edit_item'             => esc_html__( 'Edit Solution Type', 'pressody_retailer' ),
+			'all_items'             => esc_html__( 'All Solution Types', 'pressody_retailer' ),
+			'search_items'          => esc_html__( 'Search Solution Types', 'pressody_retailer' ),
+			'parent_item'           => esc_html__( 'Parent Solution Type', 'pressody_retailer' ),
+			'parent_item_colon'     => esc_html__( 'Parent Solution Type:', 'pressody_retailer' ),
+			'not_found'             => esc_html__( 'No solution types found.', 'pressody_retailer' ),
+			'no_terms'              => esc_html__( 'No solution types.', 'pressody_retailer' ),
+			'items_list_navigation' => esc_html__( 'Solution Types list navigation', 'pressody_retailer' ),
+			'items_list'            => esc_html__( 'Solution Types list', 'pressody_retailer' ),
+			'back_to_items'         => esc_html__( '&larr; Go to Solution Types', 'pressody_retailer' ),
 		];
 
 		return array_merge( [
@@ -193,22 +193,22 @@ class SolutionManager implements Manager {
 	 */
 	public function get_solution_category_taxonomy_args( array $args = [] ): array {
 		$labels = [
-			'name'                  => esc_html__( 'Solution Categories', 'pixelgradelt_retailer' ),
-			'singular_name'         => esc_html__( 'Solution Category', 'pixelgradelt_retailer' ),
-			'add_new'               => esc_html_x( 'Add New', 'LT Solution Category', 'pixelgradelt_retailer' ),
-			'add_new_item'          => esc_html__( 'Add New Solution Category', 'pixelgradelt_retailer' ),
-			'update_item'           => esc_html__( 'Update Solution Category', 'pixelgradelt_retailer' ),
-			'new_item_name'         => esc_html__( 'New Solution Category Name', 'pixelgradelt_retailer' ),
-			'edit_item'             => esc_html__( 'Edit Solution Category', 'pixelgradelt_retailer' ),
-			'all_items'             => esc_html__( 'All Solution Categories', 'pixelgradelt_retailer' ),
-			'search_items'          => esc_html__( 'Search Solution Categories', 'pixelgradelt_retailer' ),
-			'parent_item'           => esc_html__( 'Parent Solution Category', 'pixelgradelt_retailer' ),
-			'parent_item_colon'     => esc_html__( 'Parent Solution Category:', 'pixelgradelt_retailer' ),
-			'not_found'             => esc_html__( 'No solution categories found.', 'pixelgradelt_retailer' ),
-			'no_terms'              => esc_html__( 'No solution categories.', 'pixelgradelt_retailer' ),
-			'items_list_navigation' => esc_html__( 'Solution Categories list navigation', 'pixelgradelt_retailer' ),
-			'items_list'            => esc_html__( 'Solution Categories list', 'pixelgradelt_retailer' ),
-			'back_to_items'         => esc_html__( '&larr; Go to Solution Categories', 'pixelgradelt_retailer' ),
+			'name'                  => esc_html__( 'Solution Categories', 'pressody_retailer' ),
+			'singular_name'         => esc_html__( 'Solution Category', 'pressody_retailer' ),
+			'add_new'               => esc_html_x( 'Add New', 'PD Solution Category', 'pressody_retailer' ),
+			'add_new_item'          => esc_html__( 'Add New Solution Category', 'pressody_retailer' ),
+			'update_item'           => esc_html__( 'Update Solution Category', 'pressody_retailer' ),
+			'new_item_name'         => esc_html__( 'New Solution Category Name', 'pressody_retailer' ),
+			'edit_item'             => esc_html__( 'Edit Solution Category', 'pressody_retailer' ),
+			'all_items'             => esc_html__( 'All Solution Categories', 'pressody_retailer' ),
+			'search_items'          => esc_html__( 'Search Solution Categories', 'pressody_retailer' ),
+			'parent_item'           => esc_html__( 'Parent Solution Category', 'pressody_retailer' ),
+			'parent_item_colon'     => esc_html__( 'Parent Solution Category:', 'pressody_retailer' ),
+			'not_found'             => esc_html__( 'No solution categories found.', 'pressody_retailer' ),
+			'no_terms'              => esc_html__( 'No solution categories.', 'pressody_retailer' ),
+			'items_list_navigation' => esc_html__( 'Solution Categories list navigation', 'pressody_retailer' ),
+			'items_list'            => esc_html__( 'Solution Categories list', 'pressody_retailer' ),
+			'back_to_items'         => esc_html__( '&larr; Go to Solution Categories', 'pressody_retailer' ),
 		];
 
 		return array_merge( [
@@ -235,23 +235,23 @@ class SolutionManager implements Manager {
 	 */
 	public function get_solution_keyword_taxonomy_args( array $args = [] ): array {
 		$labels = [
-			'name'                       => esc_html__( 'Solution Keywords', 'pixelgradelt_retailer' ),
-			'singular_name'              => esc_html__( 'Solution Keyword', 'pixelgradelt_retailer' ),
-			'add_new'                    => esc_html_x( 'Add New', 'LT Solution Keyword', 'pixelgradelt_retailer' ),
-			'add_new_item'               => esc_html__( 'Add New Solution Keyword', 'pixelgradelt_retailer' ),
-			'update_item'                => esc_html__( 'Update Solution Keyword', 'pixelgradelt_retailer' ),
-			'new_item_name'              => esc_html__( 'New Solution Keyword Name', 'pixelgradelt_retailer' ),
-			'edit_item'                  => esc_html__( 'Edit Solution Keyword', 'pixelgradelt_retailer' ),
-			'all_items'                  => esc_html__( 'All Solution Keywords', 'pixelgradelt_retailer' ),
-			'search_items'               => esc_html__( 'Search Solution Keywords', 'pixelgradelt_retailer' ),
-			'not_found'                  => esc_html__( 'No solution keywords found.', 'pixelgradelt_retailer' ),
-			'no_terms'                   => esc_html__( 'No solution keywords.', 'pixelgradelt_retailer' ),
-			'separate_items_with_commas' => esc_html__( 'Separate keywords with commas.', 'pixelgradelt_retailer' ),
-			'choose_from_most_used'      => esc_html__( 'Choose from the most used keywords.', 'pixelgradelt_retailer' ),
-			'most_used'                  => esc_html__( 'Most used.', 'pixelgradelt_retailer' ),
-			'items_list_navigation'      => esc_html__( 'Solution Keywords list navigation', 'pixelgradelt_retailer' ),
-			'items_list'                 => esc_html__( 'Solution Keywords list', 'pixelgradelt_retailer' ),
-			'back_to_items'              => esc_html__( '&larr; Go to Solution Keywords', 'pixelgradelt_retailer' ),
+			'name'                       => esc_html__( 'Solution Keywords', 'pressody_retailer' ),
+			'singular_name'              => esc_html__( 'Solution Keyword', 'pressody_retailer' ),
+			'add_new'                    => esc_html_x( 'Add New', 'PD Solution Keyword', 'pressody_retailer' ),
+			'add_new_item'               => esc_html__( 'Add New Solution Keyword', 'pressody_retailer' ),
+			'update_item'                => esc_html__( 'Update Solution Keyword', 'pressody_retailer' ),
+			'new_item_name'              => esc_html__( 'New Solution Keyword Name', 'pressody_retailer' ),
+			'edit_item'                  => esc_html__( 'Edit Solution Keyword', 'pressody_retailer' ),
+			'all_items'                  => esc_html__( 'All Solution Keywords', 'pressody_retailer' ),
+			'search_items'               => esc_html__( 'Search Solution Keywords', 'pressody_retailer' ),
+			'not_found'                  => esc_html__( 'No solution keywords found.', 'pressody_retailer' ),
+			'no_terms'                   => esc_html__( 'No solution keywords.', 'pressody_retailer' ),
+			'separate_items_with_commas' => esc_html__( 'Separate keywords with commas.', 'pressody_retailer' ),
+			'choose_from_most_used'      => esc_html__( 'Choose from the most used keywords.', 'pressody_retailer' ),
+			'most_used'                  => esc_html__( 'Most used.', 'pressody_retailer' ),
+			'items_list_navigation'      => esc_html__( 'Solution Keywords list navigation', 'pressody_retailer' ),
+			'items_list'                 => esc_html__( 'Solution Keywords list', 'pressody_retailer' ),
+			'back_to_items'              => esc_html__( '&larr; Go to Solution Keywords', 'pressody_retailer' ),
 		];
 
 		return array_merge( [
@@ -367,7 +367,7 @@ class SolutionManager implements Manager {
 		 * @param array $query_args The query args.
 		 * @param array $args       The received args.
 		 */
-		$query_args = \apply_filters( 'pixelgradelt_retailer/solution_ids_by_query_args', $query_args, $args );
+		$query_args = \apply_filters( 'pressody_retailer/solution_ids_by_query_args', $query_args, $args );
 
 		$query       = new \WP_Query( $query_args );
 		$package_ids = $query->get_posts();
@@ -406,7 +406,7 @@ class SolutionManager implements Manager {
 		$data['description'] = get_post_meta( $post_ID, '_solution_details_description', true );
 		$data['homepage']    = get_post_meta( $post_ID, '_solution_details_homepage', true );
 
-		$data['required_ltrecords_parts'] = $this->get_post_solution_required_parts( $post_ID );
+		$data['required_pdrecords_parts'] = $this->get_post_solution_required_parts( $post_ID );
 		$data['required_solutions']       = $this->get_post_solution_required_solutions( $post_ID );
 		$data['excluded_solutions']       = $this->get_post_solution_excluded_solutions( $post_ID );
 		$data['composer_require']         = $this->get_post_solution_composer_require( $post_ID );
@@ -419,7 +419,7 @@ class SolutionManager implements Manager {
 		 * @param array $solution_data The solution data.
 		 * @param int   $post_id       The solution post ID.
 		 */
-		return \apply_filters( 'pixelgradelt_retailer/solution_id_data', $data, $post_ID );
+		return \apply_filters( 'pressody_retailer/solution_id_data', $data, $post_ID );
 	}
 
 	/**
@@ -710,12 +710,12 @@ class SolutionManager implements Manager {
 	public function dry_run_solution_require( Package $solution ) {
 		$client = $this->get_composer_client();
 
-		if ( empty( $ltrecords_repo_url = ensure_packages_json_url( get_setting( 'ltrecords-packages-repo-endpoint' ) ) )
-		     || empty( $ltrecords_api_key = get_setting( 'ltrecords-api-key' ) ) ) {
+		if ( empty( $pdrecords_repo_url = ensure_packages_json_url( get_setting( 'pdrecords-packages-repo-endpoint' ) ) )
+		     || empty( $pdrecords_api_key = get_setting( 'pdrecords-api-key' ) ) ) {
 
 			$this->logger->error(
 				'Error during Composer require dry-run for solution "{package}" #{post_id}.' . PHP_EOL
-				. esc_html__( 'Missing LT Records Repo URL and/or LT Records API key in Settings > LT Retailer.', 'pixelgradelt_retailer' ),
+				. esc_html__( 'Missing PD Records Repo URL and/or PD Records API key in Settings > PD Retailer.', 'pressody_retailer' ),
 				[
 					'package' => $solution->get_name(),
 					'post_id' => $solution->get_managed_post_id(),
@@ -737,23 +737,23 @@ class SolutionManager implements Manager {
 								'verify_peer' => ! is_debug_mode(),
 							],
 							'http' => [
-								'header' => ! empty( Env::get( 'LTRETAILER_PHP_AUTH_USER' ) ) ? [
-									'Authorization: Basic ' . base64_encode( Env::get( 'LTRETAILER_PHP_AUTH_USER' ) . ':' . Server::AUTH_PWD ),
+								'header' => ! empty( Env::get( 'PDRETAILER_PHP_AUTH_USER' ) ) ? [
+									'Authorization: Basic ' . base64_encode( Env::get( 'PDRETAILER_PHP_AUTH_USER' ) . ':' . Server::AUTH_PWD ),
 								] : [],
 							],
 						],
 					],
 					[
-						// The LT Records Repo (includes all LT Records packages and parts).
+						// The PD Records Repo (includes all PD Records packages and parts).
 						'type'    => 'composer',
-						'url'     => esc_url( $ltrecords_repo_url ),
+						'url'     => esc_url( $pdrecords_repo_url ),
 						'options' => [
 							'ssl'  => [
 								'verify_peer' => ! is_debug_mode(),
 							],
 							'http' => [
 								'header' => [
-									'Authorization: Basic ' . base64_encode( $ltrecords_api_key . ':' . self::LTRECORDS_API_PWD ),
+									'Authorization: Basic ' . base64_encode( $pdrecords_api_key . ':' . self::PDRECORDS_API_PWD ),
 								],
 							],
 						],
@@ -857,36 +857,36 @@ class SolutionManager implements Manager {
 	 *
 	 * @return array|\WP_Error
 	 */
-	public function get_ltrecords_parts( bool $skip_cache = false ) {
+	public function get_pdrecords_parts( bool $skip_cache = false ) {
 		// First, try to get the parts from the instance property.
-		if ( ! is_null( $this->ltrecords_parts ) && ! $skip_cache ) {
-			return $this->ltrecords_parts;
+		if ( ! is_null( $this->pdrecords_parts ) && ! $skip_cache ) {
+			return $this->pdrecords_parts;
 		}
 
 		$parts = [];
 
 		// Second, use the cache.
 		if ( ! $skip_cache ) {
-			$parts   = \get_option( '_pixelgradelt_retailer_ltrecords_parts' );
-			$timeout = \get_option( '_pixelgradelt_retailer_ltrecords_parts_timeout' );
+			$parts   = \get_option( '_pressody_retailer_pdrecords_parts' );
+			$timeout = \get_option( '_pressody_retailer_pdrecords_parts_timeout' );
 			// If the cache isn't expired, use it.
 			if ( $timeout > time() ) {
-				$this->ltrecords_parts = $parts;
+				$this->pdrecords_parts = $parts;
 
-				return $this->ltrecords_parts;
+				return $this->pdrecords_parts;
 			}
 		}
 
 		// Third, we need to fetch from the remote endpoint.
-		$remote_parts = $this->fetch_ltrecords_parts();
+		$remote_parts = $this->fetch_pdrecords_parts();
 		// If we have received remote parts, use them.
 		// Otherwise, we will keep the already cached data (if we haven't been instructed to skip the cache).
 		if ( ! empty( $remote_parts ) && ! \is_wp_error( $remote_parts ) ) {
 			$parts = $remote_parts;
 			// Cache the results in an option with an expiration timestamp.
 			// Like a transient but without the automatic delete logic since we want to keep existing data if we are not able to fetch.
-			\update_option( '_pixelgradelt_retailer_ltrecords_parts', $parts, true );
-			\update_option( '_pixelgradelt_retailer_ltrecords_parts_timeout', time() + MINUTE_IN_SECONDS * 15, true );
+			\update_option( '_pressody_retailer_pdrecords_parts', $parts, true );
+			\update_option( '_pressody_retailer_pdrecords_parts_timeout', time() + MINUTE_IN_SECONDS * 15, true );
 		}
 
 		if ( \is_wp_error( $remote_parts ) ) {
@@ -897,38 +897,38 @@ class SolutionManager implements Manager {
 			$parts = [];
 		}
 
-		$this->ltrecords_parts = $parts;
+		$this->pdrecords_parts = $parts;
 
-		return $this->ltrecords_parts;
+		return $this->pdrecords_parts;
 	}
 
 	/**
-	 * Fetch the parts list (only package-names) from the repo setup in the LT Retailer settings.
+	 * Fetch the parts list (only package-names) from the repo setup in the PD Retailer settings.
 	 *
 	 * @return array|\WP_Error
 	 */
-	protected function fetch_ltrecords_parts() {
+	protected function fetch_pdrecords_parts() {
 		$parts = [];
 
-		if ( empty( $ltrecords_parts_repo_url = ensure_packages_json_url( get_setting( 'ltrecords-parts-repo-endpoint' ) ) )
-		     || empty( $ltrecords_api_key = get_setting( 'ltrecords-api-key' ) ) ) {
+		if ( empty( $pdrecords_parts_repo_url = ensure_packages_json_url( get_setting( 'pdrecords-parts-repo-endpoint' ) ) )
+		     || empty( $pdrecords_api_key = get_setting( 'pdrecords-api-key' ) ) ) {
 
-			return new \WP_Error( 'missing_settings', esc_html__( 'You need to provide a LT Records parts endpoint and a LT Records API key in Settings > LT Retailer.', 'pixelgradelt_retailer' ) );
+			return new \WP_Error( 'missing_settings', esc_html__( 'You need to provide a PD Records parts endpoint and a PD Records API key in Settings > PD Retailer.', 'pressody_retailer' ) );
 		}
 
 		$request_args = [
 			'headers'   => [
-				'Authorization' => 'Basic ' . base64_encode( $ltrecords_api_key . ':' . self::LTRECORDS_API_PWD ),
+				'Authorization' => 'Basic ' . base64_encode( $pdrecords_api_key . ':' . self::PDRECORDS_API_PWD ),
 			],
 			'timeout'   => 5,
-			'sslverify' => ! ( is_debug_mode() || is_dev_url( $ltrecords_parts_repo_url ) ),
+			'sslverify' => ! ( is_debug_mode() || is_dev_url( $pdrecords_parts_repo_url ) ),
 		];
 
-		$response = \wp_remote_get( $ltrecords_parts_repo_url, $request_args );
+		$response = \wp_remote_get( $pdrecords_parts_repo_url, $request_args );
 		if ( \is_wp_error( $response ) || \wp_remote_retrieve_response_code( $response ) !== 200 ) {
 			$error            = [];
-			$error['code']    = 'ltrecords_request_error';
-			$error['message'] = esc_html__( 'Something went wrong and we couldn\'t get the LT Records parts from the provided endpoint.', 'pixelgradelt_retailer' );
+			$error['code']    = 'pdrecords_request_error';
+			$error['message'] = esc_html__( 'Something went wrong and we couldn\'t get the PD Records parts from the provided endpoint.', 'pressody_retailer' );
 
 			if ( \is_wp_error( $response ) ) {
 				$error['data'] = [
@@ -939,10 +939,10 @@ class SolutionManager implements Manager {
 					],
 				];
 			} else {
-				// Add the data we received from LT Records.
+				// Add the data we received from PD Records.
 				$response_body = json_decode( \wp_remote_retrieve_body( $response ), true );
 				$error['data'] = [
-					'ltrecords' => [
+					'pdrecords' => [
 						'code'    => $response_body['code'] ?? '',
 						'message' => $response_body['message'] ?? '',
 						'data'    => $response_body['data'] ?? '',

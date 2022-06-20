@@ -6,7 +6,7 @@ parameters:
     level: 5
     inferPrivatePropertyTypeFromConstructor: true
     paths:
-        - pixelgradelt-retailer.php
+        - pressody-retailer.php
         - src/
     bootstrapFiles:
         - vendor/php-stubs/woocommerce-stubs/woocommerce-stubs.php

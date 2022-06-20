@@ -1,29 +1,29 @@
 /* Settings Screen
 ------------------------------------------------------------------------------*/
 
-.pixelgradelt_retailer-screen {
+.pressody_retailer-screen {
 	display: flex;
 	flex-wrap: nowrap;
 }
 
-.pixelgradelt_retailer-screen-content {
+.pressody_retailer-screen-content {
 	width: 100%;
 }
 
-.js .pixelgradelt_retailer-tab-panel {
+.js .pressody_retailer-tab-panel {
 	display: none;
 	margin-top: 1em;
 }
 
-.pixelgradelt_retailer-tab-panel.is-active {
+.pressody_retailer-tab-panel.is-active {
 	display: block;
 }
 
-.pixelgradelt_retailer-field-error {
+.pressody_retailer-field-error {
 	color: #ff0000;
 }
 
-.pixelgradelt_retailer-composer-snippet {
+.pressody_retailer-composer-snippet {
 	background: #333;
 	color: #fff;
 	line-height: 1.2;
@@ -31,11 +31,11 @@
 	overflow: scroll;
 }
 
-.pixelgradelt_retailer-composer-snippet code {
+.pressody_retailer-composer-snippet code {
 	background: transparent;
 }
 
-.pixelgradelt_retailer-screen-sidebar {
+.pressody_retailer-screen-sidebar {
 	background: #fff;
 	color: #1e1e1e;
 	display: none;
@@ -49,7 +49,7 @@
 	z-index: 10;
 }
 
-.pixelgradelt_retailer-screen-sidebar .components-panel__header {
+.pressody_retailer-screen-sidebar .components-panel__header {
 	background: #fff;
 	border-top-width: 0;
 	padding-right: 4px;
@@ -58,7 +58,7 @@
 	z-index: 2;
 }
 
-.pixelgradelt_retailer-screen-sidebar .components-tab-panel__tabs {
+.pressody_retailer-screen-sidebar .components-tab-panel__tabs {
 	background: #fff;
 	border-bottom: 1px solid #ddd;
 	position: sticky;
@@ -66,23 +66,23 @@
 	z-index: 1;
 }
 
-.pixelgradelt_retailer-screen-sidebar .components-tab-panel__tab-content {
+.pressody_retailer-screen-sidebar .components-tab-panel__tab-content {
 	padding: 16px;
 }
 
-.pixelgradelt_retailer-screen-sidebar .components-tab-panel__tab-content > :first-child {
+.pressody_retailer-screen-sidebar .components-tab-panel__tab-content > :first-child {
 	margin-top: 0;
 }
 
-.sidebar-is-open .pixelgradelt_retailer-screen-content {
+.sidebar-is-open .pressody_retailer-screen-content {
 	margin-right: 370px;
 }
 
-.sidebar-is-open .pixelgradelt_retailer-screen-sidebar {
+.sidebar-is-open .pressody_retailer-screen-sidebar {
 	display: block;
 }
 
-.pixelgradelt_retailer-card {
+.pressody_retailer-card {
 	background: #fff;
 	border: 1px solid #e5e5e5;
 	box-shadow: 0 1px 1px rgba(0,0,0,0.04);
@@ -96,7 +96,7 @@
 /* Repository Tab
 ----------------------------------------------------------------------------- */
 
-.pixelgradelt_retailer-repository .components-placeholder {
+.pressody_retailer-repository .components-placeholder {
 	margin-top: 20px;
 	padding: 0.7em 2em 1em;
 	max-width: 620px;
@@ -104,39 +104,39 @@
 	box-shadow: inset 0 0 0 1px #ccd0d4;
 }
 
-.pixelgradelt_retailer-repository > .components-button.is-pressed {
+.pressody_retailer-repository > .components-button.is-pressed {
 	padding-right: 12px;
 }
 
-.pixelgradelt_retailer-package {
+.pressody_retailer-package {
 	margin-top: 20px;
 }
 
-.pixelgradelt_retailer-package thead .components-button {
+.pressody_retailer-package thead .components-button {
 	float: right;
 }
 
-.pixelgradelt_retailer-package thead a.edit-package {
+.pressody_retailer-package thead a.edit-package {
 	float: right;
 }
 
-.pixelgradelt_retailer-package .error-message {
+.pressody_retailer-package .error-message {
 	color: #ff0000;
 }
 
-.pixelgradelt_retailer-package tbody th,
-.pixelgradelt_retailer-package tbody td {
+.pressody_retailer-package tbody th,
+.pressody_retailer-package tbody td {
 	word-break: break-all;
 }
 
-.pixelgradelt_retailer-package tbody th {
+.pressody_retailer-package tbody th {
 	font-size: 13px;
 	width: 150px;
 }
 
-.pixelgradelt_retailer-release.button,
-.pixelgradelt_retailer-required-package.button,
-.pixelgradelt_retailer-required-by-solution.button {
+.pressody_retailer-release.button,
+.pressody_retailer-required-package.button,
+.pressody_retailer-required-by-solution.button {
 	height: 24px;
 	margin-bottom: 3px;
 	margin-top: 3px;
@@ -144,47 +144,47 @@
 	padding-right: 6px;
 }
 
-.pixelgradelt_retailer-release-actions {
+.pressody_retailer-release-actions {
 	background: #f9f9f9;
 	border: 1px solid #dedede;
 	margin-top: 1em;
 }
 
-.pixelgradelt_retailer-release-actions td,
-.pixelgradelt_retailer-release-actions th {
+.pressody_retailer-release-actions td,
+.pressody_retailer-release-actions th {
 	padding: 5px 10px;
 }
 
-.pixelgradelt_retailer-release-actions tbody th {
+.pressody_retailer-release-actions tbody th {
 	width: auto;
 }
 
-.pixelgradelt_retailer-release-actions tr:first-child td,
-.pixelgradelt_retailer-release-actions tr:first-child th {
+.pressody_retailer-release-actions tr:first-child td,
+.pressody_retailer-release-actions tr:first-child th {
 	padding-top: 8px;
 }
 
-.pixelgradelt_retailer-release-actions tr:last-child td,
-.pixelgradelt_retailer-release-actions tr:last-child th {
+.pressody_retailer-release-actions tr:last-child td,
+.pressody_retailer-release-actions tr:last-child th {
 	padding-bottom: 10px;
 }
 
-.pixelgradelt_retailer-release-actions .components-base-control {
+.pressody_retailer-release-actions .components-base-control {
 	width: 35em;
 }
 
-.pixelgradelt_retailer-release-actions .components-base-control__field {
+.pressody_retailer-release-actions .components-base-control__field {
 	margin-bottom: 1px;
 }
 
-.pixelgradelt_retailer-release-actions .components-text-control__input {
+.pressody_retailer-release-actions .components-text-control__input {
 	background: #fff;
 	max-width: 100%;
 	width: 35em;
 }
 
 @media screen and ( max-width: 782px ) {
-	.pixelgradelt_retailer-release.button {
+	.pressody_retailer-release.button {
 		line-height: normal;
 		height: auto;
 	}
@@ -194,71 +194,71 @@
 /* API Keys Table
 ----------------------------------------------------------------------------- */
 
-.pixelgradelt_retailer-api-key-table {
+.pressody_retailer-api-key-table {
 	margin: 1em 0;
 }
 
-.pixelgradelt_retailer-api-key-table td,
-.pixelgradelt_retailer-api-key-table th {
+.pressody_retailer-api-key-table td,
+.pressody_retailer-api-key-table th {
 	width: auto;
 }
 
-.pixelgradelt_retailer-api-key-table tbody td,
-.pixelgradelt_retailer-api-key-table tbody th {
+.pressody_retailer-api-key-table tbody td,
+.pressody_retailer-api-key-table tbody th {
 	vertical-align: middle;
 }
 
-.pixelgradelt_retailer-api-key-table tfoot td {
+.pressody_retailer-api-key-table tfoot td {
 	background-color: #f9f9f9;
 }
 
-.pixelgradelt_retailer-api-key-table tfoot td input {
+.pressody_retailer-api-key-table tfoot td input {
 	margin-left: 0;
 	padding: 0 6px;
 	width: 20em;
 }
 
-.pixelgradelt_retailer-api-key-table tfoot td label {
+.pressody_retailer-api-key-table tfoot td label {
 	display: inline-block;
 	line-height: 1;
 }
 
-.pixelgradelt_retailer-api-key-table tfoot td .spinner {
+.pressody_retailer-api-key-table tfoot td .spinner {
 	float: none;
 }
 
-.pixelgradelt_retailer-api-key-table .column-actions {
+.pressody_retailer-api-key-table .column-actions {
 	text-align: right;
 }
 
-.pixelgradelt_retailer-api-key-table .column-token input {
+.pressody_retailer-api-key-table .column-token input {
 	font-family: monospace;
 	max-width: 282px;
 }
 
-.screen-profile .pixelgradelt_retailer-api-key-table .column-user,
-.screen-user-edit .pixelgradelt_retailer-api-key-table .column-user,
-.network-admin.profile-php .pixelgradelt_retailer-api-key-table .column-user,
-.network-admin.user-edit-php .pixelgradelt_retailer-api-key-table .column-user {
+.screen-profile .pressody_retailer-api-key-table .column-user,
+.screen-user-edit .pressody_retailer-api-key-table .column-user,
+.network-admin.profile-php .pressody_retailer-api-key-table .column-user,
+.network-admin.user-edit-php .pressody_retailer-api-key-table .column-user {
 	display: none;
 }
 
-.pixelgradelt_retailer-api-key-form .components-base-control {
+.pressody_retailer-api-key-form .components-base-control {
 	width: 25em;
 }
 
-.pixelgradelt_retailer-api-key-form .components-base-control__field {
+.pressody_retailer-api-key-form .components-base-control__field {
 	margin-bottom: 1px;
 }
 
-.pixelgradelt_retailer-api-key-form .components-text-control__input {
+.pressody_retailer-api-key-form .components-text-control__input {
 	height: 36px;
 }
 
 /* Composer Tab
 ----------------------------------------------------------------------------- */
 
-input.pixelgradelt_retailer-cli-field {
+input.pressody_retailer-cli-field {
 	background: #f6f6f6;
 	font-family: monospace;
 	max-width: 720px;
@@ -271,14 +271,14 @@ input.pixelgradelt_retailer-cli-field {
 	margin-right: 15px;
 }
 
-.pixelgradelt_retailer-solution-preview .components-placeholder {
+.pressody_retailer-solution-preview .components-placeholder {
 	margin-top: 20px;
 	padding: 0.7em 2em 1em;
 
 	box-shadow: inset 0 0 0 1px #ccd0d4;
 }
 
-.pixelgradelt_retailer-solution-preview a.edit-package {
+.pressody_retailer-solution-preview a.edit-package {
 	display: none;
 }
 
@@ -286,19 +286,19 @@ input.pixelgradelt_retailer-cli-field {
 ----------------------------------------------------------------------------- */
 
 /* Give the association field a little more contrast compared with the container. */
-body.post-type-ltcomposition .cf-association__bar,
-body.post-type-ltcomposition .cf-association__bar .cf-search-input__inner,
-body.post-type-ltcomposition .cf-association__cols {
+body.post-type-pdcomposition .cf-association__bar,
+body.post-type-pdcomposition .cf-association__bar .cf-search-input__inner,
+body.post-type-pdcomposition .cf-association__cols {
 	background-color: #fbfbfc;
 }
 
-body.post-type-ltcomposition .cf-association__cols .cf-association__option--selected {
+body.post-type-pdcomposition .cf-association__cols .cf-association__option--selected {
 	background-color: #efefef;
 }
 
 /* List Solutions screen
 ----------------------------------------------------------------------------- */
-body.post-type-ltsolution table.table-view-list.posts {
+body.post-type-pdsolution table.table-view-list.posts {
 	table-layout: auto;
 }
 .column-solution_required_parts {
@@ -307,7 +307,7 @@ body.post-type-ltsolution table.table-view-list.posts {
 
 /* List Compositions screen
 ----------------------------------------------------------------------------- */
-body.post-type-ltcomposition table.table-view-list.posts {
+body.post-type-pdcomposition table.table-view-list.posts {
 	table-layout: auto;
 }
 .column-composition_required_solutions {

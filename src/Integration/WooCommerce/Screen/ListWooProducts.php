@@ -4,17 +4,17 @@
  *
  * @since   0.14.0
  * @license GPL-2.0-or-later
- * @package PixelgradeLT
+ * @package Pressody
  */
 
 declare ( strict_types=1 );
 
-namespace PixelgradeLT\Retailer\Integration\WooCommerce\Screen;
+namespace Pressody\Retailer\Integration\WooCommerce\Screen;
 
 use Cedaro\WP\Plugin\AbstractHookProvider;
-use PixelgradeLT\Retailer\Integration\WooCommerce;
-use PixelgradeLT\Retailer\SolutionManager;
-use PixelgradeLT\Retailer\Utils\ArrayHelpers;
+use Pressody\Retailer\Integration\WooCommerce;
+use Pressody\Retailer\SolutionManager;
+use Pressody\Retailer\Utils\ArrayHelpers;
 
 /**
  * WooCommerce products list screen provider class.
@@ -86,8 +86,8 @@ class ListWooProducts extends AbstractHookProvider {
 			return;
 		}
 
-		wp_enqueue_script( 'pixelgradelt_retailer-admin' );
-		wp_enqueue_style( 'pixelgradelt_retailer-admin' );
+		wp_enqueue_script( 'pressody_retailer-admin' );
+		wp_enqueue_style( 'pressody_retailer-admin' );
 	}
 
 	/**
@@ -106,7 +106,7 @@ class ListWooProducts extends AbstractHookProvider {
 		// Insert after the tags column.
 		$columns = ArrayHelpers::insertAfterKey( $columns, 'product_tag',
 			[
-				'linked_ltsolution' => esc_html__( 'Linked LT Solution', 'pixelgradelt_retailer' ),
+				'linked_pdsolution' => esc_html__( 'Linked PD Solution', 'pressody_retailer' ),
 			]
 		);
 
@@ -120,15 +120,15 @@ class ListWooProducts extends AbstractHookProvider {
 	 * @param int    $post_id
 	 */
 	protected function populate_custom_columns( string $column, int $post_id ): void {
-		if ( ! in_array( $column, [ 'linked_ltsolution', ] ) ) {
+		if ( ! in_array( $column, [ 'linked_pdsolution', ] ) ) {
 			return;
 		}
 
 		$output = '—';
 		// Find the solution that is linked to this product.
-		$solution_id = WooCommerce::get_product_linked_ltsolution( $post_id );
+		$solution_id = WooCommerce::get_product_linked_pdsolution( $post_id );
 		if ( ! empty( $solution_id ) ) {
-			$output      = '<a class="package-list_link" href="' . esc_url( get_edit_post_link( $solution_id ) ) . '" title="' . esc_attr__( 'Edit LT Solution', 'pixelgradelt_retailer' ) . '">' . get_the_title( $solution_id ) . ' #' . $solution_id . '</a>';
+			$output      = '<a class="package-list_link" href="' . esc_url( get_edit_post_link( $solution_id ) ) . '" title="' . esc_attr__( 'Edit PD Solution', 'pressody_retailer' ) . '">' . get_the_title( $solution_id ) . ' #' . $solution_id . '</a>';
 		}
 
 		echo $output;
@@ -142,23 +142,23 @@ class ListWooProducts extends AbstractHookProvider {
 	 * @return array
 	 */
 	protected function add_custom_filters( array $filters ) {
-		$filters['linked_to_ltsolution'] = [ $this, 'render_products_linked_to_ltsolution_filter' ];
+		$filters['linked_to_pdsolution'] = [ $this, 'render_products_linked_to_pdsolution_filter' ];
 
 		return $filters;
 	}
 
 	/**
-	 * Render the linked to ltsolution filter for the list table.
+	 * Render the linked to pdsolution filter for the list table.
 	 *
 	 * @since 0.14.0
 	 */
-	public function render_products_linked_to_ltsolution_filter() {
-		$current_filter = isset( $_REQUEST['linked_to_ltsolution'] ) ? wc_clean( wp_unslash( $_REQUEST['linked_to_ltsolution'] ) ) : false; // WPCS: input var ok, sanitization ok.
+	public function render_products_linked_to_pdsolution_filter() {
+		$current_filter = isset( $_REQUEST['linked_to_pdsolution'] ) ? wc_clean( wp_unslash( $_REQUEST['linked_to_pdsolution'] ) ) : false; // WPCS: input var ok, sanitization ok.
 		$options        = [
-			'linked'    => esc_html__( 'Linked to a LT Solution', 'pixelgradelt_retailer' ),
-			'notlinked' => esc_html__( 'Not linked to a LT Solution', 'pixelgradelt_retailer' ),
+			'linked'    => esc_html__( 'Linked to a PD Solution', 'pressody_retailer' ),
+			'notlinked' => esc_html__( 'Not linked to a PD Solution', 'pressody_retailer' ),
 		];
-		$output         = '<select name="linked_to_ltsolution"><option value="">' . esc_html__( 'Filter by LT Solution link', 'pixelgradelt_retailer' ) . '</option>';
+		$output         = '<select name="linked_to_pdsolution"><option value="">' . esc_html__( 'Filter by PD Solution link', 'pressody_retailer' ) . '</option>';
 
 		foreach ( $options as $value => $label ) {
 			$output .= '<option ' . selected( $value, $current_filter, false ) . ' value="' . esc_attr( $value ) . '">' . esc_html( $label ) . '</option>';
@@ -197,16 +197,16 @@ class ListWooProducts extends AbstractHookProvider {
 	 * @return array
 	 */
 	protected function query_filters( $query_vars ) {
-		// Linked to LT Solution filter.
-		if ( ! empty( $_GET['linked_to_ltsolution'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-			add_filter( 'posts_clauses', [ $this, 'filter_linked_to_ltsolution_post_clauses' ] );
+		// Linked to PD Solution filter.
+		if ( ! empty( $_GET['linked_to_pdsolution'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			add_filter( 'posts_clauses', [ $this, 'filter_linked_to_pdsolution_post_clauses' ] );
 		}
 
 		return $query_vars;
 	}
 
 	/**
-	 * Filter by linked to LT Solution.
+	 * Filter by linked to PD Solution.
 	 *
 	 * @since 0.14.0
 	 *
@@ -214,11 +214,11 @@ class ListWooProducts extends AbstractHookProvider {
 	 *
 	 * @return array
 	 */
-	public function filter_linked_to_ltsolution_post_clauses( array $args ): array {
+	public function filter_linked_to_pdsolution_post_clauses( array $args ): array {
 		global $wpdb;
-		if ( ! empty( $_GET['linked_to_ltsolution'] ) && in_array( $_GET['linked_to_ltsolution'], ['linked', 'notlinked'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-			$args['join']  .= " LEFT JOIN {$wpdb->postmeta} ltmeta ON $wpdb->posts.ID = ltmeta.post_id AND ltmeta.meta_key = WooCommerce::PRODUCT_LINKED_TO_LTSOLUTION_META_KEY ";
-			if ( 'linked' === $_GET['linked_to_ltsolution'] ) {
+		if ( ! empty( $_GET['linked_to_pdsolution'] ) && in_array( $_GET['linked_to_pdsolution'], ['linked', 'notlinked'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			$args['join']  .= " LEFT JOIN {$wpdb->postmeta} ltmeta ON $wpdb->posts.ID = ltmeta.post_id AND ltmeta.meta_key = WooCommerce::PRODUCT_LINKED_TO_PDSOLUTION_META_KEY ";
+			if ( 'linked' === $_GET['linked_to_pdsolution'] ) {
 				$args['where'] .= " AND ltmeta.meta_value ";
 			} else {
 				$args['where'] .= " AND NOT coalesce(ltmeta.meta_value, FALSE) ";

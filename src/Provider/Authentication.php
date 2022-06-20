@@ -2,21 +2,21 @@
 /**
  * Authentication provider.
  *
- * @package PixelgradeLT
+ * @package Pressody
  * @license GPL-2.0-or-later
  * @since 0.1.0
  */
 
 declare ( strict_types = 1 );
 
-namespace PixelgradeLT\Retailer\Provider;
+namespace Pressody\Retailer\Provider;
 
 use Cedaro\WP\Plugin\AbstractHookProvider;
 use Pimple\ServiceIterator;
-use PixelgradeLT\Retailer\Authentication\ServerInterface;
-use PixelgradeLT\Retailer\Capabilities as Caps;
-use PixelgradeLT\Retailer\Exception\AuthenticationException;
-use PixelgradeLT\Retailer\HTTP\Request;
+use Pressody\Retailer\Authentication\ServerInterface;
+use Pressody\Retailer\Capabilities as Caps;
+use Pressody\Retailer\Exception\AuthenticationException;
+use Pressody\Retailer\HTTP\Request;
 use WP_Error;
 
 /**
@@ -72,7 +72,7 @@ class Authentication extends AbstractHookProvider {
 	 * @since 0.1.0
 	 */
 	public function register_hooks() {
-		if ( ! $this->is_pixelgradelt_retailer_request() ) {
+		if ( ! $this->is_pressody_retailer_request() ) {
 			return;
 		}
 
@@ -101,7 +101,7 @@ class Authentication extends AbstractHookProvider {
 
 		foreach ( $this->servers as $server ) {
 			if ( ! $server instanceof ServerInterface ) {
-				throw new \LogicException( 'Authentication servers must implement \PixelgradeLT\Retailer\Authentication\ServerInterface.' );
+				throw new \LogicException( 'Authentication servers must implement \Pressody\Retailer\Authentication\ServerInterface.' );
 			}
 
 			if ( ! $server->check_scheme( $this->request ) ) {
@@ -151,27 +151,27 @@ class Authentication extends AbstractHookProvider {
 	}
 
 	/**
-	 * Whether the current request is for a PixelgradeLT Retailer route or REST endpoint.
+	 * Whether the current request is for a Pressody Retailer route or REST endpoint.
 	 *
 	 * @since 0.1.0
 	 *
 	 * @return bool
 	 */
-	protected function is_pixelgradelt_retailer_request(): bool {
+	protected function is_pressody_retailer_request(): bool {
 		$request_path = $this->get_request_path();
 
 		// phpcs:ignore WordPress.Security.NonceVerification.NoNonceVerification
-		if ( ! empty( $_GET['pixelgradelt_retailer_route'] ) ) {
+		if ( ! empty( $_GET['pressody_retailer_route'] ) ) {
 			return true;
 		}
 
 		// This is a request for the solutions composer repo.
-		if ( 0 === strpos( $request_path, '/ltsolutions' ) ) {
+		if ( 0 === strpos( $request_path, '/pdsolutions' ) ) {
 			return true;
 		}
 
 		// This is a REST API request of ours.
-		if ( 0 === strpos( $request_path, '/wp-json/pixelgradelt_retailer/' ) ) {
+		if ( 0 === strpos( $request_path, '/wp-json/pressody_retailer/' ) ) {
 			return true;
 		}
 
@@ -203,7 +203,7 @@ class Authentication extends AbstractHookProvider {
 	/**
 	 * Sets and returns all the capabilities the current user has and should have.
 	 *
-	 * Appends `allcaps` with pixelgradelt_retailer_view_solutions if there are no servers,
+	 * Appends `allcaps` with pressody_retailer_view_solutions if there are no servers,
 	 * meaning that authentication should be skipped.
 	 *
 	 * @since 0.1.0

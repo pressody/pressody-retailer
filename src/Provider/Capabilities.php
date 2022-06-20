@@ -4,16 +4,16 @@
  *
  * @since   0.1.0
  * @license GPL-2.0-or-later
- * @package PixelgradeLT
+ * @package Pressody
  */
 
 declare ( strict_types=1 );
 
-namespace PixelgradeLT\Retailer\Provider;
+namespace Pressody\Retailer\Provider;
 
 use Cedaro\WP\Plugin\AbstractHookProvider;
-use PixelgradeLT\Retailer\Capabilities as Caps;
-use PixelgradeLT\Retailer\CompositionManager;
+use Pressody\Retailer\Capabilities as Caps;
+use Pressody\Retailer\CompositionManager;
 
 /**
  * Capabilities provider class.

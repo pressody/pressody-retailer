@@ -4,12 +4,12 @@
  *
  * @since   0.14.0
  * @license GPL-2.0-or-later
- * @package PixelgradeLT
+ * @package Pressody
  */
 
 declare ( strict_types=1 );
 
-namespace PixelgradeLT\Retailer;
+namespace Pressody\Retailer;
 
 use BerlinDB\Database\Query;
 use BerlinDB\Database\Table;
@@ -82,29 +82,29 @@ class PurchasedSolutionManager implements Manager {
 		$this->db               = $db;
 		$this->logger           = $logger;
 
-		self::$STATUSES = \apply_filters( 'pixelgradelt_retailer/purchased_solution_statuses', [
+		self::$STATUSES = \apply_filters( 'pressody_retailer/purchased_solution_statuses', [
 			'ready'   => [
 				'id'       => 'ready',
-				'label'    => esc_html__( 'Ready', 'pixelgradelt_retailer' ),
-				'desc'     => esc_html__( 'The purchased solution is ready to be used in compositions.', 'pixelgradelt_retailer' ),
+				'label'    => esc_html__( 'Ready', 'pressody_retailer' ),
+				'desc'     => esc_html__( 'The purchased solution is ready to be used in compositions.', 'pressody_retailer' ),
 				'internal' => false,
 			],
 			'active'  => [
 				'id'       => 'active',
-				'label'    => esc_html__( 'Active', 'pixelgradelt_retailer' ),
-				'desc'     => esc_html__( 'The purchased solution is part of a composition. When it is no longer part of a composition it should be transitioned to `ready`.', 'pixelgradelt_retailer' ),
+				'label'    => esc_html__( 'Active', 'pressody_retailer' ),
+				'desc'     => esc_html__( 'The purchased solution is part of a composition. When it is no longer part of a composition it should be transitioned to `ready`.', 'pressody_retailer' ),
 				'internal' => false,
 			],
 			'invalid' => [
 				'id'       => 'invalid',
-				'label'    => esc_html__( 'Invalid', 'pixelgradelt_retailer' ),
-				'desc'     => esc_html__( 'The purchased solution can\'t be used in compositions. After certain changes it may become `ready` or `active`.', 'pixelgradelt_retailer' ),
+				'label'    => esc_html__( 'Invalid', 'pressody_retailer' ),
+				'desc'     => esc_html__( 'The purchased solution can\'t be used in compositions. After certain changes it may become `ready` or `active`.', 'pressody_retailer' ),
 				'internal' => false,
 			],
 			'retired' => [
 				'id'       => 'retired',
-				'label'    => esc_html__( 'Retired', 'pixelgradelt_retailer' ),
-				'desc'     => esc_html__( 'The purchased solution has been retired and is no longer available for use. This status change should be definitive.', 'pixelgradelt_retailer' ),
+				'label'    => esc_html__( 'Retired', 'pressody_retailer' ),
+				'desc'     => esc_html__( 'The purchased solution has been retired and is no longer available for use. This status change should be definitive.', 'pressody_retailer' ),
 				'internal' => false,
 			],
 		] );
@@ -148,7 +148,7 @@ class PurchasedSolutionManager implements Manager {
 	 *
 	 * @see   Database\Queries\PurchasedSolution::__construct()
 	 *
-	 * @param array $args Arguments. See `\PixelgradeLT\Retailer\Database\Queries\PurchasedSolution` for
+	 * @param array $args Arguments. See `\Pressody\Retailer\Database\Queries\PurchasedSolution` for
 	 *                    accepted arguments.
 	 *
 	 * @return PurchasedSolution[] Array of `PurchasedSolution` objects.
@@ -172,7 +172,7 @@ class PurchasedSolutionManager implements Manager {
 	 *
 	 * @see   Database\Queries\PurchasedSolution::__construct()
 	 *
-	 * @param array $args Arguments. See `\PixelgradeLT\Retailer\Database\Queries\PurchasedSolution` for
+	 * @param array $args Arguments. See `\Pressody\Retailer\Database\Queries\PurchasedSolution` for
 	 *                    accepted arguments.
 	 *
 	 * @return int Number of purchased solutions returned based on query arguments passed.
@@ -197,7 +197,7 @@ class PurchasedSolutionManager implements Manager {
 	 *
 	 * @see   Database\Queries\PurchasedSolution::__construct()
 	 *
-	 * @param array $args Arguments. See `\PixelgradeLT\Retailer\Database\Queries\PurchasedSolution` for
+	 * @param array $args Arguments. See `\Pressody\Retailer\Database\Queries\PurchasedSolution` for
 	 *                    accepted arguments.
 	 *
 	 * @return array Purchased solution counts keyed by status.

@@ -1,17 +1,17 @@
 <?php
 declare ( strict_types=1 );
 
-namespace PixelgradeLT\Retailer\Tests\Integration\Repository;
+namespace Pressody\Retailer\Tests\Integration\Repository;
 
-use PixelgradeLT\Retailer\Repository\FlattenedSolutions;
-use PixelgradeLT\Retailer\Repository\ProcessedSolutions;
-use PixelgradeLT\Retailer\SolutionType\BaseSolution;
-use PixelgradeLT\Retailer\SolutionType\SolutionTypes;
-use PixelgradeLT\Retailer\Tests\Framework\PHPUnitUtil;
-use PixelgradeLT\Retailer\Tests\Integration\TestCase;
+use Pressody\Retailer\Repository\FlattenedSolutions;
+use Pressody\Retailer\Repository\ProcessedSolutions;
+use Pressody\Retailer\SolutionType\BaseSolution;
+use Pressody\Retailer\SolutionType\SolutionTypes;
+use Pressody\Retailer\Tests\Framework\PHPUnitUtil;
+use Pressody\Retailer\Tests\Integration\TestCase;
 
 use Psr\Container\ContainerInterface;
-use function PixelgradeLT\Retailer\plugin;
+use function Pressody\Retailer\plugin;
 
 class FlattenedSolutionsTest extends TestCase {
 	protected static $posts_data;
@@ -28,7 +28,7 @@ class FlattenedSolutionsTest extends TestCase {
 		/** @var ContainerInterface $container */
 		self::$container = plugin()->get_container();
 
-		// Register ltsolution post type
+		// Register pdsolution post type
 		$register_post_type = PHPUnitUtil::getProtectedMethod( self::$container['hooks.solution_post_type'], 'register_post_type' );
 		$register_post_type->invoke( self::$container['hooks.solution_post_type'] );
 
@@ -89,7 +89,7 @@ And here is a quote from a customer:
 			],
 		];
 
-		// Create the test ltsolutions posts that will be dependencies to other posts that we test.
+		// Create the test pdsolutions posts that will be dependencies to other posts that we test.
 		$dep_post_ids = [];
 		foreach ( self::$dep_posts_data as $key => $data ) {
 			$dep_post_ids[ $key ] = $factory->post->create_object( $data );
@@ -117,7 +117,7 @@ And here is a quote from a customer:
 <blockquote>Pure bliss, man!</blockquote>',
 				'_solution_details_homepage'                       => 'https://package.homepage',
 				'_solution_required_parts|||0|value'               => '_',
-				'_solution_required_parts|package_name|0|0|value'  => 'pixelgradelt-records/part_yet-another',
+				'_solution_required_parts|package_name|0|0|value'  => 'pressody-records/part_yet-another',
 				'_solution_required_parts|version_range|0|0|value' => '1.2.9',
 				'_solution_required_parts|stability|0|0|value'     => 'stable',
 				'_solution_required_solutions|||0|value'           => '_',
@@ -146,7 +146,7 @@ And here is a quote from a customer:
 <blockquote>Pure bliss, man!</blockquote>',
 				'_solution_details_homepage'                       => 'https://package.homepage',
 				'_solution_required_parts|||0|value'               => '_',
-				'_solution_required_parts|package_name|0|0|value'  => 'pixelgradelt-records/part_yet-another',
+				'_solution_required_parts|package_name|0|0|value'  => 'pressody-records/part_yet-another',
 				'_solution_required_parts|version_range|0|0|value' => '1.2.9',
 				'_solution_required_parts|stability|0|0|value'     => 'stable',
 				'_solution_required_solutions|||0|value'           => '_',
@@ -161,7 +161,7 @@ And here is a quote from a customer:
 	}
 
 	public function test_flattened_solutions() {
-		/** @var \PixelgradeLT\Retailer\Repository\Solutions $repository */
+		/** @var \Pressody\Retailer\Repository\Solutions $repository */
 		$repository = plugin()->get_container()['repository.solutions'];
 		$repository->reinitialize();
 
@@ -180,21 +180,21 @@ And here is a quote from a customer:
 		$flattened_repository = new FlattenedSolutions( $filtered_repo, $repository->get_factory(), $repository->get_solution_manager() );
 		$flattened_solutions  = $flattened_repository->all();
 
-		$this->assertNotEmpty( $flattened_solutions['pixelgradelt-retailer/edd'] );
-		$this->assertInstanceOf( BaseSolution::class, $flattened_solutions['pixelgradelt-retailer/edd'] );
-		$this->assertNotEmpty( $flattened_solutions['pixelgradelt-retailer/ecommerce'] );
-		$this->assertInstanceOf( BaseSolution::class, $flattened_solutions['pixelgradelt-retailer/ecommerce'] );
-		$this->assertNotEmpty( $flattened_solutions['pixelgradelt-retailer/blog'] );
-		$this->assertInstanceOf( BaseSolution::class, $flattened_solutions['pixelgradelt-retailer/blog'] );
-		$this->assertNotEmpty( $flattened_solutions['pixelgradelt-retailer/presentation'] );
-		$this->assertInstanceOf( BaseSolution::class, $flattened_solutions['pixelgradelt-retailer/presentation'] );
+		$this->assertNotEmpty( $flattened_solutions['pressody-retailer/edd'] );
+		$this->assertInstanceOf( BaseSolution::class, $flattened_solutions['pressody-retailer/edd'] );
+		$this->assertNotEmpty( $flattened_solutions['pressody-retailer/ecommerce'] );
+		$this->assertInstanceOf( BaseSolution::class, $flattened_solutions['pressody-retailer/ecommerce'] );
+		$this->assertNotEmpty( $flattened_solutions['pressody-retailer/blog'] );
+		$this->assertInstanceOf( BaseSolution::class, $flattened_solutions['pressody-retailer/blog'] );
+		$this->assertNotEmpty( $flattened_solutions['pressody-retailer/presentation'] );
+		$this->assertInstanceOf( BaseSolution::class, $flattened_solutions['pressody-retailer/presentation'] );
 
 		// We also expect a certain order, alphabetically by the package name.
 		$this->assertSame( [
-			'pixelgradelt-retailer/blog',
-			'pixelgradelt-retailer/ecommerce',
-			'pixelgradelt-retailer/edd',
-			'pixelgradelt-retailer/presentation',
+			'pressody-retailer/blog',
+			'pressody-retailer/ecommerce',
+			'pressody-retailer/edd',
+			'pressody-retailer/presentation',
 		], array_keys( $flattened_solutions ) );
 	}
 }

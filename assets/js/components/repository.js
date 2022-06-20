@@ -7,15 +7,15 @@ const { __ } = i18n;
 function RepositoryPlaceholder( props ) {
 	return html`
 		<${ Placeholder }
-			label=${ __( 'Add Solutions', 'pixelgradelt_retailer' ) }
-			instructions=${ __( 'You have not configured any Pixelgrade LT Solutions.', 'pixelgradelt_retailer' ) }
-			className="pixelgradelt_retailer-repository-placeholder"
+			label=${ __( 'Add Solutions', 'pressody_retailer' ) }
+			instructions=${ __( 'You have not configured any Pressody Solutions.', 'pressody_retailer' ) }
+			className="pressody_retailer-repository-placeholder"
 		>
 			<${ Button }
 				isPrimary
 				href= ${ props.addNewSolutionUrl }
 			>
-				${ __( 'Add Solution', 'pixelgradelt_retailer' ) }
+				${ __( 'Add Solution', 'pressody_retailer' ) }
 			</${ Button }>
 		</${ Placeholder }>
 	`;

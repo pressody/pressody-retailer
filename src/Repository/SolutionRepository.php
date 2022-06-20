@@ -2,17 +2,17 @@
 /**
  * Solution repository interface.
  *
- * @package PixelgradeLT
+ * @package Pressody
  * @license GPL-2.0-or-later
  * @since 0.8.0
  */
 
 declare ( strict_types = 1 );
 
-namespace PixelgradeLT\Retailer\Repository;
+namespace Pressody\Retailer\Repository;
 
-use PixelgradeLT\Retailer\SolutionFactory;
-use PixelgradeLT\Retailer\SolutionManager;
+use Pressody\Retailer\SolutionFactory;
+use Pressody\Retailer\SolutionManager;
 
 /**
  * Solution repository interface.

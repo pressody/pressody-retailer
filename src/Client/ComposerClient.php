@@ -4,12 +4,12 @@
  *
  * @since   0.1.0
  * @license GPL-2.0-or-later
- * @package PixelgradeLT
+ * @package Pressody
  */
 
 declare ( strict_types=1 );
 
-namespace PixelgradeLT\Retailer\Client;
+namespace Pressody\Retailer\Client;
 
 use Composer\Composer;
 use Composer\Config;
@@ -23,7 +23,7 @@ use Composer\Package\BasePackage;
 use Composer\Package\Dumper\ArrayDumper;
 use Composer\Package\PackageInterface;
 use Composer\Semver\VersionParser;
-use PixelgradeLT\Retailer\Client\Builder\ComposerArchiveBuilder;
+use Pressody\Retailer\Client\Builder\ComposerArchiveBuilder;
 
 /**
  * Class for communicating with an external Composer repository.
@@ -240,7 +240,7 @@ class ComposerClient implements Client {
 		$config = $this->parseDynamicConfigArgs( $config, $args );
 
 		// Allow others to filter this and add or modify the Composer client config (like adding OAuth tokens).
-		return \apply_filters( 'pixelgradelt_retailer/composer_client_config', $config, $args );
+		return \apply_filters( 'pressody_retailer/composer_client_config', $config, $args );
 	}
 
 	/**
@@ -299,12 +299,12 @@ class ComposerClient implements Client {
 			$config['ignore-platform-reqs'] = $args['ignore-platform-reqs'];
 		}
 
-		return \apply_filters( 'pixelgradelt_retailer/composer_client_config_parse_args', $config, $args, $originalConfig );
+		return \apply_filters( 'pressody_retailer/composer_client_config_parse_args', $config, $args, $originalConfig );
 	}
 
 	public function getDefaultDynamicConfig(): array {
 		$default_config = [
-			'name'                      => 'pixelgradelt-retailer/fake_project',
+			'name'                      => 'pressody-retailer/fake_project',
 			'repositories'              => [],
 			'require-all'               => false,
 			'require-dependencies'      => false,
@@ -326,7 +326,7 @@ class ComposerClient implements Client {
 			$default_config['secure-http'] = false;
 		}
 
-		return \apply_filters( 'pixelgradelt_retailer/composer_client_default_config', $default_config );
+		return \apply_filters( 'pressody_retailer/composer_client_default_config', $default_config );
 	}
 
 	/**

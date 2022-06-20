@@ -2,17 +2,17 @@
 /**
  * Custom vendor provider.
  *
- * @package PixelgradeLT
+ * @package Pressody
  * @license GPL-2.0-or-later
  * @since 0.1.0
  */
 
 declare ( strict_types = 1 );
 
-namespace PixelgradeLT\Retailer\Provider;
+namespace Pressody\Retailer\Provider;
 
 use Cedaro\WP\Plugin\AbstractHookProvider;
-use function PixelgradeLT\Retailer\get_setting;
+use function Pressody\Retailer\get_setting;
 
 /**
  * Custom vendor provider class.
@@ -24,7 +24,7 @@ class CustomVendor extends AbstractHookProvider {
 	 * Register hooks.
 	 */
 	public function register_hooks() {
-		add_filter( 'pixelgradelt_retailer/vendor', [ $this, 'filter_vendor' ], 5, 1 );
+		add_filter( 'pressody_retailer/vendor', [ $this, 'filter_vendor' ], 5, 1 );
 	}
 
 	/**

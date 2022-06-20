@@ -4,14 +4,14 @@
  *
  * @since       0.14.0
  * @license     GPL-2.0-or-later
- * @package     PixelgradeLT
+ * @package     Pressody
  */
 
 declare ( strict_types=1 );
 
-namespace PixelgradeLT\Retailer\Logging;
+namespace Pressody\Retailer\Logging;
 
-use PixelgradeLT\Retailer\BaseObject;
+use Pressody\Retailer\BaseObject;
 
 /**
  * Log Class.
@@ -39,7 +39,7 @@ class Log extends BaseObject {
 	/**
 	 * Log level.
 	 *
-	 * @see \PixelgradeLT\Retailer\Logging\LogLevels
+	 * @see \Pressody\Retailer\Logging\LogLevels
 	 *
 	 * @since  0.14.0
 	 * @access protected

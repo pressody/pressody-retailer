@@ -1,19 +1,19 @@
 <?php
 declare ( strict_types = 1 );
 
-namespace PixelgradeLT\Retailer\Tests\Integration\Provider;
+namespace Pressody\Retailer\Tests\Integration\Provider;
 
 use Pimple\ServiceIterator;
-use PixelgradeLT\Retailer\Capabilities as Caps;
-use PixelgradeLT\Retailer\Exception\AuthenticationException;
-use PixelgradeLT\Retailer\HTTP\Request;
-use PixelgradeLT\Retailer\Provider\Authentication;
-use PixelgradeLT\Retailer\Tests\Integration\TestCase;
+use Pressody\Retailer\Capabilities as Caps;
+use Pressody\Retailer\Exception\AuthenticationException;
+use Pressody\Retailer\HTTP\Request;
+use Pressody\Retailer\Provider\Authentication;
+use Pressody\Retailer\Tests\Integration\TestCase;
 use WP_Error;
 
 use function Patchwork\{always, redefine, restore};
-use function PixelgradeLT\Retailer\get_solutions_permalink;
-use function PixelgradeLT\Retailer\plugin;
+use function Pressody\Retailer\get_solutions_permalink;
+use function Pressody\Retailer\plugin;
 
 class AuthenticationTest extends TestCase {
 	protected static $api_key;
@@ -57,7 +57,7 @@ class AuthenticationTest extends TestCase {
 		$this->set_request_headers( [
 			'Authorization' => 'Basic ' . base64_encode( self::$api_key . ':lt' ),
 			'PHP_AUTH_USER' => self::$api_key,
-			'PHP_AUTH_PW'   => 'pixelgradelt_retailer', // This is the password that is used as the Basic Auth Pass.
+			'PHP_AUTH_PW'   => 'pressody_retailer', // This is the password that is used as the Basic Auth Pass.
 		] );
 
 		$user = wp_get_current_user();
@@ -74,7 +74,7 @@ class AuthenticationTest extends TestCase {
 		$this->set_request_headers( [
 			'Authorization' => 'Bearer ' . base64_encode( self::$api_key . ':lt' ),
 			'PHP_AUTH_USER' => self::$api_key,
-			'PHP_AUTH_PW'   => 'pixelgradelt_retailer', // This is the password that is used as the Basic Auth Pass.
+			'PHP_AUTH_PW'   => 'pressody_retailer', // This is the password that is used as the Basic Auth Pass.
 		] );
 
 		$user = wp_get_current_user();
@@ -115,7 +115,7 @@ class AuthenticationTest extends TestCase {
 	public function test_authentication_fails_with_missing_key() {
 		$this->set_request_headers( [
 			'Authorization' => 'Basic ' . base64_encode( ':lt' ),
-			'PHP_AUTH_PW'   => 'pixelgradelt_retailer', // This is the password that is used as the Basic Auth Pass.
+			'PHP_AUTH_PW'   => 'pressody_retailer', // This is the password that is used as the Basic Auth Pass.
 		] );
 
 		$user = wp_get_current_user();
@@ -129,7 +129,7 @@ class AuthenticationTest extends TestCase {
 		$this->set_request_headers( [
 			'Authorization' => 'Basic ' . base64_encode( 'abcdef:lt' ),
 			'PHP_AUTH_USER' => 'abcdef',
-			'PHP_AUTH_PW'   => 'pixelgradelt_retailer', // This is the password that is used as the Basic Auth Pass.
+			'PHP_AUTH_PW'   => 'pressody_retailer', // This is the password that is used as the Basic Auth Pass.
 		] );
 
 		$user = wp_get_current_user();

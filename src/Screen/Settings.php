@@ -4,23 +4,23 @@
  *
  * @since   0.1.0
  * @license GPL-2.0-or-later
- * @package PixelgradeLT
+ * @package Pressody
  */
 
 declare ( strict_types=1 );
 
-namespace PixelgradeLT\Retailer\Screen;
+namespace Pressody\Retailer\Screen;
 
 use Cedaro\WP\Plugin\AbstractHookProvider;
-use PixelgradeLT\Retailer\Authentication\ApiKey\ApiKeyRepository;
-use PixelgradeLT\Retailer\Capabilities;
-use PixelgradeLT\Retailer\Provider\HealthCheck;
-use PixelgradeLT\Retailer\Repository\PackageRepository;
-use PixelgradeLT\Retailer\Transformer\ComposerPackageTransformer;
+use Pressody\Retailer\Authentication\ApiKey\ApiKeyRepository;
+use Pressody\Retailer\Capabilities;
+use Pressody\Retailer\Provider\HealthCheck;
+use Pressody\Retailer\Repository\PackageRepository;
+use Pressody\Retailer\Transformer\ComposerPackageTransformer;
 
-use function PixelgradeLT\Retailer\get_setting;
-use function PixelgradeLT\Retailer\get_solutions_permalink;
-use function PixelgradeLT\Retailer\preload_rest_data;
+use function Pressody\Retailer\get_setting;
+use function Pressody\Retailer\get_solutions_permalink;
+use function Pressody\Retailer\preload_rest_data;
 
 /**
  * Settings screen provider class.
@@ -97,10 +97,10 @@ class Settings extends AbstractHookProvider {
 
 		$page_hook = \add_submenu_page(
 				$parent_slug,
-				esc_html__( 'PixelgradeLT Retailer', 'pixelgradelt_retailer' ),
-				esc_html__( 'LT Retailer', 'pixelgradelt_retailer' ),
+				esc_html__( 'Pressody Retailer', 'pressody_retailer' ),
+				esc_html__( 'PD Retailer', 'pressody_retailer' ),
 				Capabilities::MANAGE_OPTIONS,
-				'pixelgradelt_retailer',
+				'pressody_retailer',
 				[ $this, 'render_screen' ]
 		);
 
@@ -124,36 +124,36 @@ class Settings extends AbstractHookProvider {
 	 * @since 0.1.0
 	 */
 	public function enqueue_assets() {
-		\wp_enqueue_script( 'pixelgradelt_retailer-admin' );
-		\wp_enqueue_style( 'pixelgradelt_retailer-admin' );
-		\wp_enqueue_script( 'pixelgradelt_retailer-access' );
-		\wp_enqueue_script( 'pixelgradelt_retailer-repository' );
+		\wp_enqueue_script( 'pressody_retailer-admin' );
+		\wp_enqueue_style( 'pressody_retailer-admin' );
+		\wp_enqueue_script( 'pressody_retailer-access' );
+		\wp_enqueue_script( 'pressody_retailer-repository' );
 
 		\wp_localize_script(
-				'pixelgradelt_retailer-access',
-				'_pixelgradeltRetailerAccessData',
+				'pressody_retailer-access',
+				'_pressodyRetailerAccessData',
 				[
 						'editedUserId' => get_current_user_id(),
 				]
 		);
 
 		\wp_localize_script(
-				'pixelgradelt_retailer-repository',
-				'_pixelgradeltRetailerRepositoryData',
+				'pressody_retailer-repository',
+				'_pressodyRetailerRepositoryData',
 				[
-						'addNewSolutionUrl' => admin_url('post-new.php?post_type=ltsolution'),
+						'addNewSolutionUrl' => admin_url('post-new.php?post_type=pdsolution'),
 				]
 		);
 
 		$preload_paths = [
-				'/pixelgradelt_retailer/v1/solutions',
+				'/pressody_retailer/v1/solutions',
 		];
 
 		if ( \current_user_can( Capabilities::MANAGE_OPTIONS ) ) {
 			$preload_paths = array_merge(
 					$preload_paths,
 					[
-							'/pixelgradelt_retailer/v1/apikeys?user=' . get_current_user_id(),
+							'/pressody_retailer/v1/apikeys?user=' . get_current_user_id(),
 					]
 			);
 		}
@@ -167,7 +167,7 @@ class Settings extends AbstractHookProvider {
 	 * @since 0.1.0
 	 */
 	public function register_settings() {
-		\register_setting( 'pixelgradelt_retailer', 'pixelgradelt_retailer', [ $this, 'sanitize_settings' ] );
+		\register_setting( 'pressody_retailer', 'pressody_retailer', [ $this, 'sanitize_settings' ] );
 	}
 
 	/**
@@ -178,16 +178,16 @@ class Settings extends AbstractHookProvider {
 	public function add_sections() {
 		\add_settings_section(
 				'default',
-				esc_html__( 'General', 'pixelgradelt_retailer' ),
+				esc_html__( 'General', 'pressody_retailer' ),
 				'__return_null',
-				'pixelgradelt_retailer'
+				'pressody_retailer'
 		);
 
 		\add_settings_section(
-				'ltrecords',
-				esc_html__( 'LT Records Communication', 'pixelgradelt_retailer' ),
+				'pdrecords',
+				esc_html__( 'PD Records Communication', 'pressody_retailer' ),
 				'__return_null',
-				'pixelgradelt_retailer'
+				'pressody_retailer'
 		);
 	}
 
@@ -199,42 +199,42 @@ class Settings extends AbstractHookProvider {
 	public function add_settings() {
 		\add_settings_field(
 				'vendor',
-				'<label for="pixelgradelt_retailer-vendor">' . esc_html__( 'Vendor', 'pixelgradelt_retailer' ) . '</label>',
+				'<label for="pressody_retailer-vendor">' . esc_html__( 'Vendor', 'pressody_retailer' ) . '</label>',
 				[ $this, 'render_field_vendor' ],
-				'pixelgradelt_retailer',
+				'pressody_retailer',
 				'default'
 		);
 
 		\add_settings_field(
 				'github-oauth-token',
-				'<label for="pixelgradelt_retailer-github-oauth-token">' . esc_html__( 'Github OAuth Token', 'pixelgradelt_retailer' ) . '</label>',
+				'<label for="pressody_retailer-github-oauth-token">' . esc_html__( 'Github OAuth Token', 'pressody_retailer' ) . '</label>',
 				[ $this, 'render_field_github_oauth_token' ],
-				'pixelgradelt_retailer',
+				'pressody_retailer',
 				'default'
 		);
 
 		\add_settings_field(
-				'ltrecords-packages-repo-endpoint',
-				'<label for="pixelgradelt_retailer-ltrecords-packages-repo-endpoint">' . esc_html__( 'Packages Repository Endpoint', 'pixelgradelt_retailer' ) . '</label>',
-				[ $this, 'render_field_ltrecords_packages_repo_endpoint' ],
-				'pixelgradelt_retailer',
-				'ltrecords'
+				'pdrecords-packages-repo-endpoint',
+				'<label for="pressody_retailer-pdrecords-packages-repo-endpoint">' . esc_html__( 'Packages Repository Endpoint', 'pressody_retailer' ) . '</label>',
+				[ $this, 'render_field_pdrecords_packages_repo_endpoint' ],
+				'pressody_retailer',
+				'pdrecords'
 		);
 
 		\add_settings_field(
-				'ltrecords-parts-repo-endpoint',
-				'<label for="pixelgradelt_retailer-ltrecords-parts-repo-endpoint">' . esc_html__( 'Parts Repository Endpoint', 'pixelgradelt_retailer' ) . '</label>',
-				[ $this, 'render_field_ltrecords_parts_repo_endpoint' ],
-				'pixelgradelt_retailer',
-				'ltrecords'
+				'pdrecords-parts-repo-endpoint',
+				'<label for="pressody_retailer-pdrecords-parts-repo-endpoint">' . esc_html__( 'Parts Repository Endpoint', 'pressody_retailer' ) . '</label>',
+				[ $this, 'render_field_pdrecords_parts_repo_endpoint' ],
+				'pressody_retailer',
+				'pdrecords'
 		);
 
 		\add_settings_field(
-				'ltrecords-api-key',
-				'<label for="pixelgradelt_retailer-ltrecords-api-key">' . esc_html__( 'Access API Key', 'pixelgradelt_retailer' ) . '</label>',
-				[ $this, 'render_field_ltrecords_api_key' ],
-				'pixelgradelt_retailer',
-				'ltrecords'
+				'pdrecords-api-key',
+				'<label for="pressody_retailer-pdrecords-api-key">' . esc_html__( 'Access API Key', 'pressody_retailer' ) . '</label>',
+				[ $this, 'render_field_pdrecords_api_key' ],
+				'pressody_retailer',
+				'pdrecords'
 		);
 	}
 
@@ -256,19 +256,19 @@ class Settings extends AbstractHookProvider {
 			$value['github-oauth-token'] = trim( $value['github-oauth-token'] );
 		}
 
-		if ( ! empty( $value['ltrecords-packages-repo-endpoint'] ) ) {
-			$value['ltrecords-packages-repo-endpoint'] = \esc_url( $value['ltrecords-packages-repo-endpoint'] );
+		if ( ! empty( $value['pdrecords-packages-repo-endpoint'] ) ) {
+			$value['pdrecords-packages-repo-endpoint'] = \esc_url( $value['pdrecords-packages-repo-endpoint'] );
 		}
 
-		if ( ! empty( $value['ltrecords-parts-repo-endpoint'] ) ) {
-			$value['ltrecords-parts-repo-endpoint'] = \esc_url( $value['ltrecords-parts-repo-endpoint'] );
+		if ( ! empty( $value['pdrecords-parts-repo-endpoint'] ) ) {
+			$value['pdrecords-parts-repo-endpoint'] = \esc_url( $value['pdrecords-parts-repo-endpoint'] );
 		}
 
-		if ( ! empty( $value['ltrecords-api-key'] ) ) {
-			$value['ltrecords-api-key'] = trim( $value['ltrecords-api-key'] );
+		if ( ! empty( $value['pdrecords-api-key'] ) ) {
+			$value['pdrecords-api-key'] = trim( $value['pdrecords-api-key'] );
 		}
 
-		return (array) \apply_filters( 'pixelgradelt_retailer/sanitize_settings', $value );
+		return (array) \apply_filters( 'pressody_retailer/sanitize_settings', $value );
 	}
 
 	/**
@@ -281,24 +281,24 @@ class Settings extends AbstractHookProvider {
 
 		$tabs = [
 				'repository' => [
-						'name'       => esc_html__( 'Repository', 'pixelgradelt_retailer' ),
+						'name'       => esc_html__( 'Repository', 'pressody_retailer' ),
 						'capability' => Capabilities::VIEW_SOLUTIONS,
 				],
 				'access'     => [
-						'name'       => esc_html__( 'Access', 'pixelgradelt_retailer' ),
+						'name'       => esc_html__( 'Access', 'pressody_retailer' ),
 						'capability' => Capabilities::MANAGE_OPTIONS,
 						'is_active'  => false,
 				],
 				'composer'   => [
-						'name'       => esc_html__( 'Composer', 'pixelgradelt_retailer' ),
+						'name'       => esc_html__( 'Composer', 'pressody_retailer' ),
 						'capability' => Capabilities::VIEW_SOLUTIONS,
 				],
 				'settings'   => [
-						'name'       => esc_html__( 'Settings', 'pixelgradelt_retailer' ),
+						'name'       => esc_html__( 'Settings', 'pressody_retailer' ),
 						'capability' => Capabilities::MANAGE_OPTIONS,
 				],
 				'system-status'   => [
-						'name'       => esc_html__( 'System Status', 'pixelgradelt_retailer' ),
+						'name'       => esc_html__( 'System Status', 'pressody_retailer' ),
 						'capability' => Capabilities::MANAGE_OPTIONS,
 				],
 		];
@@ -318,12 +318,12 @@ class Settings extends AbstractHookProvider {
 		$value = $this->get_setting( 'vendor', '' );
 		?>
 		<p>
-			<input type="text" name="pixelgradelt_retailer[vendor]" id="pixelgradelt_retailer-vendor"
-			       value="<?php echo \esc_attr( $value ); ?>" placeholder="pixelgradelt-retailer"><br/>
-			<span class="description">The default is <code>pixelgradelt-retailer</code><br>
+			<input type="text" name="pressody_retailer[vendor]" id="pressody_retailer-vendor"
+			       value="<?php echo \esc_attr( $value ); ?>" placeholder="pressody-retailer"><br/>
+			<span class="description">The default is <code>pressody-retailer</code><br>
 			This is the general vendor that will be used when exposing all the packages for consumption.<br>
 				<strong>For example:</strong> you have a managed package with the source on Packagist.org (say <a
-						href="https://packagist.org/packages/yoast/wordpress-seo"><code>yoast/wordpress-seo</code></a>). You will expose it under a package name in the form <code>vendor/post_slug</code> (say <code>pixelgradelt-retailer/yoast-wordpress-seo</code>).</span>
+						href="https://packagist.org/packages/yoast/wordpress-seo"><code>yoast/wordpress-seo</code></a>). You will expose it under a package name in the form <code>vendor/post_slug</code> (say <code>pressody-retailer/yoast-wordpress-seo</code>).</span>
 		</p>
 		<?php
 	}
@@ -337,8 +337,8 @@ class Settings extends AbstractHookProvider {
 		$value = $this->get_setting( 'github-oauth-token', '' );
 		?>
 		<p>
-			<input type="password" size="80" name="pixelgradelt_retailer[github-oauth-token]"
-			       id="pixelgradelt_retailer-github-oauth-token" value="<?php echo \esc_attr( $value ); ?>"><br/>
+			<input type="password" size="80" name="pressody_retailer[github-oauth-token]"
+			       id="pressody_retailer-github-oauth-token" value="<?php echo \esc_attr( $value ); ?>"><br/>
 			<span class="description">Github has <strong>a rate limit of 60 requests/hour</strong> on their API for <strong>requests not using an OAuth Token.</strong><br>
 				Since most packages on Packagist.org have their source on Github, and you may be using actual Github repos as sources, <strong>you should definitely generate a token and save it here.</strong><br>
 				Learn more about <strong>the steps to take <a
@@ -348,51 +348,51 @@ class Settings extends AbstractHookProvider {
 	}
 
 	/**
-	 * Display a field for defining the LT Records Packages Repository endpoint.
+	 * Display a field for defining the PD Records Packages Repository endpoint.
 	 *
 	 * @since 0.1.0
 	 */
-	public function render_field_ltrecords_packages_repo_endpoint() {
-		$value = $this->get_setting( 'ltrecords-packages-repo-endpoint', '' );
+	public function render_field_pdrecords_packages_repo_endpoint() {
+		$value = $this->get_setting( 'pdrecords-packages-repo-endpoint', '' );
 		?>
 		<p>
-			<input type="url" size="80" name="pixelgradelt_retailer[ltrecords-packages-repo-endpoint]"
-			       id="pixelgradelt_retailer-ltrecords-packages-repo-endpoint"
+			<input type="url" size="80" name="pressody_retailer[pdrecords-packages-repo-endpoint]"
+			       id="pressody_retailer-pdrecords-packages-repo-endpoint"
 			       value="<?php echo \esc_attr( $value ); ?>"><br/>
-			<span class="description">Provide here the LT Records Packages Repository endpoint URL.</span>
+			<span class="description">Provide here the PD Records Packages Repository endpoint URL.</span>
 		</p>
 		<?php
 	}
 
 	/**
-	 * Display a field for defining the LT Records Parts Repository endpoint.
+	 * Display a field for defining the PD Records Parts Repository endpoint.
 	 *
 	 * @since 0.1.0
 	 */
-	public function render_field_ltrecords_parts_repo_endpoint() {
-		$value = $this->get_setting( 'ltrecords-parts-repo-endpoint', '' );
+	public function render_field_pdrecords_parts_repo_endpoint() {
+		$value = $this->get_setting( 'pdrecords-parts-repo-endpoint', '' );
 		?>
 		<p>
-			<input type="url" size="80" name="pixelgradelt_retailer[ltrecords-parts-repo-endpoint]"
-			       id="pixelgradelt_retailer-ltrecords-parts-repo-endpoint"
+			<input type="url" size="80" name="pressody_retailer[pdrecords-parts-repo-endpoint]"
+			       id="pressody_retailer-pdrecords-parts-repo-endpoint"
 			       value="<?php echo \esc_attr( $value ); ?>"><br/>
-			<span class="description">Provide here the LT Records Parts Repository endpoint URL.</span>
+			<span class="description">Provide here the PD Records Parts Repository endpoint URL.</span>
 		</p>
 		<?php
 	}
 
 	/**
-	 * Display a field for defining the LT Records API Key.
+	 * Display a field for defining the PD Records API Key.
 	 *
 	 * @since 0.1.0
 	 */
-	public function render_field_ltrecords_api_key() {
-		$value = $this->get_setting( 'ltrecords-api-key', '' );
+	public function render_field_pdrecords_api_key() {
+		$value = $this->get_setting( 'pdrecords-api-key', '' );
 		?>
 		<p>
-			<input type="text" size="80" name="pixelgradelt_retailer[ltrecords-api-key]"
-			       id="pixelgradelt_retailer-ltrecords-api-key" value="<?php echo \esc_attr( $value ); ?>"><br/>
-			<span class="description">Provide here <strong>a valid LT Records API key</strong> for LT Retailer to use to access the repositories above.</span>
+			<input type="text" size="80" name="pressody_retailer[pdrecords-api-key]"
+			       id="pressody_retailer-pdrecords-api-key" value="<?php echo \esc_attr( $value ); ?>"><br/>
+			<span class="description">Provide here <strong>a valid PD Records API key</strong> for PD Retailer to use to access the repositories above.</span>
 		</p>
 		<?php
 	}

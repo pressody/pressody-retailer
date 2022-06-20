@@ -27,7 +27,7 @@ function Releases( props ) {
 	const releaseButtons = releases.map( ( release, index ) => {
 		const isSelected = selectedVersion === release.version;
 
-		let className = 'button pixelgradelt_retailer-release';
+		let className = 'button pressody_retailer-release';
 		if ( isSelected ) {
 			className += ' active';
 		}
@@ -63,7 +63,7 @@ function Releases( props ) {
 
 	return html`
 		<${ Fragment }>
-			${ releaseButtons.length ? releaseButtons : __( 'None', 'pixelgradelt_retailer' ) }
+			${ releaseButtons.length ? releaseButtons : __( 'None', 'pressody_retailer' ) }
 			${ releaseActions }
 		</${ Fragment }
 	`;

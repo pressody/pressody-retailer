@@ -2,18 +2,18 @@
 /**
  * Base repository.
  *
- * @package PixelgradeLT
+ * @package Pressody
  * @license GPL-2.0-or-later
  * @since 0.1.0
  */
 
 declare ( strict_types = 1 );
 
-namespace PixelgradeLT\Retailer\Repository;
+namespace Pressody\Retailer\Repository;
 
-use PixelgradeLT\Retailer\Package;
+use Pressody\Retailer\Package;
 
-use function PixelgradeLT\Retailer\is_plugin_file;
+use function Pressody\Retailer\is_plugin_file;
 
 /**
  * Abstract repository class.

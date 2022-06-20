@@ -2,17 +2,17 @@
 /**
  * Health check provider.
  *
- * @package PixelgradeLT
+ * @package Pressody
  * @license GPL-2.0-or-later
  * @since 0.1.0
  */
 
 declare ( strict_types = 1 );
 
-namespace PixelgradeLT\Retailer\Provider;
+namespace Pressody\Retailer\Provider;
 
 use Cedaro\WP\Plugin\AbstractHookProvider;
-use PixelgradeLT\Retailer\HTTP\Request;
+use Pressody\Retailer\HTTP\Request;
 use WP_Http as HTTP;
 
 /**
@@ -45,7 +45,7 @@ class HealthCheck extends AbstractHookProvider {
 	 * @since 0.1.0
 	 */
 	public function register_hooks() {
-		\add_action( 'admin_post_nopriv_pixelgradelt_retailer_check_authorization_header', [ $this, 'handle_authorization_request' ] );
+		\add_action( 'admin_post_nopriv_pressody_retailer_check_authorization_header', [ $this, 'handle_authorization_request' ] );
 	}
 
 	/**
@@ -58,7 +58,7 @@ class HealthCheck extends AbstractHookProvider {
 	protected static function display_notice( $message ) {
 		printf(
 			'<div class="notice notice-error"><p><strong>%s:</strong> %s</p></div>',
-			esc_html__( 'Health Check', 'pixelgradelt_retailer' ),
+			esc_html__( 'Health Check', 'pressody_retailer' ),
 			\wp_kses(
 				$message,
 				[
@@ -98,7 +98,7 @@ class HealthCheck extends AbstractHookProvider {
 
 		$message = sprintf(
 			/* translators: %s: permalink screen URL */
-			__( 'PixelgradeLT Retailer requires pretty permalinks to be enabled. <a href="%s">Enable permalinks</a>.', 'pixelgradelt_retailer' ),
+			__( 'Pressody Retailer requires pretty permalinks to be enabled. <a href="%s">Enable permalinks</a>.', 'pressody_retailer' ),
 			\esc_url( \admin_url( 'options-permalink.php' ) )
 		);
 
@@ -117,7 +117,7 @@ class HealthCheck extends AbstractHookProvider {
 	public static function check_authorization_header() {
 		$url = \add_query_arg(
 			[
-				'action' => 'pixelgradelt_retailer_check_authorization_header',
+				'action' => 'pressody_retailer_check_authorization_header',
 			],
 			\admin_url( 'admin-post.php' )
 		);
@@ -127,7 +127,7 @@ class HealthCheck extends AbstractHookProvider {
 			[
 				'headers'   => [
 					// phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode
-					'Authorization' => 'Basic ' . base64_encode( '%api_key%:pixelgradelt_retailer' ),
+					'Authorization' => 'Basic ' . base64_encode( '%api_key%:pressody_retailer' ),
 				],
 				'timeout'   => 10,
 				// phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound
@@ -169,7 +169,7 @@ class HealthCheck extends AbstractHookProvider {
 				'missing_header',
 				sprintf(
 					'The authorization header check failed; the header was missing. <a href="%s" target="_blank" rel="noopener noreferer">Learn more about this issue</a>.',
-					'https://github.com/pixelgradelt/pixelgradelt-retailer/blob/develop/docs/troubleshooting.md#basic-auth-not-working'
+					'https://github.com/pressody/pressody-retailer/blob/develop/docs/troubleshooting.md#basic-auth-not-working'
 				)
 			);
 		}
@@ -183,7 +183,7 @@ class HealthCheck extends AbstractHookProvider {
 		}
 
 		$password = $this->request->get_header( 'PHP_AUTH_PW' );
-		if ( empty( $password ) || 'pixelgradelt_retailer' !== $password ) {
+		if ( empty( $password ) || 'pressody_retailer' !== $password ) {
 			$this->send_json_error(
 				'invalid_password',
 				'The authorization header check failed; the password was invalid.'

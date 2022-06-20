@@ -4,21 +4,21 @@
  *
  * @since   1.0.0
  * @license GPL-2.0-or-later
- * @package PixelgradeLT
+ * @package Pressody
  */
 
 declare ( strict_types=1 );
 
-namespace PixelgradeLT\Retailer\REST;
+namespace Pressody\Retailer\REST;
 
-use PixelgradeLT\Retailer\Capabilities;
-use PixelgradeLT\Retailer\Package;
-use PixelgradeLT\Retailer\Repository\PackageRepository;
-use PixelgradeLT\Retailer\Repository\ProcessedSolutions;
-use PixelgradeLT\Retailer\Repository\SolutionRepository;
-use PixelgradeLT\Retailer\SolutionType\SolutionTypes;
-use PixelgradeLT\Retailer\Transformer\ComposerSolutionTransformer;
-use PixelgradeLT\Retailer\Utils\ArrayHelpers;
+use Pressody\Retailer\Capabilities;
+use Pressody\Retailer\Package;
+use Pressody\Retailer\Repository\PackageRepository;
+use Pressody\Retailer\Repository\ProcessedSolutions;
+use Pressody\Retailer\Repository\SolutionRepository;
+use Pressody\Retailer\SolutionType\SolutionTypes;
+use Pressody\Retailer\Transformer\ComposerSolutionTransformer;
+use Pressody\Retailer\Utils\ArrayHelpers;
 use WP_Error;
 use WP_REST_Controller;
 use WP_REST_Request;
@@ -126,7 +126,7 @@ class SolutionsController extends WP_REST_Controller {
 			[
 				'args'   => [
 					'id' => [
-						'description' => esc_html__( 'The solution post ID.', 'pixelgradelt_retailer' ),
+						'description' => esc_html__( 'The solution post ID.', 'pressody_retailer' ),
 						'type'        => 'integer',
 					],
 				],
@@ -200,8 +200,8 @@ class SolutionsController extends WP_REST_Controller {
 		     && empty( $request['packageName'] ) ) {
 
 			return new \WP_Error(
-				'pixelgradelt_retailer_rest_no_list',
-				esc_html__( 'You need to define a subset of solutions to process.', 'pixelgradelt_retailer' ),
+				'pressody_retailer_rest_no_list',
+				esc_html__( 'You need to define a subset of solutions to process.', 'pressody_retailer' ),
 				[ 'status' => HTTP::NOT_ACCEPTABLE ]
 			);
 		}
@@ -241,8 +241,8 @@ class SolutionsController extends WP_REST_Controller {
 		// Otherwise, all the solutions as processed and that doesn't make any sense.
 		if ( empty( $request['postId'] ) && empty( $request['postSlug'] ) && empty( $request['packageName'] ) ) {
 			return new \WP_Error(
-				'pixelgradelt_retailer_rest_no_list',
-				esc_html__( 'You need to define a subset of solutions to process.', 'pixelgradelt_retailer' ),
+				'pressody_retailer_rest_no_list',
+				esc_html__( 'You need to define a subset of solutions to process.', 'pressody_retailer' ),
 				[ 'status' => HTTP::NOT_ACCEPTABLE ]
 			);
 		}
@@ -265,11 +265,11 @@ class SolutionsController extends WP_REST_Controller {
 		 */
 		$required_parts = [];
 		foreach ( $processed_repository->all() as $solution ) {
-			if ( ! $solution->has_required_ltrecords_parts() ) {
+			if ( ! $solution->has_required_pdrecords_parts() ) {
 				continue;
 			}
 
-			foreach ( $solution->get_required_ltrecords_parts() as $part ) {
+			foreach ( $solution->get_required_pdrecords_parts() as $part ) {
 				if ( empty( $required_parts[ $part['composer_package_name'] ] ) ) {
 					$required_parts[ $part['composer_package_name'] ] = [
 						'composer_package_name' => $part['composer_package_name'],
@@ -380,8 +380,8 @@ class SolutionsController extends WP_REST_Controller {
 	public function get_items_permissions_check( $request ) {
 		if ( ! \current_user_can( Capabilities::VIEW_SOLUTIONS ) ) {
 			return new \WP_Error(
-				'pixelgradelt_retailer_rest_cannot_read',
-				esc_html__( 'Sorry, you are not allowed to view solutions.', 'pixelgradelt_retailer' ),
+				'pressody_retailer_rest_cannot_read',
+				esc_html__( 'Sorry, you are not allowed to view solutions.', 'pressody_retailer' ),
 				[ 'status' => rest_authorization_required_code() ]
 			);
 		}
@@ -402,8 +402,8 @@ class SolutionsController extends WP_REST_Controller {
 		$package = $this->repository->first_where( [ 'managed_post_id' => $request->get_param( 'id' ) ] );
 		if ( empty( $package ) ) {
 			return new \WP_Error(
-				'pixelgradelt_retailer_rest_invalid_id',
-				esc_html__( 'Invalid solution post ID.', 'pixelgradelt_retailer' ),
+				'pressody_retailer_rest_invalid_id',
+				esc_html__( 'Invalid solution post ID.', 'pressody_retailer' ),
 				[ 'status' => HTTP::NOT_FOUND ]
 			);
 		}
@@ -425,8 +425,8 @@ class SolutionsController extends WP_REST_Controller {
 	public function get_item_permissions_check( $request ) {
 		if ( ! \current_user_can( Capabilities::VIEW_SOLUTION, $request->get_param( 'id' ) ) ) {
 			return new \WP_Error(
-				'pixelgradelt_retailer_rest_cannot_read',
-				esc_html__( 'Sorry, you are not allowed to view the requested solution.', 'pixelgradelt_retailer' ),
+				'pressody_retailer_rest_cannot_read',
+				esc_html__( 'Sorry, you are not allowed to view the requested solution.', 'pressody_retailer' ),
 				[ 'status' => \rest_authorization_required_code() ]
 			);
 		}
@@ -445,14 +445,14 @@ class SolutionsController extends WP_REST_Controller {
 		$params = [
 			'context'          => $this->get_context_param( [ 'default' => 'view' ] ),
 			'solutionsContext' => [
-				'description' => esc_html__( 'Details about the solutions to limit the response by (enforced by post IDs, post slugs, package names). These details are related to the user actions in adding to a site\'s composition (a series of solutions); things like the timestamps of when a solution was added. Each solution details should sit under the solution\'s package name key.', 'pixelgradelt_retailer' ),
+				'description' => esc_html__( 'Details about the solutions to limit the response by (enforced by post IDs, post slugs, package names). These details are related to the user actions in adding to a site\'s composition (a series of solutions); things like the timestamps of when a solution was added. Each solution details should sit under the solution\'s package name key.', 'pressody_retailer' ),
 				'type'        => 'object',
 				'default'     => [],
 			],
 		];
 
 		$params['postId'] = [
-			'description'       => esc_html__( 'Limit results to solutions by one or more (managed) post IDs.', 'pixelgradelt_retailer' ),
+			'description'       => esc_html__( 'Limit results to solutions by one or more (managed) post IDs.', 'pressody_retailer' ),
 			'type'              => 'array',
 			'items'             => [
 				'type' => 'integer',
@@ -462,7 +462,7 @@ class SolutionsController extends WP_REST_Controller {
 		];
 
 		$params['postSlug'] = [
-			'description'       => esc_html__( 'Limit results to solutions by one or more (managed) post slugs.', 'pixelgradelt_retailer' ),
+			'description'       => esc_html__( 'Limit results to solutions by one or more (managed) post slugs.', 'pressody_retailer' ),
 			'type'              => 'array',
 			'items'             => [
 				'type' => 'string',
@@ -472,7 +472,7 @@ class SolutionsController extends WP_REST_Controller {
 		];
 
 		$params['packageName'] = [
-			'description' => esc_html__( 'Limit results to solutions by one or more Composer package names (including the vendor). Use the "postSlug" parameter if you want to provide only the name, without the vendor.', 'pixelgradelt_retailer' ),
+			'description' => esc_html__( 'Limit results to solutions by one or more Composer package names (including the vendor). Use the "postSlug" parameter if you want to provide only the name, without the vendor.', 'pressody_retailer' ),
 			'type'        => 'array',
 			'items'       => [
 				'type'    => 'string',
@@ -482,7 +482,7 @@ class SolutionsController extends WP_REST_Controller {
 		];
 
 		$params['type'] = [
-			'description'       => esc_html__( 'Limit results to solutions of one or more types.', 'pixelgradelt_retailer' ),
+			'description'       => esc_html__( 'Limit results to solutions of one or more types.', 'pressody_retailer' ),
 			'type'              => 'array',
 			'items'             => [
 				'type' => 'string',
@@ -554,7 +554,7 @@ class SolutionsController extends WP_REST_Controller {
 
 		$requires = [];
 		$requires += $package->get_required_solutions();
-		$requires += $package->get_required_ltrecords_parts();
+		$requires += $package->get_required_pdrecords_parts();
 		foreach ( $requires as $requiredPackage ) {
 			$package_name = $requiredPackage['composer_package_name'] . ':' . $requiredPackage['version_range'];
 			if ( 'stable' !== $requiredPackage['stability'] ) {
@@ -628,25 +628,25 @@ class SolutionsController extends WP_REST_Controller {
 			'type'       => 'object',
 			'properties' => [
 				'authors'          => [
-					'description' => esc_html__( 'The package authors details.', 'pixelgradelt_retailer' ),
+					'description' => esc_html__( 'The package authors details.', 'pressody_retailer' ),
 					'type'        => 'array',
 					'context'     => [ 'view', 'edit', 'embed' ],
 					'readonly'    => true,
 				],
 				'composer'         => [
-					'description' => esc_html__( 'Package data formatted for Composer.', 'pixelgradelt_retailer' ),
+					'description' => esc_html__( 'Package data formatted for Composer.', 'pressody_retailer' ),
 					'type'        => 'object',
 					'context'     => [ 'view', 'edit', 'embed' ],
 					'readonly'    => true,
 					'properties'  => [
 						'name' => [
-							'description' => esc_html__( 'Composer package name.', 'pixelgradelt_retailer' ),
+							'description' => esc_html__( 'Composer package name.', 'pressody_retailer' ),
 							'type'        => 'string',
 							'context'     => [ 'view', 'edit', 'embed' ],
 							'readonly'    => true,
 						],
 						'type' => [
-							'description' => esc_html__( 'Composer package type.', 'pixelgradelt_retailer' ),
+							'description' => esc_html__( 'Composer package type.', 'pressody_retailer' ),
 							'type'        => 'string',
 							'enum'        => [ 'wordpress-plugin', 'wordpress-theme' ],
 							'context'     => [ 'view', 'edit', 'embed' ],
@@ -655,20 +655,20 @@ class SolutionsController extends WP_REST_Controller {
 					],
 				],
 				'description'      => [
-					'description' => esc_html__( 'The package description.', 'pixelgradelt_retailer' ),
+					'description' => esc_html__( 'The package description.', 'pressody_retailer' ),
 					'type'        => 'string',
 					'context'     => [ 'view', 'edit', 'embed' ],
 					'readonly'    => true,
 				],
 				'homepage'         => [
-					'description' => esc_html__( 'The package URL.', 'pixelgradelt_retailer' ),
+					'description' => esc_html__( 'The package URL.', 'pressody_retailer' ),
 					'type'        => 'string',
 					'format'      => 'uri',
 					'context'     => [ 'view', 'edit', 'embed' ],
 					'readonly'    => true,
 				],
 				'keywords'         => [
-					'description' => esc_html__( 'The package keywords.', 'pixelgradelt_retailer' ),
+					'description' => esc_html__( 'The package keywords.', 'pressody_retailer' ),
 					'type'        => 'array',
 					'items'       => [
 						'type' => 'string',
@@ -677,13 +677,13 @@ class SolutionsController extends WP_REST_Controller {
 					'readonly'    => true,
 				],
 				'name'             => [
-					'description' => esc_html__( 'The name of the package.', 'pixelgradelt_retailer' ),
+					'description' => esc_html__( 'The name of the package.', 'pressody_retailer' ),
 					'type'        => 'string',
 					'context'     => [ 'view', 'edit', 'embed' ],
 					'readonly'    => true,
 				],
 				'releases'         => [
-					'description' => esc_html__( 'A list of package releases.', 'pixelgradelt_retailer' ),
+					'description' => esc_html__( 'A list of package releases.', 'pressody_retailer' ),
 					'type'        => 'array',
 					'context'     => [ 'view', 'edit', 'embed' ],
 					'readonly'    => true,
@@ -692,14 +692,14 @@ class SolutionsController extends WP_REST_Controller {
 						'readonly'   => true,
 						'properties' => [
 							'url'     => [
-								'description' => esc_html__( 'A URL to download the release.', 'pixelgradelt_retailer' ),
+								'description' => esc_html__( 'A URL to download the release.', 'pressody_retailer' ),
 								'type'        => 'string',
 								'format'      => 'uri',
 								'context'     => [ 'view', 'edit', 'embed' ],
 								'readonly'    => true,
 							],
 							'version' => [
-								'description' => esc_html__( 'The release version.', 'pixelgradelt_retailer' ),
+								'description' => esc_html__( 'The release version.', 'pressody_retailer' ),
 								'type'        => 'string',
 								'context'     => [ 'view', 'edit', 'embed' ],
 								'readonly'    => true,
@@ -708,7 +708,7 @@ class SolutionsController extends WP_REST_Controller {
 					],
 				],
 				'requiredPackages' => [
-					'description' => esc_html__( 'A list of required packages.', 'pixelgradelt_retailer' ),
+					'description' => esc_html__( 'A list of required packages.', 'pressody_retailer' ),
 					'type'        => 'array',
 					'context'     => [ 'view', 'edit', 'embed' ],
 					'readonly'    => true,
@@ -717,32 +717,32 @@ class SolutionsController extends WP_REST_Controller {
 						'readonly'   => true,
 						'properties' => [
 							'name'        => [
-								'description' => esc_html__( 'Composer package name.', 'pixelgradelt_retailer' ),
+								'description' => esc_html__( 'Composer package name.', 'pressody_retailer' ),
 								'type'        => 'string',
 								'context'     => [ 'view', 'edit', 'embed' ],
 								'readonly'    => true,
 							],
 							'version'     => [
-								'description' => esc_html__( 'The required package version constraint.', 'pixelgradelt_retailer' ),
+								'description' => esc_html__( 'The required package version constraint.', 'pressody_retailer' ),
 								'type'        => 'string',
 								'context'     => [ 'view', 'edit', 'embed' ],
 								'readonly'    => true,
 							],
 							'stability'   => [
-								'description' => esc_html__( 'The required package stability constraint.', 'pixelgradelt_retailer' ),
+								'description' => esc_html__( 'The required package stability constraint.', 'pressody_retailer' ),
 								'type'        => 'string',
 								'context'     => [ 'view', 'edit', 'embed' ],
 								'readonly'    => true,
 							],
 							'editLink'    => [
-								'description' => esc_html__( 'The required package post edit link.', 'pixelgradelt_retailer' ),
+								'description' => esc_html__( 'The required package post edit link.', 'pressody_retailer' ),
 								'type'        => 'string',
 								'format'      => 'uri',
 								'context'     => [ 'view', 'edit' ],
 								'readonly'    => true,
 							],
 							'displayName' => [
-								'description' => esc_html__( 'The required package display name/string.', 'pixelgradelt_retailer' ),
+								'description' => esc_html__( 'The required package display name/string.', 'pressody_retailer' ),
 								'type'        => 'string',
 								'context'     => [ 'view', 'edit', 'embed' ],
 								'readonly'    => true,
@@ -751,7 +751,7 @@ class SolutionsController extends WP_REST_Controller {
 					],
 				],
 				'excludedPackages' => [
-					'description' => esc_html__( 'A list of excluded packages.', 'pixelgradelt_retailer' ),
+					'description' => esc_html__( 'A list of excluded packages.', 'pressody_retailer' ),
 					'type'        => 'array',
 					'context'     => [ 'view', 'edit' ],
 					'readonly'    => true,
@@ -760,32 +760,32 @@ class SolutionsController extends WP_REST_Controller {
 						'readonly'   => true,
 						'properties' => [
 							'name'        => [
-								'description' => esc_html__( 'Composer package name.', 'pixelgradelt_retailer' ),
+								'description' => esc_html__( 'Composer package name.', 'pressody_retailer' ),
 								'type'        => 'string',
 								'context'     => [ 'view', 'edit' ],
 								'readonly'    => true,
 							],
 							'version'     => [
-								'description' => esc_html__( 'The excluded package version constraint.', 'pixelgradelt_retailer' ),
+								'description' => esc_html__( 'The excluded package version constraint.', 'pressody_retailer' ),
 								'type'        => 'string',
 								'context'     => [ 'view', 'edit' ],
 								'readonly'    => true,
 							],
 							'stability'   => [
-								'description' => esc_html__( 'The excluded package stability constraint.', 'pixelgradelt_retailer' ),
+								'description' => esc_html__( 'The excluded package stability constraint.', 'pressody_retailer' ),
 								'type'        => 'string',
 								'context'     => [ 'view', 'edit' ],
 								'readonly'    => true,
 							],
 							'editLink'    => [
-								'description' => esc_html__( 'The excluded package post edit link.', 'pixelgradelt_retailer' ),
+								'description' => esc_html__( 'The excluded package post edit link.', 'pressody_retailer' ),
 								'type'        => 'string',
 								'format'      => 'uri',
 								'context'     => [ 'view', 'edit' ],
 								'readonly'    => true,
 							],
 							'displayName' => [
-								'description' => esc_html__( 'The excluded package display name/string.', 'pixelgradelt_retailer' ),
+								'description' => esc_html__( 'The excluded package display name/string.', 'pressody_retailer' ),
 								'type'        => 'string',
 								'context'     => [ 'view', 'edit' ],
 								'readonly'    => true,
@@ -794,14 +794,14 @@ class SolutionsController extends WP_REST_Controller {
 					],
 				],
 				'slug'             => [
-					'description' => esc_html__( 'The package slug.', 'pixelgradelt_retailer' ),
+					'description' => esc_html__( 'The package slug.', 'pressody_retailer' ),
 					'type'        => 'string',
 					'pattern'     => self::SLUG_PATTERN,
 					'context'     => [ 'view', 'edit', 'embed' ],
 					'required'    => true,
 				],
 				'type'             => [
-					'description' => esc_html__( 'Type of package.', 'pixelgradelt_retailer' ),
+					'description' => esc_html__( 'Type of package.', 'pressody_retailer' ),
 					'type'        => 'string',
 					'enum'        => [
 						SolutionTypes::REGULAR,
@@ -810,13 +810,13 @@ class SolutionsController extends WP_REST_Controller {
 					'required'    => true,
 				],
 				'visibility'       => [
-					'description' => esc_html__( 'The package visibility (public, draft, private, etc.)', 'pixelgradelt_retailer' ),
+					'description' => esc_html__( 'The package visibility (public, draft, private, etc.)', 'pressody_retailer' ),
 					'type'        => 'string',
 					'context'     => [ 'view', 'edit', 'embed' ],
 					'readonly'    => true,
 				],
 				'editLink'         => [
-					'description' => esc_html__( 'The package post edit link.', 'pixelgradelt_retailer' ),
+					'description' => esc_html__( 'The package post edit link.', 'pressody_retailer' ),
 					'type'        => 'string',
 					'format'      => 'uri',
 					'context'     => [ 'view', 'edit' ],
@@ -840,32 +840,32 @@ class SolutionsController extends WP_REST_Controller {
 			'type'       => 'object',
 			'properties' => [
 				'name'       => [
-					'description' => esc_html__( 'The part\'s Composer package name.', 'pixelgradelt_retailer' ),
+					'description' => esc_html__( 'The part\'s Composer package name.', 'pressody_retailer' ),
 					'type'        => 'string',
 					'context'     => [ 'view', 'edit', 'embed' ],
 					'readonly'    => true,
 				],
 				'version'    => [
-					'description' => esc_html__( 'The part\'s version constraint(s).', 'pixelgradelt_retailer' ),
+					'description' => esc_html__( 'The part\'s version constraint(s).', 'pressody_retailer' ),
 					'type'        => 'string',
 					'context'     => [ 'view', 'edit', 'embed' ],
 					'readonly'    => true,
 				],
 				'requiredBy' => [
-					'description' => esc_html__( 'A list of solution package details that required this part.', 'pixelgradelt_retailer' ),
+					'description' => esc_html__( 'A list of solution package details that required this part.', 'pressody_retailer' ),
 					'type'        => 'array',
 					'items'       => [
 						'type'       => 'object',
 						'readonly'   => true,
 						'properties' => [
 							'name'            => [
-								'description' => esc_html__( 'Solution composer package name.', 'pixelgradelt_retailer' ),
+								'description' => esc_html__( 'Solution composer package name.', 'pressody_retailer' ),
 								'type'        => 'string',
 								'context'     => [ 'view', 'edit' ],
 								'readonly'    => true,
 							],
 							'requiredVersion' => [
-								'description' => esc_html__( 'The solution\'s required part version constraint.', 'pixelgradelt_retailer' ),
+								'description' => esc_html__( 'The solution\'s required part version constraint.', 'pressody_retailer' ),
 								'type'        => 'string',
 								'context'     => [ 'view', 'edit' ],
 								'readonly'    => true,

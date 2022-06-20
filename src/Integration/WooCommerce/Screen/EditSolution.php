@@ -4,20 +4,20 @@
  *
  * @since   0.14.0
  * @license GPL-2.0-or-later
- * @package PixelgradeLT
+ * @package Pressody
  */
 
 declare ( strict_types=1 );
 
-namespace PixelgradeLT\Retailer\Integration\WooCommerce\Screen;
+namespace Pressody\Retailer\Integration\WooCommerce\Screen;
 
 use Carbon_Fields\Carbon_Fields;
 use Carbon_Fields\Container;
 use Carbon_Fields\Field;
 use Cedaro\WP\Plugin\AbstractHookProvider;
-use PixelgradeLT\Retailer\Integration\WooCommerce;
-use PixelgradeLT\Retailer\SolutionManager;
-use PixelgradeLT\Retailer\Repository\PackageRepository;
+use Pressody\Retailer\Integration\WooCommerce;
+use Pressody\Retailer\SolutionManager;
+use Pressody\Retailer\Repository\PackageRepository;
 use function Pixelgrade\WPPostNotes\create_note;
 
 /**
@@ -93,19 +93,19 @@ class EditSolution extends AbstractHookProvider {
 
 		// Show edit post screen error messages.
 		$this->add_action( 'edit_form_top', 'check_solution_post', 5 );
-		$this->add_filter( 'pixelgradelt_retailer/editsolution_show_user_messages', 'filter_user_messages', 10, 2 );
+		$this->add_filter( 'pressody_retailer/editsolution_show_user_messages', 'filter_user_messages', 10, 2 );
 
 		/*
 		 * HANDLE POST UPDATE CHANGES.
 		 */
-		$this->add_action( 'pixelgradelt_retailer/ltsolution/save', 'handle_post_save', 10, 3 );
-		$this->add_action( 'pixelgradelt_retailer/ltsolution/update', 'handle_post_update', 10, 3 );
-		$this->add_action( 'pixelgradelt_retailer/ltsolution/woocommerce_products_change', 'update_linked_products_metadata', 10, 3 );
+		$this->add_action( 'pressody_retailer/pdsolution/save', 'handle_post_save', 10, 3 );
+		$this->add_action( 'pressody_retailer/pdsolution/update', 'handle_post_update', 10, 3 );
+		$this->add_action( 'pressody_retailer/pdsolution/woocommerce_products_change', 'update_linked_products_metadata', 10, 3 );
 
 		/*
 		 * HANDLE AUTOMATIC POST NOTES.
 		 */
-		$this->add_action( 'pixelgradelt_retailer/ltsolution/woocommerce_products_change', 'add_solution_products_change_note', 10, 3 );
+		$this->add_action( 'pressody_retailer/pdsolution/woocommerce_products_change', 'add_solution_products_change_note', 10, 3 );
 	}
 
 	/**
@@ -128,7 +128,7 @@ class EditSolution extends AbstractHookProvider {
 	 * @since 0.14.0
 	 */
 	public function enqueue_assets() {
-		wp_enqueue_style( 'pixelgradelt_retailer-admin' );
+		wp_enqueue_style( 'pressody_retailer-admin' );
 	}
 
 	/**
@@ -143,19 +143,19 @@ class EditSolution extends AbstractHookProvider {
 	 */
 	protected function attach_post_meta_fields() {
 		// Register the metabox for managing the general details of the solution.
-		Container::make( 'post_meta', 'carbon_fields_container_woocommerce_configuration_' . $this->solution_manager::POST_TYPE, esc_html__( 'WooCommerce Configuration', 'pixelgradelt_retailer' ) )
+		Container::make( 'post_meta', 'carbon_fields_container_woocommerce_configuration_' . $this->solution_manager::POST_TYPE, esc_html__( 'WooCommerce Configuration', 'pressody_retailer' ) )
 		         ->where( 'post_type', '=', $this->solution_manager::POST_TYPE )
 		         ->set_context( 'normal' )
 		         ->set_priority( 'core' )
 		         ->add_fields( [
-			         Field::make( 'html', 'solution_woocommerce_products_html', __( 'Section Description', 'pixelgradelt_retailer' ) )
-			              ->set_html( sprintf( '<p class="description">%s</p>', __( 'Configure details about <strong>the solution\'s integration with WooCommerce products.</strong>', 'pixelgradelt_retailer' ) ) ),
+			         Field::make( 'html', 'solution_woocommerce_products_html', __( 'Section Description', 'pressody_retailer' ) )
+			              ->set_html( sprintf( '<p class="description">%s</p>', __( 'Configure details about <strong>the solution\'s integration with WooCommerce products.</strong>', 'pressody_retailer' ) ) ),
 
-			         Field::make( 'multiselect', 'solution_woocommerce_products', __( 'Linked Products', 'pixelgradelt_retailer' ) )
-			              ->set_help_text( __( 'These are all the WooCommerce products that, when purchased, <strong>will determine the availability of the current LT Solution.</strong><br>
-Bear in mind that <strong>a WooCommerce product can be linked to only one LT Solution.</strong> That is why the control will display <strong>only products not previously linked to any LT Solutions.</strong><br>
-As long as a order that includes one of these products remains valid ("completed" or active subscription) the current solution will be available to be used in LT Compositions.<br>
-<strong>Important:</strong> If you <strong>remove a linked product,</strong> all customers with existing orders that included that product will <strong>lose their purchased LT solutions.</strong> Think carefully about that!', 'pixelgradelt_retailer' ) )
+			         Field::make( 'multiselect', 'solution_woocommerce_products', __( 'Linked Products', 'pressody_retailer' ) )
+			              ->set_help_text( __( 'These are all the WooCommerce products that, when purchased, <strong>will determine the availability of the current PD Solution.</strong><br>
+Bear in mind that <strong>a WooCommerce product can be linked to only one PD Solution.</strong> That is why the control will display <strong>only products not previously linked to any PD Solutions.</strong><br>
+As long as a order that includes one of these products remains valid ("completed" or active subscription) the current solution will be available to be used in PD Compositions.<br>
+<strong>Important:</strong> If you <strong>remove a linked product,</strong> all customers with existing orders that included that product will <strong>lose their purchased PD solutions.</strong> Think carefully about that!', 'pressody_retailer' ) )
 			              ->set_options( [ $this, 'get_available_products_options' ] )
 			              ->set_default_value( [] )
 			              ->set_required( false )
@@ -175,7 +175,7 @@ As long as a order that includes one of these products remains valid ("completed
 
 		/** @var \WC_Product $product */
 		foreach ( $this->get_available_products() as $product ) {
-			$options[ $product->get_id() ] = sprintf( __( '%s - #%s', 'pixelgradelt_retailer' ), $product->get_name(), $product->get_id() );
+			$options[ $product->get_id() ] = sprintf( __( '%s - #%s', 'pressody_retailer' ), $product->get_name(), $product->get_id() );
 		}
 
 		ksort( $options );
@@ -200,19 +200,19 @@ As long as a order that includes one of these products remains valid ("completed
 		 * - a Solution can be linked to multiple products! The purchase of any of those products
 		 *   will lead to the purchase of that Solution.
 		 *
-		 * @see \PixelgradeLT\Retailer\Integration\WooCommerce::handle_custom_query_vars()
+		 * @see \Pressody\Retailer\Integration\WooCommerce::handle_custom_query_vars()
 		 */
 		// First get all the product IDs that are not linked to a solution, including the current one.
 		$include = wc_get_products( [
 			'status'               => 'publish',
-			'linked_to_ltsolution' => false,
+			'linked_to_pdsolution' => false,
 			'limit'                => - 1,
 			'return'               => 'ids',
 		] );
 		// Now add the products linked to the current solution.
 		array_push( $include, ...wc_get_products( [
 			'status'               => 'publish',
-			'linked_to_ltsolution' => get_the_ID(),
+			'linked_to_pdsolution' => get_the_ID(),
 			'limit'                => - 1,
 			'return'               => 'ids',
 		] ) );
@@ -249,7 +249,7 @@ As long as a order that includes one of these products remains valid ("completed
 		$solution_data               = $this->solution_manager->get_solution_id_data( $post->ID );
 		$invalid_linked_products_ids = array_diff( $solution_data['woocommerce_products_raw'], $solution_data['woocommerce_products'] );
 		if ( count( $invalid_linked_products_ids ) ) {
-			$message = '<p>' . __( 'Some <strong>WooCommerce linked products have become unavailable</strong> since the last save: %1$s.<br>Usually, this happens when a product is no longer "Published" (like being trashed or converted to draft or private).<br><strong>IMPORTANT: They have been automatically unlinked!</strong> If this is what you intended, not worries. Just hit "Update" to get rid of this warning.', 'pixelgradelt_retailer' ) . '</p>';
+			$message = '<p>' . __( 'Some <strong>WooCommerce linked products have become unavailable</strong> since the last save: %1$s.<br>Usually, this happens when a product is no longer "Published" (like being trashed or converted to draft or private).<br><strong>IMPORTANT: They have been automatically unlinked!</strong> If this is what you intended, not worries. Just hit "Update" to get rid of this warning.', 'pressody_retailer' ) . '</p>';
 
 			$product_list = [];
 			foreach ( $invalid_linked_products_ids as $invalid_linked_products_id ) {
@@ -361,7 +361,7 @@ As long as a order that includes one of these products remains valid ("completed
 
 		if ( ! empty( $solution_data['woocommerce_products'] ) ) {
 			foreach ( $solution_data['woocommerce_products'] as $product_id ) {
-				update_post_meta( $product_id, WooCommerce::PRODUCT_LINKED_TO_LTSOLUTION_META_KEY, $solution_data['managed_post_id'] );
+				update_post_meta( $product_id, WooCommerce::PRODUCT_LINKED_TO_PDSOLUTION_META_KEY, $solution_data['managed_post_id'] );
 			}
 		}
 	}
@@ -385,13 +385,13 @@ As long as a order that includes one of these products remains valid ("completed
 
 		if ( ! empty( $removed ) ) {
 			foreach ( $removed as $product_id ) {
-				update_post_meta( $product_id, WooCommerce::PRODUCT_LINKED_TO_LTSOLUTION_META_KEY, false );
+				update_post_meta( $product_id, WooCommerce::PRODUCT_LINKED_TO_PDSOLUTION_META_KEY, false );
 			}
 		}
 
 		if ( ! empty( $new_product_ids ) ) {
 			foreach ( $new_product_ids as $product_id ) {
-				update_post_meta( $product_id, WooCommerce::PRODUCT_LINKED_TO_LTSOLUTION_META_KEY, $solution_data['managed_post_id'] );
+				update_post_meta( $product_id, WooCommerce::PRODUCT_LINKED_TO_PDSOLUTION_META_KEY, $solution_data['managed_post_id'] );
 			}
 		}
 	}
@@ -428,7 +428,7 @@ As long as a order that includes one of these products remains valid ("completed
 
 			if ( serialize( $old_products ) !== serialize( $new_products ) ) {
 				/**
-				 * Fires on LT solution WooCommerce linked products change.
+				 * Fires on PD solution WooCommerce linked products change.
 				 *
 				 * @since 0.14.0
 				 *
@@ -437,7 +437,7 @@ As long as a order that includes one of these products remains valid ("completed
 				 * @param array $old_product_ids The old solution WooCommerce product IDs.
 				 * @param array $new_solution    The new solution data.
 				 */
-				\do_action( 'pixelgradelt_retailer/ltsolution/woocommerce_products_change',
+				\do_action( 'pressody_retailer/pdsolution/woocommerce_products_change',
 					$post_id,
 					$new_products,
 					$old_products,
@@ -448,7 +448,7 @@ As long as a order that includes one of these products remains valid ("completed
 	}
 
 	/**
-	 * Add post note on LT solution products change.
+	 * Add post note on PD solution products change.
 	 *
 	 * @since 0.14.0
 	 *
@@ -478,7 +478,7 @@ As long as a order that includes one of these products remains valid ("completed
 			}
 
 			$note .= sprintf(
-				esc_html__( 'Removed these linked WooCommerce products: %1$s. ', 'pixelgradelt_retailer' ),
+				esc_html__( 'Removed these linked WooCommerce products: %1$s. ', 'pressody_retailer' ),
 				'<strong>' . implode( ', ', $removed_list ) . '</strong>'
 			);
 		}
@@ -496,7 +496,7 @@ As long as a order that includes one of these products remains valid ("completed
 			}
 
 			$note .= sprintf(
-				esc_html__( 'Added the following linked WooCommerce products: %1$s. ', 'pixelgradelt_retailer' ),
+				esc_html__( 'Added the following linked WooCommerce products: %1$s. ', 'pressody_retailer' ),
 				'<strong>' . implode( ', ', $added_list ) . '</strong>'
 			);
 		}

@@ -1,14 +1,14 @@
 <?php
 declare ( strict_types=1 );
 
-namespace PixelgradeLT\Retailer\Tests\Unit\Transformer;
+namespace Pressody\Retailer\Tests\Unit\Transformer;
 
 use Composer\IO\NullIO;
-use PixelgradeLT\Retailer\SolutionFactory;
-use PixelgradeLT\Retailer\SolutionManager;
-use PixelgradeLT\Retailer\SolutionType\SolutionTypes;
-use PixelgradeLT\Retailer\Tests\Unit\TestCase;
-use PixelgradeLT\Retailer\Transformer\ComposerSolutionTransformer;
+use Pressody\Retailer\SolutionFactory;
+use Pressody\Retailer\SolutionManager;
+use Pressody\Retailer\SolutionType\SolutionTypes;
+use Pressody\Retailer\Tests\Unit\TestCase;
+use Pressody\Retailer\Transformer\ComposerSolutionTransformer;
 
 class ComposerSolutionTransformerTest extends TestCase {
 	protected $solution = null;
@@ -34,6 +34,6 @@ class ComposerSolutionTransformerTest extends TestCase {
 
 	public function test_package_name_is_lowercased() {
 		$package = $this->transformer->transform( $this->solution );
-		$this->assertSame( 'pixelgradelt-retailer/acmecode', $package->get_name() );
+		$this->assertSame( 'pressody-retailer/acmecode', $package->get_name() );
 	}
 }

@@ -1,15 +1,15 @@
 <?php
 declare ( strict_types=1 );
 
-namespace PixelgradeLT\Retailer\Tests\Integration\Repository;
+namespace Pressody\Retailer\Tests\Integration\Repository;
 
-use PixelgradeLT\Retailer\SolutionType\BaseSolution;
-use PixelgradeLT\Retailer\SolutionType\SolutionTypes;
-use PixelgradeLT\Retailer\Tests\Framework\PHPUnitUtil;
-use PixelgradeLT\Retailer\Tests\Integration\TestCase;
+use Pressody\Retailer\SolutionType\BaseSolution;
+use Pressody\Retailer\SolutionType\SolutionTypes;
+use Pressody\Retailer\Tests\Framework\PHPUnitUtil;
+use Pressody\Retailer\Tests\Integration\TestCase;
 
 use Psr\Container\ContainerInterface;
-use function PixelgradeLT\Retailer\plugin;
+use function Pressody\Retailer\plugin;
 
 class SolutionsTest extends TestCase {
 	protected static $posts_data;
@@ -26,7 +26,7 @@ class SolutionsTest extends TestCase {
 		/** @var ContainerInterface $container */
 		self::$container = plugin()->get_container();
 
-		// Register ltsolution post type
+		// Register pdsolution post type
 		$register_post_type = PHPUnitUtil::getProtectedMethod( self::$container['hooks.solution_post_type'], 'register_post_type' );
 		$register_post_type->invoke( self::$container['hooks.solution_post_type'] );
 
@@ -86,7 +86,7 @@ And here is a quote from a customer:
 			],
 		];
 
-		// First, create the test ltsolutions posts that will be dependencies to other posts that we test.
+		// First, create the test pdsolutions posts that will be dependencies to other posts that we test.
 		$dep_post_ids = [];
 		foreach ( self::$dep_posts_data as $key => $data ) {
 			$dep_post_ids[ $key ] = $factory->post->create_object( $data );
@@ -111,7 +111,7 @@ And here is a quote from a customer:
 <blockquote>Pure bliss, man!</blockquote>',
 					'_solution_details_homepage'                       => 'https://package.homepage',
 					'_solution_required_parts|||0|value'               => '_',
-					'_solution_required_parts|package_name|0|0|value'  => 'pixelgradelt-records/part_yet-another',
+					'_solution_required_parts|package_name|0|0|value'  => 'pressody-records/part_yet-another',
 					'_solution_required_parts|version_range|0|0|value' => '1.2.9',
 					'_solution_required_parts|stability|0|0|value'     => 'stable',
 					'_solution_required_solutions|||0|value'           => '_',
@@ -132,7 +132,7 @@ And here is a quote from a customer:
 	}
 
 	public function test_get_non_existent_solution() {
-		/** @var \PixelgradeLT\Retailer\Repository\Solutions $repository */
+		/** @var \Pressody\Retailer\Repository\Solutions $repository */
 		$repository = plugin()->get_container()['repository.solutions'];
 		$repository->reinitialize();
 
@@ -141,7 +141,7 @@ And here is a quote from a customer:
 	}
 
 	public function test_get_solution_with_required_parts() {
-		/** @var \PixelgradeLT\Retailer\Repository\Solutions $repository */
+		/** @var \Pressody\Retailer\Repository\Solutions $repository */
 		$repository = plugin()->get_container()['repository.solutions'];
 		$repository->reinitialize();
 
@@ -154,8 +154,8 @@ And here is a quote from a customer:
 		$this->assertSame( 'https://package.homepage', $package->get_homepage() );
 		$this->assertSame( SolutionTypes::REGULAR, $package->get_type() );
 		$this->assertCount( 3, $package->get_keywords() );
-		$this->assertTrue( $package->has_required_ltrecords_parts() );
-		$this->assertCount( 1, $package->get_required_ltrecords_parts() );
+		$this->assertTrue( $package->has_required_pdrecords_parts() );
+		$this->assertCount( 1, $package->get_required_pdrecords_parts() );
 		$this->assertTrue( $package->has_required_solutions() );
 		$this->assertCount( 1, $package->get_required_solutions() );
 		$this->assertTrue( $package->has_excluded_solutions() );

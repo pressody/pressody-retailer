@@ -28,7 +28,7 @@ function PackageAuthors( props ) {
 
 	return html`
 		<${ Fragment }>
-			${ authorLinks.length ? authorLinks : __( 'None', 'pixelgradelt_retailer' ) }
+			${ authorLinks.length ? authorLinks : __( 'None', 'pressody_retailer' ) }
 		</${ Fragment }
 	`;
 }

@@ -2,16 +2,16 @@
 /**
  * Invalid package exception.
  *
- * @package PixelgradeLT
+ * @package Pressody
  * @license GPL-2.0-or-later
  * @since 0.1.0
  */
 
 declare ( strict_types = 1 );
 
-namespace PixelgradeLT\Retailer\Exception;
+namespace Pressody\Retailer\Exception;
 
-use PixelgradeLT\Retailer\Package;
+use Pressody\Retailer\Package;
 use Throwable;
 
 /**
@@ -19,7 +19,7 @@ use Throwable;
  *
  * @since 0.1.0
  */
-class InvalidPackage extends \RuntimeException implements PixelgradeltRetailerException {
+class InvalidPackage extends \RuntimeException implements PressodyRetailerException {
 	/**
 	 * Create an exception for package that is missing the needed details to determine its storage relative directory.
 	 *

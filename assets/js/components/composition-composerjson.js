@@ -6,8 +6,8 @@ const {__} = i18n
 function CompositionComposerJsonPlaceholder (props) {
 	return html`
 	  <${Placeholder}
-			  label=${__('No composer.json', 'pixelgradelt_retailer')}
-			  instructions=${__('Add some solutions to this composition if you want it to do something. Also, make sure to have some valid composition user details, since these will be validated on composer.json generation.', 'pixelgradelt_retailer')}
+			  label=${__('No composer.json', 'pressody_retailer')}
+			  instructions=${__('Add some solutions to this composition if you want it to do something. Also, make sure to have some valid composition user details, since these will be validated on composer.json generation.', 'pressody_retailer')}
 	  >
 	  </${Placeholder}>
 	`
@@ -32,7 +32,7 @@ function CompositionComposerJson (props) {
 	} = props
 
 	return html`
-			<pre className="pixelgradelt_retailer-composer-snippet"><code>${ JSON.stringify( composerJson, null, 2 ) }</code></pre>
+			<pre className="pressody_retailer-composer-snippet"><code>${ JSON.stringify( composerJson, null, 2 ) }</code></pre>
 	`
 }
 

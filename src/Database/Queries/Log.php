@@ -4,12 +4,12 @@
  *
  * @since   0.14.0
  * @license GPL-2.0-or-later
- * @package PixelgradeLT
+ * @package Pressody
  */
 
 declare ( strict_types = 1 );
 
-namespace PixelgradeLT\Retailer\Database\Queries;
+namespace Pressody\Retailer\Database\Queries;
 
 use BerlinDB\Database\Query;
 
@@ -18,7 +18,7 @@ use BerlinDB\Database\Query;
  *
  * @since 0.14.0
  *
- * @see \PixelgradeLT\Retailer\Database\Queries\Log::__construct() for accepted arguments.
+ * @see \Pressody\Retailer\Database\Queries\Log::__construct() for accepted arguments.
  */
 class Log extends Query {
 
@@ -31,7 +31,7 @@ class Log extends Query {
 	 * @access public
 	 * @var string
 	 */
-	protected $table_name = 'lt_retailer_logs';
+	protected $table_name = 'pd_retailer_logs';
 
 	/**
 	 * String used to alias the database table in MySQL statement.
@@ -49,7 +49,7 @@ class Log extends Query {
 	 * @access public
 	 * @var string
 	 */
-	protected $table_schema = '\\PixelgradeLT\\Retailer\\Database\\Schemas\\Logs';
+	protected $table_schema = '\\Pressody\\Retailer\\Database\\Schemas\\Logs';
 
 	/** Item ******************************************************************/
 
@@ -78,7 +78,7 @@ class Log extends Query {
 	 * @access public
 	 * @var mixed
 	 */
-	protected $item_shape = '\\PixelgradeLT\\Retailer\\Logging\\Log';
+	protected $item_shape = '\\Pressody\\Retailer\\Logging\\Log';
 
 	/** Cache *****************************************************************/
 

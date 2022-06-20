@@ -2,16 +2,16 @@
 /**
  * Package transformer.
  *
- * @package PixelgradeLT
+ * @package Pressody
  * @license GPL-2.0-or-later
  * @since 0.1.0
  */
 
 declare ( strict_types = 1 );
 
-namespace PixelgradeLT\Retailer\Transformer;
+namespace Pressody\Retailer\Transformer;
 
-use PixelgradeLT\Retailer\Package;
+use Pressody\Retailer\Package;
 
 /**
  * Package transformer interface.

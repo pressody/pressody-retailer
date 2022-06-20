@@ -7,8 +7,8 @@ const {__} = i18n
 function CompositionPartsPlaceholder (props) {
 	return html`
 	  <${Placeholder}
-			  label=${__('No parts', 'pixelgradelt_retailer')}
-			  instructions=${__('You need to do some more configuring.', 'pixelgradelt_retailer')}
+			  label=${__('No parts', 'pressody_retailer')}
+			  instructions=${__('You need to do some more configuring.', 'pressody_retailer')}
 	  >
 	  </${Placeholder}>
 	`
@@ -36,14 +36,14 @@ function CompositionPart (props) {
 	} = props
 
 	const solutionsList = useSelect((select) => {
-		return select('pixelgradelt_retailer/composition').getSolutions()
+		return select('pressody_retailer/composition').getSolutions()
 	})
 
 	const requiredByList = requiredBy.map( ( solution, index ) => {
 
-		let className = 'button pixelgradelt_retailer-required-by-solution';
+		let className = 'button pressody_retailer-required-by-solution';
 
-		// Find the solution that requires this LT part.
+		// Find the solution that requires this PD part.
 		let solutionEditLink = '#';
 		if ( solutionsList.length ) {
 			const solutionDetails = solutionsList.find((item) => {
@@ -70,7 +70,7 @@ function CompositionPart (props) {
 	} );
 
 	return html`
-	  <table className="pixelgradelt_retailer-package widefat">
+	  <table className="pressody_retailer-package widefat">
 		  <thead>
 		  <tr>
 			  <th colSpan="2"><strong>${name} : ${version}</strong></th>
@@ -78,8 +78,8 @@ function CompositionPart (props) {
 		  </thead>
 		  <tbody>
 		  <tr>
-			  <th>${__('Required By Solutions', 'pixelgradelt_retailer')}</th>
-			  <td className="pixelgradelt_retailer-required-by-solutions">
+			  <th>${__('Required By Solutions', 'pressody_retailer')}</th>
+			  <td className="pressody_retailer-required-by-solutions">
 				  ${requiredByList}
 			  </td>
 		  </tr>

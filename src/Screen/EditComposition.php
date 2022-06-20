@@ -4,26 +4,26 @@
  *
  * @since   0.11.0
  * @license GPL-2.0-or-later
- * @package PixelgradeLT
+ * @package Pressody
  */
 
 declare ( strict_types=1 );
 
-namespace PixelgradeLT\Retailer\Screen;
+namespace Pressody\Retailer\Screen;
 
 use Carbon_Fields\Carbon_Fields;
 use Carbon_Fields\Container;
 use Carbon_Fields\Field;
 use Carbon_Fields\Helper\Helper;
 use Cedaro\WP\Plugin\AbstractHookProvider;
-use PixelgradeLT\Retailer\CompositionManager;
-use PixelgradeLT\Retailer\PurchasedSolutionManager;
-use PixelgradeLT\Retailer\Transformer\ComposerPackageTransformer;
-use PixelgradeLT\Retailer\SolutionManager;
-use PixelgradeLT\Retailer\Utils\ArrayHelpers;
+use Pressody\Retailer\CompositionManager;
+use Pressody\Retailer\PurchasedSolutionManager;
+use Pressody\Retailer\Transformer\ComposerPackageTransformer;
+use Pressody\Retailer\SolutionManager;
+use Pressody\Retailer\Utils\ArrayHelpers;
 use function Pixelgrade\WPPostNotes\create_note;
-use function PixelgradeLT\Retailer\get_setting;
-use function PixelgradeLT\Retailer\preload_rest_data;
+use function Pressody\Retailer\get_setting;
+use function Pressody\Retailer\preload_rest_data;
 
 /**
  * Edit Composition screen provider class.
@@ -32,7 +32,7 @@ use function PixelgradeLT\Retailer\preload_rest_data;
  */
 class EditComposition extends AbstractHookProvider {
 
-	const LTRECORDS_API_PWD = 'pixelgradelt_records';
+	const PDRECORDS_API_PWD = 'pressody_records';
 
 	/**
 	 * Composition manager.
@@ -127,7 +127,7 @@ class EditComposition extends AbstractHookProvider {
 		$this->add_action( 'wp_trash_post', 'remember_post_composition_data', 10, 1 );
 		$this->add_action( 'before_delete_post', 'remember_post_composition_data', 10, 1 );
 		// These are programmatic changes.
-		$this->add_action( 'pixelgradelt_retailer/ltcomposition/before_update', 'remember_post_composition_data', 10, 1 );
+		$this->add_action( 'pressody_retailer/pdcomposition/before_update', 'remember_post_composition_data', 10, 1 );
 
 		// Check that the package can be resolved with the required packages.
 		$this->add_action( 'carbon_fields_post_meta_container_saved', 'fill_hashid', 10, 2 );
@@ -145,36 +145,36 @@ class EditComposition extends AbstractHookProvider {
 		 */
 		// Just trigger the trash action.
 		$this->add_action( 'wp_after_insert_post', 'do_update_action', 10, 3 );
-		$this->add_action( 'pixelgradelt_retailer/ltcomposition/update', 'handle_composition_update', 10, 3 );
+		$this->add_action( 'pressody_retailer/pdcomposition/update', 'handle_composition_update', 10, 3 );
 
 		/*
 		 * HANDLE POST TRASH CHANGES.
 		 */
 		// Just trigger the update action.
 		$this->add_action( 'trashed_post', 'do_trash_action', 10, 1 );
-		$this->add_action( 'pixelgradelt_retailer/ltcomposition/trash', 'handle_composition_trash', 10, 1 );
+		$this->add_action( 'pressody_retailer/pdcomposition/trash', 'handle_composition_trash', 10, 1 );
 
 		/*
 		 * HANDLE POST DELETE CHANGES.
 		 */
 		// Just trigger the delete action.
 		$this->add_action( 'deleted_post', 'do_delete_action', 10, 2 );
-		$this->add_action( 'pixelgradelt_retailer/ltcomposition/delete', 'handle_composition_delete', 10, 1 );
+		$this->add_action( 'pressody_retailer/pdcomposition/delete', 'handle_composition_delete', 10, 1 );
 
 
 		/*
 		 * HANDLE PURCHASED SOLUTIONS DETAILS UPDATES.
 		 */
-		$this->add_action( 'pixelgradelt_retailer/ltcomposition/required_purchased_solutions_change', 'handle_required_purchased_solutions_details_update', 10, 3 );
+		$this->add_action( 'pressody_retailer/pdcomposition/required_purchased_solutions_change', 'handle_required_purchased_solutions_details_update', 10, 3 );
 
 		/*
 		 * HANDLE AUTOMATIC POST NOTES.
 		 */
-		$this->add_action( 'pixelgradelt_retailer/ltcomposition/status_change', 'add_composition_status_change_note', 10, 3 );
-		$this->add_action( 'pixelgradelt_retailer/ltcomposition/hashid_change', 'add_composition_hashid_change_note', 10, 3 );
-		$this->add_action( 'pixelgradelt_retailer/ltcomposition/user_change', 'add_composition_user_change_note', 10, 3 );
-		$this->add_action( 'pixelgradelt_retailer/ltcomposition/required_purchased_solutions_change', 'add_composition_required_purchased_solutions_change_note', 10, 3 );
-		$this->add_action( 'pixelgradelt_retailer/ltcomposition/required_manual_solutions_change', 'add_composition_required_manual_solutions_change_note', 10, 3 );
+		$this->add_action( 'pressody_retailer/pdcomposition/status_change', 'add_composition_status_change_note', 10, 3 );
+		$this->add_action( 'pressody_retailer/pdcomposition/hashid_change', 'add_composition_hashid_change_note', 10, 3 );
+		$this->add_action( 'pressody_retailer/pdcomposition/user_change', 'add_composition_user_change_note', 10, 3 );
+		$this->add_action( 'pressody_retailer/pdcomposition/required_purchased_solutions_change', 'add_composition_required_purchased_solutions_change_note', 10, 3 );
+		$this->add_action( 'pressody_retailer/pdcomposition/required_manual_solutions_change', 'add_composition_required_manual_solutions_change_note', 10, 3 );
 	}
 
 	/**
@@ -197,36 +197,36 @@ class EditComposition extends AbstractHookProvider {
 	 * @since 0.11.0
 	 */
 	public function enqueue_assets() {
-		\wp_enqueue_script( 'pixelgradelt_retailer-admin' );
-		\wp_enqueue_style( 'pixelgradelt_retailer-admin' );
+		\wp_enqueue_script( 'pressody_retailer-admin' );
+		\wp_enqueue_style( 'pressody_retailer-admin' );
 
-		\wp_enqueue_script( 'pixelgradelt_retailer-edit-composition' );
+		\wp_enqueue_script( 'pressody_retailer-edit-composition' );
 
 		// Gather all the contained solutions in the composition.
 		$composition_data = $this->composition_manager->get_composition_id_data( get_the_ID(), true );
 		$solutionsIds     = $this->composition_manager->extract_required_solutions_post_ids( $composition_data['required_solutions'] );
 		$solutionsContext = $this->composition_manager->extract_required_solutions_context( $composition_data['required_solutions'] );
 
-		// Get the encrypted form of the composition's LT details.
-		$encrypted_ltdetails = $this->composition_manager->get_post_composition_encrypted_ltdetails( $composition_data );
+		// Get the encrypted form of the composition's PD details.
+		$encrypted_pddetails = $this->composition_manager->get_post_composition_encrypted_pddetails( $composition_data );
 
 		\wp_localize_script(
-			'pixelgradelt_retailer-edit-composition',
-			'_pixelgradeltRetailerEditCompositionData',
+			'pressody_retailer-edit-composition',
+			'_pressodyRetailerEditCompositionData',
 			[
 				'editedPostId'             => \get_the_ID(),
 				'editedHashId'             => $composition_data['hashid'],
-				'encryptedLTDetails'       => $encrypted_ltdetails,
+				'encryptedPDDetails'       => $encrypted_pddetails,
 				'solutionIds'              => $solutionsIds,
 				'solutionContexts'         => $solutionsContext,
-				'ltrecordsCompositionsUrl' => 'https://lt-records.local/wp-json/pixelgradelt_records/v1/compositions',
-				'ltrecordsApiKey'          => get_setting( 'ltrecords-api-key' ),
-				'ltrecordsApiPwd'          => self::LTRECORDS_API_PWD,
+				'pdrecordsCompositionsUrl' => 'https://pd-records.local/wp-json/pressody_records/v1/compositions',
+				'pdrecordsApiKey'          => get_setting( 'pdrecords-api-key' ),
+				'pdrecordsApiPwd'          => self::PDRECORDS_API_PWD,
 			]
 		);
 
 		$preload_paths = [
-			'/pixelgradelt_retailer/v1/solutions',
+			'/pressody_retailer/v1/solutions',
 		];
 
 		preload_rest_data( $preload_paths );
@@ -238,19 +238,19 @@ class EditComposition extends AbstractHookProvider {
 
 	protected function attach_post_meta_fields() {
 		// Register the metabox for managing the general details of the solution.
-		Container::make( 'post_meta', 'carbon_fields_container_general_configuration_' . $this->composition_manager::POST_TYPE, esc_html__( 'General Configuration', 'pixelgradelt_retailer' ) )
+		Container::make( 'post_meta', 'carbon_fields_container_general_configuration_' . $this->composition_manager::POST_TYPE, esc_html__( 'General Configuration', 'pressody_retailer' ) )
 		         ->where( 'post_type', '=', $this->composition_manager::POST_TYPE )
 		         ->set_context( 'normal' )
 		         ->set_priority( 'core' )
 		         ->add_fields( [
-			         Field::make( 'html', 'composition_details_html', __( 'Section Description', 'pixelgradelt_retailer' ) )
+			         Field::make( 'html', 'composition_details_html', __( 'Section Description', 'pressody_retailer' ) )
 			              ->set_html( sprintf( '<p class="description">%s</p>', __( 'Configure details about <strong>the composition itself,</strong> as it will be exposed for consumption.<br>
 Under normal circumstances, <strong>compositions are created and details updated programmatically</strong> on user actions (purchases, expirations, cancellations, etc.).<br><br>
-<em><strong>FYI:</strong> These details are meta-details for <strong>the actual Composer compositions</strong> (<code>composer.json</code> contents) <strong>generated and updated by LT Records.</strong><br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<strong>LT Records will query LT Retailer</strong> to check and provide update instructions, based on the information below.</em>', 'pixelgradelt_retailer' ) ) ),
+<em><strong>FYI:</strong> These details are meta-details for <strong>the actual Composer compositions</strong> (<code>composer.json</code> contents) <strong>generated and updated by PD Records.</strong><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<strong>PD Records will query PD Retailer</strong> to check and provide update instructions, based on the information below.</em>', 'pressody_retailer' ) ) ),
 
-			         Field::make( 'select', 'composition_status', __( 'Composition Status', 'pixelgradelt_retailer' ) )
-			              ->set_help_text( __( 'The composition status will determine if and when this composition is available to be used on sites.', 'pixelgradelt_retailer' ) )
+			         Field::make( 'select', 'composition_status', __( 'Composition Status', 'pressody_retailer' ) )
+			              ->set_help_text( __( 'The composition status will determine if and when this composition is available to be used on sites.', 'pressody_retailer' ) )
 			              ->add_options( ArrayHelpers::array_map_assoc( function ( $key, $status ) {
 				              // Construct the options from the global composition statuses.
 				              return [ $status['id'] => $status['label'] . ' (' . $status['desc'] . ')' ];
@@ -259,16 +259,16 @@ Under normal circumstances, <strong>compositions are created and details updated
 			              ->set_required( true )
 			              ->set_width( 50 ),
 
-			         Field::make( 'text', 'composition_hashid', __( 'Composition HashID', 'pixelgradelt_retailer' ) )
+			         Field::make( 'text', 'composition_hashid', __( 'Composition HashID', 'pressody_retailer' ) )
 			              ->set_help_text( __( 'This will be used to <strong>uniquely identify the composition throughout the ecosystem.</strong> Be careful when changing this after a composition is used on a site.<br>
-<strong>Leave empty</strong> and we will fill it with a hash generated from the post ID. You should <strong>leave it as such</strong> if you don\'t have a good reason to change it!', 'pixelgradelt_retailer' ) ),
+<strong>Leave empty</strong> and we will fill it with a hash generated from the post ID. You should <strong>leave it as such</strong> if you don\'t have a good reason to change it!', 'pressody_retailer' ) ),
 
-			         Field::make( 'association', 'composition_user_ids', __( 'Composition Owner(s)', 'pixelgradelt_retailer' ) )
+			         Field::make( 'association', 'composition_user_ids', __( 'Composition Owner(s)', 'pressody_retailer' ) )
 			              ->set_duplicates_allowed( false )
 			              ->set_help_text( sprintf( '<p class="description">%s</p>', __( 'These are registered users that act as <strong>owners of this composition.</strong> They can edit the composition and use it on sites.<br>
 <strong>Only the owners\' purchased solutions</strong> can be included in the composition.<br>
 <em>Note:</em> After modifying the owner list, update the post to make the new purchased solutions available.<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Please bear in mind that already included purchased solutions may be removed from the composition if they are no longer available.', 'pixelgradelt_retailer' ) ) )
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Please bear in mind that already included purchased solutions may be removed from the composition if they are no longer available.', 'pressody_retailer' ) ) )
 			              ->set_types( [
 				              [
 					              'type' => 'user',
@@ -282,46 +282,46 @@ Under normal circumstances, <strong>compositions are created and details updated
 			if ( $status_details['internal'] ) {
 				continue;
 			}
-			$purchased_solutions_statuses_help[] = sprintf( __( '<code>%1$s</code> : %2$s', 'pixelgradelt_retailer' ), $status, $status_details['desc'] );
+			$purchased_solutions_statuses_help[] = sprintf( __( '<code>%1$s</code> : %2$s', 'pressody_retailer' ), $status, $status_details['desc'] );
 		}
 
 		// Register the metabox for managing the purchased or manual solutions the current composition includes.
-		Container::make( 'post_meta', 'carbon_fields_container_solutions_configuration_' . $this->composition_manager::POST_TYPE, esc_html__( 'Included Solutions Configuration', 'pixelgradelt_retailer' ) )
+		Container::make( 'post_meta', 'carbon_fields_container_solutions_configuration_' . $this->composition_manager::POST_TYPE, esc_html__( 'Included Solutions Configuration', 'pressody_retailer' ) )
 		         ->where( 'post_type', '=', $this->composition_manager::POST_TYPE )
 		         ->set_context( 'normal' )
 		         ->set_priority( 'core' )
 		         ->add_fields( [
-			         Field::make( 'html', 'solutions_configuration_html', __( 'Solutions Description', 'pixelgradelt_retailer' ) )
+			         Field::make( 'html', 'solutions_configuration_html', __( 'Solutions Description', 'pressody_retailer' ) )
 			              ->set_html( sprintf( '<p class="description">%s</p>', __( 'Here you edit and configure <strong>the list of solutions</strong> the composition includes.<br>
 The purchased solutions list will be <strong>merged</strong> with the manual solutions list to make up <strong>the final list.</strong><br>
-If a <strong>manual solution</strong> is present then <strong>that LT solution will always be part of the composition,</strong> regardless of the status of a purchased solution matching the same LT Solution.', 'pixelgradelt_retailer' ) ) ),
+If a <strong>manual solution</strong> is present then <strong>that PD solution will always be part of the composition,</strong> regardless of the status of a purchased solution matching the same PD Solution.', 'pressody_retailer' ) ) ),
 
-			         Field::make( 'multiselect', 'composition_required_purchased_solutions', __( 'Purchased Solutions', 'pixelgradelt_retailer' ) )
-			              ->set_help_text( __( 'These are <strong>purchased LT solutions that are included in this composition.</strong><br>
+			         Field::make( 'multiselect', 'composition_required_purchased_solutions', __( 'Purchased Solutions', 'pressody_retailer' ) )
+			              ->set_help_text( __( 'These are <strong>purchased PD solutions that are included in this composition.</strong><br>
 The options available are <strong>all the solutions purchased by the composition owners, combined.</strong> They are ordered by their purchased-solution ID, ascending.<br>
-<strong>FYI:</strong> Each purchased-solution label is comprised of: <code>LT solution name</code>, <code>LT solution #post_id</code>, and purchased solution details like <code>customer username</code>, <code>order ID</code>, <code>purchased-solution status</code>.<br>
+<strong>FYI:</strong> Each purchased-solution label is comprised of: <code>PD solution name</code>, <code>PD solution #post_id</code>, and purchased solution details like <code>customer username</code>, <code>order ID</code>, <code>purchased-solution status</code>.<br>
 The statuses can be: <br>
-<ul><li>' . implode( '</li><li>', $purchased_solutions_statuses_help ) . '</li></ul>', 'pixelgradelt_retailer' ) )
+<ul><li>' . implode( '</li><li>', $purchased_solutions_statuses_help ) . '</li></ul>', 'pressody_retailer' ) )
 			              ->set_classes( 'composition-required-solutions composition_required_purchased_solutions' )
 			              ->set_options( [ $this, 'get_available_required_purchased_solutions_options' ] )
 			              ->set_default_value( [] )
 			              ->set_required( false )
 			              ->set_width( 50 ),
 
-			         Field::make( 'complex', 'composition_required_manual_solutions', __( 'Manual Solutions', 'pixelgradelt_retailer' ) )
-			              ->set_help_text( __( 'These are <strong>the manual LT solutions part of this composition.</strong> These are <strong>LT solutions that don\'t have a product purchase associated</strong> with them.<br>
+			         Field::make( 'complex', 'composition_required_manual_solutions', __( 'Manual Solutions', 'pressody_retailer' ) )
+			              ->set_help_text( __( 'These are <strong>the manual PD solutions part of this composition.</strong> These are <strong>PD solutions that don\'t have a product purchase associated</strong> with them.<br>
 Manually included solutions are <strong>for internal use only</strong> and are not accessible to composition users. That is why an optional "Reason" field is attached to each.<br>
-<strong>FYI:</strong> Each solution label is comprised of the solution <code>slug</code> and the <code>#post_id</code>.', 'pixelgradelt_retailer' ) )
+<strong>FYI:</strong> Each solution label is comprised of the solution <code>slug</code> and the <code>#post_id</code>.', 'pressody_retailer' ) )
 			              ->set_classes( 'composition-required-solutions composition_required_manual_solutions' )
 			              ->set_collapsed( true )
 			              ->add_fields( [
-				              Field::make( 'select', 'pseudo_id', __( 'Choose one of the configured solutions', 'pixelgradelt_retailer' ) )
+				              Field::make( 'select', 'pseudo_id', __( 'Choose one of the configured solutions', 'pressody_retailer' ) )
 				                   ->set_options( [ $this, 'get_available_required_manual_solutions_options' ] )
 				                   ->set_default_value( null )
 				                   ->set_required( true )
 				                   ->set_width( 50 ),
-				              Field::make( 'text', 'reason', __( 'Reason', 'pixelgradelt_retailer' ) )
-				                   ->set_help_text( __( 'The reason this LT solution is manually included in the composition.', 'pixelgradelt_retailer' ) )
+				              Field::make( 'text', 'reason', __( 'Reason', 'pressody_retailer' ) )
+				                   ->set_help_text( __( 'The reason this PD solution is manually included in the composition.', 'pressody_retailer' ) )
 				                   ->set_required( false )
 				                   ->set_width( 50 ),
 			              ] )
@@ -341,7 +341,7 @@ Manually included solutions are <strong>for internal use only</strong> and are n
 		$container_id = $post_type . '_current_state_details';
 		\add_meta_box(
 			$container_id,
-			esc_html__( 'Current Composition State Details', 'pixelgradelt_retailer' ),
+			esc_html__( 'Current Composition State Details', 'pressody_retailer' ),
 			[ $this, 'display_composition_current_state_meta_box' ],
 			$this->composition_manager::POST_TYPE,
 			'normal',
@@ -437,7 +437,7 @@ Manually included solutions are <strong>for internal use only</strong> and are n
 				$exception_message = preg_replace( '/<(http[^>]*)>/i', '<a href="$1" target="_blank">$1</a>', $exception_message );
 				$message           .= '<pre>' . $exception_message . '</pre><br>';
 			}
-			$message .= 'There should be additional information in the PixelgradeLT Retailer logs.';
+			$message .= 'There should be additional information in the Pressody Retailer logs.';
 			$message .= '</p>';
 			\update_post_meta( $post_ID, '_package_require_dry_run_result', [
 				'type'    => 'error',
@@ -475,7 +475,7 @@ Manually included solutions are <strong>for internal use only</strong> and are n
 		// Get the current composition owners (saved in the DB).
 		$raw_owners = $this->get_cf_field_raw_value( get_the_ID(), 'composition_user_ids', 'carbon_fields_container_general_configuration_' . $this->composition_manager::POST_TYPE );
 		if ( empty( $raw_owners ) || ! is_array( $raw_owners ) ) {
-			return [ null => esc_html__( 'Set some composition owners first..', 'pixelgradelt_retailer' ) ];
+			return [ null => esc_html__( 'Set some composition owners first..', 'pressody_retailer' ) ];
 		}
 
 		// Process the raw values.
@@ -491,18 +491,18 @@ Manually included solutions are <strong>for internal use only</strong> and are n
 		] );
 
 		if ( empty( $purchased_solutions ) ) {
-			return [ null => esc_html__( 'There are no (usable) purchased solutions from the current composition owners..', 'pixelgradelt_retailer' ) ];
+			return [ null => esc_html__( 'There are no (usable) purchased solutions from the current composition owners..', 'pressody_retailer' ) ];
 		}
 
 		$options = [];
-		/** @var \PixelgradeLT\Retailer\PurchasedSolution $ps */
+		/** @var \Pressody\Retailer\PurchasedSolution $ps */
 		foreach ( $purchased_solutions as $ps ) {
 			$customer = \get_userdata( $ps->user_id );
 			if ( empty( $customer ) ) {
 				continue;
 			}
 			$options[ $ps->id ] = sprintf(
-				__( '%1$s - #%2$s (Customer: %3$s, Order: #%4$s, Status: %5$s)', 'pixelgradelt_retailer' ),
+				__( '%1$s - #%2$s (Customer: %3$s, Order: #%4$s, Status: %5$s)', 'pressody_retailer' ),
 				$this->solution_manager->get_post_solution_name( $ps->solution_id ),
 				$ps->solution_id,
 				$customer->user_login,
@@ -569,13 +569,13 @@ Manually included solutions are <strong>for internal use only</strong> and are n
 		foreach ( $solutions_ids as $post_id ) {
 			$solution_pseudo_id = $this->solution_manager->get_post_solution_slug( $post_id ) . $this->composition_manager::PSEUDO_ID_DELIMITER . $post_id;
 
-			$options[ $solution_pseudo_id ] = sprintf( __( '%s - #%s', 'pixelgradelt_retailer' ), $this->solution_manager->get_post_solution_name( $post_id ), $post_id );
+			$options[ $solution_pseudo_id ] = sprintf( __( '%s - #%s', 'pressody_retailer' ), $this->solution_manager->get_post_solution_name( $post_id ), $post_id );
 		}
 
 		ksort( $options );
 
 		// Prepend an empty option.
-		$options = [ null => esc_html__( 'Pick a solution, carefully..', 'pixelgradelt_retailer' ) ] + $options;
+		$options = [ null => esc_html__( 'Pick a solution, carefully..', 'pressody_retailer' ) ] + $options;
 
 		return $options;
 	}
@@ -636,7 +636,7 @@ Manually included solutions are <strong>for internal use only</strong> and are n
 			return;
 		}
 
-		$messages = \apply_filters( 'pixelgradelt_retailer/editcomposition_show_user_messages', $this->user_messages, $post );
+		$messages = \apply_filters( 'pressody_retailer/editcomposition_show_user_messages', $this->user_messages, $post );
 		if ( empty( $messages ) ) {
 			return;
 		}
@@ -680,7 +680,7 @@ Manually included solutions are <strong>for internal use only</strong> and are n
 
 		printf(
 			'<div class="message patience"><p>%s</p></div>',
-			\wp_kses_post( __( 'Please bear in mind that Publish/Update may take a while since we do some heavy lifting behind the scenes.<br>Exercise patience 🦉', 'pixelgradelt_retailer' ) )
+			\wp_kses_post( __( 'Please bear in mind that Publish/Update may take a while since we do some heavy lifting behind the scenes.<br>Exercise patience 🦉', 'pressody_retailer' ) )
 		);
 	}
 
@@ -699,7 +699,7 @@ Manually included solutions are <strong>for internal use only</strong> and are n
 		}
 
 		/**
-		 * Fires after LT composition update.
+		 * Fires after PD composition update.
 		 *
 		 * @since 0.14.0
 		 *
@@ -707,7 +707,7 @@ Manually included solutions are <strong>for internal use only</strong> and are n
 		 * @param \WP_Post $post    The composition post object.
 		 * @param bool     $update  If this is an update.
 		 */
-		\do_action( 'pixelgradelt_retailer/ltcomposition/update',
+		\do_action( 'pressody_retailer/pdcomposition/update',
 			$post_id,
 			$post,
 			$update
@@ -745,7 +745,7 @@ Manually included solutions are <strong>for internal use only</strong> and are n
 		// Handle composition status change.
 		if ( ! empty( $old_composition['status'] ) && $old_composition['status'] !== $current_composition['status'] ) {
 			/**
-			 * Fires on LT composition status change.
+			 * Fires on PD composition status change.
 			 *
 			 * @since 0.14.0
 			 *
@@ -754,7 +754,7 @@ Manually included solutions are <strong>for internal use only</strong> and are n
 			 * @param string $old_status      The old composition status.
 			 * @param array  $new_composition The entire new composition data.
 			 */
-			\do_action( 'pixelgradelt_retailer/ltcomposition/status_change',
+			\do_action( 'pressody_retailer/pdcomposition/status_change',
 				$post_id,
 				$current_composition['status'],
 				$old_composition['status'],
@@ -765,7 +765,7 @@ Manually included solutions are <strong>for internal use only</strong> and are n
 		// Handle composition hashid change.
 		if ( ! empty( $old_composition['hashid'] ) && $old_composition['hashid'] !== $current_composition['hashid'] ) {
 			/**
-			 * Fires on LT composition hashid change.
+			 * Fires on PD composition hashid change.
 			 *
 			 * @since 0.14.0
 			 *
@@ -774,7 +774,7 @@ Manually included solutions are <strong>for internal use only</strong> and are n
 			 * @param string $old_hashid      The old composition hashid.
 			 * @param array  $new_composition The entire new composition data.
 			 */
-			\do_action( 'pixelgradelt_retailer/ltcomposition/hashid_change',
+			\do_action( 'pressody_retailer/pdcomposition/hashid_change',
 				$post_id,
 				$current_composition['hashid'],
 				$old_composition['hashid'],
@@ -793,7 +793,7 @@ Manually included solutions are <strong>for internal use only</strong> and are n
 		sort( $new_userids );
 		if ( $old_userids != $new_userids ) {
 			/**
-			 * Fires on LT composition user details change.
+			 * Fires on PD composition user details change.
 			 *
 			 * @since 0.14.0
 			 *
@@ -804,7 +804,7 @@ Manually included solutions are <strong>for internal use only</strong> and are n
 			 * @param array $old_users       The old composition users details.
 			 * @param array $new_composition The entire new composition data.
 			 */
-			\do_action( 'pixelgradelt_retailer/ltcomposition/user_change',
+			\do_action( 'pressody_retailer/pdcomposition/user_change',
 				$post_id,
 				$current_composition['users'],
 				$old_composition['users'],
@@ -824,7 +824,7 @@ Manually included solutions are <strong>for internal use only</strong> and are n
 
 		if ( serialize( $old_required_purchased_solutions_ids ) !== serialize( $current_required_purchased_solutions_ids ) ) {
 			/**
-			 * Fires on LT composition required purchased-solutions change (post ID changes).
+			 * Fires on PD composition required purchased-solutions change (post ID changes).
 			 *
 			 * @since 0.14.0
 			 *
@@ -835,7 +835,7 @@ Manually included solutions are <strong>for internal use only</strong> and are n
 			 * @param array $old_required_purchased_solutions The old composition required_purchased_solutions details.
 			 * @param array $new_composition                  The entire new composition data.
 			 */
-			\do_action( 'pixelgradelt_retailer/ltcomposition/required_purchased_solutions_change',
+			\do_action( 'pressody_retailer/pdcomposition/required_purchased_solutions_change',
 				$post_id,
 				$current_composition['required_purchased_solutions'],
 				$old_composition['required_purchased_solutions'],
@@ -857,7 +857,7 @@ Manually included solutions are <strong>for internal use only</strong> and are n
 
 		if ( serialize( $old_required_manual_solutions_post_ids ) !== serialize( $current_required_manual_solutions_post_ids ) ) {
 			/**
-			 * Fires on LT composition required solutions change (post ID changes).
+			 * Fires on PD composition required solutions change (post ID changes).
 			 *
 			 * @since 0.14.0
 			 *
@@ -868,7 +868,7 @@ Manually included solutions are <strong>for internal use only</strong> and are n
 			 * @param array $old_required_manual_solutions The old composition required_manual_solutions details.
 			 * @param array $new_composition               The entire new composition data.
 			 */
-			\do_action( 'pixelgradelt_retailer/ltcomposition/required_manual_solutions_change',
+			\do_action( 'pressody_retailer/pdcomposition/required_manual_solutions_change',
 				$post_id,
 				$current_composition['required_manual_solutions'],
 				$old_composition['required_manual_solutions'],
@@ -877,11 +877,11 @@ Manually included solutions are <strong>for internal use only</strong> and are n
 		}
 
 		/**
-		 * Handle the final required LT solutions list that may or may not change on purchased or manual solutions list changes
+		 * Handle the final required PD solutions list that may or may not change on purchased or manual solutions list changes
 		 * since this list is a merge of the two.
 		 * @see CompositionManager::get_post_composition_required_solutions()
 		 */
-		// We are only interested in actual LT solutions changes, not slug or context details changes.
+		// We are only interested in actual PD solutions changes, not slug or context details changes.
 		// That is why we will only look at the required solution post ID (managed_post_id).
 		$old_required_solutions_post_ids = \wp_list_pluck( $old_composition['required_solutions'], 'managed_post_id' );
 		sort( $old_required_solutions_post_ids );
@@ -891,10 +891,10 @@ Manually included solutions are <strong>for internal use only</strong> and are n
 
 		if ( serialize( $old_required_solutions_post_ids ) !== serialize( $current_required_solutions_post_ids ) ) {
 			/**
-			 * Fires on LT composition required solutions final list change (post ID changes).
+			 * Fires on PD composition required solutions final list change (post ID changes).
 			 *
-			 * Use the 'pixelgradelt_retailer/ltcomposition/required_purchased_solutions_change' or
-			 * 'pixelgradelt_retailer/ltcomposition/required_manual_solutions_change' hooks for more specific actions.
+			 * Use the 'pressody_retailer/pdcomposition/required_purchased_solutions_change' or
+			 * 'pressody_retailer/pdcomposition/required_manual_solutions_change' hooks for more specific actions.
 			 *
 			 * @since 0.14.0
 			 *
@@ -905,7 +905,7 @@ Manually included solutions are <strong>for internal use only</strong> and are n
 			 * @param array $old_required_solutions The old composition required_solutions.
 			 * @param array $new_composition        The entire new composition data.
 			 */
-			\do_action( 'pixelgradelt_retailer/ltcomposition/required_solutions_change',
+			\do_action( 'pressody_retailer/pdcomposition/required_solutions_change',
 				$post_id,
 				$current_composition['required_solutions'],
 				$old_composition['required_solutions'],
@@ -914,7 +914,7 @@ Manually included solutions are <strong>for internal use only</strong> and are n
 		}
 
 		/**
-		 * Fires on LT composition update, after the individual change hooks have been fired.
+		 * Fires on PD composition update, after the individual change hooks have been fired.
 		 *
 		 * @since 0.14.0
 		 *
@@ -924,7 +924,7 @@ Manually included solutions are <strong>for internal use only</strong> and are n
 		 * @param array $new_composition The entire new composition data.
 		 * @param array $old_composition The entire old composition data.
 		 */
-		\do_action( 'pixelgradelt_retailer/ltcomposition/after_update',
+		\do_action( 'pressody_retailer/pdcomposition/after_update',
 			$post_id,
 			$current_composition,
 			$old_composition
@@ -932,7 +932,7 @@ Manually included solutions are <strong>for internal use only</strong> and are n
 	}
 
 	/**
-	 * Handle purchased solutions details update on LT composition required purchased-solutions change.
+	 * Handle purchased solutions details update on PD composition required purchased-solutions change.
 	 *
 	 * @since 0.15.0
 	 *
@@ -970,13 +970,13 @@ Manually included solutions are <strong>for internal use only</strong> and are n
 		}
 
 		/**
-		 * Fires after a LT composition is trashed.
+		 * Fires after a PD composition is trashed.
 		 *
 		 * @since 0.15.0
 		 *
 		 * @param int      $post_id The trashed composition post ID
 		 */
-		\do_action( 'pixelgradelt_retailer/ltcomposition/trash',
+		\do_action( 'pressody_retailer/pdcomposition/trash',
 			$post_id,
 		);
 	}
@@ -1017,13 +1017,13 @@ Manually included solutions are <strong>for internal use only</strong> and are n
 		}
 
 		/**
-		 * Fires after a LT composition is deleted.
+		 * Fires after a PD composition is deleted.
 		 *
 		 * @since 0.15.0
 		 *
 		 * @param int      $post_id The deleted composition post ID
 		 */
-		\do_action( 'pixelgradelt_retailer/ltcomposition/delete',
+		\do_action( 'pressody_retailer/pdcomposition/delete',
 			$post_id,
 		);
 	}
@@ -1051,7 +1051,7 @@ Manually included solutions are <strong>for internal use only</strong> and are n
 	}
 
 	/**
-	 * Add post note on LT composition status change.
+	 * Add post note on PD composition status change.
 	 *
 	 * @since 0.14.0
 	 *
@@ -1061,7 +1061,7 @@ Manually included solutions are <strong>for internal use only</strong> and are n
 	 */
 	protected function add_composition_status_change_note( int $post_id, string $new_status, string $old_status ) {
 		$note = sprintf(
-			esc_html__( 'Composition status changed from %1$s to %2$s.', 'pixelgradelt_retailer' ),
+			esc_html__( 'Composition status changed from %1$s to %2$s.', 'pressody_retailer' ),
 			'<strong>' . $old_status . '</strong>',
 			'<strong>' . $new_status . '</strong>'
 		);
@@ -1070,7 +1070,7 @@ Manually included solutions are <strong>for internal use only</strong> and are n
 	}
 
 	/**
-	 * Add post note on LT composition hashid change.
+	 * Add post note on PD composition hashid change.
 	 *
 	 * @since 0.14.0
 	 *
@@ -1080,7 +1080,7 @@ Manually included solutions are <strong>for internal use only</strong> and are n
 	 */
 	protected function add_composition_hashid_change_note( int $post_id, string $new_hashid, string $old_hashid ) {
 		$note = sprintf(
-			esc_html__( 'Composition hashid changed from %1$s to %2$s.', 'pixelgradelt_retailer' ),
+			esc_html__( 'Composition hashid changed from %1$s to %2$s.', 'pressody_retailer' ),
 			'<strong>' . $old_hashid . '</strong>',
 			'<strong>' . $new_hashid . '</strong>'
 		);
@@ -1089,7 +1089,7 @@ Manually included solutions are <strong>for internal use only</strong> and are n
 	}
 
 	/**
-	 * Add post note on LT composition users change.
+	 * Add post note on PD composition users change.
 	 *
 	 * @since 0.14.0
 	 *
@@ -1122,12 +1122,12 @@ Manually included solutions are <strong>for internal use only</strong> and are n
 
 			if ( count( $removed_list ) == 1 ) {
 				$note .= sprintf(
-					esc_html__( 'Removed a composition owner: %1$s. ', 'pixelgradelt_retailer' ),
+					esc_html__( 'Removed a composition owner: %1$s. ', 'pressody_retailer' ),
 					'<strong>' . implode( ', ', $removed_list ) . '</strong>'
 				);
 			} else {
 				$note .= sprintf(
-					esc_html__( 'Removed these composition owners: %1$s. ', 'pixelgradelt_retailer' ),
+					esc_html__( 'Removed these composition owners: %1$s. ', 'pressody_retailer' ),
 					'<strong>' . implode( ', ', $removed_list ) . '</strong>'
 				);
 			}
@@ -1147,12 +1147,12 @@ Manually included solutions are <strong>for internal use only</strong> and are n
 
 			if ( count( $added_list ) == 1 ) {
 				$note .= sprintf(
-					esc_html__( 'Added a composition owner: %1$s. ', 'pixelgradelt_retailer' ),
+					esc_html__( 'Added a composition owner: %1$s. ', 'pressody_retailer' ),
 					'<strong>' . implode( ', ', $added_list ) . '</strong>'
 				);
 			} else {
 				$note .= sprintf(
-					esc_html__( 'Added the following composition owners: %1$s. ', 'pixelgradelt_retailer' ),
+					esc_html__( 'Added the following composition owners: %1$s. ', 'pressody_retailer' ),
 					'<strong>' . implode( ', ', $added_list ) . '</strong>'
 				);
 			}
@@ -1164,7 +1164,7 @@ Manually included solutions are <strong>for internal use only</strong> and are n
 	}
 
 	/**
-	 * Add post note on LT composition required purchased-solutions change.
+	 * Add post note on PD composition required purchased-solutions change.
 	 *
 	 * @since 0.14.0
 	 *
@@ -1192,12 +1192,12 @@ Manually included solutions are <strong>for internal use only</strong> and are n
 
 			if ( count( $removed_list ) == 1 ) {
 				$note .= sprintf(
-					esc_html__( 'Removed a purchased-solution: %1$s. ', 'pixelgradelt_retailer' ),
+					esc_html__( 'Removed a purchased-solution: %1$s. ', 'pressody_retailer' ),
 					'<strong>' . implode( ', ', $removed_list ) . '</strong>'
 				);
 			} else {
 				$note .= sprintf(
-					esc_html__( 'Removed these purchased-solutions: %1$s. ', 'pixelgradelt_retailer' ),
+					esc_html__( 'Removed these purchased-solutions: %1$s. ', 'pressody_retailer' ),
 					'<strong>' . implode( ', ', $removed_list ) . '</strong>'
 				);
 			}
@@ -1212,12 +1212,12 @@ Manually included solutions are <strong>for internal use only</strong> and are n
 
 			if ( count( $added_list ) == 1 ) {
 				$note .= sprintf(
-					esc_html__( 'Added a purchased-solution: %1$s. ', 'pixelgradelt_retailer' ),
+					esc_html__( 'Added a purchased-solution: %1$s. ', 'pressody_retailer' ),
 					'<strong>' . implode( ', ', $added_list ) . '</strong>'
 				);
 			} else {
 				$note .= sprintf(
-					esc_html__( 'Added the following purchased-solutions: %1$s. ', 'pixelgradelt_retailer' ),
+					esc_html__( 'Added the following purchased-solutions: %1$s. ', 'pressody_retailer' ),
 					'<strong>' . implode( ', ', $added_list ) . '</strong>'
 				);
 			}
@@ -1229,7 +1229,7 @@ Manually included solutions are <strong>for internal use only</strong> and are n
 	}
 
 	/**
-	 * Add post note on LT composition required manual-solutions change.
+	 * Add post note on PD composition required manual-solutions change.
 	 *
 	 * @since 0.14.0
 	 *
@@ -1257,12 +1257,12 @@ Manually included solutions are <strong>for internal use only</strong> and are n
 
 			if ( count( $removed_list ) == 1 ) {
 				$note .= sprintf(
-					esc_html__( 'Removed a manual-solution: %1$s. ', 'pixelgradelt_retailer' ),
+					esc_html__( 'Removed a manual-solution: %1$s. ', 'pressody_retailer' ),
 					'<strong>' . implode( ', ', $removed_list ) . '</strong>'
 				);
 			} else {
 				$note .= sprintf(
-					esc_html__( 'Removed these manual-solutions: %1$s. ', 'pixelgradelt_retailer' ),
+					esc_html__( 'Removed these manual-solutions: %1$s. ', 'pressody_retailer' ),
 					'<strong>' . implode( ', ', $removed_list ) . '</strong>'
 				);
 			}
@@ -1277,12 +1277,12 @@ Manually included solutions are <strong>for internal use only</strong> and are n
 
 			if ( count( $added_list ) == 1 ) {
 				$note .= sprintf(
-					esc_html__( 'Added a manual-solution: %1$s. ', 'pixelgradelt_retailer' ),
+					esc_html__( 'Added a manual-solution: %1$s. ', 'pressody_retailer' ),
 					'<strong>' . implode( ', ', $added_list ) . '</strong>'
 				);
 			} else {
 				$note .= sprintf(
-					esc_html__( 'Added the following manual-solutions: %1$s. ', 'pixelgradelt_retailer' ),
+					esc_html__( 'Added the following manual-solutions: %1$s. ', 'pressody_retailer' ),
 					'<strong>' . implode( ', ', $added_list ) . '</strong>'
 				);
 			}

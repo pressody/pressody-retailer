@@ -2,14 +2,14 @@
 /**
  * Htaccess class
  *
- * @package PixelgradeLT
+ * @package Pressody
  * @license GPL-2.0-or-later
  * @since 0.1.0
  */
 
 declare ( strict_types = 1 );
 
-namespace PixelgradeLT\Retailer;
+namespace Pressody\Retailer;
 
 /**
  * Interact with the .htaccess file.
@@ -73,14 +73,14 @@ class Htaccess {
 	/**
 	 * Retrieve the rules in the .htaccess file.
 	 *
-	 * Only contains the rules between the #PixelgradeLT Retailer delimiters.
+	 * Only contains the rules between the #Pressody Retailer delimiters.
 	 *
 	 * @since 0.1.0
 	 *
 	 * @return array
 	 */
 	public function get_rules(): array {
-		return (array) \apply_filters( 'pixelgradelt_retailer/htaccess_rules', $this->rules );
+		return (array) \apply_filters( 'pressody_retailer/htaccess_rules', $this->rules );
 	}
 
 	/**
@@ -114,6 +114,6 @@ class Htaccess {
 	 */
 	public function save() {
 		$rules = $this->get_rules();
-		insert_with_markers( $this->get_file(), 'PixelgradeLT Retailer', $rules );
+		insert_with_markers( $this->get_file(), 'Pressody Retailer', $rules );
 	}
 }

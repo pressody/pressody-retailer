@@ -4,31 +4,31 @@
  *
  * @since   0.10.0
  * @license GPL-2.0-or-later
- * @package PixelgradeLT
+ * @package Pressody
  */
 
 declare ( strict_types=1 );
 
-namespace PixelgradeLT\Retailer\REST;
+namespace Pressody\Retailer\REST;
 
 use Composer\Json\JsonFile;
 use Composer\Json\JsonValidationException;
 use InvalidArgumentException;
 use JsonSchema\Validator;
-use PixelgradeLT\Retailer\Capabilities;
-use PixelgradeLT\Retailer\CompositionManager;
-use PixelgradeLT\Retailer\CrypterInterface;
-use PixelgradeLT\Retailer\Exception\CrypterBadFormatException;
-use PixelgradeLT\Retailer\Exception\CrypterEnvironmentIsBrokenException;
-use PixelgradeLT\Retailer\Exception\CrypterWrongKeyOrModifiedCiphertextException;
-use PixelgradeLT\Retailer\Exception\RestException;
-use PixelgradeLT\Retailer\Transformer\ComposerSolutionTransformer;
+use Pressody\Retailer\Capabilities;
+use Pressody\Retailer\CompositionManager;
+use Pressody\Retailer\CrypterInterface;
+use Pressody\Retailer\Exception\CrypterBadFormatException;
+use Pressody\Retailer\Exception\CrypterEnvironmentIsBrokenException;
+use Pressody\Retailer\Exception\CrypterWrongKeyOrModifiedCiphertextException;
+use Pressody\Retailer\Exception\RestException;
+use Pressody\Retailer\Transformer\ComposerSolutionTransformer;
 use WP_Error;
 use WP_REST_Controller;
 use WP_REST_Request;
 use WP_REST_Response;
 use WP_Http as HTTP;
-use function PixelgradeLT\Retailer\plugin;
+use function Pressody\Retailer\plugin;
 
 /**
  * Compositions REST controller class.
@@ -56,13 +56,13 @@ class CompositionsController extends WP_REST_Controller {
 	const HASHID_PATTERN = '[A-Za-z0-9]*';
 
 	/**
-	 * The key in composer.json `extra` used to store the encrypted composition LT details.
+	 * The key in composer.json `extra` used to store the encrypted composition PD details.
 	 *
 	 * @since 0.10.0
 	 *
 	 * @var string
 	 */
-	const LTDETAILS_KEY = 'lt-composition';
+	const PDDETAILS_KEY = 'pd-composition';
 
 	/**
 	 * The key in composer.json `extra` used to store the composer.json fingerprint.
@@ -71,10 +71,10 @@ class CompositionsController extends WP_REST_Controller {
 	 *
 	 * @var string
 	 */
-	const FINGERPRINT_KEY = 'lt-fingerprint';
+	const FINGERPRINT_KEY = 'pd-fingerprint';
 
 	/**
-	 * The key in composer.json `extra` used to store the composer.json LT version.
+	 * The key in composer.json `extra` used to store the composer.json PD version.
 	 *
 	 * We will use this in case we make breaking changes and wish to provide backwards compatibility.
 	 *
@@ -82,7 +82,7 @@ class CompositionsController extends WP_REST_Controller {
 	 *
 	 * @var string
 	 */
-	const VERSION_KEY = 'lt-version';
+	const VERSION_KEY = 'pd-version';
 
 	/**
 	 * Composition manager.
@@ -159,13 +159,13 @@ class CompositionsController extends WP_REST_Controller {
 					'show_in_index'       => false,
 					'args'                => [
 						'name'                             => [
-							'description' => esc_html__( 'The composition\'s name/title.', 'pixelgradelt_retailer' ),
+							'description' => esc_html__( 'The composition\'s name/title.', 'pressody_retailer' ),
 							'type'        => 'string',
 							'context'     => [ 'view', 'edit', 'embed' ],
 							'required'    => false,
 						],
 						'keywords'                         => [
-							'description' => esc_html__( 'The composition\'s keywords.', 'pixelgradelt_retailer' ),
+							'description' => esc_html__( 'The composition\'s keywords.', 'pressody_retailer' ),
 							'type'        => 'array',
 							'items'       => [
 								'type' => 'string',
@@ -174,7 +174,7 @@ class CompositionsController extends WP_REST_Controller {
 							'required'    => false,
 						],
 						'userids'                          => [
-							'description' => esc_html__( 'The owner/user IDs list.', 'pixelgradelt_retailer' ),
+							'description' => esc_html__( 'The owner/user IDs list.', 'pressody_retailer' ),
 							'type'        => 'array',
 							'items'       => [
 								'type' => 'integer',
@@ -183,7 +183,7 @@ class CompositionsController extends WP_REST_Controller {
 							'required'    => false,
 						],
 						'required_purchased_solutions_ids' => [
-							'description' => esc_html__( 'The composition\'s list of purchased required solutions IDs.', 'pixelgradelt_retailer' ),
+							'description' => esc_html__( 'The composition\'s list of purchased required solutions IDs.', 'pressody_retailer' ),
 							'type'        => 'array',
 							'items'       => [
 								'type' => 'integer',
@@ -204,7 +204,7 @@ class CompositionsController extends WP_REST_Controller {
 			[
 				'args'   => [
 					'compositionid' => [
-						'description'       => __( 'The composition hashid.', 'pixelgradelt_retailer' ),
+						'description'       => __( 'The composition hashid.', 'pressody_retailer' ),
 						'type'              => 'string',
 						'pattern'           => self::HASHID_PATTERN,
 						'required'          => true,
@@ -228,19 +228,19 @@ class CompositionsController extends WP_REST_Controller {
 					'show_in_index'       => false,
 					'args'                => [
 						'name'                             => [
-							'description' => esc_html__( 'The composition\'s name/title.', 'pixelgradelt_retailer' ),
+							'description' => esc_html__( 'The composition\'s name/title.', 'pressody_retailer' ),
 							'type'        => 'string',
 							'context'     => [ 'view', 'edit', 'embed' ],
 							'required'    => false,
 						],
 						'status'                           => [
-							'description' => esc_html__( 'The composition\'s status.', 'pixelgradelt_retailer' ),
+							'description' => esc_html__( 'The composition\'s status.', 'pressody_retailer' ),
 							'type'        => 'string',
 							'context'     => [ 'view', 'edit', 'embed' ],
 							'required'    => false,
 						],
 						'keywords'                         => [
-							'description' => esc_html__( 'The composition\'s keywords.', 'pixelgradelt_retailer' ),
+							'description' => esc_html__( 'The composition\'s keywords.', 'pressody_retailer' ),
 							'type'        => 'array',
 							'items'       => [
 								'type' => 'string',
@@ -249,13 +249,13 @@ class CompositionsController extends WP_REST_Controller {
 							'required'    => false,
 						],
 						'author'                           => [
-							'description' => esc_html__( 'The composition\'s author ID.', 'pixelgradelt_retailer' ),
+							'description' => esc_html__( 'The composition\'s author ID.', 'pressody_retailer' ),
 							'type'        => 'integer',
 							'context'     => [ 'edit' ],
 							'required'    => false,
 						],
 						'userids'                          => [
-							'description' => esc_html__( 'The composition\'s user/owner IDs list.', 'pixelgradelt_retailer' ),
+							'description' => esc_html__( 'The composition\'s user/owner IDs list.', 'pressody_retailer' ),
 							'type'        => 'array',
 							'items'       => [
 								'type' => 'integer',
@@ -264,7 +264,7 @@ class CompositionsController extends WP_REST_Controller {
 							'required'    => false,
 						],
 						'required_purchased_solutions_ids' => [
-							'description' => esc_html__( 'The composition\'s list of purchased required solutions IDs.', 'pixelgradelt_retailer' ),
+							'description' => esc_html__( 'The composition\'s list of purchased required solutions IDs.', 'pressody_retailer' ),
 							'type'        => 'array',
 							'items'       => [
 								'type' => 'integer',
@@ -290,17 +290,17 @@ class CompositionsController extends WP_REST_Controller {
 
 		register_rest_route(
 			$this->namespace,
-			'/' . $this->rest_base . '/encrypt_ltdetails',
+			'/' . $this->rest_base . '/encrypt_pddetails',
 			[
 				[
 					'methods'             => \WP_REST_Server::CREATABLE,
-					'callback'            => [ $this, 'encrypt_ltdetails' ],
-					'permission_callback' => [ $this, 'encrypt_ltdetails_permissions_check' ],
+					'callback'            => [ $this, 'encrypt_pddetails' ],
+					'permission_callback' => [ $this, 'encrypt_pddetails_permissions_check' ],
 					'show_in_index'       => false,
 					'args'                => [
 						'context'       => $this->get_context_param( [ 'default' => 'edit' ] ),
 						'userids'       => [
-							'description' => esc_html__( 'The user/owner IDs list.', 'pixelgradelt_retailer' ),
+							'description' => esc_html__( 'The user/owner IDs list.', 'pressody_retailer' ),
 							'type'        => 'array',
 							'items'       => [
 								'type' => 'integer',
@@ -309,14 +309,14 @@ class CompositionsController extends WP_REST_Controller {
 							'required'    => true,
 						],
 						'compositionid' => [
-							'description' => esc_html__( 'The composition ID.', 'pixelgradelt_retailer' ),
+							'description' => esc_html__( 'The composition ID.', 'pressody_retailer' ),
 							'type'        => 'string',
 							'context'     => [ 'view', 'edit' ],
 							'required'    => true,
 						],
 						'extra'         => [
 							'type'        => 'object',
-							'description' => esc_html__( 'Extra details to encrypt besides the core details.', 'pixelgradelt_retailer' ),
+							'description' => esc_html__( 'Extra details to encrypt besides the core details.', 'pressody_retailer' ),
 							'default'     => [],
 							'context'     => [ 'view', 'edit' ],
 						],
@@ -327,24 +327,24 @@ class CompositionsController extends WP_REST_Controller {
 
 		register_rest_route(
 			$this->namespace,
-			'/' . $this->rest_base . '/check_ltdetails',
+			'/' . $this->rest_base . '/check_pddetails',
 			[
 				[
 					'methods'             => \WP_REST_Server::CREATABLE,
-					'callback'            => [ $this, 'check_ltdetails' ],
+					'callback'            => [ $this, 'check_pddetails' ],
 					'permission_callback' => [ $this, 'check_items_details_permissions_check' ],
 					'show_in_index'       => false,
 					'args'                => [
 						'context'   => $this->get_context_param( [ 'default' => 'view' ] ),
-						'ltdetails' => [
-							'description' => esc_html__( 'The encrypted LT details to check.', 'pixelgradelt_retailer' ),
+						'pddetails' => [
+							'description' => esc_html__( 'The encrypted PD details to check.', 'pressody_retailer' ),
 							'type'        => 'string',
 							'context'     => [ 'view', 'edit' ],
 							'required'    => true,
 						],
 						'composer'  => [
 							'type'        => 'object',
-							'description' => esc_html__( 'composer.json project (root) properties according to the Composer 2.0 JSON schema.', 'pixelgradelt_retailer' ),
+							'description' => esc_html__( 'composer.json project (root) properties according to the Composer 2.0 JSON schema.', 'pressody_retailer' ),
 							'default'     => [],
 							'context'     => [ 'view', 'edit' ],
 						],
@@ -365,7 +365,7 @@ class CompositionsController extends WP_REST_Controller {
 					'args'                => [
 						'context'  => $this->get_context_param( [ 'default' => 'edit' ] ),
 						'composer' => [
-							'description' => esc_html__( 'The full composer.json contents to determine if they need updating.', 'pixelgradelt_retailer' ),
+							'description' => esc_html__( 'The full composer.json contents to determine if they need updating.', 'pressody_retailer' ),
 							'type'        => 'object',
 							'context'     => [ 'view', 'edit' ],
 							'required'    => true,
@@ -388,8 +388,8 @@ class CompositionsController extends WP_REST_Controller {
 	public function get_items_permissions_check( $request ) {
 		if ( ! \current_user_can( Capabilities::VIEW_COMPOSITIONS ) ) {
 			return new \WP_Error(
-				'pixelgradelt_retailer_rest_cannot_read',
-				esc_html__( 'Sorry, you are not allowed to view compositions.', 'pixelgradelt_retailer' ),
+				'pressody_retailer_rest_cannot_read',
+				esc_html__( 'Sorry, you are not allowed to view compositions.', 'pressody_retailer' ),
 				[ 'status' => \rest_authorization_required_code() ]
 			);
 		}
@@ -410,8 +410,8 @@ class CompositionsController extends WP_REST_Controller {
 		$current_user_id = \get_current_user_id();
 		if ( empty( $current_user_id ) ) {
 			return new \WP_Error(
-				'pixelgradelt_retailer_rest_cannot_read',
-				esc_html__( 'You need to be logged in to view compositions.', 'pixelgradelt_retailer' ),
+				'pressody_retailer_rest_cannot_read',
+				esc_html__( 'You need to be logged in to view compositions.', 'pressody_retailer' ),
 				[ 'status' => \rest_authorization_required_code() ]
 			);
 		}
@@ -461,7 +461,7 @@ class CompositionsController extends WP_REST_Controller {
 		];
 
 		$params['postId'] = [
-			'description'       => esc_html__( 'Limit results to compositions by one or more post IDs.', 'pixelgradelt_retailer' ),
+			'description'       => esc_html__( 'Limit results to compositions by one or more post IDs.', 'pressody_retailer' ),
 			'type'              => 'array',
 			'items'             => [
 				'type' => 'integer',
@@ -471,7 +471,7 @@ class CompositionsController extends WP_REST_Controller {
 		];
 
 		$params['hashid'] = [
-			'description' => esc_html__( 'Limit results to compositions by one or more hashids.', 'pixelgradelt_retailer' ),
+			'description' => esc_html__( 'Limit results to compositions by one or more hashids.', 'pressody_retailer' ),
 			'type'        => 'array',
 			'items'       => [
 				'type'    => 'string',
@@ -481,7 +481,7 @@ class CompositionsController extends WP_REST_Controller {
 		];
 
 		$params['status'] = [
-			'description'       => esc_html__( 'Limit results to compositions of one or more statuses.', 'pixelgradelt_retailer' ),
+			'description'       => esc_html__( 'Limit results to compositions of one or more statuses.', 'pressody_retailer' ),
 			'type'              => 'array',
 			'items'             => [
 				'type' => 'string',
@@ -491,7 +491,7 @@ class CompositionsController extends WP_REST_Controller {
 		];
 
 		$params['userid'] = [
-			'description' => esc_html__( 'Limit results to compositions that have the user in their owners list.', 'pixelgradelt_retailer' ),
+			'description' => esc_html__( 'Limit results to compositions that have the user in their owners list.', 'pressody_retailer' ),
 			'type'        => 'integer',
 			'default'     => 0,
 		];
@@ -511,8 +511,8 @@ class CompositionsController extends WP_REST_Controller {
 	public function create_item_permissions_check( $request ) {
 		if ( ! \current_user_can( Capabilities::CREATE_COMPOSITIONS ) ) {
 			return new \WP_Error(
-				'pixelgradelt_retailer_rest_cannot_create',
-				esc_html__( 'Sorry, you are not allowed to create compositions.', 'pixelgradelt_retailer' ),
+				'pressody_retailer_rest_cannot_create',
+				esc_html__( 'Sorry, you are not allowed to create compositions.', 'pressody_retailer' ),
 				[ 'status' => \rest_authorization_required_code() ]
 			);
 		}
@@ -548,8 +548,8 @@ class CompositionsController extends WP_REST_Controller {
 		$result = $this->composition_manager->save_composition( $args, false );
 		if ( empty( $result ) ) {
 			return new \WP_Error(
-				'pixelgradelt_retailer_rest_failed',
-				esc_html__( 'Operation failed.', 'pixelgradelt_retailer' ),
+				'pressody_retailer_rest_failed',
+				esc_html__( 'Operation failed.', 'pressody_retailer' ),
 				[ 'status' => HTTP::NOT_ACCEPTABLE ]
 			);
 		}
@@ -557,8 +557,8 @@ class CompositionsController extends WP_REST_Controller {
 		$composition_data = $this->composition_manager->get_composition_id_data( $result );
 		if ( empty( $composition_data ) ) {
 			return new \WP_Error(
-				'pixelgradelt_retailer_rest_failed',
-				esc_html__( 'Operation failed.', 'pixelgradelt_retailer' ),
+				'pressody_retailer_rest_failed',
+				esc_html__( 'Operation failed.', 'pressody_retailer' ),
 				[ 'status' => HTTP::NOT_ACCEPTABLE ]
 			);
 		}
@@ -583,8 +583,8 @@ class CompositionsController extends WP_REST_Controller {
 	public function get_item_permissions_check( $request ) {
 		if ( ! \current_user_can( Capabilities::VIEW_COMPOSITION, $request->get_param( 'compositionid' ) ) ) {
 			return new \WP_Error(
-				'pixelgradelt_retailer_rest_cannot_read',
-				esc_html__( 'Sorry, you are not allowed to view the requested composition.', 'pixelgradelt_retailer' ),
+				'pressody_retailer_rest_cannot_read',
+				esc_html__( 'Sorry, you are not allowed to view the requested composition.', 'pressody_retailer' ),
 				[ 'status' => \rest_authorization_required_code() ]
 			);
 		}
@@ -607,8 +607,8 @@ class CompositionsController extends WP_REST_Controller {
 		);
 		if ( empty( $composition_data ) ) {
 			return new \WP_Error(
-				'pixelgradelt_retailer_rest_invalid_id',
-				esc_html__( 'Invalid composition ID.', 'pixelgradelt_retailer' ),
+				'pressody_retailer_rest_invalid_id',
+				esc_html__( 'Invalid composition ID.', 'pressody_retailer' ),
 				[ 'status' => HTTP::NOT_FOUND ]
 			);
 		}
@@ -630,8 +630,8 @@ class CompositionsController extends WP_REST_Controller {
 	public function edit_item_permissions_check( $request ) {
 		if ( ! \current_user_can( Capabilities::EDIT_COMPOSITION, $request->get_param( 'compositionid' ) ) ) {
 			return new \WP_Error(
-				'pixelgradelt_retailer_rest_cannot_edit',
-				esc_html__( 'Sorry, you are not allowed to edit the requested composition.', 'pixelgradelt_retailer' ),
+				'pressody_retailer_rest_cannot_edit',
+				esc_html__( 'Sorry, you are not allowed to edit the requested composition.', 'pressody_retailer' ),
 				[ 'status' => \rest_authorization_required_code() ]
 			);
 		}
@@ -654,8 +654,8 @@ class CompositionsController extends WP_REST_Controller {
 		);
 		if ( empty( $composition_data ) ) {
 			return new \WP_Error(
-				'pixelgradelt_retailer_rest_invalid_id',
-				esc_html__( 'Invalid composition ID.', 'pixelgradelt_retailer' ),
+				'pressody_retailer_rest_invalid_id',
+				esc_html__( 'Invalid composition ID.', 'pressody_retailer' ),
 				[ 'status' => HTTP::NOT_FOUND ]
 			);
 		}
@@ -679,8 +679,8 @@ class CompositionsController extends WP_REST_Controller {
 		     && $current_user->ID !== $composition_data['author'] ) {
 
 			return new \WP_Error(
-				'pixelgradelt_retailer_rest_cannot_edit',
-				esc_html__( 'Operation failed. Only composition authors can change the composition\'s author.', 'pixelgradelt_retailer' ),
+				'pressody_retailer_rest_cannot_edit',
+				esc_html__( 'Operation failed. Only composition authors can change the composition\'s author.', 'pressody_retailer' ),
 				[ 'status' => \rest_authorization_required_code() ]
 			);
 		}
@@ -696,8 +696,8 @@ class CompositionsController extends WP_REST_Controller {
 			     && $current_user->ID !== $composition_data['author'] ) {
 
 				return new \WP_Error(
-					'pixelgradelt_retailer_rest_cannot_edit',
-					esc_html__( 'Operation failed. Only composition authors can modify the composition users/owners list.', 'pixelgradelt_retailer' ),
+					'pressody_retailer_rest_cannot_edit',
+					esc_html__( 'Operation failed. Only composition authors can modify the composition users/owners list.', 'pressody_retailer' ),
 					[ 'status' => \rest_authorization_required_code() ]
 				);
 			}
@@ -709,8 +709,8 @@ class CompositionsController extends WP_REST_Controller {
 		     && ! \current_user_can( Capabilities::MANAGE_COMPOSITIONS ) ) {
 
 			return new \WP_Error(
-				'pixelgradelt_retailer_rest_cannot_edit',
-				esc_html__( 'Operation failed. Only compositions managers can manually change the composition\'s status.', 'pixelgradelt_retailer' ),
+				'pressody_retailer_rest_cannot_edit',
+				esc_html__( 'Operation failed. Only compositions managers can manually change the composition\'s status.', 'pressody_retailer' ),
 				[ 'status' => \rest_authorization_required_code() ]
 			);
 		}
@@ -721,8 +721,8 @@ class CompositionsController extends WP_REST_Controller {
 		$result = $this->composition_manager->save_composition( $args, true );
 		if ( $result !== $composition_data['id'] ) {
 			return new \WP_Error(
-				'pixelgradelt_retailer_rest_failed',
-				esc_html__( 'Operation failed.', 'pixelgradelt_retailer' ),
+				'pressody_retailer_rest_failed',
+				esc_html__( 'Operation failed.', 'pressody_retailer' ),
 				[ 'status' => HTTP::NOT_ACCEPTABLE ]
 			);
 		}
@@ -746,8 +746,8 @@ class CompositionsController extends WP_REST_Controller {
 	public function delete_item_permissions_check( $request ) {
 		if ( ! \current_user_can( Capabilities::DELETE_COMPOSITION, $request->get_param( 'compositionid' ) ) ) {
 			return new \WP_Error(
-				'pixelgradelt_retailer_rest_cannot_delete',
-				esc_html__( 'Sorry, you are not allowed to delete the composition.', 'pixelgradelt_retailer' ),
+				'pressody_retailer_rest_cannot_delete',
+				esc_html__( 'Sorry, you are not allowed to delete the composition.', 'pressody_retailer' ),
 				[ 'status' => \rest_authorization_required_code() ]
 			);
 		}
@@ -770,8 +770,8 @@ class CompositionsController extends WP_REST_Controller {
 		);
 		if ( empty( $composition_data ) ) {
 			return new \WP_Error(
-				'pixelgradelt_retailer_rest_invalid_id',
-				esc_html__( 'Invalid composition ID.', 'pixelgradelt_retailer' ),
+				'pressody_retailer_rest_invalid_id',
+				esc_html__( 'Invalid composition ID.', 'pressody_retailer' ),
 				[ 'status' => HTTP::NOT_FOUND ]
 			);
 		}
@@ -849,37 +849,37 @@ class CompositionsController extends WP_REST_Controller {
 			'type'       => 'object',
 			'properties' => [
 				'id'       => [
-					'description' => esc_html__( 'The composition\'s post ID.', 'pixelgradelt_retailer' ),
+					'description' => esc_html__( 'The composition\'s post ID.', 'pressody_retailer' ),
 					'type'        => 'integer',
 					'context'     => [ 'edit' ],
 					'readonly'    => true,
 				],
 				'author'   => [
-					'description' => esc_html__( 'The composition\'s post author user ID.', 'pixelgradelt_retailer' ),
+					'description' => esc_html__( 'The composition\'s post author user ID.', 'pressody_retailer' ),
 					'type'        => 'integer',
 					'context'     => [ 'edit' ],
 					'readonly'    => false,
 				],
 				'name'     => [
-					'description' => esc_html__( 'The composition\'s name/title.', 'pixelgradelt_retailer' ),
+					'description' => esc_html__( 'The composition\'s name/title.', 'pressody_retailer' ),
 					'type'        => 'string',
 					'context'     => [ 'view', 'edit', 'embed' ],
 					'readonly'    => false,
 				],
 				'status'   => [
-					'description' => esc_html__( 'The composition\'s status.', 'pixelgradelt_retailer' ),
+					'description' => esc_html__( 'The composition\'s status.', 'pressody_retailer' ),
 					'type'        => 'string',
 					'context'     => [ 'view', 'edit', 'embed' ],
 					'readonly'    => true,
 				],
 				'hashid'   => [
-					'description' => esc_html__( 'The composition\'s hashid.', 'pixelgradelt_retailer' ),
+					'description' => esc_html__( 'The composition\'s hashid.', 'pressody_retailer' ),
 					'type'        => 'string',
 					'context'     => [ 'view', 'edit', 'embed' ],
 					'readonly'    => true,
 				],
 				'keywords' => [
-					'description' => esc_html__( 'The composition\'s keywords.', 'pixelgradelt_retailer' ),
+					'description' => esc_html__( 'The composition\'s keywords.', 'pressody_retailer' ),
 					'type'        => 'array',
 					'items'       => [
 						'type' => 'string',
@@ -889,32 +889,32 @@ class CompositionsController extends WP_REST_Controller {
 				],
 
 				'users'   => [
-					'description' => esc_html__( 'The composition users/owners details.', 'pixelgradelt_retailer' ),
+					'description' => esc_html__( 'The composition users/owners details.', 'pressody_retailer' ),
 					'type'        => 'array',
 					'items'       => [
 						'type'       => 'object',
 						'readonly'   => true,
 						'properties' => [
 							'status'   => [
-								'description' => esc_html__( 'The user status (valid/invalid).', 'pixelgradelt_retailer' ),
+								'description' => esc_html__( 'The user status (valid/invalid).', 'pressody_retailer' ),
 								'type'        => 'string',
 								'context'     => [ 'view', 'edit', 'embed' ],
 								'readonly'    => true,
 							],
 							'id'       => [
-								'description' => esc_html__( 'The user ID.', 'pixelgradelt_retailer' ),
+								'description' => esc_html__( 'The user ID.', 'pressody_retailer' ),
 								'type'        => 'integer',
 								'context'     => [ 'view', 'edit', 'embed' ],
 								'readonly'    => true,
 							],
 							'email'    => [
-								'description' => esc_html__( 'The user email.', 'pixelgradelt_retailer' ),
+								'description' => esc_html__( 'The user email.', 'pressody_retailer' ),
 								'type'        => 'string',
 								'context'     => [ 'view', 'edit', 'embed' ],
 								'readonly'    => true,
 							],
 							'username' => [
-								'description' => esc_html__( 'The user username.', 'pixelgradelt_retailer' ),
+								'description' => esc_html__( 'The user username.', 'pressody_retailer' ),
 								'type'        => 'string',
 								'context'     => [ 'view', 'edit', 'embed' ],
 								'readonly'    => true,
@@ -925,7 +925,7 @@ class CompositionsController extends WP_REST_Controller {
 					'readonly'    => true,
 				],
 				'userids' => [
-					'description' => esc_html__( 'The composition\'s users/owners IDs.', 'pixelgradelt_retailer' ),
+					'description' => esc_html__( 'The composition\'s users/owners IDs.', 'pressody_retailer' ),
 					'type'        => 'array',
 					'items'       => [
 						'type' => 'integer',
@@ -935,32 +935,32 @@ class CompositionsController extends WP_REST_Controller {
 				],
 
 				'required_solutions' => [
-					'description' => esc_html__( 'The composition\'s final list of required solutions.', 'pixelgradelt_retailer' ),
+					'description' => esc_html__( 'The composition\'s final list of required solutions.', 'pressody_retailer' ),
 					'type'        => 'array',
 					'items'       => [
 						'type'       => 'object',
 						'readonly'   => true,
 						'properties' => [
 							'type'            => [
-								'description' => esc_html__( 'The required solution\'s type.', 'pixelgradelt_retailer' ),
+								'description' => esc_html__( 'The required solution\'s type.', 'pressody_retailer' ),
 								'type'        => 'string',
 								'context'     => [ 'view', 'edit', 'embed' ],
 								'readonly'    => true,
 							],
 							'slug'            => [
-								'description' => esc_html__( 'The required solution\'s slug.', 'pixelgradelt_retailer' ),
+								'description' => esc_html__( 'The required solution\'s slug.', 'pressody_retailer' ),
 								'type'        => 'string',
 								'context'     => [ 'view', 'edit', 'embed' ],
 								'readonly'    => true,
 							],
 							'managed_post_id' => [
-								'description' => esc_html__( 'The required solution\'s post ID.', 'pixelgradelt_retailer' ),
+								'description' => esc_html__( 'The required solution\'s post ID.', 'pressody_retailer' ),
 								'type'        => 'integer',
 								'context'     => [ 'view', 'edit', 'embed' ],
 								'readonly'    => true,
 							],
 							'context'         => [
-								'description' => esc_html__( 'The required solution\'s context details.', 'pixelgradelt_retailer' ),
+								'description' => esc_html__( 'The required solution\'s context details.', 'pressody_retailer' ),
 								'type'        => 'object',
 								'context'     => [ 'view', 'edit', ],
 								'readonly'    => true,
@@ -972,38 +972,38 @@ class CompositionsController extends WP_REST_Controller {
 				],
 
 				'required_purchased_solutions'     => [
-					'description' => esc_html__( 'The composition\'s list of purchased required solutions.', 'pixelgradelt_retailer' ),
+					'description' => esc_html__( 'The composition\'s list of purchased required solutions.', 'pressody_retailer' ),
 					'type'        => 'array',
 					'items'       => [
 						'type'       => 'object',
 						'readonly'   => true,
 						'properties' => [
 							'type'                  => [
-								'description' => esc_html__( 'The required solution\'s type.', 'pixelgradelt_retailer' ),
+								'description' => esc_html__( 'The required solution\'s type.', 'pressody_retailer' ),
 								'type'        => 'string',
 								'context'     => [ 'view', 'edit', ],
 								'readonly'    => true,
 							],
 							'purchased_solution_id' => [
-								'description' => esc_html__( 'The required purchased solution\'s ID.', 'pixelgradelt_retailer' ),
+								'description' => esc_html__( 'The required purchased solution\'s ID.', 'pressody_retailer' ),
 								'type'        => 'integer',
 								'context'     => [ 'view', 'edit', ],
 								'readonly'    => true,
 							],
 							'slug'                  => [
-								'description' => esc_html__( 'The required solution\'s slug.', 'pixelgradelt_retailer' ),
+								'description' => esc_html__( 'The required solution\'s slug.', 'pressody_retailer' ),
 								'type'        => 'string',
 								'context'     => [ 'view', 'edit', ],
 								'readonly'    => true,
 							],
 							'managed_post_id'       => [
-								'description' => esc_html__( 'The required solution\'s post ID.', 'pixelgradelt_retailer' ),
+								'description' => esc_html__( 'The required solution\'s post ID.', 'pressody_retailer' ),
 								'type'        => 'integer',
 								'context'     => [ 'view', 'edit', ],
 								'readonly'    => true,
 							],
 							'context'               => [
-								'description' => esc_html__( 'The required solution\'s context details.', 'pixelgradelt_retailer' ),
+								'description' => esc_html__( 'The required solution\'s context details.', 'pressody_retailer' ),
 								'type'        => 'object',
 								'context'     => [ 'view', 'edit', ],
 								'readonly'    => true,
@@ -1014,7 +1014,7 @@ class CompositionsController extends WP_REST_Controller {
 					'readonly'    => true,
 				],
 				'required_purchased_solutions_ids' => [
-					'description' => esc_html__( 'The composition\'s list of required purchased-solutions IDs.', 'pixelgradelt_retailer' ),
+					'description' => esc_html__( 'The composition\'s list of required purchased-solutions IDs.', 'pressody_retailer' ),
 					'type'        => 'array',
 					'items'       => [
 						'type' => 'integer',
@@ -1024,32 +1024,32 @@ class CompositionsController extends WP_REST_Controller {
 				],
 
 				'required_manual_solutions' => [
-					'description' => esc_html__( 'The composition\'s list of manually required solutions.', 'pixelgradelt_retailer' ),
+					'description' => esc_html__( 'The composition\'s list of manually required solutions.', 'pressody_retailer' ),
 					'type'        => 'array',
 					'items'       => [
 						'type'       => 'object',
 						'readonly'   => true,
 						'properties' => [
 							'type'            => [
-								'description' => esc_html__( 'The required solution\'s type.', 'pixelgradelt_retailer' ),
+								'description' => esc_html__( 'The required solution\'s type.', 'pressody_retailer' ),
 								'type'        => 'string',
 								'context'     => [ 'view', 'edit', ],
 								'readonly'    => true,
 							],
 							'slug'            => [
-								'description' => esc_html__( 'The required solution\'s slug.', 'pixelgradelt_retailer' ),
+								'description' => esc_html__( 'The required solution\'s slug.', 'pressody_retailer' ),
 								'type'        => 'string',
 								'context'     => [ 'view', 'edit', ],
 								'readonly'    => true,
 							],
 							'managed_post_id' => [
-								'description' => esc_html__( 'The required solution\'s post ID.', 'pixelgradelt_retailer' ),
+								'description' => esc_html__( 'The required solution\'s post ID.', 'pressody_retailer' ),
 								'type'        => 'integer',
 								'context'     => [ 'view', 'edit', ],
 								'readonly'    => true,
 							],
 							'context'         => [
-								'description' => esc_html__( 'The required solution\'s context details.', 'pixelgradelt_retailer' ),
+								'description' => esc_html__( 'The required solution\'s context details.', 'pressody_retailer' ),
 								'type'        => 'object',
 								'context'     => [ 'view', 'edit', ],
 								'readonly'    => true,
@@ -1061,14 +1061,14 @@ class CompositionsController extends WP_REST_Controller {
 				],
 
 				'composer_require' => [
-					'description' => esc_html__( 'The composition\'s Composer require list.', 'pixelgradelt_retailer' ),
+					'description' => esc_html__( 'The composition\'s Composer require list.', 'pressody_retailer' ),
 					'type'        => 'object',
 					'context'     => [ 'view', 'edit', ],
 					'readonly'    => true,
 				],
 
 				'editLink' => [
-					'description' => esc_html__( 'The package post edit link.', 'pixelgradelt_retailer' ),
+					'description' => esc_html__( 'The package post edit link.', 'pressody_retailer' ),
 					'type'        => 'string',
 					'format'      => 'uri',
 					'context'     => [ 'view', 'edit' ],
@@ -1079,7 +1079,7 @@ class CompositionsController extends WP_REST_Controller {
 	}
 
 	/**
-	 * Check if a given request has access to encrypt composition LT details.
+	 * Check if a given request has access to encrypt composition PD details.
 	 *
 	 * @since 1.0.0
 	 *
@@ -1087,12 +1087,12 @@ class CompositionsController extends WP_REST_Controller {
 	 *
 	 * @return true|WP_Error True if the request has read access, WP_Error object otherwise.
 	 */
-	public function encrypt_ltdetails_permissions_check( WP_REST_Request $request ) {
-		// This is a loose check for now. Only checking if at least an LT Retailer Client is being used.
+	public function encrypt_pddetails_permissions_check( WP_REST_Request $request ) {
+		// This is a loose check for now. Only checking if at least an PD Retailer Client is being used.
 		if ( ! \current_user_can( Capabilities::VIEW_SOLUTIONS ) ) {
 			return new \WP_Error(
-				'pixelgradelt_retailer_rest_cannot_encrypt',
-				esc_html__( 'Sorry, you are not allowed to encrypt composition LT details.', 'pixelgradelt_retailer' ),
+				'pressody_retailer_rest_cannot_encrypt',
+				esc_html__( 'Sorry, you are not allowed to encrypt composition PD details.', 'pressody_retailer' ),
 				[ 'status' => \rest_authorization_required_code() ]
 			);
 		}
@@ -1110,11 +1110,11 @@ class CompositionsController extends WP_REST_Controller {
 	 * @return true|WP_Error True if the request has read access, WP_Error object otherwise.
 	 */
 	public function check_items_details_permissions_check( WP_REST_Request $request ) {
-		// This is a loose check for now. Only checking if at least an LT Retailer Client is being used.
+		// This is a loose check for now. Only checking if at least an PD Retailer Client is being used.
 		if ( ! \current_user_can( Capabilities::VIEW_SOLUTIONS ) ) {
 			return new \WP_Error(
-				'pixelgradelt_retailer_rest_cannot_check',
-				esc_html__( 'Sorry, you are not allowed to check composition LT details.', 'pixelgradelt_retailer' ),
+				'pressody_retailer_rest_cannot_check',
+				esc_html__( 'Sorry, you are not allowed to check composition PD details.', 'pressody_retailer' ),
 				[ 'status' => \rest_authorization_required_code() ]
 			);
 		}
@@ -1132,11 +1132,11 @@ class CompositionsController extends WP_REST_Controller {
 	 * @return true|WP_Error True if the request has read access, WP_Error object otherwise.
 	 */
 	public function update_items_details_permissions_check( WP_REST_Request $request ) {
-		// This is a loose check for now. Only checking if at least an LT Retailer Client is being used.
+		// This is a loose check for now. Only checking if at least an PD Retailer Client is being used.
 		if ( ! \current_user_can( Capabilities::VIEW_SOLUTIONS ) ) {
 			return new \WP_Error(
-				'pixelgradelt_retailer_rest_cannot_update',
-				esc_html__( 'Sorry, you are not allowed to update composition details.', 'pixelgradelt_retailer' ),
+				'pressody_retailer_rest_cannot_update',
+				esc_html__( 'Sorry, you are not allowed to update composition details.', 'pressody_retailer' ),
 				[ 'status' => \rest_authorization_required_code() ]
 			);
 		}
@@ -1145,7 +1145,7 @@ class CompositionsController extends WP_REST_Controller {
 	}
 
 	/**
-	 * Encrypt a set of composition LT details.
+	 * Encrypt a set of composition PD details.
 	 *
 	 * @since 0.10.0
 	 *
@@ -1153,8 +1153,8 @@ class CompositionsController extends WP_REST_Controller {
 	 *
 	 * @return WP_REST_Response|WP_Error Response object on success, or WP_Error object on failure.
 	 */
-	public function encrypt_ltdetails( WP_REST_Request $request ) {
-		// Gather the composition's LT details.
+	public function encrypt_pddetails( WP_REST_Request $request ) {
+		// Gather the composition's PD details.
 		$details = [
 			'userids'       => $request['userids'],
 			'compositionid' => $request['compositionid'],
@@ -1162,25 +1162,25 @@ class CompositionsController extends WP_REST_Controller {
 		];
 
 		/**
-		 * Filter the composition's LT details before encryption.
+		 * Filter the composition's PD details before encryption.
 		 *
 		 * @since 0.10.0
 		 *
-		 * @see   CompositionsController::encrypt_ltdetails()
+		 * @see   CompositionsController::encrypt_pddetails()
 		 *
-		 * @param bool  $valid       Whether the composition LT details are valid.
-		 * @param array $details     The composition's LT details as decrypted from the composition data.
+		 * @param bool  $valid       Whether the composition PD details are valid.
+		 * @param array $details     The composition's PD details as decrypted from the composition data.
 		 * @param array $composition The full composition data.
 		 */
-		$details = \apply_filters( 'pixelgradelt_retailer/before_encrypt_composition_ltdetails', $details, $request );
+		$details = \apply_filters( 'pressody_retailer/before_encrypt_composition_pddetails', $details, $request );
 
 		try {
 			// Validate the received details.
 			// In case of invalid details, exceptions are thrown.
-			$this->validate_ltdetails( $details );
+			$this->validate_pddetails( $details );
 		} catch ( RestException $e ) {
 			return new \WP_Error(
-				'pixelgradelt_retailer_rest_invalid_composition_ltdetails',
+				'pressody_retailer_rest_invalid_composition_pddetails',
 				$e->getMessage(),
 				[ 'status' => $e->getStatusCode(), ]
 			);
@@ -1191,8 +1191,8 @@ class CompositionsController extends WP_REST_Controller {
 			$encrypted_details = $this->crypter->encrypt( json_encode( $details ) );
 		} catch ( CrypterEnvironmentIsBrokenException $e ) {
 			return new \WP_Error(
-				'pixelgradelt_retailer_rest_unable_to_encrypt',
-				esc_html__( 'We could not encrypt. Please contact the administrator and let them know that something is wrong. Thanks in advance!', 'pixelgradelt_retailer' ),
+				'pressody_retailer_rest_unable_to_encrypt',
+				esc_html__( 'We could not encrypt. Please contact the administrator and let them know that something is wrong. Thanks in advance!', 'pressody_retailer' ),
 				[
 					'status'  => HTTP::INTERNAL_SERVER_ERROR,
 					'details' => $e->getMessage(),
@@ -1200,12 +1200,12 @@ class CompositionsController extends WP_REST_Controller {
 			);
 		}
 
-		// Return the encrypted composition LT details (a string).
+		// Return the encrypted composition PD details (a string).
 		return \rest_ensure_response( $encrypted_details );
 	}
 
 	/**
-	 * Check a set of composition LT details.
+	 * Check a set of composition PD details.
 	 *
 	 * @since 0.10.0
 	 *
@@ -1213,22 +1213,22 @@ class CompositionsController extends WP_REST_Controller {
 	 *
 	 * @return WP_REST_Response|WP_Error Response object on success, or WP_Error object on failure.
 	 */
-	public function check_ltdetails( WP_REST_Request $request ) {
+	public function check_pddetails( WP_REST_Request $request ) {
 		/**
-		 * Validate the encrypted LT details in the composition.
+		 * Validate the encrypted PD details in the composition.
 		 */
 		try {
-			$details = $this->decrypt_ltdetails( $request['ltdetails'] );
+			$details = $this->decrypt_pddetails( $request['pddetails'] );
 		} catch ( CrypterBadFormatException | CrypterWrongKeyOrModifiedCiphertextException | RestException $e ) {
 			return new \WP_Error(
-				'pixelgradelt_retailer_rest_invalid_ltdetails',
+				'pressody_retailer_rest_invalid_pddetails',
 				$e->getMessage(),
 				[ 'status' => HTTP::NOT_ACCEPTABLE, ]
 			);
 		} catch ( CrypterEnvironmentIsBrokenException $e ) {
 			return new \WP_Error(
-				'pixelgradelt_retailer_rest_unable_to_encrypt',
-				esc_html__( 'We could not decrypt. Please contact the administrator and let them know that something is wrong. Thanks in advance!', 'pixelgradelt_retailer' ),
+				'pressody_retailer_rest_unable_to_encrypt',
+				esc_html__( 'We could not decrypt. Please contact the administrator and let them know that something is wrong. Thanks in advance!', 'pressody_retailer' ),
 				[
 					'status'  => HTTP::INTERNAL_SERVER_ERROR,
 					'details' => $e->getMessage(),
@@ -1237,11 +1237,11 @@ class CompositionsController extends WP_REST_Controller {
 		}
 
 		try {
-			// In case of invalid LT details, exceptions are thrown.
-			$this->validate_ltdetails( $details );
+			// In case of invalid PD details, exceptions are thrown.
+			$this->validate_pddetails( $details );
 		} catch ( RestException $e ) {
 			return new \WP_Error(
-				'pixelgradelt_retailer_rest_invalid_ltdetails',
+				'pressody_retailer_rest_invalid_pddetails',
 				$e->getMessage(),
 				[ 'status' => $e->getStatusCode(), ]
 			);
@@ -1252,7 +1252,7 @@ class CompositionsController extends WP_REST_Controller {
 	}
 
 	/**
-	 * Validate the composition's LT details.
+	 * Validate the composition's PD details.
 	 *
 	 * Allow others to do further validations.
 	 *
@@ -1263,10 +1263,10 @@ class CompositionsController extends WP_REST_Controller {
 	 * @throws RestException
 	 * @return bool True on valid. Exceptions are thrown on invalid.
 	 */
-	protected function validate_ltdetails( array $details ): bool {
+	protected function validate_pddetails( array $details ): bool {
 
 		if ( ! isset( $details['userids'] ) ) {
-			throw RestException::forMissingCompositionLTDetails();
+			throw RestException::forMissingCompositionPDDetails();
 		}
 
 		// Check that AT LEAST a user ID actually belongs to a valid user.
@@ -1278,25 +1278,25 @@ class CompositionsController extends WP_REST_Controller {
 		}
 
 		/**
-		 * Filter the validation of the composition's LT details.
+		 * Filter the validation of the composition's PD details.
 		 *
 		 * @since 0.10.0
 		 *
-		 * @see   CompositionsController::validate_ltdetails()
+		 * @see   CompositionsController::validate_pddetails()
 		 *
 		 * Return true if the composition details are valid, or a WP_Error in case we should reject them.
 		 *
-		 * @param bool  $valid   Whether the composition LT details are valid.
+		 * @param bool  $valid   Whether the composition PD details are valid.
 		 * @param array $details The composition details as decrypted from the composition data.
 		 */
-		$valid = \apply_filters( 'pixelgradelt_retailer/validate_composition_ltdetails', true, $details );
+		$valid = \apply_filters( 'pressody_retailer/validate_composition_pddetails', true, $details );
 		if ( \is_wp_error( $valid ) ) {
-			$message = esc_html__( 'Third-party composition\'s LT details checks have found them invalid. Here is what happened: ', 'pixelgradelt_retailer' ) . PHP_EOL;
+			$message = esc_html__( 'Third-party composition\'s PD details checks have found them invalid. Here is what happened: ', 'pressody_retailer' ) . PHP_EOL;
 			$message .= implode( ' ; ' . PHP_EOL, $valid->get_error_messages() );
 
-			throw RestException::forInvalidCompositionLTDetails( $message );
+			throw RestException::forInvalidCompositionPDDetails( $message );
 		} elseif ( true !== $valid ) {
-			throw RestException::forInvalidCompositionLTDetails();
+			throw RestException::forInvalidCompositionPDDetails();
 		}
 
 		return true;
@@ -1305,7 +1305,7 @@ class CompositionsController extends WP_REST_Controller {
 	/**
 	 * Determine what details should be updated in the received composition.
 	 *
-	 * First, the received composition LT details and composition will be checked.
+	 * First, the received composition PD details and composition will be checked.
 	 *
 	 * @since 0.10.0
 	 *
@@ -1328,8 +1328,8 @@ class CompositionsController extends WP_REST_Controller {
 			$this->validate_schema( $this->standardize_to_object( $composition ) );
 		} catch ( JsonValidationException $e ) {
 			return new \WP_Error(
-				'pixelgradelt_retailer_rest_json_invalid',
-				esc_html__( 'Could not validate the received composition against the Composer JSON schema.', 'pixelgradelt_retailer' ),
+				'pressody_retailer_rest_json_invalid',
+				esc_html__( 'Could not validate the received composition against the Composer JSON schema.', 'pressody_retailer' ),
 				[
 					'status'  => HTTP::NOT_ACCEPTABLE,
 					'details' => $e->getErrors(),
@@ -1338,33 +1338,33 @@ class CompositionsController extends WP_REST_Controller {
 		}
 
 		/* ==============================
-		 * Second, decrypt and validate the LT details.
+		 * Second, decrypt and validate the PD details.
 		 */
-		if ( empty( $composition['extra'][ self::LTDETAILS_KEY ] ) ) {
+		if ( empty( $composition['extra'][ self::PDDETAILS_KEY ] ) ) {
 			return new \WP_Error(
-				'pixelgradelt_retailer_rest_missing_composition_ltdetails',
-				esc_html__( 'The composition is missing the encrypted LT details.', 'pixelgradelt_retailer' ),
+				'pressody_retailer_rest_missing_composition_pddetails',
+				esc_html__( 'The composition is missing the encrypted PD details.', 'pressody_retailer' ),
 				[ 'status' => HTTP::NOT_ACCEPTABLE, ]
 			);
 		}
 		try {
-			$composition_ltdetails = $this->decrypt_ltdetails( $composition['extra'][ self::LTDETAILS_KEY ] );
+			$composition_pddetails = $this->decrypt_pddetails( $composition['extra'][ self::PDDETAILS_KEY ] );
 		} catch ( RestException $e ) {
 			return new \WP_Error(
-				'pixelgradelt_retailer_rest_invalid_composition_ltdetails',
+				'pressody_retailer_rest_invalid_composition_pddetails',
 				$e->getMessage(),
 				[ 'status' => $e->getStatusCode(), ]
 			);
 		} catch ( CrypterBadFormatException | CrypterWrongKeyOrModifiedCiphertextException $e ) {
 			return new \WP_Error(
-				'pixelgradelt_retailer_rest_invalid_composition_ltdetails',
+				'pressody_retailer_rest_invalid_composition_pddetails',
 				$e->getMessage(),
 				[ 'status' => HTTP::NOT_ACCEPTABLE ]
 			);
 		} catch ( CrypterEnvironmentIsBrokenException $e ) {
 			return new \WP_Error(
-				'pixelgradelt_retailer_rest_unable_to_encrypt',
-				esc_html__( 'We could not decrypt. Please contact the administrator and let them know that something is wrong. Thanks in advance!', 'pixelgradelt_retailer' ),
+				'pressody_retailer_rest_unable_to_encrypt',
+				esc_html__( 'We could not decrypt. Please contact the administrator and let them know that something is wrong. Thanks in advance!', 'pressody_retailer' ),
 				[
 					'status'  => HTTP::INTERNAL_SERVER_ERROR,
 					'details' => $e->getMessage(),
@@ -1373,11 +1373,11 @@ class CompositionsController extends WP_REST_Controller {
 		}
 
 		try {
-			// In case of invalid composition LT details, exceptions are thrown.
-			$this->validate_ltdetails( $composition_ltdetails );
+			// In case of invalid composition PD details, exceptions are thrown.
+			$this->validate_pddetails( $composition_pddetails );
 		} catch ( RestException $e ) {
 			return new \WP_Error(
-				'pixelgradelt_retailer_rest_invalid_composition_ltdetails',
+				'pressody_retailer_rest_invalid_composition_pddetails',
 				$e->getMessage(),
 				[ 'status' => $e->getStatusCode(), ]
 			);
@@ -1399,23 +1399,23 @@ class CompositionsController extends WP_REST_Controller {
 		 * @param bool|array $instructions_to_update The instructions to update the composition by.
 		 *                                           false if we should reject the request and error out.
 		 *                                           An empty array if we should leave the composition unchanged.
-		 * @param array      $composition_ltdetails  The decrypted composition LT details, already checked.
+		 * @param array      $composition_pddetails  The decrypted composition PD details, already checked.
 		 * @param array      $composition            The full composition data.
 		 */
-		$instructions_to_update = \apply_filters( 'pixelgradelt_retailer/instructions_to_update_composition', [], $composition_ltdetails, $composition );
+		$instructions_to_update = \apply_filters( 'pressody_retailer/instructions_to_update_composition', [], $composition_pddetails, $composition );
 		if ( \is_wp_error( $instructions_to_update ) ) {
-			$message = esc_html__( 'Your attempt to determine what to update in the composition was rejected. Here is what happened: ', 'pixelgradelt_retailer' ) . PHP_EOL;
+			$message = esc_html__( 'Your attempt to determine what to update in the composition was rejected. Here is what happened: ', 'pressody_retailer' ) . PHP_EOL;
 			$message .= implode( ' ; ' . PHP_EOL, $instructions_to_update->get_error_messages() );
 
 			return new \WP_Error(
-				'pixelgradelt_retailer_rest_rejected',
+				'pressody_retailer_rest_rejected',
 				$message,
 				[ 'status' => HTTP::NOT_ACCEPTABLE, ]
 			);
 		} elseif ( false === $instructions_to_update ) {
 			return new \WP_Error(
-				'pixelgradelt_retailer_rest_rejected',
-				esc_html__( 'Your attempt to determine what to update in the composition was rejected.', 'pixelgradelt_retailer' ),
+				'pressody_retailer_rest_rejected',
+				esc_html__( 'Your attempt to determine what to update in the composition was rejected.', 'pressody_retailer' ),
 				[ 'status' => HTTP::NOT_ACCEPTABLE, ]
 			);
 		}
@@ -1432,7 +1432,7 @@ class CompositionsController extends WP_REST_Controller {
 	}
 
 	/**
-	 * Decrypt the encrypted composition LT details.
+	 * Decrypt the encrypted composition PD details.
 	 *
 	 * @since 0.10.0
 	 *
@@ -1444,11 +1444,11 @@ class CompositionsController extends WP_REST_Controller {
 	 * @throws RestException
 	 * @return array
 	 */
-	protected function decrypt_ltdetails( string $encrypted_details ): array {
+	protected function decrypt_pddetails( string $encrypted_details ): array {
 		$details = json_decode( $this->crypter->decrypt( $encrypted_details ), true );
 
 		if ( null === $details ) {
-			throw RestException::forInvalidCompositionLTDetails();
+			throw RestException::forInvalidCompositionPDDetails();
 		}
 
 		return $details;
@@ -1530,7 +1530,7 @@ class CompositionsController extends WP_REST_Controller {
 		 * @param object $compositionObject The standardized composition object.
 		 * @param array  $composition       The initial composition.
 		 */
-		return \apply_filters( 'pixelgradelt_retailer/composition_standardize_to_object', $compositionObject, $composition );
+		return \apply_filters( 'pressody_retailer/composition_standardize_to_object', $compositionObject, $composition );
 	}
 
 	/**
@@ -1545,7 +1545,7 @@ class CompositionsController extends WP_REST_Controller {
 	protected function arrayToObjectRecursive( array $array ): object {
 		$json = json_encode( $array );
 		if ( json_last_error() !== \JSON_ERROR_NONE ) {
-			$message = esc_html__( 'Unable to encode schema array as JSON', 'pixelgradelt_retailer' );
+			$message = esc_html__( 'Unable to encode schema array as JSON', 'pressody_retailer' );
 			if ( function_exists( 'json_last_error_msg' ) ) {
 				$message .= ': ' . json_last_error_msg();
 			}
@@ -1567,7 +1567,7 @@ class CompositionsController extends WP_REST_Controller {
 	protected function objectToArrayRecursive( object $object ): array {
 		$json = json_encode( $object );
 		if ( json_last_error() !== \JSON_ERROR_NONE ) {
-			$message = esc_html__( 'Unable to encode schema array as JSON', 'pixelgradelt_retailer' );
+			$message = esc_html__( 'Unable to encode schema array as JSON', 'pressody_retailer' );
 			if ( function_exists( 'json_last_error_msg' ) ) {
 				$message .= ': ' . json_last_error_msg();
 			}
@@ -1601,7 +1601,7 @@ class CompositionsController extends WP_REST_Controller {
 			foreach ( (array) $validator->getErrors() as $error ) {
 				$errors[] = ( $error['property'] ? $error['property'] . ' : ' : '' ) . $error['message'];
 			}
-			throw new JsonValidationException( esc_html__( 'The composition does not match the expected JSON schema', 'pixelgradelt_retailer' ), $errors );
+			throw new JsonValidationException( esc_html__( 'The composition does not match the expected JSON schema', 'pressody_retailer' ), $errors );
 		}
 
 		return true;

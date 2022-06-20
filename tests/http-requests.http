@@ -1,11 +1,11 @@
-GET https://lt-retailer.local/wp-json/pixelgradelt_retailer/v1/solutions
-Authorization: Basic Fry4YDsVZGs7UDvtLrHcR8fjEgdL8iG0 pixelgradelt_retailer
+GET https://pd-retailer.local/wp-json/pressody_retailer/v1/solutions
+Authorization: Basic Fry4YDsVZGs7UDvtLrHcR8fjEgdL8iG0 pressody_retailer
 Accept: application/json
 
 ###
 
-GET https://lt-retailer.local/wp-json/pixelgradelt_retailer/v1/solutions/parts
-Authorization: Basic Fry4YDsVZGs7UDvtLrHcR8fjEgdL8iG0 pixelgradelt_retailer
+GET https://pd-retailer.local/wp-json/pressody_retailer/v1/solutions/parts
+Authorization: Basic Fry4YDsVZGs7UDvtLrHcR8fjEgdL8iG0 pressody_retailer
 Accept: application/json
 Content-Type: application/json
 
@@ -15,24 +15,24 @@ Content-Type: application/json
 
 ###
 
-GET https://lt-retailer.local/wp-json/pixelgradelt_retailer/v1/solutions/processed
-Authorization: Basic Fry4YDsVZGs7UDvtLrHcR8fjEgdL8iG0 pixelgradelt_retailer
+GET https://pd-retailer.local/wp-json/pressody_retailer/v1/solutions/processed
+Authorization: Basic Fry4YDsVZGs7UDvtLrHcR8fjEgdL8iG0 pressody_retailer
 Accept: application/json
 Content-Type: application/json
 
 {
   "postId": [9,22],
   "solutionsContext": {
-	"pixelgradelt-retailer/first-solution": {
+	"pressody-retailer/first-solution": {
 	  "timestamp": 101
 	},
-	"pixelgradelt-retailer/fourth-solution": {
+	"pressody-retailer/fourth-solution": {
 	  "timestamp": 102
 	},
-	"pixelgradelt-retailer/second-solution": {
+	"pressody-retailer/second-solution": {
 	  "timestamp": 103
 	},
-	"pixelgradelt-retailer/third-solution": {
+	"pressody-retailer/third-solution": {
 	  "timestamp": 104
 	}
   }
@@ -40,47 +40,35 @@ Content-Type: application/json
 
 ###
 
-POST https://lt-retailer.local/wp-json/pixelgradelt_retailer/v1/compositions/instructions_to_update
-Authorization: Basic whtg94kNGV20FuOy7yTbqAi198hBMjyz pixelgradelt_retailer
+POST https://pd-retailer.local/wp-json/pressody_retailer/v1/compositions/instructions_to_update
+Authorization: Basic whtg94kNGV20FuOy7yTbqAi198hBMjyz pressody_retailer
 Accept: application/json
 Content-Type: application/json
 
 {
   "composer": {
-	"name": "pixelgradelt/site",
+	"name": "pressody/site",
 	"type": "project",
 	"license": "MIT",
-	"description": "A Pixelgrade LT WordPress site.",
-	"homepage": "https://pixelgradelt.com",
+	"description": "A Pressody WordPress site.",
+	"homepage": "https://pressody.com",
 	"time": "2021-07-13T14:28:26+00:00",
 	"authors": [
 	  {
 		"name": "Vlad Olaru",
-		"email": "vlad@pixelgrade.com",
+		"email": "vlad@getpressody.com",
 		"homepage": "https://thinkwritecode.com",
 		"role": "Development, infrastructure, and product development"
 	  },
 	  {
 		"name": "George Olaru",
-		"email": "george@pixelgrade.com",
-		"homepage": "https://pixelgrade.com",
+		"email": "george@getpressody.com",
+		"homepage": "https://getpressody.com",
 		"role": "Design and product development"
-	  },
-	  {
-		"name": "Răzvan Onofrei",
-		"email": "razvan@pixelgrade.com",
-		"homepage": "https://pixelgrade.com",
-		"role": "Development and product development"
-	  },
-	  {
-		"name": "Mădălin Gorbănescu",
-		"email": "madalin@pixelgrade.com",
-		"homepage": "https://pixelgrade.com",
-		"role": "Development"
 	  }
 	],
 	"keywords": [
-	  "pixelgradelt",
+	  "pressody",
 	  "bedrock",
 	  "composer",
 	  "roots",
@@ -89,13 +77,13 @@ Content-Type: application/json
 	  "wp-config"
 	],
 	"support": {
-	  "issues": "https://pixelgradelt.com",
-	  "forum": "https://pixelgradelt.com"
+	  "issues": "https://getpressody.com",
+	  "forum": "https://getpressody.com"
 	},
 	"repositories": [
 	  {
 		"type": "composer",
-		"url": "https://lt-records.local/ltpackagist/",
+		"url": "https://pd-records.local/pdpackagist/",
 		"options": {
 		  "ssl": {
 			"verify_peer": false
@@ -111,10 +99,10 @@ Content-Type: application/json
 	  "ext-json": "*",
 	  "oscarotero/env": "^2.1",
 	  "php": ">=7.1",
-	  "pixelgradelt-records/part_another-test": "*, >=1.4",
-	  "pixelgradelt-records/part_spanky": "1.0.0",
-	  "pixelgradelt-records/part_test-test": "*, ^1.0",
-	  "pixelgradelt-records/part_yet-another": "*",
+	  "pressody-records/part_another-test": "*, >=1.4",
+	  "pressody-records/part_spanky": "1.0.0",
+	  "pressody-records/part_test-test": "*, ^1.0",
+	  "pressody-records/part_yet-another": "*",
 	  "roots/bedrock-autoloader": "^1.0",
 	  "roots/wordpress": "*",
 	  "roots/wp-config": "1.0.0",
@@ -143,60 +131,60 @@ Content-Type: application/json
 		  "type:wordpress-theme"
 		]
 	  },
-	  "lt-composition": "def5020051bc8670e75a30e3b93beef0a949370dec51667bdc61ce004b5d8c07202ed9d9a4ee138f3622de86af1a1fe692555a8dc86f9ea107c06cfc2834470746a76813d48a8aa83fa63fd664adde8dd9420ea4952569295be670c7bb3fdb624463f4781ccd077c6de009d08398524ee2cacacc4b75b0270fdd2b820c8241c5e8676a6eab6831e5c58220ae9e1f76dc28ae4cb26814e21ed7f9d77c10507f6181054df2f258884b9e1cca6d852ce0aae1584c4ebb75301a842d",
-	  "lt-required-packages": {
-		"pixelgradelt-records/part_yet-another": {
-		  "name": "pixelgradelt-records/part_yet-another",
+	  "pd-composition": "def5020051bc8670e75a30e3b93beef0a949370dec51667bdc61ce004b5d8c07202ed9d9a4ee138f3622de86af1a1fe692555a8dc86f9ea107c06cfc2834470746a76813d48a8aa83fa63fd664adde8dd9420ea4952569295be670c7bb3fdb624463f4781ccd077c6de009d08398524ee2cacacc4b75b0270fdd2b820c8241c5e8676a6eab6831e5c58220ae9e1f76dc28ae4cb26814e21ed7f9d77c10507f6181054df2f258884b9e1cca6d852ce0aae1584c4ebb75301a842d",
+	  "pd-required-packages": {
+		"pressody-records/part_yet-another": {
+		  "name": "pressody-records/part_yet-another",
 		  "version": "*",
 		  "requiredBy": [
 			{
-			  "name": "pixelgradelt-retailer/first-solution",
+			  "name": "pressody-retailer/first-solution",
 			  "requiredVersion": "*"
 			}
 		  ]
 		},
-		"pixelgradelt-records/part_another-test": {
-		  "name": "pixelgradelt-records/part_another-test",
+		"pressody-records/part_another-test": {
+		  "name": "pressody-records/part_another-test",
 		  "version": "*, >=1.4",
 		  "requiredBy": [
 			{
-			  "name": "pixelgradelt-retailer/fourth-solution",
+			  "name": "pressody-retailer/fourth-solution",
 			  "requiredVersion": "*"
 			},
 			{
-			  "name": "pixelgradelt-retailer/second-solution",
+			  "name": "pressody-retailer/second-solution",
 			  "requiredVersion": ">=1.4"
 			}
 		  ]
 		},
-		"pixelgradelt-records/part_spanky": {
-		  "name": "pixelgradelt-records/part_spanky",
+		"pressody-records/part_spanky": {
+		  "name": "pressody-records/part_spanky",
 		  "version": "1.0.0",
 		  "requiredBy": [
 			{
-			  "name": "pixelgradelt-retailer/fourth-solution",
+			  "name": "pressody-retailer/fourth-solution",
 			  "requiredVersion": "1.0.0"
 			}
 		  ]
 		},
-		"pixelgradelt-records/part_test-test": {
-		  "name": "pixelgradelt-records/part_test-test",
+		"pressody-records/part_test-test": {
+		  "name": "pressody-records/part_test-test",
 		  "version": "*, ^1.0",
 		  "requiredBy": [
 			{
-			  "name": "pixelgradelt-retailer/fourth-solution",
+			  "name": "pressody-retailer/fourth-solution",
 			  "requiredVersion": "*"
 			},
 			{
-			  "name": "pixelgradelt-retailer/second-solution",
+			  "name": "pressody-retailer/second-solution",
 			  "requiredVersion": "^1.0"
 			}
 		  ]
 		}
 	  },
-	  "lt-version": "1.1.0",
+	  "pd-version": "1.1.0",
 	  "wordpress-install-dir": "web/wp",
-	  "lt-fingerprint": "f94bd64f455c48012218507b33e7c741"
+	  "pd-fingerprint": "f94bd64f455c48012218507b33e7c741"
 	},
 	"scripts": {
 	  "post-root-package-install": [],
@@ -209,19 +197,19 @@ Content-Type: application/json
 
 ###
 
-POST https://lt-retailer.local/wp-json/pixelgradelt_retailer/v1/compositions/check_ltdetails
-Authorization: Basic whtg94kNGV20FuOy7yTbqAi198hBMjyz pixelgradelt_retailer
+POST https://pd-retailer.local/wp-json/pressody_retailer/v1/compositions/check_pddetails
+Authorization: Basic whtg94kNGV20FuOy7yTbqAi198hBMjyz pressody_retailer
 Accept: application/json
 Content-Type: application/json
 
 {
-  "ltdetails": "def502008255eca7bb197c6abea2ba0dc5c9d6315418946d37e17b68a8a3fd3ce5a9132d0ffa95836a5952b1b18667a2b592b50a8bbf84b3afe9e7e06298d9ca29f5a722024673215d8111ccdbdf3d9fbbd7d3f5b5467482ce5822f833b29a6f3e4dd06128323a00732b06449b9400fb957958dc3af89d1475204a1e0e2214a8971df85f8db5ad5b7ba2eb1d7b3f78f2fbf6e3949da68f42d7c76b29aab2f01e4eeed84fed71aa46301d3c3c2b3e288373cbe239e886acb1e68f8490bb7f5b682c3ae4ee27fcfff2619188f2fd57ba8d9fd3"
+  "pddetails": "def502008255eca7bb197c6abea2ba0dc5c9d6315418946d37e17b68a8a3fd3ce5a9132d0ffa95836a5952b1b18667a2b592b50a8bbf84b3afe9e7e06298d9ca29f5a722024673215d8111ccdbdf3d9fbbd7d3f5b5467482ce5822f833b29a6f3e4dd06128323a00732b06449b9400fb957958dc3af89d1475204a1e0e2214a8971df85f8db5ad5b7ba2eb1d7b3f78f2fbf6e3949da68f42d7c76b29aab2f01e4eeed84fed71aa46301d3c3c2b3e288373cbe239e886acb1e68f8490bb7f5b682c3ae4ee27fcfff2619188f2fd57ba8d9fd3"
 }
 
 ###
 
-POST https://lt-retailer.local/wp-json/pixelgradelt_retailer/v1/compositions/encrypt_ltdetails
-Authorization: Basic whtg94kNGV20FuOy7yTbqAi198hBMjyz pixelgradelt_retailer
+POST https://pd-retailer.local/wp-json/pressody_retailer/v1/compositions/encrypt_pddetails
+Authorization: Basic whtg94kNGV20FuOy7yTbqAi198hBMjyz pressody_retailer
 Accept: application/json
 Content-Type: application/json
 

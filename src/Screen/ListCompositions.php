@@ -4,18 +4,18 @@
  *
  * @since   0.12.0
  * @license GPL-2.0-or-later
- * @package PixelgradeLT
+ * @package Pressody
  */
 
 declare ( strict_types=1 );
 
-namespace PixelgradeLT\Retailer\Screen;
+namespace Pressody\Retailer\Screen;
 
 use Cedaro\WP\Plugin\AbstractHookProvider;
-use PixelgradeLT\Retailer\CompositionManager;
-use PixelgradeLT\Retailer\SolutionManager;
-use PixelgradeLT\Retailer\SolutionType\SolutionTypes;
-use PixelgradeLT\Retailer\Utils\ArrayHelpers;
+use Pressody\Retailer\CompositionManager;
+use Pressody\Retailer\SolutionManager;
+use Pressody\Retailer\SolutionType\SolutionTypes;
+use Pressody\Retailer\Utils\ArrayHelpers;
 
 /**
  * List Compositions screen provider class.
@@ -89,8 +89,8 @@ class ListCompositions extends AbstractHookProvider {
 	 * @since 0.12.0
 	 */
 	public function enqueue_assets() {
-		wp_enqueue_script( 'pixelgradelt_retailer-admin' );
-		wp_enqueue_style( 'pixelgradelt_retailer-admin' );
+		wp_enqueue_script( 'pressody_retailer-admin' );
+		wp_enqueue_style( 'pressody_retailer-admin' );
 	}
 
 	protected function add_custom_columns( array $columns ): array {
@@ -102,10 +102,10 @@ class ListCompositions extends AbstractHookProvider {
 		// Insert after the title columns for dependencies.
 		$columns = ArrayHelpers::insertAfterKey( $columns, 'title',
 			[
-				'composition_status' => esc_html__( 'Status', 'pixelgradelt_retailer' ),
-				'composition_hashid' => esc_html__( 'Hashid', 'pixelgradelt_retailer' ),
-				'composition_users' => esc_html__( 'Owner(s)', 'pixelgradelt_retailer' ),
-				'composition_required_solutions' => esc_html__( 'Contained Solution(s)', 'pixelgradelt_retailer' ),
+				'composition_status' => esc_html__( 'Status', 'pressody_retailer' ),
+				'composition_hashid' => esc_html__( 'Hashid', 'pressody_retailer' ),
+				'composition_users' => esc_html__( 'Owner(s)', 'pressody_retailer' ),
+				'composition_required_solutions' => esc_html__( 'Contained Solution(s)', 'pressody_retailer' ),
 			]
 		);
 
@@ -156,7 +156,7 @@ class ListCompositions extends AbstractHookProvider {
 		if ( 'composition_required_solutions' === $column && ! empty( $composition_data['required_solutions'] ) ) {
 			$list = [];
 			foreach ( $composition_data['required_solutions'] as $solution_details ) {
-				$list[] = '<a class="package-list_link" href="' . esc_url( get_edit_post_link( $solution_details['managed_post_id'] ) ) . '" title="Edit Required LT Solution">' . get_the_title( $solution_details['managed_post_id'] ) . ' #' . $solution_details['managed_post_id'] . '</a>';
+				$list[] = '<a class="package-list_link" href="' . esc_url( get_edit_post_link( $solution_details['managed_post_id'] ) ) . '" title="Edit Required PD Solution">' . get_the_title( $solution_details['managed_post_id'] ) . ' #' . $solution_details['managed_post_id'] . '</a>';
 			}
 
 			$output = implode( '<br>' . PHP_EOL, $list );

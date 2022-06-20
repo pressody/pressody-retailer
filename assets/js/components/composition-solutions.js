@@ -8,8 +8,8 @@ const {__} = i18n
 function CompositionSolutionsPlaceholder (props) {
 	return html`
 	  <${Placeholder}
-			  label=${__('No solutions', 'pixelgradelt_retailer')}
-			  instructions=${__('Add some solutions to this composition if you want it to do something.', 'pixelgradelt_retailer')}
+			  label=${__('No solutions', 'pressody_retailer')}
+			  instructions=${__('Add some solutions to this composition if you want it to do something.', 'pressody_retailer')}
 	  >
 	  </${Placeholder}>
 	`
@@ -48,7 +48,7 @@ function CompositionSolution (props) {
 	} = props
 
 	return html`
-	  <table className="pixelgradelt_retailer-package widefat">
+	  <table className="pressody_retailer-package widefat">
 		  <thead>
 		  <tr>
 					<th colSpan="2"><strong>${composer.name}</strong>
@@ -59,8 +59,8 @@ function CompositionSolution (props) {
 		  </thead>
 		  <tbody>
 		  <tr>
-			  <th>${__('Required Packages', 'pixelgradelt_retailer')}</th>
-			  <td className="pixelgradelt_retailer-required-packages">
+			  <th>${__('Required Packages', 'pressody_retailer')}</th>
+			  <td className="pressody_retailer-required-packages">
 				  <${SolutionRequiredPackages} requiredPackages=${requiredPackages}/>
 			  </td>
 		  </tr>

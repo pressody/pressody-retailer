@@ -4,16 +4,16 @@
  *
  * @since   0.1.0
  * @license GPL-2.0-or-later
- * @package PixelgradeLT
+ * @package Pressody
  */
 
 declare ( strict_types=1 );
 
-namespace PixelgradeLT\Retailer\Screen;
+namespace Pressody\Retailer\Screen;
 
 use Cedaro\WP\Plugin\AbstractHookProvider;
-use PixelgradeLT\Retailer\SolutionManager;
-use PixelgradeLT\Retailer\Utils\ArrayHelpers;
+use Pressody\Retailer\SolutionManager;
+use Pressody\Retailer\Utils\ArrayHelpers;
 
 /**
  * List Solutions screen provider class.
@@ -72,12 +72,12 @@ class ListSolutions extends AbstractHookProvider {
 
 		$type_taxonomy = get_taxonomy( $this->solution_manager::TYPE_TAXONOMY );
 		wp_dropdown_categories( array(
-			'show_option_all' => sprintf( __( 'All %s', 'pixelgradelt_retailer' ), $type_taxonomy->label ),
+			'show_option_all' => sprintf( __( 'All %s', 'pressody_retailer' ), $type_taxonomy->label ),
 			'orderby'         => 'term_id',
 			'order'           => 'ASC',
 			'hide_empty'      => false,
 			'hide_if_empty'   => true,
-			'selected'        => filter_input( INPUT_GET, $type_taxonomy->query_var, FILTER_SANITIZE_STRING ),
+			'selected'        => filter_input( INPUT_GET, $type_taxonomy->query_var, FIPDER_SANITIZE_STRING ),
 			'hierarchical'    => false,
 			'name'            => $type_taxonomy->query_var,
 			'taxonomy'        => $type_taxonomy->name,
@@ -86,12 +86,12 @@ class ListSolutions extends AbstractHookProvider {
 
 		$category_taxonomy = get_taxonomy( $this->solution_manager::CATEGORY_TAXONOMY );
 		wp_dropdown_categories( array(
-			'show_option_all' => sprintf( __( 'All %s', 'pixelgradelt_retailer' ), $category_taxonomy->label ),
+			'show_option_all' => sprintf( __( 'All %s', 'pressody_retailer' ), $category_taxonomy->label ),
 			'orderby'         => 'term_id',
 			'order'           => 'ASC',
 			'hide_empty'      => false,
 			'hide_if_empty'   => true,
-			'selected'        => filter_input( INPUT_GET, $category_taxonomy->query_var, FILTER_SANITIZE_STRING ),
+			'selected'        => filter_input( INPUT_GET, $category_taxonomy->query_var, FIPDER_SANITIZE_STRING ),
 			'hierarchical'    => true,
 			'name'            => $category_taxonomy->query_var,
 			'taxonomy'        => $category_taxonomy->name,
@@ -119,8 +119,8 @@ class ListSolutions extends AbstractHookProvider {
 	 * @since 0.1.0
 	 */
 	public function enqueue_assets() {
-		wp_enqueue_script( 'pixelgradelt_retailer-admin' );
-		wp_enqueue_style( 'pixelgradelt_retailer-admin' );
+		wp_enqueue_script( 'pressody_retailer-admin' );
+		wp_enqueue_style( 'pressody_retailer-admin' );
 	}
 
 	protected function add_custom_columns( array $columns ): array {
@@ -132,9 +132,9 @@ class ListSolutions extends AbstractHookProvider {
 		// Insert after the title columns for dependencies.
 		$columns = ArrayHelpers::insertAfterKey( $columns, 'title',
 			[
-				'solution_required_parts' => esc_html__( 'Required Parts', 'pixelgradelt_retailer' ),
-				'solution_required_solutions' => esc_html__( 'Required Solutions', 'pixelgradelt_retailer' ),
-				'solution_excluded_solutions' => esc_html__( 'Excluded Solutions', 'pixelgradelt_retailer' ),
+				'solution_required_parts' => esc_html__( 'Required Parts', 'pressody_retailer' ),
+				'solution_required_solutions' => esc_html__( 'Required Solutions', 'pressody_retailer' ),
+				'solution_excluded_solutions' => esc_html__( 'Excluded Solutions', 'pressody_retailer' ),
 			]
 		);
 
@@ -153,9 +153,9 @@ class ListSolutions extends AbstractHookProvider {
 		$output = '—';
 
 		$solution_data = $this->solution_manager->get_solution_id_data( $post_id );
-		if ( 'solution_required_parts' === $column && ! empty( $solution_data['required_ltrecords_parts'] ) ) {
+		if ( 'solution_required_parts' === $column && ! empty( $solution_data['required_pdrecords_parts'] ) ) {
 			$list = [];
-			foreach ( $solution_data['required_ltrecords_parts'] as $part_details ) {
+			foreach ( $solution_data['required_pdrecords_parts'] as $part_details ) {
 				$list[] = $part_details['package_name'] . ':' . $part_details['version_range'];
 			}
 
@@ -165,7 +165,7 @@ class ListSolutions extends AbstractHookProvider {
 		if ( 'solution_required_solutions' === $column && ! empty( $solution_data['required_solutions'] ) ) {
 			$list = [];
 			foreach ( $solution_data['required_solutions'] as $solution_details ) {
-				$list[] = '<a class="package-list_link" href="' . esc_url( get_edit_post_link( $solution_details['managed_post_id'] ) ) . '" title="Edit Required LT Solution">' . get_the_title( $solution_details['managed_post_id'] ) . ' (' . $solution_details['pseudo_id'] . ')</a>';
+				$list[] = '<a class="package-list_link" href="' . esc_url( get_edit_post_link( $solution_details['managed_post_id'] ) ) . '" title="Edit Required PD Solution">' . get_the_title( $solution_details['managed_post_id'] ) . ' (' . $solution_details['pseudo_id'] . ')</a>';
 			}
 
 			$output = implode( '<br>' . PHP_EOL, $list );
@@ -174,7 +174,7 @@ class ListSolutions extends AbstractHookProvider {
 		if ( 'solution_excluded_solutions' === $column && ! empty( $solution_data['excluded_solutions'] ) ) {
 			$list = [];
 			foreach ( $solution_data['excluded_solutions'] as $solution_details ) {
-				$list[] = '<a class="package-list_link" href="' . esc_url( get_edit_post_link( $solution_details['managed_post_id'] ) ) . '" title="Edit Excluded LT Solution">' . get_the_title( $solution_details['managed_post_id'] ) . ' (' . $solution_details['pseudo_id'] . ')</a>';
+				$list[] = '<a class="package-list_link" href="' . esc_url( get_edit_post_link( $solution_details['managed_post_id'] ) ) . '" title="Edit Excluded PD Solution">' . get_the_title( $solution_details['managed_post_id'] ) . ' (' . $solution_details['pseudo_id'] . ')</a>';
 			}
 
 			$output = implode( '<br>' . PHP_EOL, $list );

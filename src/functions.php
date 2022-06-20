@@ -4,15 +4,15 @@
  *
  * @since   0.1.0
  * @license GPL-2.0-or-later
- * @package PixelgradeLT
+ * @package Pressody
  */
 
 declare ( strict_types=1 );
 
-namespace PixelgradeLT\Retailer;
+namespace Pressody\Retailer;
 
 use Carbon_Fields\Helper\Helper;
-use PixelgradeLT\Retailer\Exception\InvalidComposerVendor;
+use Pressody\Retailer\Exception\InvalidComposerVendor;
 
 /**
  * Retrieve the main plugin instance.
@@ -39,7 +39,7 @@ function plugin(): Plugin {
  * @return mixed
  */
 function get_setting( string $key, $default = null ) {
-	$option = get_option( 'pixelgradelt_retailer' );
+	$option = get_option( 'pressody_retailer' );
 
 	return $option[ $key ] ?? $default;
 }
@@ -128,18 +128,18 @@ function get_solutions_permalink( array $args = null ): string {
 
 	$permalink = get_option( 'permalink_structure' );
 	if ( empty( $permalink ) ) {
-		$url = add_query_arg( 'pixelgradelt_retailer_route', 'composer_solutions', home_url( '/' ) );
+		$url = add_query_arg( 'pressody_retailer_route', 'composer_solutions', home_url( '/' ) );
 	} else {
 		// Leave off the packages.json if 'base' arg is true.
 		$suffix = isset( $args['base'] ) && $args['base'] ? '' : 'packages.json';
-		$url    = sprintf( network_home_url( '/ltsolutions/%s' ), $suffix );
+		$url    = sprintf( network_home_url( '/pdsolutions/%s' ), $suffix );
 	}
 
 	return $url;
 }
 
 /**
- * Retrieve the PixelgradeLT Retailer Composer vendor for use with our packages.
+ * Retrieve the Pressody Retailer Composer vendor for use with our packages.
  *
  * @throws InvalidComposerVendor
  * @return string
@@ -148,13 +148,13 @@ function get_composer_vendor(): string {
 	/**
 	 * The custom vendor configured via the Settings page is hooked through @see CustomVendor::register_hooks()
 	 */
-	$vendor = \apply_filters( 'pixelgradelt_retailer/vendor', 'pixelgradelt-retailer' );
+	$vendor = \apply_filters( 'pressody_retailer/vendor', 'pressody-retailer' );
 	if ( empty( $vendor ) || ! is_string( $vendor ) ) {
-		throw new InvalidComposerVendor( "The PixelgradeLT Retailer Composer vendor must be a string and it can't be empty or falsy." );
+		throw new InvalidComposerVendor( "The Pressody Retailer Composer vendor must be a string and it can't be empty or falsy." );
 	}
 
 	if ( strlen( $vendor ) < 10 ) {
-		throw new InvalidComposerVendor( "The PixelgradeLT Retailer Composer vendor must be at least 10 characters long. Please make sure that it is as unique as possible, in the entire Composer ecosystem." );
+		throw new InvalidComposerVendor( "The Pressody Retailer Composer vendor must be at least 10 characters long. Please make sure that it is as unique as possible, in the entire Composer ecosystem." );
 	}
 
 	// This is the same partial pattern used by Composer.
@@ -235,12 +235,12 @@ function is_plugin_file( string $plugin_file ): bool {
 function display_missing_dependencies_notice() {
 	$message = sprintf(
 	/* translators: %s: documentation URL */
-		__( 'PixelgradeLT Retailer is missing required dependencies. <a href="%s" target="_blank" rel="noopener noreferer">Learn more.</a>', 'pixelgradelt_retailer' ),
-		'https://github.com/pixelgradelt/pixelgradelt-retailer/blob/master/docs/installation.md'
+		__( 'Pressody Retailer is missing required dependencies. <a href="%s" target="_blank" rel="noopener noreferer">Learn more.</a>', 'pressody_retailer' ),
+		'https://github.com/pressody/pressody-retailer/blob/master/docs/installation.md'
 	);
 
 	printf(
-		'<div class="pixelgradelt_retailer-compatibility-notice notice notice-error"><p>%s</p></div>',
+		'<div class="pressody_retailer-compatibility-notice notice notice-error"><p>%s</p></div>',
 		wp_kses(
 			$message,
 			[
@@ -285,7 +285,7 @@ function is_rest_request() {
 	$rest_prefix         = \trailingslashit( \rest_get_url_prefix() );
 	$is_rest_api_request = ( false !== strpos( $_SERVER['REQUEST_URI'], $rest_prefix ) ); // phpcs:disable WordPress.Security.ValidatedSanitizedInput.MissingUnslash, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 
-	return \apply_filters( 'pixelgradelt_retailer/is_rest_api_request', $is_rest_api_request );
+	return \apply_filters( 'pressody_retailer/is_rest_api_request', $is_rest_api_request );
 }
 
 /**
@@ -296,7 +296,7 @@ function is_rest_request() {
  * @return bool
  */
 function is_running_unit_tests(): bool {
-	return \defined( 'PixelgradeLT\Retailer\RUNNING_UNIT_TESTS' ) && true === RUNNING_UNIT_TESTS;
+	return \defined( 'Pressody\Retailer\RUNNING_UNIT_TESTS' ) && true === RUNNING_UNIT_TESTS;
 }
 
 /**

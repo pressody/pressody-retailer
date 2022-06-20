@@ -2,18 +2,18 @@
 /**
  * Composer package transformer.
  *
- * @package PixelgradeLT
+ * @package Pressody
  * @license GPL-2.0-or-later
  * @since 0.1.0
  */
 
 declare ( strict_types = 1 );
 
-namespace PixelgradeLT\Retailer\Transformer;
+namespace Pressody\Retailer\Transformer;
 
-use PixelgradeLT\Retailer\Package;
-use PixelgradeLT\Retailer\SolutionFactory;
-use function PixelgradeLT\Retailer\get_composer_vendor;
+use Pressody\Retailer\Package;
+use Pressody\Retailer\SolutionFactory;
+use function Pressody\Retailer\get_composer_vendor;
 
 /**
  * Composer package transformer class.
@@ -68,18 +68,18 @@ class ComposerSolutionTransformer implements ComposerPackageTransformer {
 	 *
 	 * @since 0.1.0
 	 *
-	 * @param array $required_ltpackages
+	 * @param array $required_pdpackages
 	 * @return array
 	 */
-	public function transform_required_packages( array $required_ltpackages ): array {
+	public function transform_required_packages( array $required_pdpackages ): array {
 		$composer_require = [];
 
 		// Convert the managed required packages to the simple Composer format.
-		foreach ( $required_ltpackages as $required_ltpackage ) {
-			$composer_require[ $required_ltpackage['composer_package_name'] ] = $required_ltpackage['version_range'];
+		foreach ( $required_pdpackages as $required_pdpackage ) {
+			$composer_require[ $required_pdpackage['composer_package_name'] ] = $required_pdpackage['version_range'];
 
-			if ( 'stable' !== $required_ltpackage['stability'] ) {
-				$composer_require[ $required_ltpackage['composer_package_name'] ] .= '@' . $required_ltpackage['stability'];
+			if ( 'stable' !== $required_pdpackage['stability'] ) {
+				$composer_require[ $required_pdpackage['composer_package_name'] ] .= '@' . $required_pdpackage['stability'];
 			}
 		}
 

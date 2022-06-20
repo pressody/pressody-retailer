@@ -7,12 +7,12 @@
  *
  * @since   0.1.0
  * @license GPL-2.0-or-later
- * @package PixelgradeLT
+ * @package Pressody
  */
 
 declare ( strict_types=1 );
 
-namespace PixelgradeLT\Retailer\SolutionType;
+namespace Pressody\Retailer\SolutionType;
 
 /**
  * Solution Types.
@@ -37,11 +37,11 @@ final class SolutionTypes {
 	const DETAILS = [
 		self::REGULAR => [
 			'name'        => 'Regular Solution',
-			'description' => 'A regular LT solution that provides code-based functionality to a composition.',
+			'description' => 'A regular PD solution that provides code-based functionality to a composition.',
 		],
 		self::HOSTING => [
 			'name'        => 'Hosting Solution',
-			'description' => 'A hosting LT solution that provides hosting services to a composition.',
+			'description' => 'A hosting PD solution that provides hosting services to a composition.',
 		],
 	];
 }

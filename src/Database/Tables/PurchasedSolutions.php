@@ -4,12 +4,12 @@
  *
  * @since   0.14.0
  * @license GPL-2.0-or-later
- * @package PixelgradeLT
+ * @package Pressody
  */
 
 declare ( strict_types=1 );
 
-namespace PixelgradeLT\Retailer\Database\Tables;
+namespace Pressody\Retailer\Database\Tables;
 
 use BerlinDB\Database\Table;
 
@@ -27,7 +27,7 @@ final class PurchasedSolutions extends Table {
 	 * @since  0.14.0
 	 * @var string
 	 */
-	protected string $name = 'lt_retailer_purchased_solutions';
+	protected $name = 'pd_retailer_purchased_solutions';
 
 	/**
 	 * Database version.
@@ -36,10 +36,15 @@ final class PurchasedSolutions extends Table {
 	 * @since  0.14.0
 	 * @var int
 	 */
-	protected $version = 20210825;
+	protected $version = 20220620;
 
 	/**
 	 * Array of upgrade versions and methods.
+	 *
+	 * The key is the version to which we upgrade, and the value is the callable to run.
+	 * If the value is not a global callable, it will fallback to a class a method with the value as name, prefixed by `__`.
+	 *
+	 * @see BerlinDB\Database\Table::get_callable()
 	 *
 	 * @access protected
 	 * @since  0.14.0

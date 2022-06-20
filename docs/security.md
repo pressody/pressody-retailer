@@ -1,16 +1,16 @@
 # Security
 
-This document outlines the considerations we've made regarding the security of PixelgradeLT Retailer and the resources it creates to provide you with the information you need to help make informed decisions about the security of your site.
+This document outlines the considerations we've made regarding the security of Pressody Retailer and the resources it creates to provide you with the information you need to help make informed decisions about the security of your site.
 
-If you think you've discovered a vulnerability, please [get in touch privately](https://pixelgrade.com/contact/).
+If you think you've discovered a vulnerability, please [get in touch privately](https://getpressody.com/contact/).
 
 ## Introduction
 
-Resources created by PixelgradeLT Retailer are private by default and require authentication to access them.
+Resources created by Pressody Retailer are private by default and require authentication to access them.
 
 Only users registered in WordPress with the appropriate [capabilities](#capabilities) can access protected resources, which include package artifacts (plugin and theme zip files) and the `packages.json` endpoint.
 
-PixelgradeLT Retailer ships with support for accessing protected resources by using API Keys via [Basic HTTP Authentication](https://tools.ietf.org/html/rfc2617).
+Pressody Retailer ships with support for accessing protected resources by using API Keys via [Basic HTTP Authentication](https://tools.ietf.org/html/rfc2617).
 
 ## API Keys
 
@@ -20,15 +20,15 @@ An API Key is a series of 32 randomly generated letters and numbers that look so
 aUEZYqq6pXlMjdg8swe0rQgMCZAPJNaR
 ```
 
-API Keys are associated with the user they're created for and inherit the users' capabilities &mdash; a key doesn't provide access to protected resources if the user can't access those resources. API Keys are read-only and limited to accessing PixelgradeLT Retailer resources, so if one where to become compromised, an attacker could only view and download whitelisted packages.
+API Keys are associated with the user they're created for and inherit the users' capabilities &mdash; a key doesn't provide access to protected resources if the user can't access those resources. API Keys are read-only and limited to accessing Pressody Retailer resources, so if one where to become compromised, an attacker could only view and download whitelisted packages.
 
-To use an API Key with Basic authentication, the API Key should be provided as the username with a password of `pixelgradelt-retailer`:
+To use an API Key with Basic authentication, the API Key should be provided as the username with a password of `pressody-retailer`:
 
 __Example Request__
 
 ```shell
-$ curl https://retailer.pixelgradelt.com/ltpackagist/packages.json \
-   -u aUEZYqq6pXlMjdg8swe0rQgMCZAPJNaR:pixelgradelt-retailer
+$ curl https://retailer.getpressody.com/pdpackagist/packages.json \
+   -u aUEZYqq6pXlMjdg8swe0rQgMCZAPJNaR:pressody-retailer
 ```
 
 ### Revoking Keys
@@ -45,7 +45,7 @@ Also keep in mind that even with HTTPS enabled, the credentials will most likely
 
 ## Third-Party Authentication Providers
 
-Third-party authentication providers that hook into the `determine_current_user` filter and take care to account for multiple authentication schemes should also work with PixelgradeLT Retailer.
+Third-party authentication providers that hook into the `determine_current_user` filter and take care to account for multiple authentication schemes should also work with Pressody Retailer.
 
 ## Protecting Package Artifacts
 
@@ -59,16 +59,16 @@ _If your site is running on NGINX, you may need to implement custom redirects to
 
 ## Capabilities
 
-PixelgradeLT Retailer introduces three new primitive capabilities:
+Pressody Retailer introduces three new primitive capabilities:
 
-- `pixelgradelt_retailer_download_packages`
-- `pixelgradelt_retailer_view_packages`
-- `pixelgradelt_retailer_manage_options`
+- `pressody_retailer_download_packages`
+- `pressody_retailer_view_packages`
+- `pressody_retailer_manage_options`
 
 And two new meta capabilities:
 
-- `pixelgradelt_retailer_download_package`
-- `pixelgradelt_retailer_view_package`
+- `pressody_retailer_download_package`
+- `pressody_retailer_view_package`
 
 The primitive capabilities are added to the administrator role by default during plugin installation and upgrade.
 
@@ -81,16 +81,16 @@ If you're using another authentication provider or really don't need authenticat
 ```php
 <?php
 /**
- * Deregister PixelgradeLT Retailer authentication servers.
+ * Deregister Pressody Retailer authentication servers.
  */
-add_filter( 'pixelgradelt_retailer_authentication_servers', '__return_empty_array' );
+add_filter( 'pressody_retailer_authentication_servers', '__return_empty_array' );
 ```
 
 _Keep in mind that disabling authentication may make it easier for malicious actors to determine which plugins are being used on your site._
 
 ## Other Methods
 
-Securing the PixelgradeLT Retailer repository should be possible using the same methods outlined in the [Satis documentation](https://getcomposer.org/doc/articles/handling-private-packages-with-satis.md#security).
+Securing the Pressody Retailer repository should be possible using the same methods outlined in the [Satis documentation](https://getcomposer.org/doc/articles/handling-private-packages-with-satis.md#security).
 
 [Back to Index](index.md)
  

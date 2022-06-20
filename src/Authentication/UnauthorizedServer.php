@@ -4,17 +4,17 @@
  *
  * Prevents access if all authentication methods have failed.
  *
- * @package PixelgradeLT
+ * @package Pressody
  * @license GPL-2.0-or-later
  * @since 0.1.0
  */
 
 declare ( strict_types = 1 );
 
-namespace PixelgradeLT\Retailer\Authentication;
+namespace Pressody\Retailer\Authentication;
 
-use PixelgradeLT\Retailer\Exception\AuthenticationException;
-use PixelgradeLT\Retailer\HTTP\Request;
+use Pressody\Retailer\Exception\AuthenticationException;
+use Pressody\Retailer\HTTP\Request;
 
 /**
  * Unauthorized authentication server class.

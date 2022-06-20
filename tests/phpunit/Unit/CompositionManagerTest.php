@@ -1,19 +1,19 @@
 <?php
 declare ( strict_types=1 );
 
-namespace PixelgradeLT\Retailer\Tests\Unit;
+namespace Pressody\Retailer\Tests\Unit;
 
 use Brain\Monkey\Functions;
 use Composer\IO\NullIO;
 use Composer\Semver\VersionParser;
-use PixelgradeLT\Retailer\Client\ComposerClient;
-use PixelgradeLT\Retailer\ComposerVersionParser;
-use PixelgradeLT\Retailer\CompositionManager;
-use PixelgradeLT\Retailer\PurchasedSolutionManager;
-use PixelgradeLT\Retailer\Repository\Solutions;
-use PixelgradeLT\Retailer\SolutionFactory;
-use PixelgradeLT\Retailer\SolutionManager;
-use PixelgradeLT\Retailer\StringHashes;
+use Pressody\Retailer\Client\ComposerClient;
+use Pressody\Retailer\ComposerVersionParser;
+use Pressody\Retailer\CompositionManager;
+use Pressody\Retailer\PurchasedSolutionManager;
+use Pressody\Retailer\Repository\Solutions;
+use Pressody\Retailer\SolutionFactory;
+use Pressody\Retailer\SolutionManager;
+use Pressody\Retailer\StringHashes;
 
 class CompositionManagerTest extends TestCase {
 	protected $compositionManager = null;

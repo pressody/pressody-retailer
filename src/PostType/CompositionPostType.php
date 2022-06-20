@@ -4,16 +4,16 @@
  *
  * @since   0.11.0
  * @license GPL-2.0-or-later
- * @package PixelgradeLT
+ * @package Pressody
  */
 
 declare ( strict_types=1 );
 
-namespace PixelgradeLT\Retailer\PostType;
+namespace Pressody\Retailer\PostType;
 
 use Cedaro\WP\Plugin\AbstractHookProvider;
 use Pixelgrade\WPPostNotes\PostNotes;
-use PixelgradeLT\Retailer\CompositionManager;
+use Pressody\Retailer\CompositionManager;
 
 /**
  * The Composition custom post type provider: provides the interface for and stores the information about each composition.

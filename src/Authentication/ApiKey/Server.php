@@ -2,18 +2,18 @@
 /**
  * API Key authentication server.
  *
- * @package PixelgradeLT
+ * @package Pressody
  * @license GPL-2.0-or-later
  * @since 0.1.0
  */
 
 declare ( strict_types = 1 );
 
-namespace PixelgradeLT\Retailer\Authentication\ApiKey;
+namespace Pressody\Retailer\Authentication\ApiKey;
 
-use PixelgradeLT\Retailer\Authentication\ServerInterface;
-use PixelgradeLT\Retailer\Exception\AuthenticationException;
-use PixelgradeLT\Retailer\HTTP\Request;
+use Pressody\Retailer\Authentication\ServerInterface;
+use Pressody\Retailer\Exception\AuthenticationException;
+use Pressody\Retailer\HTTP\Request;
 
 /**
  * API Key authentication server class.
@@ -22,7 +22,7 @@ use PixelgradeLT\Retailer\HTTP\Request;
  */
 class Server implements ServerInterface {
 
-	const AUTH_PWD = 'pixelgradelt_retailer';
+	const AUTH_PWD = 'pressody_retailer';
 
 	/**
 	 * API Key repository.
@@ -63,7 +63,7 @@ class Server implements ServerInterface {
 		// The password is hardcoded because the username is a private API Key.
 		$auth_password = $request->get_header( 'PHP_AUTH_PW' );
 
-		// Bail if this isn't a PixelgradeLT Retailer authentication request.
+		// Bail if this isn't a Pressody Retailer authentication request.
 		if ( self::AUTH_PWD !== $auth_password ) {
 			return false;
 		}

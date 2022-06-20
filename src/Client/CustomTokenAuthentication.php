@@ -2,17 +2,17 @@
 /**
  * Composer Client Custom Token Authentication provider.
  *
- * @package PixelgradeLT
+ * @package Pressody
  * @license GPL-2.0-or-later
  * @since 0.1.0
  */
 
 declare ( strict_types = 1 );
 
-namespace PixelgradeLT\Retailer\Client;
+namespace Pressody\Retailer\Client;
 
 use Cedaro\WP\Plugin\AbstractHookProvider;
-use function PixelgradeLT\Retailer\get_setting;
+use function Pressody\Retailer\get_setting;
 
 /**
  * Composer Client Custom Token Authentication provider class.
@@ -24,11 +24,11 @@ class CustomTokenAuthentication extends AbstractHookProvider {
 	 * Register hooks.
 	 */
 	public function register_hooks() {
-		add_filter( 'pixelgradelt_retailer/composer_client_config', [ $this, 'filter_config' ], 5 );
+		add_filter( 'pressody_retailer/composer_client_config', [ $this, 'filter_config' ], 5 );
 	}
 
 	/**
-	 * Update the Composer Client config based on the credentials (OAuth tokens) saved in the PixelgradeLT Retailer settings.
+	 * Update the Composer Client config based on the credentials (OAuth tokens) saved in the Pressody Retailer settings.
 	 *
 	 * @since 0.1.0
 	 *

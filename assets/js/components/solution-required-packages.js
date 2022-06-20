@@ -12,7 +12,7 @@ function SolutionRequiredPackages(props ) {
 
 	const requiredButtons = requiredPackages.map( ( requiredPackage, index ) => {
 
-		let className = 'button pixelgradelt_retailer-required-package';
+		let className = 'button pressody_retailer-required-package';
 
 		return html`
 			<${ Button }
@@ -28,7 +28,7 @@ function SolutionRequiredPackages(props ) {
 
 	return html`
 		<${ Fragment }>
-			${ requiredButtons.length ? requiredButtons : __( 'None', 'pixelgradelt_retailer' ) }
+			${ requiredButtons.length ? requiredButtons : __( 'None', 'pressody_retailer' ) }
 		</${ Fragment }
 	`;
 }

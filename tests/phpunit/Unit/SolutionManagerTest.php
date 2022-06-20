@@ -1,14 +1,14 @@
 <?php
 declare ( strict_types=1 );
 
-namespace PixelgradeLT\Retailer\Tests\Unit;
+namespace Pressody\Retailer\Tests\Unit;
 
 use Brain\Monkey\Functions;
 use Composer\IO\NullIO;
 use Composer\Semver\VersionParser;
-use PixelgradeLT\Retailer\Client\ComposerClient;
-use PixelgradeLT\Retailer\ComposerVersionParser;
-use PixelgradeLT\Retailer\SolutionManager;
+use Pressody\Retailer\Client\ComposerClient;
+use Pressody\Retailer\ComposerVersionParser;
+use Pressody\Retailer\SolutionManager;
 
 class SolutionManagerTest extends TestCase {
 	protected $solutionManager = null;
@@ -37,7 +37,7 @@ class SolutionManagerTest extends TestCase {
 
 	public function test_solution_name_to_composer_package_name() {
 		$name     = 'test';
-		$expected = 'pixelgradelt-retailer/test';
+		$expected = 'pressody-retailer/test';
 
 		$this->assertSame( $expected, $this->solutionManager->solution_name_to_composer_package_name( $name ) );
 	}

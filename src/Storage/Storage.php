@@ -2,16 +2,16 @@
 /**
  * Storage interface.
  *
- * @package PixelgradeLT
+ * @package Pressody
  * @license GPL-2.0-or-later
  * @since 0.1.0
  */
 
 declare ( strict_types = 1 );
 
-namespace PixelgradeLT\Retailer\Storage;
+namespace Pressody\Retailer\Storage;
 
-use PixelgradeLT\Retailer\HTTP\Response;
+use Pressody\Retailer\HTTP\Response;
 
 /**
  * Storage interface.

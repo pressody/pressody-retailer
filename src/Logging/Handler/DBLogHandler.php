@@ -4,18 +4,18 @@
  *
  * Code borrowed and modified from WooCommerce.
  *
- * @package PixelgradeLT
+ * @package Pressody
  * @license GPL-2.0-or-later
  * @since 0.1.0
  */
 
 declare ( strict_types = 1 );
 
-namespace PixelgradeLT\Retailer\Logging\Handler;
+namespace Pressody\Retailer\Logging\Handler;
 
 use Automattic\Jetpack\Constants;
-use PixelgradeLT\Retailer\Database\Queries\Log;
-use PixelgradeLT\Retailer\Logging\LogLevels;
+use Pressody\Retailer\Database\Queries\Log;
+use Pressody\Retailer\Logging\LogLevels;
 
 /**
  * Handles log entries by writing to database.
@@ -89,7 +89,7 @@ class DBLogHandler extends LogHandler {
 	public static function flush(): bool {
 		global $wpdb;
 
-		return $wpdb->query( "TRUNCATE TABLE {$wpdb->prefix}lt_retailer_logs" );
+		return $wpdb->query( "TRUNCATE TABLE {$wpdb->prefix}pd_retailer_logs" );
 	}
 
 	/**
@@ -104,7 +104,7 @@ class DBLogHandler extends LogHandler {
 
 		return $wpdb->query(
 			$wpdb->prepare(
-				"DELETE FROM {$wpdb->prefix}lt_retailer_logs WHERE source = %s",
+				"DELETE FROM {$wpdb->prefix}pd_retailer_logs WHERE source = %s",
 				$source
 			)
 		);
@@ -126,7 +126,7 @@ class DBLogHandler extends LogHandler {
 
 		$format   = array_fill( 0, count( $log_ids ), '%d' );
 		$query_in = '(' . implode( ',', $format ) . ')';
-		return $wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->prefix}lt_retailer_logs WHERE id IN {$query_in}", $log_ids ) ); // @codingStandardsIgnoreLine.
+		return $wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->prefix}pd_retailer_logs WHERE id IN {$query_in}", $log_ids ) ); // @codingStandardsIgnoreLine.
 	}
 
 	/**
@@ -143,7 +143,7 @@ class DBLogHandler extends LogHandler {
 
 		$wpdb->query(
 			$wpdb->prepare(
-				"DELETE FROM {$wpdb->prefix}lt_retailer_logs WHERE date_created < %s",
+				"DELETE FROM {$wpdb->prefix}pd_retailer_logs WHERE date_created < %s",
 				date( 'Y-m-d H:i:s', $timestamp )
 			)
 		);

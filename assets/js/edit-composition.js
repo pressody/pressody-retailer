@@ -9,16 +9,16 @@ const {Fragment, render} = element
 const {
 	editedPostId,
 	editedHashId,
-	encryptedLTDetails,
+	encryptedPDDetails,
 	solutionIds,
 	solutionContexts
-} = _pixelgradeltRetailerEditCompositionData
+} = _pressodyRetailerEditCompositionData
 
 function App (props) {
 	const {
 		postId,
 		hashId,
-		encryptedLTDetails,
+		encryptedPDDetails,
 		solutionIds,
 		solutionContexts
 	} = props
@@ -26,27 +26,27 @@ function App (props) {
 	const {
 		setPostId,
 		setHashId,
-		setEncryptedLTDetails,
+		setEncryptedPDDetails,
 		setSolutionIds,
 		setSolutionContexts
-	} = useDispatch('pixelgradelt_retailer/composition')
+	} = useDispatch('pressody_retailer/composition')
 
 	setPostId(postId)
 	setHashId(hashId)
-	setEncryptedLTDetails(encryptedLTDetails)
+	setEncryptedPDDetails(encryptedPDDetails)
 	setSolutionIds(solutionIds)
 	setSolutionContexts(solutionContexts)
 
 	const solutions = useSelect((select) => {
-		return select('pixelgradelt_retailer/composition').getSolutions()
+		return select('pressody_retailer/composition').getSolutions()
 	})
 
 	const parts = useSelect((select) => {
-		return select('pixelgradelt_retailer/composition').getParts()
+		return select('pressody_retailer/composition').getParts()
 	})
 
 	const composerJson = useSelect((select) => {
-		return select('pixelgradelt_retailer/composition').getComposerJson()
+		return select('pressody_retailer/composition').getComposerJson()
 	})
 
 	return html`
@@ -58,7 +58,7 @@ function App (props) {
 				  composerJson=${composerJson}
 				  postId=${postId}
 				  hashId=${hashId}
-				  encryptedLTDetails=${encryptedLTDetails}
+				  encryptedPDDetails=${encryptedPDDetails}
 		  />
 	  </${Fragment}>
 	`
@@ -68,8 +68,8 @@ render(
 	html`
 	  <${App} postId=${editedPostId}
 	          hashId=${editedHashId}
-	          encryptedLTDetails=${encryptedLTDetails}
+	          encryptedPDDetails=${encryptedPDDetails}
 	          solutionIds=${solutionIds}
 	          solutionContexts=${solutionContexts}/>`,
-	document.getElementById('pixelgradelt_retailer-composition-state')
+	document.getElementById('pressody_retailer-composition-state')
 )

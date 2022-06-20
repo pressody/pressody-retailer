@@ -1,31 +1,31 @@
 <?php
 /**
- * PixelgradeLT Retailer
+ * Pressody Retailer
  *
- * @package PixelgradeLT
- * @author  Vlad Olaru <vlad@pixelgrade.com>
+ * @package Pressody
+ * @author  Vlad Olaru <vladpotter85@gmail.com>
  * @license GPL-2.0-or-later
  *
  * @wordpress-plugin
- * Plugin Name: PixelgradeLT Retailer
- * Plugin URI: https://github.com/pixelgradelt/pixelgradelt-retailer
- * Description: Define and manage PixelgradeLT solutions to be purchased and used on customers' websites. Ensures the connection with WooCommerce.
- * Version: 0.15.0
- * Author: Pixelgrade
- * Author URI: https://pixelgrade.com/
+ * Plugin Name: Pressody Retailer
+ * Plugin URI: https://github.com/pressody/pressody-retailer
+ * Description: Define and manage Pressody (PD) solutions to be purchased and used on customers' websites. Ensures the connection with WooCommerce.
+ * Version: 0.16.0
+ * Author: Pressody
+ * Author URI: https://getpressody.com/
  * License: GPL-2.0-or-later
  * License URI: https://www.gnu.org/licenses/gpl-2.0.html
- * Text Domain: pixelgradelt_retailer
+ * Text Domain: pressody_retailer
  * Domain Path: /languages
  * Requires PHP: 7.4
  * Network: false
- * GitHub Plugin URI: pixelgradelt/pixelgradelt-retailer
+ * GitHub Plugin URI: pressody/pressody-retailer
  * Release Asset: true
  */
 
 declare ( strict_types=1 );
 
-namespace PixelgradeLT\Retailer;
+namespace Pressody\Retailer;
 
 // Exit if accessed directly.
 if ( ! \defined( 'ABSPATH' ) ) {
@@ -37,7 +37,7 @@ if ( ! \defined( 'ABSPATH' ) ) {
  *
  * @var string
  */
-const VERSION = '0.15.0';
+const VERSION = '0.16.0';
 
 // Load the Composer autoloader.
 if ( file_exists( __DIR__ . '/vendor/autoload.php' ) ) {
@@ -59,8 +59,8 @@ spl_autoload_register( __NAMESPACE__ . '\autoloader_classmap' );
 // We use immutable since we don't want to overwrite variables already set.
 $dotenv = \Dotenv\Dotenv::createImmutable(__DIR__);
 $dotenv->load();
-$dotenv->required( 'LTRETAILER_PHP_AUTH_USER' )->notEmpty();
-$dotenv->required( 'LTRETAILER_ENCRYPTION_KEY' )->notEmpty();
+$dotenv->required( 'PDRETAILER_PHP_AUTH_USER' )->notEmpty();
+$dotenv->required( 'PDRETAILER_ENCRYPTION_KEY' )->notEmpty();
 // Read environment variables from the $_ENV array also.
 \Env\Env::$options |= \Env\Env::USE_ENV_ARRAY;
 
@@ -68,20 +68,20 @@ $dotenv->required( 'LTRETAILER_ENCRYPTION_KEY' )->notEmpty();
 require_once ABSPATH . 'wp-admin/includes/plugin.php';
 
 // Create a container and register a service provider.
-$pixelgradelt_retailer_container = new Container();
-$pixelgradelt_retailer_container->register( new ServiceProvider() );
+$pressody_retailer_container = new Container();
+$pressody_retailer_container->register( new ServiceProvider() );
 
 // Initialize the plugin and inject the container.
-$pixelgradelt_retailer = plugin()
+$pressody_retailer = plugin()
 	->set_basename( plugin_basename( __FILE__ ) )
 	->set_directory( plugin_dir_path( __FILE__ ) )
-	->set_file( __DIR__ . '/pixelgradelt-retailer.php' )
-	->set_slug( 'pixelgradelt-retailer' )
+	->set_file( __DIR__ . '/pressody-retailer.php' )
+	->set_slug( 'pressody-retailer' )
 	->set_url( plugin_dir_url( __FILE__ ) )
 	->define_constants()
-	->set_container( $pixelgradelt_retailer_container )
-	->register_hooks( $pixelgradelt_retailer_container->get( 'hooks.activation' ) )
-	->register_hooks( $pixelgradelt_retailer_container->get( 'hooks.deactivation' ) )
-	->register_hooks( $pixelgradelt_retailer_container->get( 'hooks.authentication' ) );
+	->set_container( $pressody_retailer_container )
+	->register_hooks( $pressody_retailer_container->get( 'hooks.activation' ) )
+	->register_hooks( $pressody_retailer_container->get( 'hooks.deactivation' ) )
+	->register_hooks( $pressody_retailer_container->get( 'hooks.authentication' ) );
 
-add_action( 'plugins_loaded', [ $pixelgradelt_retailer, 'compose' ], 5 );
+add_action( 'plugins_loaded', [ $pressody_retailer, 'compose' ], 5 );

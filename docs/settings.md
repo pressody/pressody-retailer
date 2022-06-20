@@ -1,10 +1,10 @@
 # Settings
 
-At _Settings &rarr; PixelgradeLT Retailer_, you'll find the settings page:
+At _Settings &rarr; Pressody Retailer_, you'll find the settings page:
 
 ## Vendor
 
-When requiring a package from PixelgradeLT Retailer, the default would be a package name like `pixelgradelt-retailer/genesis`.
+When requiring a package from Pressody Retailer, the default would be a package name like `pressody-retailer/genesis`.
 
 The "Vendor" field allows this to be changed; a value of `mypremiumcode` would mean the `require` package name would be like `mypremiumcode/genesis`.
 

@@ -4,15 +4,15 @@
  *
  * @since   0.14.0
  * @license GPL-2.0-or-later
- * @package PixelgradeLT
+ * @package Pressody
  */
 
 declare ( strict_types=1 );
 
-namespace PixelgradeLT\Retailer\Database\Rows;
+namespace Pressody\Retailer\Database\Rows;
 
 use BerlinDB\Database\Row;
-use PixelgradeLT\Retailer\PurchasedSolutionManager;
+use Pressody\Retailer\PurchasedSolutionManager;
 
 /**
  * Purchased Solution database row class.

@@ -4,14 +4,14 @@
  *
  * @since   0.14.0
  * @license GPL-2.0-or-later
- * @package PixelgradeLT
+ * @package Pressody
  */
 
 declare ( strict_types=1 );
 
-namespace PixelgradeLT\Retailer\Integration\WooCommerce;
+namespace Pressody\Retailer\Integration\WooCommerce;
 
-use PixelgradeLT\Retailer\Integration\WooCommerce;
+use Pressody\Retailer\Integration\WooCommerce;
 
 /**
  * WooCommerce Order utility wrapping class.
@@ -79,8 +79,8 @@ final class Order {
 			return null;
 		}
 
-		// Determine if this product is linked to an LT Solution.
-		$linked_solution_id = WooCommerce::get_product_linked_ltsolution( $product );
+		// Determine if this product is linked to an PD Solution.
+		$linked_solution_id = WooCommerce::get_product_linked_pdsolution( $product );
 		if ( empty( $linked_solution_id ) ) {
 			// No linked solution.
 			return null;

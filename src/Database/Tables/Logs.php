@@ -4,12 +4,12 @@
  *
  * @since   0.14.0
  * @license GPL-2.0-or-later
- * @package PixelgradeLT
+ * @package Pressody
  */
 
 declare ( strict_types=1 );
 
-namespace PixelgradeLT\Retailer\Database\Tables;
+namespace Pressody\Retailer\Database\Tables;
 
 use BerlinDB\Database\Table;
 
@@ -27,7 +27,7 @@ final class Logs extends Table {
 	 * @since  0.14.0
 	 * @var string
 	 */
-	protected string $name = 'lt_retailer_logs';
+	protected $name = 'pd_retailer_logs';
 
 	/**
 	 * Database version.
@@ -36,7 +36,7 @@ final class Logs extends Table {
 	 * @since  0.14.0
 	 * @var int
 	 */
-	protected $version = 20210826;
+	protected $version = 20220620;
 
 	/**
 	 * Set up the database schema.

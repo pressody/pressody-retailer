@@ -4,14 +4,14 @@
  *
  * @since   0.1.0
  * @license GPL-2.0-or-later
- * @package PixelgradeLT
+ * @package Pressody
  */
 
 declare ( strict_types=1 );
 
-namespace PixelgradeLT\Retailer\SolutionType;
+namespace Pressody\Retailer\SolutionType;
 
-use PixelgradeLT\Retailer\Package;
+use Pressody\Retailer\Package;
 
 /**
  * Base solution class.
@@ -106,11 +106,11 @@ class BaseSolution implements \ArrayAccess, Package {
 	protected string $visibility = '';
 
 	/**
-	 * LT Records Parts required by this solution.
+	 * PD Records Parts required by this solution.
 	 *
 	 * @var array
 	 */
-	protected array $required_ltrecords_parts = [];
+	protected array $required_pdrecords_parts = [];
 
 	/**
 	 * A Composer config `require` entry.
@@ -298,25 +298,25 @@ class BaseSolution implements \ArrayAccess, Package {
 	}
 
 	/**
-	 * Retrieve the required LT Records Parts.
+	 * Retrieve the required PD Records Parts.
 	 *
 	 * @since 0.1.0
 	 *
 	 * @return array
 	 */
-	public function get_required_ltrecords_parts(): array {
-		return $this->required_ltrecords_parts;
+	public function get_required_pdrecords_parts(): array {
+		return $this->required_pdrecords_parts;
 	}
 
 	/**
-	 * Whether the solution has any required LT Records Parts.
+	 * Whether the solution has any required PD Records Parts.
 	 *
 	 * @since 0.1.0
 	 *
 	 * @return bool
 	 */
-	public function has_required_ltrecords_parts(): bool {
-		return ! empty( $this->required_ltrecords_parts );
+	public function has_required_pdrecords_parts(): bool {
+		return ! empty( $this->required_pdrecords_parts );
 	}
 
 	/**

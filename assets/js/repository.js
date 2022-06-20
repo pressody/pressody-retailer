@@ -6,10 +6,10 @@ const { useSelect } = data;
 const { Fragment, render } = element;
 
 // noinspection JSUnresolvedVariable,JSHint
-const { addNewSolutionUrl } = _pixelgradeltRetailerRepositoryData;
+const { addNewSolutionUrl } = _pressodyRetailerRepositoryData;
 
 function App() {
-	const solutions = useSelect( select => select( 'pixelgradelt_retailer/solutions' ).getSolutions() );
+	const solutions = useSelect( select => select( 'pressody_retailer/solutions' ).getSolutions() );
 
 	return html`
 		<${ Fragment }>
@@ -23,5 +23,5 @@ function App() {
 
 render(
 	html`<${ App } />`,
-	document.getElementById( 'pixelgradelt_retailer-repository-container' )
+	document.getElementById( 'pressody_retailer-repository-container' )
 );

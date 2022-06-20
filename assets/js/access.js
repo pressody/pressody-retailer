@@ -6,7 +6,7 @@ const { useDispatch, useSelect } = data;
 const { render } = element;
 
 // noinspection JSUnresolvedVariable,JSHint
-const { editedUserId } = _pixelgradeltRetailerAccessData;
+const { editedUserId } = _pressodyRetailerAccessData;
 
 function App( props ) {
 	const { userId } = props;
@@ -15,12 +15,12 @@ function App( props ) {
 		createApiKey,
 		setUserId,
 		revokeApiKey,
-	} = useDispatch( 'pixelgradelt_retailer/access' );
+	} = useDispatch( 'pressody_retailer/access' );
 
 	setUserId( userId );
 
 	const apiKeys = useSelect( ( select ) => {
-		return select( 'pixelgradelt_retailer/access' ).getApiKeys();
+		return select( 'pressody_retailer/access' ).getApiKeys();
 	} );
 
 	return html`
@@ -35,5 +35,5 @@ function App( props ) {
 
 render(
 	html`<${ App } userId=${ editedUserId } />`,
-	document.getElementById( 'pixelgradelt_retailer-api-key-manager' )
+	document.getElementById( 'pressody_retailer-api-key-manager' )
 );

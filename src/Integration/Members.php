@@ -2,17 +2,17 @@
 /**
  * Members plugin integration.
  *
- * @package PixelgradeLT
+ * @package Pressody
  * @license GPL-2.0-or-later
  * @since 0.1.0
  */
 
 declare ( strict_types = 1 );
 
-namespace PixelgradeLT\Retailer\Integration;
+namespace Pressody\Retailer\Integration;
 
 use Cedaro\WP\Plugin\AbstractHookProvider;
-use PixelgradeLT\Retailer\Capabilities;
+use Pressody\Retailer\Capabilities;
 
 /**
  * Members plugin integration provider class.
@@ -39,9 +39,9 @@ class Members extends AbstractHookProvider {
 	 */
 	public function register_capability_group() {
 		members_register_cap_group(
-			'pixelgradelt_retailer',
+			'pressody_retailer',
 			[
-				'label'    => esc_html__( 'PixelgradeLT Retailer', 'pixelgradelt_retailer' ),
+				'label'    => esc_html__( 'Pressody Retailer', 'pressody_retailer' ),
 				'caps'     => [],
 				'icon'     => 'dashicons-admin-generic',
 				'priority' => 50,
@@ -61,32 +61,32 @@ class Members extends AbstractHookProvider {
 		members_register_cap(
 			Capabilities::VIEW_SOLUTIONS,
 			[
-				'label' => esc_html__( 'View Solutions', 'pixelgradelt_retailer' ),
-				'group' => 'pixelgradelt_retailer',
+				'label' => esc_html__( 'View Solutions', 'pressody_retailer' ),
+				'group' => 'pressody_retailer',
 			]
 		);
 
 		members_register_cap(
 			Capabilities::MANAGE_OPTIONS,
 			[
-				'label' => esc_html__( 'Manage Options', 'pixelgradelt_retailer' ),
-				'group' => 'pixelgradelt_retailer',
+				'label' => esc_html__( 'Manage Options', 'pressody_retailer' ),
+				'group' => 'pressody_retailer',
 			]
 		);
 
 		members_register_cap(
 			Capabilities::MANAGE_SOLUTION_TYPES,
 			[
-				'label' => esc_html__( 'Manage Solution Types', 'pixelgradelt_retailer' ),
-				'group' => 'pixelgradelt_retailer',
+				'label' => esc_html__( 'Manage Solution Types', 'pressody_retailer' ),
+				'group' => 'pressody_retailer',
 			]
 		);
 
 		members_register_cap(
 			Capabilities::MANAGE_SOLUTION_CATEGORIES,
 			[
-				'label' => esc_html__( 'Manage Solution Categories', 'pixelgradelt_retailer' ),
-				'group' => 'pixelgradelt_retailer',
+				'label' => esc_html__( 'Manage Solution Categories', 'pressody_retailer' ),
+				'group' => 'pressody_retailer',
 			]
 		);
 	}

@@ -1,16 +1,16 @@
 <?php
 declare ( strict_types=1 );
 
-namespace PixelgradeLT\Retailer\Tests\Integration\REST;
+namespace Pressody\Retailer\Tests\Integration\REST;
 
-use PixelgradeLT\Retailer\Capabilities;
-use PixelgradeLT\Retailer\SolutionType\SolutionTypes;
-use PixelgradeLT\Retailer\Tests\Framework\PHPUnitUtil;
-use PixelgradeLT\Retailer\Tests\Integration\TestCase;
+use Pressody\Retailer\Capabilities;
+use Pressody\Retailer\SolutionType\SolutionTypes;
+use Pressody\Retailer\Tests\Framework\PHPUnitUtil;
+use Pressody\Retailer\Tests\Integration\TestCase;
 
 use Psr\Container\ContainerInterface;
-use function PixelgradeLT\Retailer\local_rest_call;
-use function PixelgradeLT\Retailer\plugin;
+use function Pressody\Retailer\local_rest_call;
+use function Pressody\Retailer\plugin;
 
 class SolutionsControllerTest extends TestCase {
 	protected static $posts_data;
@@ -30,7 +30,7 @@ class SolutionsControllerTest extends TestCase {
 		/** @var ContainerInterface $container */
 		self::$container = plugin()->get_container();
 
-		// Register ltsolution post type
+		// Register pdsolution post type
 		$register_post_type = PHPUnitUtil::getProtectedMethod( self::$container['hooks.solution_post_type'], 'register_post_type' );
 		$register_post_type->invoke( self::$container['hooks.solution_post_type'] );
 
@@ -93,7 +93,7 @@ And here is a quote from a customer:
 			],
 		];
 
-		// Create the test ltsolutions posts that will be dependencies to other posts that we test.
+		// Create the test pdsolutions posts that will be dependencies to other posts that we test.
 		foreach ( self::$dep_posts_data as $key => $data ) {
 			self::$post_ids[ $key ] = $factory->post->create_object( $data );
 		}
@@ -118,7 +118,7 @@ And here is a quote from a customer:
 <blockquote>Pure bliss, man!</blockquote>',
 				'_solution_details_homepage'                       => 'https://package.homepage',
 				'_solution_required_parts|||0|value'               => '_',
-				'_solution_required_parts|package_name|0|0|value'  => 'pixelgradelt-records/part_yet-another',
+				'_solution_required_parts|package_name|0|0|value'  => 'pressody-records/part_yet-another',
 				'_solution_required_parts|version_range|0|0|value' => '1.2.9',
 				'_solution_required_parts|stability|0|0|value'     => 'stable',
 				'_solution_required_solutions|||0|value'           => '_',
@@ -150,7 +150,7 @@ And here is a quote from a customer:
 <blockquote>Pure bliss, man!</blockquote>',
 				'_solution_details_homepage'                       => 'https://package.homepage',
 				'_solution_required_parts|||0|value'               => '_',
-				'_solution_required_parts|package_name|0|0|value'  => 'pixelgradelt-records/part_yet-another',
+				'_solution_required_parts|package_name|0|0|value'  => 'pressody-records/part_yet-another',
 				'_solution_required_parts|version_range|0|0|value' => '^1',
 				'_solution_required_parts|stability|0|0|value'     => 'stable',
 				'_solution_required_solutions|||0|value'           => '_',
@@ -183,10 +183,10 @@ And here is a quote from a customer:
 				'_solution_details_homepage'                       => 'https://package.homepage',
 				'_solution_required_parts|||0|value'               => '_',
 				'_solution_required_parts|||1|value'               => '_',
-				'_solution_required_parts|package_name|0|0|value'  => 'pixelgradelt-records/part_yet-another',
+				'_solution_required_parts|package_name|0|0|value'  => 'pressody-records/part_yet-another',
 				'_solution_required_parts|version_range|0|0|value' => '^2',
 				'_solution_required_parts|stability|0|0|value'     => 'stable',
-				'_solution_required_parts|package_name|1|0|value'  => 'pixelgradelt-records/part_test-test',
+				'_solution_required_parts|package_name|1|0|value'  => 'pressody-records/part_test-test',
 				'_solution_required_parts|version_range|1|0|value' => '^1.0',
 				'_solution_required_parts|stability|1|0|value'     => 'stable',
 				'_solution_required_solutions|||0|value'           => '_',
@@ -213,7 +213,7 @@ And here is a quote from a customer:
 		 * Check for parameter validations.
 		 */
 		// Single int post ID should be allowed since it is converted to an array.
-		$solutions = local_rest_call( '/pixelgradelt_retailer/v1/solutions', 'GET', [
+		$solutions = local_rest_call( '/pressody_retailer/v1/solutions', 'GET', [
 			'postId' => self::$post_ids['blog'],
 		] );
 
@@ -221,7 +221,7 @@ And here is a quote from a customer:
 		$this->assertSame( [ 'blog', ], wp_list_pluck( $solutions, 'slug' ) );
 
 		// Invalid post IDs get ignored since wp_parse_id_list() will transform them to 0. We will get back all solutions.
-		$solutions = local_rest_call( '/pixelgradelt_retailer/v1/solutions', 'GET', [
+		$solutions = local_rest_call( '/pressody_retailer/v1/solutions', 'GET', [
 			'postId' => 'bogus',
 		] );
 
@@ -235,7 +235,7 @@ And here is a quote from a customer:
 		], wp_list_pluck( $solutions, 'slug' ) );
 
 		// Use an invalid package name. Should get error since we pattern check.
-		$solutions = local_rest_call( '/pixelgradelt_retailer/v1/solutions', 'GET', [
+		$solutions = local_rest_call( '/pressody_retailer/v1/solutions', 'GET', [
 			'packageName' => [ 'ecommerce', ],
 		] );
 
@@ -248,7 +248,7 @@ And here is a quote from a customer:
 		/**
 		 * Get all solutions.
 		 */
-		$solutions = local_rest_call( '/pixelgradelt_retailer/v1/solutions', 'GET', [] );
+		$solutions = local_rest_call( '/pressody_retailer/v1/solutions', 'GET', [] );
 
 		$this->assertArrayNotHasKey( 'code', $solutions );
 		$this->assertSame( [
@@ -262,7 +262,7 @@ And here is a quote from a customer:
 		/**
 		 * Get all solutions via their post IDs.
 		 */
-		$solutions = local_rest_call( '/pixelgradelt_retailer/v1/solutions', 'GET', [
+		$solutions = local_rest_call( '/pressody_retailer/v1/solutions', 'GET', [
 			'postId' => self::$post_ids,
 		] );
 
@@ -278,7 +278,7 @@ And here is a quote from a customer:
 		/**
 		 * Get certain solutions via their post slug.
 		 */
-		$solutions = local_rest_call( '/pixelgradelt_retailer/v1/solutions', 'GET', [
+		$solutions = local_rest_call( '/pressody_retailer/v1/solutions', 'GET', [
 			'postSlug' => [ 'edd', 'ecommerce', ],
 		] );
 
@@ -288,8 +288,8 @@ And here is a quote from a customer:
 		/**
 		 * Get solutions by their full Composer package name.
 		 */
-		$solutions = local_rest_call( '/pixelgradelt_retailer/v1/solutions', 'GET', [
-			'packageName' => [ 'pixelgradelt-retailer/ecommerce', ],
+		$solutions = local_rest_call( '/pressody_retailer/v1/solutions', 'GET', [
+			'packageName' => [ 'pressody-retailer/ecommerce', ],
 		] );
 
 		$this->assertArrayNotHasKey( 'code', $solutions );
@@ -298,7 +298,7 @@ And here is a quote from a customer:
 		/**
 		 * Get solutions by their type.
 		 */
-		$solutions = local_rest_call( '/pixelgradelt_retailer/v1/solutions', 'GET', [
+		$solutions = local_rest_call( '/pressody_retailer/v1/solutions', 'GET', [
 			'type' => SolutionTypes::REGULAR,
 		] );
 
@@ -312,7 +312,7 @@ And here is a quote from a customer:
 		], wp_list_pluck( $solutions, 'slug' ) );
 
 		// Use bogus type. Should not get any solution.
-		$solutions = local_rest_call( '/pixelgradelt_retailer/v1/solutions', 'GET', [
+		$solutions = local_rest_call( '/pressody_retailer/v1/solutions', 'GET', [
 			'type' => [ 'bogus', ],
 		] );
 
@@ -327,7 +327,7 @@ And here is a quote from a customer:
 		 * Check for parameter validations.
 		 */
 		// Single int post ID should be allowed since it is converted to an array.
-		$solutions = local_rest_call( '/pixelgradelt_retailer/v1/solutions/processed', 'GET', [
+		$solutions = local_rest_call( '/pressody_retailer/v1/solutions/processed', 'GET', [
 			'postId' => self::$post_ids['blog'],
 		] );
 
@@ -335,7 +335,7 @@ And here is a quote from a customer:
 		$this->assertSame( [ 'blog', ], wp_list_pluck( $solutions, 'slug' ) );
 
 		// Invalid post IDs get ignored since wp_parse_id_list() will transform them to 0. We will get back all solutions processed.
-		$solutions = local_rest_call( '/pixelgradelt_retailer/v1/solutions/processed', 'GET', [
+		$solutions = local_rest_call( '/pressody_retailer/v1/solutions/processed', 'GET', [
 			'postId' => 'bogus',
 		] );
 
@@ -343,7 +343,7 @@ And here is a quote from a customer:
 		$this->assertSame( [ 'ecommerce', 'edd', 'portfolio', ], wp_list_pluck( $solutions, 'slug' ) );
 
 		// Use an invalid package name. Should get error since we pattern check.
-		$solutions = local_rest_call( '/pixelgradelt_retailer/v1/solutions/processed', 'GET', [
+		$solutions = local_rest_call( '/pressody_retailer/v1/solutions/processed', 'GET', [
 			'packageName' => [ 'ecommerce', ],
 		] );
 
@@ -356,18 +356,18 @@ And here is a quote from a customer:
 		/**
 		 * Get all solutions processed.
 		 */
-		$solutions = local_rest_call( '/pixelgradelt_retailer/v1/solutions/processed', 'GET', [] );
+		$solutions = local_rest_call( '/pressody_retailer/v1/solutions/processed', 'GET', [] );
 
 		// Should receive error that one needs to filter the solutions not just processed them whole.
 		$this->assertArrayHasKey( 'code', $solutions );
 		$this->assertArrayHasKey( 'message', $solutions );
 		$this->assertArrayHasKey( 'data', $solutions );
-		$this->assertSame( 'pixelgradelt_retailer_rest_no_list', $solutions['code'] );
+		$this->assertSame( 'pressody_retailer_rest_no_list', $solutions['code'] );
 
 		/**
 		 * Get all solutions processed via their post IDs.
 		 */
-		$solutions = local_rest_call( '/pixelgradelt_retailer/v1/solutions/processed', 'GET', [
+		$solutions = local_rest_call( '/pressody_retailer/v1/solutions/processed', 'GET', [
 			'postId' => self::$post_ids,
 		] );
 
@@ -378,7 +378,7 @@ And here is a quote from a customer:
 		 * Get certain solutions via their post slug.
 		 */
 		// ecommerce requires edd.
-		$solutions = local_rest_call( '/pixelgradelt_retailer/v1/solutions/processed', 'GET', [
+		$solutions = local_rest_call( '/pressody_retailer/v1/solutions/processed', 'GET', [
 			'postSlug' => [ 'ecommerce', ],
 		] );
 
@@ -389,8 +389,8 @@ And here is a quote from a customer:
 		 * Get solutions by their full Composer package name.
 		 */
 		// ecommerce requires edd.
-		$solutions = local_rest_call( '/pixelgradelt_retailer/v1/solutions/processed', 'GET', [
-			'packageName' => [ 'pixelgradelt-retailer/ecommerce', ],
+		$solutions = local_rest_call( '/pressody_retailer/v1/solutions/processed', 'GET', [
+			'packageName' => [ 'pressody-retailer/ecommerce', ],
 		] );
 
 		$this->assertArrayNotHasKey( 'code', $solutions );
@@ -399,7 +399,7 @@ And here is a quote from a customer:
 		/**
 		 * Get solutions by their type.
 		 */
-		$solutions = local_rest_call( '/pixelgradelt_retailer/v1/solutions/processed', 'GET', [
+		$solutions = local_rest_call( '/pressody_retailer/v1/solutions/processed', 'GET', [
 			'type' => SolutionTypes::REGULAR,
 		] );
 
@@ -408,10 +408,10 @@ And here is a quote from a customer:
 		$this->assertArrayHasKey( 'code', $solutions );
 		$this->assertArrayHasKey( 'message', $solutions );
 		$this->assertArrayHasKey( 'data', $solutions );
-		$this->assertSame( 'pixelgradelt_retailer_rest_no_list', $solutions['code'] );
+		$this->assertSame( 'pressody_retailer_rest_no_list', $solutions['code'] );
 
 		// Use bogus type.
-		$solutions = local_rest_call( '/pixelgradelt_retailer/v1/solutions/processed', 'GET', [
+		$solutions = local_rest_call( '/pressody_retailer/v1/solutions/processed', 'GET', [
 			'type' => [ 'bogus', ],
 		] );
 
@@ -420,12 +420,12 @@ And here is a quote from a customer:
 		$this->assertArrayHasKey( 'code', $solutions );
 		$this->assertArrayHasKey( 'message', $solutions );
 		$this->assertArrayHasKey( 'data', $solutions );
-		$this->assertSame( 'pixelgradelt_retailer_rest_no_list', $solutions['code'] );
+		$this->assertSame( 'pressody_retailer_rest_no_list', $solutions['code'] );
 
 		/**
 		 * Process empty list.
 		 */
-		$solutions = local_rest_call( '/pixelgradelt_retailer/v1/solutions/processed', 'GET', [
+		$solutions = local_rest_call( '/pressody_retailer/v1/solutions/processed', 'GET', [
 			'postId' => [ 123456789, ],
 		] );
 
@@ -437,7 +437,7 @@ And here is a quote from a customer:
 		// ecommerce requires edd and excludes blog.
 		// presentation requires blog and excludes ecommerce.
 		// We should get back only blog and presentation.
-		$solutions = local_rest_call( '/pixelgradelt_retailer/v1/solutions/processed', 'GET', [
+		$solutions = local_rest_call( '/pressody_retailer/v1/solutions/processed', 'GET', [
 			'postSlug' => [ 'blog', 'ecommerce', 'portfolio', 'presentation' ],
 		] );
 
@@ -451,16 +451,16 @@ And here is a quote from a customer:
 		// presentation requires blog and excludes ecommerce.
 		// The presentation solution should be the first to exclude, thus excluding the ecommerce solution.
 		// We should get back only blog and presentation.
-		$solutions = local_rest_call( '/pixelgradelt_retailer/v1/solutions/processed', 'GET', [
+		$solutions = local_rest_call( '/pressody_retailer/v1/solutions/processed', 'GET', [
 			'postSlug'         => [ 'blog', 'ecommerce', 'portfolio', 'presentation' ],
 			'solutionsContext' => [
-				'pixelgradelt-retailer/presentation' => [
+				'pressody-retailer/presentation' => [
 					'timestamp' => 200,
 				],
-				'pixelgradelt-retailer/ecommerce'    => [
+				'pressody-retailer/ecommerce'    => [
 					'timestamp' => 100,
 				],
-				'pixelgradelt-retailer/portfolio'    => [
+				'pressody-retailer/portfolio'    => [
 					'timestamp' => 50,
 				],
 			],
@@ -477,7 +477,7 @@ And here is a quote from a customer:
 		/**
 		 * Check for existing post ID.
 		 */
-		$solution = local_rest_call( '/pixelgradelt_retailer/v1/solutions/' . self::$post_ids['blog'], 'GET', [] );
+		$solution = local_rest_call( '/pressody_retailer/v1/solutions/' . self::$post_ids['blog'], 'GET', [] );
 
 		$this->assertArrayNotHasKey( 'code', $solution );
 		$this->assertArrayHasKey( 'slug', $solution );
@@ -486,7 +486,7 @@ And here is a quote from a customer:
 		/**
 		 * Check for non-existing post ID.
 		 */
-		$solution = local_rest_call( '/pixelgradelt_retailer/v1/solutions/' . 9999999, 'GET', [] );
+		$solution = local_rest_call( '/pressody_retailer/v1/solutions/' . 9999999, 'GET', [] );
 
 		// Should receive error about the parameter.
 		$this->assertArrayHasKey( 'code', $solution );
@@ -494,12 +494,12 @@ And here is a quote from a customer:
 		$this->assertArrayHasKey( 'data', $solution );
 		$this->assertArrayHasKey( 'status', $solution['data'] );
 		$this->assertSame( \WP_Http::NOT_FOUND, $solution['data']['status'] );
-		$this->assertSame( 'pixelgradelt_retailer_rest_invalid_id', $solution['code'] );
+		$this->assertSame( 'pressody_retailer_rest_invalid_id', $solution['code'] );
 
 		/**
 		 * Check for non-numeric post ID.
 		 */
-		$solution = local_rest_call( '/pixelgradelt_retailer/v1/solutions/asfasdf', 'GET', [] );
+		$solution = local_rest_call( '/pressody_retailer/v1/solutions/asfasdf', 'GET', [] );
 
 		// Should receive error about the parameter.
 		$this->assertArrayHasKey( 'code', $solution );
@@ -519,7 +519,7 @@ And here is a quote from a customer:
 		 */
 		// Single int post ID should be allowed since it is converted to an array.
 		// The blog solutions doesn't have any required parts.
-		$parts = local_rest_call( '/pixelgradelt_retailer/v1/solutions/parts', 'GET', [
+		$parts = local_rest_call( '/pressody_retailer/v1/solutions/parts', 'GET', [
 			'postId' => self::$post_ids['blog'],
 		] );
 
@@ -528,7 +528,7 @@ And here is a quote from a customer:
 
 		// Invalid post IDs get ignored since wp_parse_id_list() will transform them to 0.
 		// We will get back required parts for all solutions processed.
-		$parts = local_rest_call( '/pixelgradelt_retailer/v1/solutions/parts', 'GET', [
+		$parts = local_rest_call( '/pressody_retailer/v1/solutions/parts', 'GET', [
 			'postId' => 'bogus',
 		] );
 
@@ -536,7 +536,7 @@ And here is a quote from a customer:
 		$this->assertCount( 2, $parts );
 
 		// Use an invalid package name. Should get error since we pattern check.
-		$parts = local_rest_call( '/pixelgradelt_retailer/v1/solutions/parts', 'GET', [
+		$parts = local_rest_call( '/pressody_retailer/v1/solutions/parts', 'GET', [
 			'packageName' => [ 'ecommerce', ],
 		] );
 
@@ -549,18 +549,18 @@ And here is a quote from a customer:
 		/**
 		 * Get required parts for all solutions processed.
 		 */
-		$parts = local_rest_call( '/pixelgradelt_retailer/v1/solutions/parts', 'GET', [] );
+		$parts = local_rest_call( '/pressody_retailer/v1/solutions/parts', 'GET', [] );
 
 		// Should receive error that one needs to filter the solutions not just processed them whole.
 		$this->assertArrayHasKey( 'code', $parts );
 		$this->assertArrayHasKey( 'message', $parts );
 		$this->assertArrayHasKey( 'data', $parts );
-		$this->assertSame( 'pixelgradelt_retailer_rest_no_list', $parts['code'] );
+		$this->assertSame( 'pressody_retailer_rest_no_list', $parts['code'] );
 
 		/**
 		 * Get required parts for all solutions processed via their post IDs.
 		 */
-		$parts = local_rest_call( '/pixelgradelt_retailer/v1/solutions/parts', 'GET', [
+		$parts = local_rest_call( '/pressody_retailer/v1/solutions/parts', 'GET', [
 			'postId' => self::$post_ids,
 		] );
 
@@ -571,13 +571,13 @@ And here is a quote from a customer:
 		 * Get required parts for certain solutions via their post slug.
 		 */
 		// ecommerce requires edd.
-		$parts = local_rest_call( '/pixelgradelt_retailer/v1/solutions/parts', 'GET', [
+		$parts = local_rest_call( '/pressody_retailer/v1/solutions/parts', 'GET', [
 			'postSlug' => [ 'ecommerce', ],
 		] );
 
 		$this->assertArrayNotHasKey( 'code', $parts );
 		$this->assertCount( 1, $parts );
-		$this->assertSame( 'pixelgradelt-records/part_yet-another', $parts[0]['name'] );
+		$this->assertSame( 'pressody-records/part_yet-another', $parts[0]['name'] );
 		$this->assertSame( '1.2.9', $parts[0]['version'] );
 		$this->assertArrayHasKey( 'requiredBy', $parts[0] );
 
@@ -585,20 +585,20 @@ And here is a quote from a customer:
 		 * Get required parts for solutions by their full Composer package name.
 		 */
 		// ecommerce requires edd.
-		$parts = local_rest_call( '/pixelgradelt_retailer/v1/solutions/parts', 'GET', [
-			'packageName' => [ 'pixelgradelt-retailer/ecommerce', ],
+		$parts = local_rest_call( '/pressody_retailer/v1/solutions/parts', 'GET', [
+			'packageName' => [ 'pressody-retailer/ecommerce', ],
 		] );
 
 		$this->assertArrayNotHasKey( 'code', $parts );
 		$this->assertCount( 1, $parts );
-		$this->assertSame( 'pixelgradelt-records/part_yet-another', $parts[0]['name'] );
+		$this->assertSame( 'pressody-records/part_yet-another', $parts[0]['name'] );
 		$this->assertSame( '1.2.9', $parts[0]['version'] );
 		$this->assertArrayHasKey( 'requiredBy', $parts[0] );
 
 		/**
 		 * Get required parts for solutions by their type.
 		 */
-		$parts = local_rest_call( '/pixelgradelt_retailer/v1/solutions/parts', 'GET', [
+		$parts = local_rest_call( '/pressody_retailer/v1/solutions/parts', 'GET', [
 			'type' => SolutionTypes::REGULAR,
 		] );
 
@@ -607,10 +607,10 @@ And here is a quote from a customer:
 		$this->assertArrayHasKey( 'code', $parts );
 		$this->assertArrayHasKey( 'message', $parts );
 		$this->assertArrayHasKey( 'data', $parts );
-		$this->assertSame( 'pixelgradelt_retailer_rest_no_list', $parts['code'] );
+		$this->assertSame( 'pressody_retailer_rest_no_list', $parts['code'] );
 
 		// Use bogus type.
-		$parts = local_rest_call( '/pixelgradelt_retailer/v1/solutions/parts', 'GET', [
+		$parts = local_rest_call( '/pressody_retailer/v1/solutions/parts', 'GET', [
 			'type' => [ 'bogus', ],
 		] );
 
@@ -619,12 +619,12 @@ And here is a quote from a customer:
 		$this->assertArrayHasKey( 'code', $parts );
 		$this->assertArrayHasKey( 'message', $parts );
 		$this->assertArrayHasKey( 'data', $parts );
-		$this->assertSame( 'pixelgradelt_retailer_rest_no_list', $parts['code'] );
+		$this->assertSame( 'pressody_retailer_rest_no_list', $parts['code'] );
 
 		/**
 		 * Get required parts for non-existent solution.
 		 */
-		$parts = local_rest_call( '/pixelgradelt_retailer/v1/solutions/parts', 'GET', [
+		$parts = local_rest_call( '/pressody_retailer/v1/solutions/parts', 'GET', [
 			'postId' => [ 123456789, ],
 		] );
 
@@ -633,17 +633,17 @@ And here is a quote from a customer:
 		/**
 		 * Get required parts required by multiple solutions with different version ranges.
 		 */
-		$parts = local_rest_call( '/pixelgradelt_retailer/v1/solutions/parts', 'GET', [
+		$parts = local_rest_call( '/pressody_retailer/v1/solutions/parts', 'GET', [
 			'postSlug' => [ 'ecommerce', 'portfolio' ],
 		] );
 
 		$this->assertArrayNotHasKey( 'code', $parts );
 		$this->assertCount( 2, $parts );
-		$this->assertSame( 'pixelgradelt-records/part_test-test', $parts[0]['name'] );
+		$this->assertSame( 'pressody-records/part_test-test', $parts[0]['name'] );
 		$this->assertSame( '^1.0', $parts[0]['version'] );
 		$this->assertArrayHasKey( 'requiredBy', $parts[0] );
 		$this->assertCount( 1, $parts[0]['requiredBy'] );
-		$this->assertSame( 'pixelgradelt-records/part_yet-another', $parts[1]['name'] );
+		$this->assertSame( 'pressody-records/part_yet-another', $parts[1]['name'] );
 		$this->assertSame( '1.2.9, ^2', $parts[1]['version'] );
 		$this->assertArrayHasKey( 'requiredBy', $parts[1] );
 		$this->assertCount( 2, $parts[1]['requiredBy'] );

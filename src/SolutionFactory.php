@@ -4,16 +4,16 @@
  *
  * @since   0.1.0
  * @license GPL-2.0-or-later
- * @package PixelgradeLT
+ * @package Pressody
  */
 
 declare ( strict_types=1 );
 
-namespace PixelgradeLT\Retailer;
+namespace Pressody\Retailer;
 
-use PixelgradeLT\Retailer\SolutionType\BaseSolution;
-use PixelgradeLT\Retailer\SolutionType\Builder\BaseSolutionBuilder;
-use PixelgradeLT\Retailer\SolutionType\SolutionTypes;
+use Pressody\Retailer\SolutionType\BaseSolution;
+use Pressody\Retailer\SolutionType\Builder\BaseSolutionBuilder;
+use Pressody\Retailer\SolutionType\SolutionTypes;
 use Psr\Log\LoggerInterface;
 
 /**

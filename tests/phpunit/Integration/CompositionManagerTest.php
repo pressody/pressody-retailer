@@ -1,15 +1,15 @@
 <?php
 declare ( strict_types=1 );
 
-namespace PixelgradeLT\Retailer\Tests\Integration;
+namespace Pressody\Retailer\Tests\Integration;
 
-use PixelgradeLT\Retailer\Capabilities;
-use PixelgradeLT\Retailer\CompositionManager;
-use PixelgradeLT\Retailer\SolutionType\SolutionTypes;
-use PixelgradeLT\Retailer\Tests\Framework\PHPUnitUtil;
+use Pressody\Retailer\Capabilities;
+use Pressody\Retailer\CompositionManager;
+use Pressody\Retailer\SolutionType\SolutionTypes;
+use Pressody\Retailer\Tests\Framework\PHPUnitUtil;
 
 use Psr\Container\ContainerInterface;
-use function PixelgradeLT\Retailer\plugin;
+use function Pressody\Retailer\plugin;
 
 use WP_Http as HTTP;
 
@@ -42,7 +42,7 @@ class CompositionManagerTest extends TestCase {
 		 * CREATE SOLUTIONS IN THE DB.
 		 */
 
-		// Register ltsolution post type
+		// Register pdsolution post type
 		$register_post_type = PHPUnitUtil::getProtectedMethod( self::$container['hooks.solution_post_type'], 'register_post_type' );
 		$register_post_type->invoke( self::$container['hooks.solution_post_type'] );
 
@@ -105,7 +105,7 @@ And here is a quote from a customer:
 			],
 		];
 
-		// Create the test ltsolutions posts that will be dependencies to other posts that we test.
+		// Create the test pdsolutions posts that will be dependencies to other posts that we test.
 		foreach ( self::$solutions_dep_post_data as $key => $data ) {
 			self::$solution_ids[ $key ] = $factory->post->create_object( $data );
 		}
@@ -130,7 +130,7 @@ And here is a quote from a customer:
 <blockquote>Pure bliss, man!</blockquote>',
 				'_solution_details_homepage'                       => 'https://package.homepage',
 				'_solution_required_parts|||0|value'               => '_',
-				'_solution_required_parts|package_name|0|0|value'  => 'pixelgradelt-records/part_yet-another',
+				'_solution_required_parts|package_name|0|0|value'  => 'pressody-records/part_yet-another',
 				'_solution_required_parts|version_range|0|0|value' => '1.2.9',
 				'_solution_required_parts|stability|0|0|value'     => 'stable',
 				'_solution_required_solutions|||0|value'           => '_',
@@ -161,7 +161,7 @@ And here is a quote from a customer:
 <blockquote>Pure bliss, man!</blockquote>',
 				'_solution_details_homepage'                       => 'https://package.homepage',
 				'_solution_required_parts|||0|value'               => '_',
-				'_solution_required_parts|package_name|0|0|value'  => 'pixelgradelt-records/part_yet-another',
+				'_solution_required_parts|package_name|0|0|value'  => 'pressody-records/part_yet-another',
 				'_solution_required_parts|version_range|0|0|value' => '^1',
 				'_solution_required_parts|stability|0|0|value'     => 'stable',
 				'_solution_required_solutions|||0|value'           => '_',
@@ -193,10 +193,10 @@ And here is a quote from a customer:
 				'_solution_details_homepage'                       => 'https://package.homepage',
 				'_solution_required_parts|||0|value'               => '_',
 				'_solution_required_parts|||1|value'               => '_',
-				'_solution_required_parts|package_name|0|0|value'  => 'pixelgradelt-records/part_yet-another',
+				'_solution_required_parts|package_name|0|0|value'  => 'pressody-records/part_yet-another',
 				'_solution_required_parts|version_range|0|0|value' => '^2',
 				'_solution_required_parts|stability|0|0|value'     => 'stable',
-				'_solution_required_parts|package_name|1|0|value'  => 'pixelgradelt-records/part_test-test',
+				'_solution_required_parts|package_name|1|0|value'  => 'pressody-records/part_test-test',
 				'_solution_required_parts|version_range|1|0|value' => '^1.0',
 				'_solution_required_parts|stability|1|0|value'     => 'stable',
 				'_solution_required_solutions|||0|value'           => '_',
@@ -219,72 +219,72 @@ And here is a quote from a customer:
 		self::$user_ids['customer1'] = $factory->user->create( [
 			'user_pass'  => 'pass',
 			'user_login' => 'customer1',
-			'user_email' => 'customer1@lt-retailer.local',
+			'user_email' => 'customer1@pd-retailer.local',
 			'first_name' => 'Customer1',
-			'last_name'  => 'LTRetailer',
+			'last_name'  => 'PDRetailer',
 			'role'       => Capabilities::CUSTOMER_USER_ROLE,
 		] );
 
 		self::$user_ids['customer2'] = $factory->user->create( [
 			'user_pass'  => 'pass',
 			'user_login' => 'customer2',
-			'user_email' => 'customer2@lt-retailer.local',
+			'user_email' => 'customer2@pd-retailer.local',
 			'first_name' => 'Customer2',
-			'last_name'  => 'LTRetailer',
+			'last_name'  => 'PDRetailer',
 			'role'       => Capabilities::CUSTOMER_USER_ROLE,
 		] );
 
 		self::$user_ids['customer3'] = $factory->user->create( [
 			'user_pass'  => 'pass',
 			'user_login' => 'customer3',
-			'user_email' => 'customer3@lt-retailer.local',
+			'user_email' => 'customer3@pd-retailer.local',
 			'first_name' => 'Customer3',
-			'last_name'  => 'LTRetailer',
+			'last_name'  => 'PDRetailer',
 			'role'       => Capabilities::CUSTOMER_USER_ROLE,
 		] );
 
 		self::$user_ids['customer4'] = $factory->user->create( [
 			'user_pass'  => 'pass',
 			'user_login' => 'customer4',
-			'user_email' => 'customer4@lt-retailer.local',
+			'user_email' => 'customer4@pd-retailer.local',
 			'first_name' => 'Customer4',
-			'last_name'  => 'LTRetailer',
+			'last_name'  => 'PDRetailer',
 			'role'       => Capabilities::CUSTOMER_USER_ROLE,
 		] );
 
 		self::$user_ids['customer5'] = $factory->user->create( [
 			'user_pass'  => 'pass',
 			'user_login' => 'customer5',
-			'user_email' => 'customer5@lt-retailer.local',
+			'user_email' => 'customer5@pd-retailer.local',
 			'first_name' => 'Customer5',
-			'last_name'  => 'LTRetailer',
+			'last_name'  => 'PDRetailer',
 			'role'       => Capabilities::CUSTOMER_USER_ROLE,
 		] );
 
 		self::$user_ids['subscriber'] = $factory->user->create( [
 			'user_pass'  => 'pass',
 			'user_login' => 'subscriber',
-			'user_email' => 'subscriber@lt-retailer.local',
+			'user_email' => 'subscriber@pd-retailer.local',
 			'first_name' => 'Subscriber',
-			'last_name'  => 'LTRetailer',
+			'last_name'  => 'PDRetailer',
 			'role'       => 'subscriber',
 		] );
 
 		self::$user_ids['manager1'] = $factory->user->create( [
 			'user_pass'  => 'pass',
 			'user_login' => 'manager1',
-			'user_email' => 'manager1@lt-retailer.local',
+			'user_email' => 'manager1@pd-retailer.local',
 			'first_name' => 'Manager1',
-			'last_name'  => 'LTRetailer',
+			'last_name'  => 'PDRetailer',
 			'role'       => 'administrator',
 		] );
 
 		self::$user_ids['client1'] = $factory->user->create( [
 			'user_pass'  => 'pass',
 			'user_login' => 'client1',
-			'user_email' => 'client1@lt-retailer.local',
+			'user_email' => 'client1@pd-retailer.local',
 			'first_name' => 'Client1',
-			'last_name'  => 'LTRetailer',
+			'last_name'  => 'PDRetailer',
 			'role'       => Capabilities::CLIENT_USER_ROLE,
 		] );
 
@@ -323,7 +323,7 @@ And here is a quote from a customer:
 		 * CREATE COMPOSITIONS IN THE DB, WITH THE SOLUTIONS.
 		 */
 
-		// Register ltcomposition post type
+		// Register pdcomposition post type
 		$register_post_type = PHPUnitUtil::getProtectedMethod( self::$container['hooks.composition_post_type'], 'register_post_type' );
 		$register_post_type->invoke( self::$container['hooks.composition_post_type'] );
 
@@ -345,7 +345,7 @@ And here is a quote from a customer:
 				self::$container['composition.manager']::KEYWORD_TAXONOMY => 'keyword1, keyword2, keyword3',
 			],
 			'meta_input'  => [
-				'_composition_status'                                        => CompositionManager::DEFAULT_STATUS,
+				'_composition_status'                                        => CompositionManager::DEFAUPD_STATUS,
 				'_composition_hashid'                                        => 'bogushashid1',
 				// These are in the format CarbonFields saves in.
 				'_composition_user_ids|||0|value'                            => 'user:user:' . self::$user_ids['customer1'],
@@ -483,7 +483,7 @@ And here is a quote from a customer:
 		] ) );
 
 		$this->assertEqualSets( [ self::$composition_ids['first'], ], $composition_manager->get_composition_ids_by( [
-			'status' => CompositionManager::DEFAULT_STATUS,
+			'status' => CompositionManager::DEFAUPD_STATUS,
 		] ) );
 		$this->assertEqualSets( [
 			self::$composition_ids['second'],
@@ -492,7 +492,7 @@ And here is a quote from a customer:
 			'status' => 'ready',
 		] ) );
 		$this->assertEqualSets( array_values( self::$composition_ids ), $composition_manager->get_composition_ids_by( [
-			'status' => [ CompositionManager::DEFAULT_STATUS, 'ready', ],
+			'status' => [ CompositionManager::DEFAUPD_STATUS, 'ready', ],
 		] ) );
 
 		$this->assertEqualSets( [ self::$composition_ids['first'], ], $composition_manager->get_composition_ids_by( [

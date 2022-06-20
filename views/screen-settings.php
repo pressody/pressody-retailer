@@ -2,16 +2,16 @@
 /**
  * Views: Settings page
  *
- * @package PixelgradeLT
+ * @package Pressody
  * @license GPL-2.0-or-later
  * @since 0.1.0
  */
 
 declare ( strict_types = 1 );
 
-namespace PixelgradeLT\Retailer;
+namespace Pressody\Retailer;
 
-use PixelgradeLT\Retailer\SolutionType\BaseSolution;
+use Pressody\Retailer\SolutionType\BaseSolution;
 
 /**
  * @global string $packages_permalink
@@ -22,8 +22,8 @@ use PixelgradeLT\Retailer\SolutionType\BaseSolution;
 
 ?>
 
-<div class="pixelgradelt_retailer-screen">
-	<div class="pixelgradelt_retailer-screen-content wrap">
+<div class="pressody_retailer-screen">
+	<div class="pressody_retailer-screen-content wrap">
 		<h1><?php echo esc_html( get_admin_page_title() ); ?></h1>
 		<h2 class="nav-tab-wrapper">
 			<?php
@@ -33,7 +33,7 @@ use PixelgradeLT\Retailer\SolutionType\BaseSolution;
 				}
 
 				printf(
-						'<a href="#pixelgradelt_retailer-%1$s" class="nav-tab%2$s">%3$s</a>',
+						'<a href="#pressody_retailer-%1$s" class="nav-tab%2$s">%3$s</a>',
 						esc_attr( $tab_id ),
 						$active_tab === $tab_id ? ' nav-tab-active' : '',
 						esc_html( $tab_data['name'] )
@@ -49,7 +49,7 @@ use PixelgradeLT\Retailer\SolutionType\BaseSolution;
 			}
 
 			printf(
-					'<div id="pixelgradelt_retailer-%1$s" class="pixelgradelt_retailer-%1$s pixelgradelt_retailer-tab-panel%2$s">',
+					'<div id="pressody_retailer-%1$s" class="pressody_retailer-%1$s pressody_retailer-tab-panel%2$s">',
 					esc_attr( $tab_id ),
 					$active_tab === $tab_id ? ' is-active' : ''
 			);
@@ -61,5 +61,5 @@ use PixelgradeLT\Retailer\SolutionType\BaseSolution;
 		?>
 	</div>
 
-	<div id="pixelgradelt_retailer-screen-sidebar" class="pixelgradelt_retailer-screen-sidebar"></div>
+	<div id="pressody_retailer-screen-sidebar" class="pressody_retailer-screen-sidebar"></div>
 </div>

@@ -4,24 +4,24 @@
  *
  * @since   0.1.0
  * @license GPL-2.0-or-later
- * @package PixelgradeLT
+ * @package Pressody
  */
 
 declare ( strict_types=1 );
 
-namespace PixelgradeLT\Retailer\Screen;
+namespace Pressody\Retailer\Screen;
 
 use Carbon_Fields\Carbon_Fields;
 use Carbon_Fields\Container;
 use Carbon_Fields\Field;
 use Cedaro\WP\Plugin\AbstractHookProvider;
-use PixelgradeLT\Retailer\Transformer\ComposerPackageTransformer;
-use PixelgradeLT\Retailer\SolutionManager;
-use PixelgradeLT\Retailer\Repository\PackageRepository;
-use PixelgradeLT\Retailer\Utils\ArrayHelpers;
+use Pressody\Retailer\Transformer\ComposerPackageTransformer;
+use Pressody\Retailer\SolutionManager;
+use Pressody\Retailer\Repository\PackageRepository;
+use Pressody\Retailer\Utils\ArrayHelpers;
 use function Pixelgrade\WPPostNotes\create_note;
-use function PixelgradeLT\Retailer\get_solutions_permalink;
-use function PixelgradeLT\Retailer\preload_rest_data;
+use function Pressody\Retailer\get_solutions_permalink;
+use function Pressody\Retailer\preload_rest_data;
 
 /**
  * Edit Solution screen provider class.
@@ -30,7 +30,7 @@ use function PixelgradeLT\Retailer\preload_rest_data;
  */
 class EditSolution extends AbstractHookProvider {
 
-	const LTRECORDS_API_PWD = 'pixelgradelt_records';
+	const PDRECORDS_API_PWD = 'pressody_records';
 
 	/**
 	 * Solution manager.
@@ -127,7 +127,7 @@ class EditSolution extends AbstractHookProvider {
 		$this->add_action( 'carbon_fields_post_meta_container_saved', 'check_required', 20, 2 );
 
 		// We get early so we can show error messages.
-		$this->add_action( 'plugins_loaded', 'get_ltrecords_parts', 20 );
+		$this->add_action( 'plugins_loaded', 'get_pdrecords_parts', 20 );
 		// Show edit post screen error messages.
 		$this->add_action( 'edit_form_top', 'check_solution_post', 5 );
 		$this->add_action( 'edit_form_top', 'show_user_messages', 50 );
@@ -140,16 +140,16 @@ class EditSolution extends AbstractHookProvider {
 		 */
 		$this->add_action( 'wp_after_insert_post', 'handle_post_update', 10, 3 );
 		// Handle changes to the slug - things that affect dependants (things like slug/package name change that is saved in pseudo_ids).
-		$this->add_action( 'pixelgradelt_retailer/ltsolution/slug_change', 'on_slug_change', 5, 3 );
+		$this->add_action( 'pressody_retailer/pdsolution/slug_change', 'on_slug_change', 5, 3 );
 
 		/*
 		 * HANDLE AUTOMATIC POST NOTES.
 		 */
-		$this->add_action( 'pixelgradelt_retailer/ltsolution/visibility_change', 'add_solution_visibility_change_note', 10, 3 );
-		$this->add_action( 'pixelgradelt_retailer/ltsolution/type_change', 'add_solution_type_change_note', 10, 3 );
-		$this->add_action( 'pixelgradelt_retailer/ltsolution/slug_change', 'add_solution_slug_change_note', 10, 3 );
-		$this->add_action( 'pixelgradelt_retailer/ltsolution/required_solutions_change', 'add_solution_required_solutions_change_note', 10, 3 );
-		$this->add_action( 'pixelgradelt_retailer/ltsolution/excluded_solutions_change', 'add_solution_excluded_solutions_change_note', 10, 3 );
+		$this->add_action( 'pressody_retailer/pdsolution/visibility_change', 'add_solution_visibility_change_note', 10, 3 );
+		$this->add_action( 'pressody_retailer/pdsolution/type_change', 'add_solution_type_change_note', 10, 3 );
+		$this->add_action( 'pressody_retailer/pdsolution/slug_change', 'add_solution_slug_change_note', 10, 3 );
+		$this->add_action( 'pressody_retailer/pdsolution/required_solutions_change', 'add_solution_required_solutions_change_note', 10, 3 );
+		$this->add_action( 'pressody_retailer/pdsolution/excluded_solutions_change', 'add_solution_excluded_solutions_change_note', 10, 3 );
 	}
 
 	/**
@@ -172,21 +172,21 @@ class EditSolution extends AbstractHookProvider {
 	 * @since 0.1.0
 	 */
 	public function enqueue_assets() {
-		\wp_enqueue_script( 'pixelgradelt_retailer-admin' );
-		\wp_enqueue_style( 'pixelgradelt_retailer-admin' );
+		\wp_enqueue_script( 'pressody_retailer-admin' );
+		\wp_enqueue_style( 'pressody_retailer-admin' );
 
-		\wp_enqueue_script( 'pixelgradelt_retailer-edit-solution' );
+		\wp_enqueue_script( 'pressody_retailer-edit-solution' );
 
 		\wp_localize_script(
-				'pixelgradelt_retailer-edit-solution',
-				'_pixelgradeltRetailerEditSolutionData',
+				'pressody_retailer-edit-solution',
+				'_pressodyRetailerEditSolutionData',
 				[
 						'editedPostId' => \get_the_ID(),
 				]
 		);
 
 		$preload_paths = [
-				'/pixelgradelt_retailer/v1/solutions',
+				'/pressody_retailer/v1/solutions',
 		];
 
 		preload_rest_data( $preload_paths );
@@ -240,7 +240,7 @@ class EditSolution extends AbstractHookProvider {
 			return $placeholder;
 		}
 
-		return esc_html__( 'Add solution title', 'pixelgradelt_retailer' );
+		return esc_html__( 'Add solution title', 'pressody_retailer' );
 	}
 
 	protected function add_post_slug_description( string $post_name, $post ): string {
@@ -257,7 +257,7 @@ class EditSolution extends AbstractHookProvider {
 		<p class="description">
 			<?php _e( '<strong>The post slug is, at the same time, the Composer PROJECT NAME.</strong><br>
 In the end this will be joined with the vendor name (like so: <code>vendor/slug</code>) to form the package name to be used in composer.json.<br>
-The slug/name must be lowercased and consist of words separated by <code>-</code> or <code>_</code>. It also must respect <a href="https://regexr.com/5sr9h" target="_blank">this regex</a>', 'pixelgradelt_retailer' ); ?>
+The slug/name must be lowercased and consist of words separated by <code>-</code> or <code>_</code>. It also must respect <a href="https://regexr.com/5sr9h" target="_blank">this regex</a>', 'pressody_retailer' ); ?>
 		</p>
 		<style>
 			input#post_name {
@@ -289,7 +289,7 @@ The slug/name must be lowercased and consist of words separated by <code>-</code
 			}
 
 			// Prevent the package type metabox from being hidden.
-			if ( false !== ( $key = array_search( 'tagsdiv-ltsolution_types', $hidden ) ) ) {
+			if ( false !== ( $key = array_search( 'tagsdiv-pdsolution_types', $hidden ) ) ) {
 				unset( $hidden[ $key ] );
 			}
 		}
@@ -313,8 +313,8 @@ The slug/name must be lowercased and consist of words separated by <code>-</code
 		}
 
 		// Since we are here, modify the package type title to be singular, rather than plural.
-		if ( ! empty( $wp_meta_boxes[ $this->solution_manager::POST_TYPE ]['side']['core']['tagsdiv-ltsolution_types'] ) ) {
-			$wp_meta_boxes[ $this->solution_manager::POST_TYPE ]['side']['core']['tagsdiv-ltsolution_types']['title'] = esc_html__( 'Solution Type', 'pixelgradelt_retailer' ) . '<span style="color: red; flex: auto">*</span>';
+		if ( ! empty( $wp_meta_boxes[ $this->solution_manager::POST_TYPE ]['side']['core']['tagsdiv-pdsolution_types'] ) ) {
+			$wp_meta_boxes[ $this->solution_manager::POST_TYPE ]['side']['core']['tagsdiv-pdsolution_types']['title'] = esc_html__( 'Solution Type', 'pressody_retailer' ) . '<span style="color: red; flex: auto">*</span>';
 		}
 	}
 
@@ -324,44 +324,44 @@ The slug/name must be lowercased and consist of words separated by <code>-</code
 
 	protected function attach_post_meta_fields() {
 		// Register the metabox for managing the general details of the solution.
-		Container::make( 'post_meta', 'carbon_fields_container_source_configuration_' . $this->solution_manager::POST_TYPE, esc_html__( 'General Configuration', 'pixelgradelt_retailer' ) )
+		Container::make( 'post_meta', 'carbon_fields_container_source_configuration_' . $this->solution_manager::POST_TYPE, esc_html__( 'General Configuration', 'pressody_retailer' ) )
 		         ->where( 'post_type', '=', $this->solution_manager::POST_TYPE )
 		         ->set_context( 'normal' )
 		         ->set_priority( 'core' )
 		         ->add_fields( [
-				         Field::make( 'html', 'solution_details_html', __( 'Section Description', 'pixelgradelt_retailer' ) )
-				              ->set_html( sprintf( '<p class="description">%s</p>', __( 'Configure details about <strong>the solution itself,</strong> as it will be exposed for consumption.', 'pixelgradelt_retailer' ) ) ),
+				         Field::make( 'html', 'solution_details_html', __( 'Section Description', 'pressody_retailer' ) )
+				              ->set_html( sprintf( '<p class="description">%s</p>', __( 'Configure details about <strong>the solution itself,</strong> as it will be exposed for consumption.', 'pressody_retailer' ) ) ),
 
-				         Field::make( 'textarea', 'solution_details_description', __( 'Short Description', 'pixelgradelt_retailer' ) ),
-				         Field::make( 'rich_text', 'solution_details_longdescription', __( 'Description', 'pixelgradelt_retailer' ) ),
-				         Field::make( 'text', 'solution_details_homepage', __( 'Solution Homepage URL', 'pixelgradelt_retailer' ) )
-				              ->set_help_text( __( 'This could be a URL to a page that presents details about this solution.', 'pixelgradelt_retailer' ) ),
+				         Field::make( 'textarea', 'solution_details_description', __( 'Short Description', 'pressody_retailer' ) ),
+				         Field::make( 'rich_text', 'solution_details_longdescription', __( 'Description', 'pressody_retailer' ) ),
+				         Field::make( 'text', 'solution_details_homepage', __( 'Solution Homepage URL', 'pressody_retailer' ) )
+				              ->set_help_text( __( 'This could be a URL to a page that presents details about this solution.', 'pressody_retailer' ) ),
 		         ] );
 
 		// Register the metabox for managing the parts the current solution depends on (dependencies that will translate in composer requires).
-		Container::make( 'post_meta', 'carbon_fields_container_part_dependencies_configuration', esc_html__( 'Required Parts Configuration', 'pixelgradelt_retailer' ) )
+		Container::make( 'post_meta', 'carbon_fields_container_part_dependencies_configuration', esc_html__( 'Required Parts Configuration', 'pressody_retailer' ) )
 		         ->where( 'post_type', '=', $this->solution_manager::POST_TYPE )
 		         ->set_context( 'normal' )
 		         ->set_priority( 'core' )
 		         ->add_fields( [
-				         Field::make( 'html', 'parts_dependencies_configuration_html', __( 'Required Parts Description', 'pixelgradelt_retailer' ) )
-				              ->set_html( sprintf( '<p class="description">%s</p>', __( 'Here you edit and configure <strong>the list of LT Records parts</strong> this solution depends on.<br>
+				         Field::make( 'html', 'parts_dependencies_configuration_html', __( 'Required Parts Description', 'pressody_retailer' ) )
+				              ->set_html( sprintf( '<p class="description">%s</p>', __( 'Here you edit and configure <strong>the list of PD Records parts</strong> this solution depends on.<br>
 For each required part you can <strong>specify a version range</strong> to better control the part releases/versions required. Set to <code>*</code> to <strong>use the latest available required-part release that matches all constraints</strong> (other parts present on a site might impose stricter limits).<br>
-Learn more about Composer <a href="https://getcomposer.org/doc/articles/versions.md#writing-version-constraints" target="_blank">versions</a> or <a href="https://semver.mwl.be/?package=madewithlove%2Fhtaccess-cli&constraint=%3C1.2%20%7C%7C%20%3E1.6&stability=stable" target="_blank">play around</a> with version ranges.', 'pixelgradelt_retailer' ) ) ),
+Learn more about Composer <a href="https://getcomposer.org/doc/articles/versions.md#writing-version-constraints" target="_blank">versions</a> or <a href="https://semver.mwl.be/?package=madewithlove%2Fhtaccess-cli&constraint=%3C1.2%20%7C%7C%20%3E1.6&stability=stable" target="_blank">play around</a> with version ranges.', 'pressody_retailer' ) ) ),
 
-				         Field::make( 'complex', 'solution_required_parts', __( 'Required Parts', 'pixelgradelt_retailer' ) )
+				         Field::make( 'complex', 'solution_required_parts', __( 'Required Parts', 'pressody_retailer' ) )
 				              ->set_help_text( __( 'The order is not important, from a logic standpoint. Also, if you add <strong>the same part multiple times</strong> only the last one will take effect since it will overwrite the previous ones.<br>
-LT Records Parts don\'t have a <code>stability</code> field because we want to <strong>control the stability at a composition level</strong> (the global site level).<br>
-<strong>FYI:</strong> Each required part label is comprised of the standardized <code>package_name</code> and the <code>version range</code>.', 'pixelgradelt_retailer' ) )
+PD Records Parts don\'t have a <code>stability</code> field because we want to <strong>control the stability at a composition level</strong> (the global site level).<br>
+<strong>FYI:</strong> Each required part label is comprised of the standardized <code>package_name</code> and the <code>version range</code>.', 'pressody_retailer' ) )
 				              ->set_classes( 'solution-required-solutions solution-required-parts' )
 				              ->set_collapsed( true )
 				              ->add_fields( [
-						              Field::make( 'select', 'package_name', __( 'Choose one of the LT Records Parts', 'pixelgradelt_retailer' ) )
+						              Field::make( 'select', 'package_name', __( 'Choose one of the PD Records Parts', 'pressody_retailer' ) )
 						                   ->set_options( [ $this, 'get_available_required_parts_options' ] )
 						                   ->set_default_value( null )
 						                   ->set_required( true )
 						                   ->set_width( 50 ),
-						              Field::make( 'text', 'version_range', __( 'Version Range', 'pixelgradelt_retailer' ) )
+						              Field::make( 'text', 'version_range', __( 'Version Range', 'pressody_retailer' ) )
 						                   ->set_default_value( '*' )
 						                   ->set_required( true )
 						                   ->set_width( 25 ),
@@ -374,21 +374,21 @@ LT Records Parts don\'t have a <code>stability</code> field because we want to <
 		         ] );
 
 		// Register the metabox for managing the solutions the current solution depends on (dependencies that will translate in composer requires).
-		Container::make( 'post_meta', 'carbon_fields_container_dependencies_configuration_' . $this->solution_manager::POST_TYPE, esc_html__( 'Dependencies Configuration', 'pixelgradelt_retailer' ) )
+		Container::make( 'post_meta', 'carbon_fields_container_dependencies_configuration_' . $this->solution_manager::POST_TYPE, esc_html__( 'Dependencies Configuration', 'pressody_retailer' ) )
 		         ->where( 'post_type', '=', $this->solution_manager::POST_TYPE )
 		         ->set_context( 'normal' )
 		         ->set_priority( 'core' )
 		         ->add_fields( [
-				         Field::make( 'html', 'solutions_dependencies_configuration_html', __( 'Dependencies Description', 'pixelgradelt_retailer' ) )
-				              ->set_html( sprintf( '<p class="description">%s</p>', __( 'Here you edit and configure <strong>the list of other solutions</strong> the current solution depends on (requires) or excludes.', 'pixelgradelt_retailer' ) ) ),
+				         Field::make( 'html', 'solutions_dependencies_configuration_html', __( 'Dependencies Description', 'pressody_retailer' ) )
+				              ->set_html( sprintf( '<p class="description">%s</p>', __( 'Here you edit and configure <strong>the list of other solutions</strong> the current solution depends on (requires) or excludes.', 'pressody_retailer' ) ) ),
 
-				         Field::make( 'complex', 'solution_required_solutions', __( 'Required Solutions', 'pixelgradelt_retailer' ) )
+				         Field::make( 'complex', 'solution_required_solutions', __( 'Required Solutions', 'pressody_retailer' ) )
 				              ->set_help_text( __( 'These are solutions that are <strong>automatically included in a site\'s composition</strong> together with the current solution. The order is not important, from a logic standpoint.<br>
-<strong>FYI:</strong> Each required solution label is comprised of the solution <code>slug</code> and the <code>#post_id</code>.', 'pixelgradelt_retailer' ) )
+<strong>FYI:</strong> Each required solution label is comprised of the solution <code>slug</code> and the <code>#post_id</code>.', 'pressody_retailer' ) )
 				              ->set_classes( 'solution-required-solutions' )
 				              ->set_collapsed( true )
 				              ->add_fields( [
-						              Field::make( 'select', 'pseudo_id', __( 'Choose one of the configured solutions', 'pixelgradelt_retailer' ) )
+						              Field::make( 'select', 'pseudo_id', __( 'Choose one of the configured solutions', 'pressody_retailer' ) )
 						                   ->set_options( [ $this, 'get_available_required_solutions_options' ] )
 						                   ->set_default_value( null )
 						                   ->set_required( true )
@@ -399,14 +399,14 @@ LT Records Parts don\'t have a <code>stability</code> field because we want to <
 								        <%- pseudo_id %>
 								    <% } %>
 								' ),
-				         Field::make( 'complex', 'solution_excluded_solutions', __( 'Excluded Solutions', 'pixelgradelt_retailer' ) )
+				         Field::make( 'complex', 'solution_excluded_solutions', __( 'Excluded Solutions', 'pressody_retailer' ) )
 				              ->set_help_text( __( 'These are solutions that are <strong>automatically removed from a site\'s composition</strong> when the current solution is included. The order is not important, from a logic standpoint.<br>
 The excluded solutions only take effect in <strong>a purchase context (add to cart, etc.), not in a Composer context. When a solution is selected, its excluded solutions (and those of its required solutions) are removed from the customer\'s site selection.</strong><br>
-<strong>FYI:</strong> Each replaced solution label is comprised of the solution <code>slug</code> and the <code>#post_id</code>.', 'pixelgradelt_retailer' ) )
+<strong>FYI:</strong> Each replaced solution label is comprised of the solution <code>slug</code> and the <code>#post_id</code>.', 'pressody_retailer' ) )
 				              ->set_classes( 'solution-required-solutions solution-excluded-solutions' )
 				              ->set_collapsed( true )
 				              ->add_fields( [
-						              Field::make( 'select', 'pseudo_id', __( 'Choose one of the configured solutions', 'pixelgradelt_retailer' ) )
+						              Field::make( 'select', 'pseudo_id', __( 'Choose one of the configured solutions', 'pressody_retailer' ) )
 						                   ->set_options( [ $this, 'get_available_required_solutions_options' ] )
 						                   ->set_default_value( null )
 						                   ->set_required( true )
@@ -425,7 +425,7 @@ The excluded solutions only take effect in <strong>a purchase context (add to ca
 		$container_id = $post_type . '_current_state_details';
 		\add_meta_box(
 				$container_id,
-				esc_html__( 'Current Solution State Details', 'pixelgradelt_retailer' ),
+				esc_html__( 'Current Solution State Details', 'pressody_retailer' ),
 				array( $this, 'display_solution_current_state_meta_box' ),
 				$this->solution_manager::POST_TYPE,
 				'normal',
@@ -459,7 +459,7 @@ The excluded solutions only take effect in <strong>a purchase context (add to ca
 	public function display_solution_current_state_meta_box( \WP_Post $post ) {
 		// Wrap it for spacing.
 		echo '<div class="cf-container"><div class="cf-field">';
-		echo '<p>This is <strong>the same info</strong> shown in the full solution-details list available <a href="' . \esc_url( \admin_url( 'options-general.php?page=pixelgradelt_retailer#pixelgradelt_retailer-solutions' ) ) . '">here</a>. <strong>The definitive source of truth is the packages JSON</strong> available <a href="' . \esc_url( get_solutions_permalink() ) . '">here</a>.</p>';
+		echo '<p>This is <strong>the same info</strong> shown in the full solution-details list available <a href="' . \esc_url( \admin_url( 'options-general.php?page=pressody_retailer#pressody_retailer-solutions' ) ) . '">here</a>. <strong>The definitive source of truth is the packages JSON</strong> available <a href="' . \esc_url( get_solutions_permalink() ) . '">here</a>.</p>';
 		require $this->plugin->get_path( 'views/solution-preview.php' );
 		echo '</div></div>';
 	}
@@ -510,7 +510,7 @@ The excluded solutions only take effect in <strong>a purchase context (add to ca
 			if ( $result instanceof \Exception ) {
 				$message .= '<pre>' . $result->getMessage() . '</pre><br>';
 			}
-			$message .= 'There should be additional information in the PixelgradeLT Retailer logs.';
+			$message .= 'There should be additional information in the Pressody Retailer logs.';
 			$message .= '</p>';
 			\update_post_meta( $post_ID, '_package_require_dry_run_result', [
 					'type'    => 'error',
@@ -540,19 +540,19 @@ The excluded solutions only take effect in <strong>a purchase context (add to ca
 		foreach ( $solutions_ids as $post_id ) {
 			$solution_pseudo_id = $this->solution_manager->get_post_solution_slug( $post_id ) . $this->solution_manager::PSEUDO_ID_DELIMITER . $post_id;
 
-			$options[ $solution_pseudo_id ] = sprintf( __( '%s - #%s', 'pixelgradelt_retailer' ), $this->solution_manager->get_post_solution_name( $post_id ), $post_id );
+			$options[ $solution_pseudo_id ] = sprintf( __( '%s - #%s', 'pressody_retailer' ), $this->solution_manager->get_post_solution_name( $post_id ), $post_id );
 		}
 
 		ksort( $options );
 
 		// Prepend an empty option.
-		$options = [ null => esc_html__( 'Pick a solution, carefully..', 'pixelgradelt_retailer' ) ] + $options;
+		$options = [ null => esc_html__( 'Pick a solution, carefully..', 'pressody_retailer' ) ] + $options;
 
 		return $options;
 	}
 
 	/**
-	 * Generate a list of select options from the LT Records available parts.
+	 * Generate a list of select options from the PD Records available parts.
 	 *
 	 * @since 0.1.0
 	 *
@@ -561,14 +561,14 @@ The excluded solutions only take effect in <strong>a purchase context (add to ca
 	public function get_available_required_parts_options(): array {
 		$options = [];
 
-		foreach ( $this->get_ltrecords_parts() as $package_name ) {
+		foreach ( $this->get_pdrecords_parts() as $package_name ) {
 			$options[ $package_name ] = $package_name;
 		}
 
 		ksort( $options );
 
 		// Prepend an empty option.
-		$options = [ null => esc_html__( 'Pick a part, carefully..', 'pixelgradelt_retailer' ) ] + $options;
+		$options = [ null => esc_html__( 'Pick a part, carefully..', 'pressody_retailer' ) ] + $options;
 
 		return $options;
 	}
@@ -578,8 +578,8 @@ The excluded solutions only take effect in <strong>a purchase context (add to ca
 	 *
 	 * @return array
 	 */
-	protected function get_ltrecords_parts( bool $skip_cache = false ): array {
-		$parts = $this->solution_manager->get_ltrecords_parts( $skip_cache );
+	protected function get_pdrecords_parts( bool $skip_cache = false ): array {
+		$parts = $this->solution_manager->get_pdrecords_parts( $skip_cache );
 		if ( \is_wp_error( $parts ) ) {
 			$this->add_user_message( 'error', sprintf(
 					'<p>%s</p>',
@@ -610,7 +610,7 @@ The excluded solutions only take effect in <strong>a purchase context (add to ca
 		if ( empty( $post->post_title ) ) {
 			$this->add_user_message( 'error', sprintf(
 					'<p>%s</p>',
-					esc_html__( 'You MUST set a unique name (title) for creating a new package.', 'pixelgradelt_retailer' )
+					esc_html__( 'You MUST set a unique name (title) for creating a new package.', 'pressody_retailer' )
 			) );
 		}
 
@@ -623,7 +623,7 @@ The excluded solutions only take effect in <strong>a purchase context (add to ca
 			$taxonomy_args = $this->solution_manager->get_solution_type_taxonomy_args();
 			$this->add_user_message( 'error', sprintf(
 					'<p>%s</p>',
-					sprintf( esc_html__( 'You MUST choose a %s for creating a new solution.', 'pixelgradelt_retailer' ), $taxonomy_args['labels']['singular_name'] )
+					sprintf( esc_html__( 'You MUST choose a %s for creating a new solution.', 'pressody_retailer' ), $taxonomy_args['labels']['singular_name'] )
 			) );
 		} else {
 			$solution_type = reset( $solution_type );
@@ -675,7 +675,7 @@ The excluded solutions only take effect in <strong>a purchase context (add to ca
 			return;
 		}
 
-		$messages = \apply_filters( 'pixelgradelt_retailer/editsolution_show_user_messages', $this->user_messages, $post );
+		$messages = \apply_filters( 'pressody_retailer/editsolution_show_user_messages', $this->user_messages, $post );
 		if ( empty( $messages ) ) {
 			return;
 		}
@@ -719,7 +719,7 @@ The excluded solutions only take effect in <strong>a purchase context (add to ca
 
 		printf(
 				'<div class="message patience"><p>%s</p></div>',
-				\wp_kses_post( __( 'Please bear in mind that Publish/Update may take a while since we do some heavy lifting behind the scenes.<br>Exercise patience 🦉', 'pixelgradelt_retailer' ) )
+				\wp_kses_post( __( 'Please bear in mind that Publish/Update may take a while since we do some heavy lifting behind the scenes.<br>Exercise patience 🦉', 'pressody_retailer' ) )
 		);
 	}
 
@@ -738,7 +738,7 @@ The excluded solutions only take effect in <strong>a purchase context (add to ca
 		}
 
 		/**
-		 * Fires on LT solution post save.
+		 * Fires on PD solution post save.
 		 *
 		 * @since 0.14.0
 		 *
@@ -746,7 +746,7 @@ The excluded solutions only take effect in <strong>a purchase context (add to ca
 		 * @param \WP_Post $post    The post object.
 		 * @param bool     $update  If the operation was an update.
 		 */
-		\do_action( 'pixelgradelt_retailer/ltsolution/save',
+		\do_action( 'pressody_retailer/pdsolution/save',
 				$post_id,
 				$post,
 				$update
@@ -771,7 +771,7 @@ The excluded solutions only take effect in <strong>a purchase context (add to ca
 		 */
 		if ( ! empty( $old_solution['visibility'] ) && $old_solution['visibility'] !== $current_solution['visibility'] ) {
 			/**
-			 * Fires on LT solution visibility change.
+			 * Fires on PD solution visibility change.
 			 *
 			 * @since 0.14.0
 			 *
@@ -780,7 +780,7 @@ The excluded solutions only take effect in <strong>a purchase context (add to ca
 			 * @param string $old_visibility The old solution visibility.
 			 * @param array  $new_solution   The new solution data.
 			 */
-			\do_action( 'pixelgradelt_retailer/ltsolution/visibility_change',
+			\do_action( 'pressody_retailer/pdsolution/visibility_change',
 					$post_id,
 					$current_solution['visibility'],
 					$old_solution['visibility'],
@@ -793,7 +793,7 @@ The excluded solutions only take effect in <strong>a purchase context (add to ca
 		 */
 		if ( ! empty( $old_solution['type'] ) && $old_solution['type'] !== $current_solution['type'] ) {
 			/**
-			 * Fires on LT solution type change.
+			 * Fires on PD solution type change.
 			 *
 			 * @since 0.14.0
 			 *
@@ -802,7 +802,7 @@ The excluded solutions only take effect in <strong>a purchase context (add to ca
 			 * @param string $old_type     The old solution type.
 			 * @param array  $new_solution The new solution data.
 			 */
-			\do_action( 'pixelgradelt_retailer/ltsolution/type_change',
+			\do_action( 'pressody_retailer/pdsolution/type_change',
 					$post_id,
 					$current_solution['type'],
 					$old_solution['type'],
@@ -815,7 +815,7 @@ The excluded solutions only take effect in <strong>a purchase context (add to ca
 		 */
 		if ( ! empty( $old_solution['slug'] ) && $old_solution['slug'] !== $current_solution['slug'] ) {
 			/**
-			 * Fires on LT solution slug change.
+			 * Fires on PD solution slug change.
 			 *
 			 * @since 0.14.0
 			 *
@@ -824,7 +824,7 @@ The excluded solutions only take effect in <strong>a purchase context (add to ca
 			 * @param string $old_slug     The old solution slug.
 			 * @param array  $new_solution The new solution data.
 			 */
-			\do_action( 'pixelgradelt_retailer/ltsolution/slug_change',
+			\do_action( 'pressody_retailer/pdsolution/slug_change',
 					$post_id,
 					$current_solution['slug'],
 					$old_solution['slug'],
@@ -833,31 +833,31 @@ The excluded solutions only take effect in <strong>a purchase context (add to ca
 		}
 
 		/*
-		 * Handle solution required LT Parts changes.
+		 * Handle solution required PD Parts changes.
 		 */
-		// We are only interested in actual LT Parts changes, not version range changes.
-		// That is why we will only look at the required LT Part package name.
-		$old_required_ltparts_package_name = \wp_list_pluck( $old_solution['required_ltrecords_parts'], 'package_name' );
-		sort( $old_required_ltparts_package_name );
+		// We are only interested in actual PD Parts changes, not version range changes.
+		// That is why we will only look at the required PD Part package name.
+		$old_required_pdparts_package_name = \wp_list_pluck( $old_solution['required_pdrecords_parts'], 'package_name' );
+		sort( $old_required_pdparts_package_name );
 
-		$current_required_ltparts_package_name = \wp_list_pluck( $current_solution['required_ltrecords_parts'], 'package_name' );
-		sort( $current_required_ltparts_package_name );
+		$current_required_pdparts_package_name = \wp_list_pluck( $current_solution['required_pdrecords_parts'], 'package_name' );
+		sort( $current_required_pdparts_package_name );
 
-		if ( serialize( $old_required_ltparts_package_name ) !== serialize( $current_required_ltparts_package_name ) ) {
+		if ( serialize( $old_required_pdparts_package_name ) !== serialize( $current_required_pdparts_package_name ) ) {
 			/**
-			 * Fires on LT solution required solutions change (post ID changes).
+			 * Fires on PD solution required solutions change (post ID changes).
 			 *
 			 * @since 0.14.0
 			 *
 			 * @param int   $post_id              The solution post ID.
-			 * @param array $new_required_ltparts The new solution required_ltparts.
-			 * @param array $old_required_ltparts The old solution required_ltparts.
+			 * @param array $new_required_pdparts The new solution required_pdparts.
+			 * @param array $old_required_pdparts The old solution required_pdparts.
 			 * @param array $new_solution         The new solution data.
 			 */
-			\do_action( 'pixelgradelt_retailer/ltsolution/required_ltparts_change',
+			\do_action( 'pressody_retailer/pdsolution/required_pdparts_change',
 					$post_id,
-					$current_solution['required_ltrecords_parts'],
-					$old_solution['required_ltrecords_parts'],
+					$current_solution['required_pdrecords_parts'],
+					$old_solution['required_pdrecords_parts'],
 					$current_solution
 			);
 		}
@@ -885,7 +885,7 @@ The excluded solutions only take effect in <strong>a purchase context (add to ca
 
 		if ( serialize( $old_required_solutions_post_ids ) !== serialize( $current_required_solutions_post_ids ) ) {
 			/**
-			 * Fires on LT solution required solutions change (post ID changes).
+			 * Fires on PD solution required solutions change (post ID changes).
 			 *
 			 * @since 0.14.0
 			 *
@@ -894,7 +894,7 @@ The excluded solutions only take effect in <strong>a purchase context (add to ca
 			 * @param array $old_required_solutions The old solution required_solutions.
 			 * @param array $new_solution           The new solution data.
 			 */
-			\do_action( 'pixelgradelt_retailer/ltsolution/required_solutions_change',
+			\do_action( 'pressody_retailer/pdsolution/required_solutions_change',
 					$post_id,
 					$current_required_solutions,
 					$old_required_solutions,
@@ -925,7 +925,7 @@ The excluded solutions only take effect in <strong>a purchase context (add to ca
 
 		if ( serialize( $old_excluded_solutions_post_ids ) !== serialize( $current_excluded_solutions_post_ids ) ) {
 			/**
-			 * Fires on LT solution excluded solutions change (post ID changes).
+			 * Fires on PD solution excluded solutions change (post ID changes).
 			 *
 			 * @since 0.14.0
 			 *
@@ -934,7 +934,7 @@ The excluded solutions only take effect in <strong>a purchase context (add to ca
 			 * @param array $old_excluded_solutions The old solution excluded_solutions.
 			 * @param array $new_solution           The new solution data.
 			 */
-			\do_action( 'pixelgradelt_retailer/ltsolution/excluded_solutions_change',
+			\do_action( 'pressody_retailer/pdsolution/excluded_solutions_change',
 					$post_id,
 					$current_excluded_solutions,
 					$old_excluded_solutions,
@@ -943,7 +943,7 @@ The excluded solutions only take effect in <strong>a purchase context (add to ca
 		}
 
 		/**
-		 * Fires on LT solution update, after the individual change hooks have been fired.
+		 * Fires on PD solution update, after the individual change hooks have been fired.
 		 *
 		 * @since 0.14.0
 		 *
@@ -951,7 +951,7 @@ The excluded solutions only take effect in <strong>a purchase context (add to ca
 		 * @param array $new_solution The new solution data.
 		 * @param array $old_solution The old solution data.
 		 */
-		\do_action( 'pixelgradelt_retailer/ltsolution/update',
+		\do_action( 'pressody_retailer/pdsolution/update',
 				$post_id,
 				$current_solution,
 				$old_solution
@@ -997,7 +997,7 @@ WHERE m.meta_key LIKE '%pseudo_id%' AND p.post_type <> 'revision'", $prev_soluti
 	}
 
 	/**
-	 * Add post note on LT solution visibility change.
+	 * Add post note on PD solution visibility change.
 	 *
 	 * @since 0.14.0
 	 *
@@ -1007,7 +1007,7 @@ WHERE m.meta_key LIKE '%pseudo_id%' AND p.post_type <> 'revision'", $prev_soluti
 	 */
 	protected function add_solution_visibility_change_note( int $post_id, string $new_visibility, string $old_visibility ) {
 		$note = sprintf(
-				esc_html__( 'Solution visibility changed from %1$s to %2$s.', 'pixelgradelt_retailer' ),
+				esc_html__( 'Solution visibility changed from %1$s to %2$s.', 'pressody_retailer' ),
 				'<strong>' . $old_visibility . '</strong>',
 				'<strong>' . $new_visibility . '</strong>'
 		);
@@ -1016,7 +1016,7 @@ WHERE m.meta_key LIKE '%pseudo_id%' AND p.post_type <> 'revision'", $prev_soluti
 	}
 
 	/**
-	 * Add post note on LT solution visibility change.
+	 * Add post note on PD solution visibility change.
 	 *
 	 * @since 0.14.0
 	 *
@@ -1026,7 +1026,7 @@ WHERE m.meta_key LIKE '%pseudo_id%' AND p.post_type <> 'revision'", $prev_soluti
 	 */
 	protected function add_solution_type_change_note( int $post_id, string $new_type, string $old_type ) {
 		$note = sprintf(
-				esc_html__( 'Solution type changed from %1$s to %2$s.', 'pixelgradelt_retailer' ),
+				esc_html__( 'Solution type changed from %1$s to %2$s.', 'pressody_retailer' ),
 				'<strong>' . $old_type . '</strong>',
 				'<strong>' . $new_type . '</strong>'
 		);
@@ -1035,7 +1035,7 @@ WHERE m.meta_key LIKE '%pseudo_id%' AND p.post_type <> 'revision'", $prev_soluti
 	}
 
 	/**
-	 * Add post note on LT solution slug change.
+	 * Add post note on PD solution slug change.
 	 *
 	 * @since 0.14.0
 	 *
@@ -1045,7 +1045,7 @@ WHERE m.meta_key LIKE '%pseudo_id%' AND p.post_type <> 'revision'", $prev_soluti
 	 */
 	protected function add_solution_slug_change_note( int $post_id, string $new_slug, string $old_slug ) {
 		$note = sprintf(
-				esc_html__( 'Solution slug (package name) changed from %1$s to %2$s.', 'pixelgradelt_retailer' ),
+				esc_html__( 'Solution slug (package name) changed from %1$s to %2$s.', 'pressody_retailer' ),
 				'<strong>' . $old_slug . '</strong>',
 				'<strong>' . $new_slug . '</strong>'
 		);
@@ -1054,7 +1054,7 @@ WHERE m.meta_key LIKE '%pseudo_id%' AND p.post_type <> 'revision'", $prev_soluti
 	}
 
 	/**
-	 * Add post note on LT solution required solutions change.
+	 * Add post note on PD solution required solutions change.
 	 *
 	 * @since 0.14.0
 	 *
@@ -1080,7 +1080,7 @@ WHERE m.meta_key LIKE '%pseudo_id%' AND p.post_type <> 'revision'", $prev_soluti
 			}
 
 			$note .= sprintf(
-					esc_html__( 'Removed these required solutions: %1$s. ', 'pixelgradelt_retailer' ),
+					esc_html__( 'Removed these required solutions: %1$s. ', 'pressody_retailer' ),
 					'<strong>' . implode( ', ', $removed_list ) . '</strong>'
 			);
 		}
@@ -1092,7 +1092,7 @@ WHERE m.meta_key LIKE '%pseudo_id%' AND p.post_type <> 'revision'", $prev_soluti
 			}
 
 			$note .= sprintf(
-					esc_html__( 'Added the following required solutions: %1$s. ', 'pixelgradelt_retailer' ),
+					esc_html__( 'Added the following required solutions: %1$s. ', 'pressody_retailer' ),
 					'<strong>' . implode( ', ', $added_list ) . '</strong>'
 			);
 		}
@@ -1103,7 +1103,7 @@ WHERE m.meta_key LIKE '%pseudo_id%' AND p.post_type <> 'revision'", $prev_soluti
 	}
 
 	/**
-	 * Add post note on LT solution excluded solutions change.
+	 * Add post note on PD solution excluded solutions change.
 	 *
 	 * @since 0.14.0
 	 *
@@ -1129,7 +1129,7 @@ WHERE m.meta_key LIKE '%pseudo_id%' AND p.post_type <> 'revision'", $prev_soluti
 			}
 
 			$note .= sprintf(
-					esc_html__( 'Removed these excluded solutions: %1$s. ', 'pixelgradelt_retailer' ),
+					esc_html__( 'Removed these excluded solutions: %1$s. ', 'pressody_retailer' ),
 					'<strong>' . implode( ', ', $removed_list ) . '</strong>'
 			);
 		}
@@ -1141,7 +1141,7 @@ WHERE m.meta_key LIKE '%pseudo_id%' AND p.post_type <> 'revision'", $prev_soluti
 			}
 
 			$note .= sprintf(
-					esc_html__( 'Added the following excluded solutions: %1$s. ', 'pixelgradelt_retailer' ),
+					esc_html__( 'Added the following excluded solutions: %1$s. ', 'pressody_retailer' ),
 					'<strong>' . implode( ', ', $added_list ) . '</strong>'
 			);
 		}

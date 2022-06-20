@@ -6,19 +6,19 @@ const { useDispatch, useSelect } = data;
 const { Fragment, render } = element;
 
 // noinspection JSUnresolvedVariable,JSHint
-const { editedPostId } = _pixelgradeltRetailerEditSolutionData;
+const { editedPostId } = _pressodyRetailerEditSolutionData;
 
 function App( props ) {
 	const { postId } = props;
 
 	const {
 		setPostId,
-	} = useDispatch( 'pixelgradelt_retailer/solutions' );
+	} = useDispatch( 'pressody_retailer/solutions' );
 
 	setPostId( postId );
 
 	const solutions = useSelect( ( select ) => {
-		return select( 'pixelgradelt_retailer/solutions' ).getSolutions();
+		return select( 'pressody_retailer/solutions' ).getSolutions();
 	} );
 
 	return html`
@@ -33,5 +33,5 @@ function App( props ) {
 
 render(
 	html`<${ App } postId=${ editedPostId } />`,
-	document.getElementById( 'pixelgradelt_retailer-solution-preview' )
+	document.getElementById( 'pressody_retailer-solution-preview' )
 );

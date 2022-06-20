@@ -4,17 +4,17 @@
  *
  * @since   0.8.0
  * @license GPL-2.0-or-later
- * @package PixelgradeLT
+ * @package Pressody
  */
 
 declare ( strict_types=1 );
 
-namespace PixelgradeLT\Retailer\Repository;
+namespace Pressody\Retailer\Repository;
 
-use PixelgradeLT\Retailer\Package;
-use PixelgradeLT\Retailer\SolutionFactory;
-use PixelgradeLT\Retailer\SolutionManager;
-use PixelgradeLT\Retailer\SolutionType\SolutionTypes;
+use Pressody\Retailer\Package;
+use Pressody\Retailer\SolutionFactory;
+use Pressody\Retailer\SolutionManager;
+use Pressody\Retailer\SolutionType\SolutionTypes;
 
 /**
  * Flattened solutions repository class.

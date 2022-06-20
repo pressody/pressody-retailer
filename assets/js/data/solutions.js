@@ -3,9 +3,9 @@ import { data, dataControls } from '../utils/index.js';
 const { dispatch, createReduxStore, register, select } = data;
 const { apiFetch, controls } = dataControls;
 
-const STORE_KEY = 'pixelgradelt_retailer/solutions';
+const STORE_KEY = 'pressody_retailer/solutions';
 
-const DEFAULT_STATE = {
+const DEFAUPD_STATE = {
 	solutions: [],
 	postId: null,
 };
@@ -44,12 +44,12 @@ function setPostId( postId ) {
 
 function* getSolutions() {
 	const postId = select( STORE_KEY ).getPostId();
-	const solutions = yield apiFetch( { path: `/pixelgradelt_retailer/v1/solutions?postId=${ postId }` } );
+	const solutions = yield apiFetch( { path: `/pressody_retailer/v1/solutions?postId=${ postId }` } );
 	dispatch( STORE_KEY ).setSolutions( solutions.sort( compareByName ) );
 }
 
 const store = createReduxStore( STORE_KEY, {
-	reducer( state = DEFAULT_STATE, action ) {
+	reducer( state = DEFAUPD_STATE, action ) {
 		switch ( action.type ) {
 			case 'SET_SOLUTIONS' :
 				return {

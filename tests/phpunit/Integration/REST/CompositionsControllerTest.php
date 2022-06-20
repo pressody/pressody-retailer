@@ -1,17 +1,17 @@
 <?php
 declare ( strict_types=1 );
 
-namespace PixelgradeLT\Retailer\Tests\Integration\REST;
+namespace Pressody\Retailer\Tests\Integration\REST;
 
-use PixelgradeLT\Retailer\Capabilities;
-use PixelgradeLT\Retailer\CompositionManager;
-use PixelgradeLT\Retailer\SolutionType\SolutionTypes;
-use PixelgradeLT\Retailer\Tests\Framework\PHPUnitUtil;
-use PixelgradeLT\Retailer\Tests\Integration\TestCase;
+use Pressody\Retailer\Capabilities;
+use Pressody\Retailer\CompositionManager;
+use Pressody\Retailer\SolutionType\SolutionTypes;
+use Pressody\Retailer\Tests\Framework\PHPUnitUtil;
+use Pressody\Retailer\Tests\Integration\TestCase;
 
 use Psr\Container\ContainerInterface;
-use function PixelgradeLT\Retailer\local_rest_call;
-use function PixelgradeLT\Retailer\plugin;
+use function Pressody\Retailer\local_rest_call;
+use function Pressody\Retailer\plugin;
 
 use WP_Http as HTTP;
 
@@ -44,7 +44,7 @@ class CompositionsControllerTest extends TestCase {
 		 * CREATE SOLUTIONS IN THE DB.
 		 */
 
-		// Register ltsolution post type
+		// Register pdsolution post type
 		$register_post_type = PHPUnitUtil::getProtectedMethod( self::$container['hooks.solution_post_type'], 'register_post_type' );
 		$register_post_type->invoke( self::$container['hooks.solution_post_type'] );
 
@@ -107,7 +107,7 @@ And here is a quote from a customer:
 			],
 		];
 
-		// Create the test ltsolutions posts that will be dependencies to other posts that we test.
+		// Create the test pdsolutions posts that will be dependencies to other posts that we test.
 		foreach ( self::$solutions_dep_post_data as $key => $data ) {
 			self::$solution_ids[ $key ] = $factory->post->create_object( $data );
 		}
@@ -132,7 +132,7 @@ And here is a quote from a customer:
 <blockquote>Pure bliss, man!</blockquote>',
 				'_solution_details_homepage'                       => 'https://package.homepage',
 				'_solution_required_parts|||0|value'               => '_',
-				'_solution_required_parts|package_name|0|0|value'  => 'pixelgradelt-records/part_yet-another',
+				'_solution_required_parts|package_name|0|0|value'  => 'pressody-records/part_yet-another',
 				'_solution_required_parts|version_range|0|0|value' => '1.2.9',
 				'_solution_required_parts|stability|0|0|value'     => 'stable',
 				'_solution_required_solutions|||0|value'           => '_',
@@ -163,7 +163,7 @@ And here is a quote from a customer:
 <blockquote>Pure bliss, man!</blockquote>',
 				'_solution_details_homepage'                       => 'https://package.homepage',
 				'_solution_required_parts|||0|value'               => '_',
-				'_solution_required_parts|package_name|0|0|value'  => 'pixelgradelt-records/part_yet-another',
+				'_solution_required_parts|package_name|0|0|value'  => 'pressody-records/part_yet-another',
 				'_solution_required_parts|version_range|0|0|value' => '^1',
 				'_solution_required_parts|stability|0|0|value'     => 'stable',
 				'_solution_required_solutions|||0|value'           => '_',
@@ -195,10 +195,10 @@ And here is a quote from a customer:
 				'_solution_details_homepage'                       => 'https://package.homepage',
 				'_solution_required_parts|||0|value'               => '_',
 				'_solution_required_parts|||1|value'               => '_',
-				'_solution_required_parts|package_name|0|0|value'  => 'pixelgradelt-records/part_yet-another',
+				'_solution_required_parts|package_name|0|0|value'  => 'pressody-records/part_yet-another',
 				'_solution_required_parts|version_range|0|0|value' => '^2',
 				'_solution_required_parts|stability|0|0|value'     => 'stable',
-				'_solution_required_parts|package_name|1|0|value'  => 'pixelgradelt-records/part_test-test',
+				'_solution_required_parts|package_name|1|0|value'  => 'pressody-records/part_test-test',
 				'_solution_required_parts|version_range|1|0|value' => '^1.0',
 				'_solution_required_parts|stability|1|0|value'     => 'stable',
 				'_solution_required_solutions|||0|value'           => '_',
@@ -221,72 +221,72 @@ And here is a quote from a customer:
 		self::$user_ids['customer1'] = $factory->user->create( [
 			'user_pass'  => 'pass',
 			'user_login' => 'customer1',
-			'user_email' => 'customer1@lt-retailer.local',
+			'user_email' => 'customer1@pd-retailer.local',
 			'first_name' => 'Customer1',
-			'last_name'  => 'LTRetailer',
+			'last_name'  => 'PDRetailer',
 			'role'       => Capabilities::CUSTOMER_USER_ROLE,
 		] );
 
 		self::$user_ids['customer2'] = $factory->user->create( [
 			'user_pass'  => 'pass',
 			'user_login' => 'customer2',
-			'user_email' => 'customer2@lt-retailer.local',
+			'user_email' => 'customer2@pd-retailer.local',
 			'first_name' => 'Customer2',
-			'last_name'  => 'LTRetailer',
+			'last_name'  => 'PDRetailer',
 			'role'       => Capabilities::CUSTOMER_USER_ROLE,
 		] );
 
 		self::$user_ids['customer3'] = $factory->user->create( [
 			'user_pass'  => 'pass',
 			'user_login' => 'customer3',
-			'user_email' => 'customer3@lt-retailer.local',
+			'user_email' => 'customer3@pd-retailer.local',
 			'first_name' => 'Customer3',
-			'last_name'  => 'LTRetailer',
+			'last_name'  => 'PDRetailer',
 			'role'       => Capabilities::CUSTOMER_USER_ROLE,
 		] );
 
 		self::$user_ids['customer4'] = $factory->user->create( [
 			'user_pass'  => 'pass',
 			'user_login' => 'customer4',
-			'user_email' => 'customer4@lt-retailer.local',
+			'user_email' => 'customer4@pd-retailer.local',
 			'first_name' => 'Customer4',
-			'last_name'  => 'LTRetailer',
+			'last_name'  => 'PDRetailer',
 			'role'       => Capabilities::CUSTOMER_USER_ROLE,
 		] );
 
 		self::$user_ids['customer5'] = $factory->user->create( [
 			'user_pass'  => 'pass',
 			'user_login' => 'customer5',
-			'user_email' => 'customer5@lt-retailer.local',
+			'user_email' => 'customer5@pd-retailer.local',
 			'first_name' => 'Customer5',
-			'last_name'  => 'LTRetailer',
+			'last_name'  => 'PDRetailer',
 			'role'       => Capabilities::CUSTOMER_USER_ROLE,
 		] );
 
 		self::$user_ids['subscriber'] = $factory->user->create( [
 			'user_pass'  => 'pass',
 			'user_login' => 'subscriber',
-			'user_email' => 'subscriber@lt-retailer.local',
+			'user_email' => 'subscriber@pd-retailer.local',
 			'first_name' => 'Subscriber',
-			'last_name'  => 'LTRetailer',
+			'last_name'  => 'PDRetailer',
 			'role'       => 'subscriber',
 		] );
 
 		self::$user_ids['manager1'] = $factory->user->create( [
 			'user_pass'  => 'pass',
 			'user_login' => 'manager1',
-			'user_email' => 'manager1@lt-retailer.local',
+			'user_email' => 'manager1@pd-retailer.local',
 			'first_name' => 'Manager1',
-			'last_name'  => 'LTRetailer',
+			'last_name'  => 'PDRetailer',
 			'role'       => 'administrator',
 		] );
 
 		self::$user_ids['client1'] = $factory->user->create( [
 			'user_pass'  => 'pass',
 			'user_login' => 'client1',
-			'user_email' => 'client1@lt-retailer.local',
+			'user_email' => 'client1@pd-retailer.local',
 			'first_name' => 'Client1',
-			'last_name'  => 'LTRetailer',
+			'last_name'  => 'PDRetailer',
 			'role'       => Capabilities::CLIENT_USER_ROLE,
 		] );
 
@@ -325,7 +325,7 @@ And here is a quote from a customer:
 		 * CREATE COMPOSITIONS IN THE DB, WITH THE SOLUTIONS.
 		 */
 
-		// Register ltcomposition post type
+		// Register pdcomposition post type
 		$register_post_type = PHPUnitUtil::getProtectedMethod( self::$container['hooks.composition_post_type'], 'register_post_type' );
 		$register_post_type->invoke( self::$container['hooks.composition_post_type'] );
 
@@ -347,7 +347,7 @@ And here is a quote from a customer:
 				self::$container['composition.manager']::KEYWORD_TAXONOMY => 'keyword1, keyword2, keyword3',
 			],
 			'meta_input'  => [
-				'_composition_status'                                        => CompositionManager::DEFAULT_STATUS,
+				'_composition_status'                                        => CompositionManager::DEFAUPD_STATUS,
 				'_composition_hashid'                                        => 'bogushashid1',
 				// These are in the format CarbonFields saves in.
 				'_composition_user_ids|||0|value'                            => 'user:user:' . self::$user_ids['customer1'],
@@ -440,7 +440,7 @@ And here is a quote from a customer:
 		\wp_clear_auth_cookie();
 
 		// Get compositions.
-		$compositions = local_rest_call( '/pixelgradelt_retailer/v1/compositions', 'GET', [] );
+		$compositions = local_rest_call( '/pressody_retailer/v1/compositions', 'GET', [] );
 
 		// Should receive error that one needs be logged it to view compositions.
 		$this->assertArrayHasKey( 'code', $compositions );
@@ -448,7 +448,7 @@ And here is a quote from a customer:
 		$this->assertArrayHasKey( 'data', $compositions );
 		$this->assertArrayHasKey( 'status', $compositions['data'] );
 		$this->assertSame( \rest_authorization_required_code(), $compositions['data']['status'] );
-		$this->assertSame( 'pixelgradelt_retailer_rest_cannot_read', $compositions['code'] );
+		$this->assertSame( 'pressody_retailer_rest_cannot_read', $compositions['code'] );
 	}
 
 	public function test_get_items_user_without_caps() {
@@ -456,7 +456,7 @@ And here is a quote from a customer:
 		\wp_set_auth_cookie( self::$user_ids['subscriber'], true, false );
 
 		// Get compositions.
-		$compositions = local_rest_call( '/pixelgradelt_retailer/v1/compositions', 'GET', [] );
+		$compositions = local_rest_call( '/pressody_retailer/v1/compositions', 'GET', [] );
 
 		// Should receive error that one needs be logged it to view compositions.
 		$this->assertArrayHasKey( 'code', $compositions );
@@ -464,14 +464,14 @@ And here is a quote from a customer:
 		$this->assertArrayHasKey( 'data', $compositions );
 		$this->assertArrayHasKey( 'status', $compositions['data'] );
 		$this->assertSame( \rest_authorization_required_code(), $compositions['data']['status'] );
-		$this->assertSame( 'pixelgradelt_retailer_rest_cannot_read', $compositions['code'] );
+		$this->assertSame( 'pressody_retailer_rest_cannot_read', $compositions['code'] );
 	}
 
 	public function test_get_items_user_is_author() {
 		// Get compositions authored by customer1.
 		\wp_set_current_user( self::$user_ids['customer1'] );
 		\wp_set_auth_cookie( self::$user_ids['customer1'], true, false );
-		$compositions = local_rest_call( '/pixelgradelt_retailer/v1/compositions', 'GET', [] );
+		$compositions = local_rest_call( '/pressody_retailer/v1/compositions', 'GET', [] );
 
 		$this->assertArrayNotHasKey( 'code', $compositions );
 		$this->assertCount( 1, $compositions );
@@ -481,7 +481,7 @@ And here is a quote from a customer:
 		// This should only be returned in an edit context.
 		$this->assertArrayNotHasKey( 'author', $composition );
 		$this->assertSame( 'First', $composition['name'] );
-		$this->assertSame( CompositionManager::DEFAULT_STATUS, $composition['status'] );
+		$this->assertSame( CompositionManager::DEFAUPD_STATUS, $composition['status'] );
 		$this->assertSame( 'bogushashid1', $composition['hashid'] );
 		$this->assertCount( 2, $composition['users'] );
 		// This should only be returned in an edit context.
@@ -497,7 +497,7 @@ And here is a quote from a customer:
 		// Get compositions authored by customer2.
 		\wp_set_current_user( self::$user_ids['customer2'] );
 		\wp_set_auth_cookie( self::$user_ids['customer2'], true, false );
-		$compositions = local_rest_call( '/pixelgradelt_retailer/v1/compositions', 'GET', [] );
+		$compositions = local_rest_call( '/pressody_retailer/v1/compositions', 'GET', [] );
 
 		$this->assertArrayNotHasKey( 'code', $compositions );
 		$this->assertCount( 1, $compositions );
@@ -526,7 +526,7 @@ And here is a quote from a customer:
 		// Get compositions authored by customer1.
 		\wp_set_current_user( self::$user_ids['manager1'] );
 		\wp_set_auth_cookie( self::$user_ids['manager1'], true, false );
-		$compositions = local_rest_call( '/pixelgradelt_retailer/v1/compositions', 'GET', [] );
+		$compositions = local_rest_call( '/pressody_retailer/v1/compositions', 'GET', [] );
 
 		$this->assertArrayNotHasKey( 'code', $compositions );
 		$this->assertCount( 1, $compositions );
@@ -554,7 +554,7 @@ And here is a quote from a customer:
 		// Get compositions customer2 is an user/owner of.
 		\wp_set_current_user( self::$user_ids['customer2'] );
 		\wp_set_auth_cookie( self::$user_ids['customer2'], true, false );
-		$compositions = local_rest_call( '/pixelgradelt_retailer/v1/compositions', 'GET', [
+		$compositions = local_rest_call( '/pressody_retailer/v1/compositions', 'GET', [
 			'userid' => self::$user_ids['customer2'],
 		] );
 
@@ -569,7 +569,7 @@ And here is a quote from a customer:
 		// This should only be returned in an edit context.
 		$this->assertArrayNotHasKey( 'author', $composition );
 		$this->assertSame( 'First', $composition['name'] );
-		$this->assertSame( CompositionManager::DEFAULT_STATUS, $composition['status'] );
+		$this->assertSame( CompositionManager::DEFAUPD_STATUS, $composition['status'] );
 		$this->assertSame( 'bogushashid1', $composition['hashid'] );
 		$this->assertCount( 2, $composition['users'] );
 		// This should only be returned in an edit context.
@@ -609,7 +609,7 @@ And here is a quote from a customer:
 		// Get compositions of customer3.
 		\wp_set_current_user( self::$user_ids['customer3'] );
 		\wp_set_auth_cookie( self::$user_ids['customer3'], true, false );
-		$compositions = local_rest_call( '/pixelgradelt_retailer/v1/compositions', 'GET', [] );
+		$compositions = local_rest_call( '/pressody_retailer/v1/compositions', 'GET', [] );
 
 		$this->assertArrayNotHasKey( 'code', $compositions );
 		$this->assertCount( 0, $compositions );
@@ -619,7 +619,7 @@ And here is a quote from a customer:
 		\wp_set_current_user( self::$user_ids['customer4'] );
 		\wp_set_auth_cookie( self::$user_ids['customer4'], true, false );
 
-		$created_composition = local_rest_call( '/pixelgradelt_retailer/v1/compositions', 'POST', [
+		$created_composition = local_rest_call( '/pressody_retailer/v1/compositions', 'POST', [
 			'name'     => 'Composition for customer4',
 			'keywords' => [ 'keyword41', 'keyword42', ],
 		] );
@@ -628,7 +628,7 @@ And here is a quote from a customer:
 		$this->assertArrayHasKey( 'id', $created_composition );
 		$this->assertSame( self::$user_ids['customer4'], $created_composition['author'] );
 		$this->assertSame( 'Composition for customer4', $created_composition['name'] );
-		$this->assertSame( CompositionManager::DEFAULT_STATUS, $created_composition['status'] );
+		$this->assertSame( CompositionManager::DEFAUPD_STATUS, $created_composition['status'] );
 		$this->assertArrayHasKey( 'hashid', $created_composition );
 		$this->assertCount( 2, $created_composition['keywords'] );
 		$this->assertSame( [ 'keyword41', 'keyword42', ], $created_composition['keywords'] );
@@ -645,7 +645,7 @@ And here is a quote from a customer:
 		$this->assertArrayHasKey( 'editLink', $created_composition );
 
 		// Get the composition via the REST API.
-		$compositions = local_rest_call( '/pixelgradelt_retailer/v1/compositions', 'GET', [
+		$compositions = local_rest_call( '/pressody_retailer/v1/compositions', 'GET', [
 			'postId' => [ $created_composition['id'], ],
 		] );
 
@@ -674,7 +674,7 @@ And here is a quote from a customer:
 		\wp_set_current_user( self::$user_ids['manager1'] );
 		\wp_set_auth_cookie( self::$user_ids['manager1'], true, false );
 
-		$created_composition = local_rest_call( '/pixelgradelt_retailer/v1/compositions', 'POST', [
+		$created_composition = local_rest_call( '/pressody_retailer/v1/compositions', 'POST', [
 			'name'     => 'Composition by manager1',
 			'keywords' => [ 'keyword41', 'keyword42', ],
 			'userids'  => [ self::$user_ids['customer1'], self::$user_ids['customer2'], ],
@@ -684,7 +684,7 @@ And here is a quote from a customer:
 		$this->assertArrayHasKey( 'id', $created_composition );
 		$this->assertSame( self::$user_ids['manager1'], $created_composition['author'] );
 		$this->assertSame( 'Composition by manager1', $created_composition['name'] );
-		$this->assertSame( CompositionManager::DEFAULT_STATUS, $created_composition['status'] );
+		$this->assertSame( CompositionManager::DEFAUPD_STATUS, $created_composition['status'] );
 		$this->assertArrayHasKey( 'hashid', $created_composition );
 		$this->assertCount( 2, $created_composition['keywords'] );
 		$this->assertSame( [ 'keyword41', 'keyword42', ], $created_composition['keywords'] );
@@ -707,7 +707,7 @@ And here is a quote from a customer:
 		$this->assertArrayHasKey( 'editLink', $created_composition );
 
 		// Get the composition via the REST API.
-		$compositions = local_rest_call( '/pixelgradelt_retailer/v1/compositions', 'GET', [
+		$compositions = local_rest_call( '/pressody_retailer/v1/compositions', 'GET', [
 			'postId' => [ $created_composition['id'], ],
 		] );
 
@@ -736,7 +736,7 @@ And here is a quote from a customer:
 		\wp_set_current_user( 0 );
 		\wp_clear_auth_cookie();
 
-		$created_composition = local_rest_call( '/pixelgradelt_retailer/v1/compositions', 'POST', [
+		$created_composition = local_rest_call( '/pressody_retailer/v1/compositions', 'POST', [
 			'name' => 'Composition for test',
 		] );
 
@@ -746,14 +746,14 @@ And here is a quote from a customer:
 		$this->assertArrayHasKey( 'data', $created_composition );
 		$this->assertArrayHasKey( 'status', $created_composition['data'] );
 		$this->assertSame( \rest_authorization_required_code(), $created_composition['data']['status'] );
-		$this->assertSame( 'pixelgradelt_retailer_rest_cannot_create', $created_composition['code'] );
+		$this->assertSame( 'pressody_retailer_rest_cannot_create', $created_composition['code'] );
 	}
 
 	public function test_create_item_invalid_user_owner() {
 		\wp_set_current_user( self::$user_ids['manager1'] );
 		\wp_set_auth_cookie( self::$user_ids['manager1'], true, false );
 
-		$created_composition = local_rest_call( '/pixelgradelt_retailer/v1/compositions', 'POST', [
+		$created_composition = local_rest_call( '/pressody_retailer/v1/compositions', 'POST', [
 			'name'    => 'Composition for other user',
 			'userids' => [ 3478, ],
 		] );
@@ -763,7 +763,7 @@ And here is a quote from a customer:
 		$this->assertArrayHasKey( 'id', $created_composition );
 		$this->assertSame( self::$user_ids['manager1'], $created_composition['author'] );
 		$this->assertSame( 'Composition for other user', $created_composition['name'] );
-		$this->assertSame( CompositionManager::DEFAULT_STATUS, $created_composition['status'] );
+		$this->assertSame( CompositionManager::DEFAUPD_STATUS, $created_composition['status'] );
 		$this->assertArrayHasKey( 'hashid', $created_composition );
 		$this->assertCount( 0, $created_composition['keywords'] );
 		$this->assertCount( 1, $created_composition['users'] );
@@ -784,7 +784,7 @@ And here is a quote from a customer:
 		\wp_set_current_user( self::$user_ids['subscriber'] );
 		\wp_set_auth_cookie( self::$user_ids['subscriber'], true, false );
 
-		$created_composition = local_rest_call( '/pixelgradelt_retailer/v1/compositions', 'POST', [
+		$created_composition = local_rest_call( '/pressody_retailer/v1/compositions', 'POST', [
 			'name' => 'Composition for subscriber',
 		] );
 
@@ -794,14 +794,14 @@ And here is a quote from a customer:
 		$this->assertArrayHasKey( 'data', $created_composition );
 		$this->assertArrayHasKey( 'status', $created_composition['data'] );
 		$this->assertSame( \rest_authorization_required_code(), $created_composition['data']['status'] );
-		$this->assertSame( 'pixelgradelt_retailer_rest_cannot_create', $created_composition['code'] );
+		$this->assertSame( 'pressody_retailer_rest_cannot_create', $created_composition['code'] );
 	}
 
 	public function test_get_item() {
 		\wp_set_current_user( self::$user_ids['manager1'] );
 		\wp_set_auth_cookie( self::$user_ids['manager1'], true, false );
 
-		$created_composition = local_rest_call( '/pixelgradelt_retailer/v1/compositions', 'POST', [
+		$created_composition = local_rest_call( '/pressody_retailer/v1/compositions', 'POST', [
 			'name'     => 'Composition',
 			'keywords' => [ 'keyword41', 'keyword42', ],
 			'userids'  => [ self::$user_ids['customer1'], self::$user_ids['customer2'], ],
@@ -813,7 +813,7 @@ And here is a quote from a customer:
 		$this->assertArrayHasKey( 'hashid', $created_composition );
 
 		// Get the composition via the REST API.
-		$fetched_composition = local_rest_call( '/pixelgradelt_retailer/v1/compositions/' . $created_composition['hashid'], 'GET', [] );
+		$fetched_composition = local_rest_call( '/pressody_retailer/v1/compositions/' . $created_composition['hashid'], 'GET', [] );
 
 		$this->assertArrayNotHasKey( 'code', $fetched_composition );
 		// This should only be returned in an edit context.
@@ -838,7 +838,7 @@ And here is a quote from a customer:
 		\wp_set_current_user( self::$user_ids['customer4'] );
 		\wp_set_auth_cookie( self::$user_ids['customer4'], true, false );
 
-		$created_composition = local_rest_call( '/pixelgradelt_retailer/v1/compositions', 'POST', [
+		$created_composition = local_rest_call( '/pressody_retailer/v1/compositions', 'POST', [
 			'name'     => 'Created composition title',
 			'keywords' => [ 'keyword53', 'keyword54', ],
 			'userids'  => [ self::$user_ids['customer1'], self::$user_ids['customer2'], ],
@@ -850,7 +850,7 @@ And here is a quote from a customer:
 		$this->assertArrayHasKey( 'hashid', $created_composition );
 
 		// Get the composition via the REST API.
-		$fetched_composition = local_rest_call( '/pixelgradelt_retailer/v1/compositions/' . $created_composition['hashid'], 'GET', [] );
+		$fetched_composition = local_rest_call( '/pressody_retailer/v1/compositions/' . $created_composition['hashid'], 'GET', [] );
 
 		$this->assertArrayNotHasKey( 'code', $fetched_composition );
 		// This should only be returned in an edit context.
@@ -885,7 +885,7 @@ And here is a quote from a customer:
 				self::$purchased_solution_ids['customer2_portfolio'],
 			],
 		];
-		$edited_composition = local_rest_call( '/pixelgradelt_retailer/v1/compositions/' . $created_composition['hashid'], 'POST', $expected );
+		$edited_composition = local_rest_call( '/pressody_retailer/v1/compositions/' . $created_composition['hashid'], 'POST', $expected );
 
 		$this->assertArrayNotHasKey( 'code', $edited_composition );
 		$this->assertSame( $created_composition['id'], $edited_composition['id'] );
@@ -911,7 +911,7 @@ And here is a quote from a customer:
 		$expected           = [
 			'status' => 'some_status',
 		];
-		$edited_composition = local_rest_call( '/pixelgradelt_retailer/v1/compositions/' . $created_composition['hashid'], 'POST', $expected );
+		$edited_composition = local_rest_call( '/pressody_retailer/v1/compositions/' . $created_composition['hashid'], 'POST', $expected );
 
 		// Should receive error that only composition managers can modify the status.
 		$this->assertArrayHasKey( 'code', $edited_composition );
@@ -919,14 +919,14 @@ And here is a quote from a customer:
 		$this->assertArrayHasKey( 'data', $edited_composition );
 		$this->assertArrayHasKey( 'status', $edited_composition['data'] );
 		$this->assertSame( \rest_authorization_required_code(), $edited_composition['data']['status'] );
-		$this->assertSame( 'pixelgradelt_retailer_rest_cannot_edit', $edited_composition['code'] );
+		$this->assertSame( 'pressody_retailer_rest_cannot_edit', $edited_composition['code'] );
 	}
 
 	public function test_edit_item_by_managers() {
 		\wp_set_current_user( self::$user_ids['manager1'] );
 		\wp_set_auth_cookie( self::$user_ids['manager1'], true, false );
 
-		$created_composition = local_rest_call( '/pixelgradelt_retailer/v1/compositions', 'POST', [
+		$created_composition = local_rest_call( '/pressody_retailer/v1/compositions', 'POST', [
 			'name'     => 'Created composition title',
 			'keywords' => [ 'keyword53', 'keyword54', ],
 			'userids'  => [ self::$user_ids['customer1'], self::$user_ids['customer2'], ],
@@ -938,7 +938,7 @@ And here is a quote from a customer:
 		$this->assertArrayHasKey( 'hashid', $created_composition );
 
 		// Get the composition via the REST API.
-		$fetched_composition = local_rest_call( '/pixelgradelt_retailer/v1/compositions/' . $created_composition['hashid'], 'GET', [] );
+		$fetched_composition = local_rest_call( '/pressody_retailer/v1/compositions/' . $created_composition['hashid'], 'GET', [] );
 
 		$this->assertArrayNotHasKey( 'code', $fetched_composition );
 		// This should only be returned in an edit context.
@@ -974,7 +974,7 @@ And here is a quote from a customer:
 				self::$purchased_solution_ids['customer2_portfolio'],
 			],
 		];
-		$edited_composition = local_rest_call( '/pixelgradelt_retailer/v1/compositions/' . $created_composition['hashid'], 'POST', $expected );
+		$edited_composition = local_rest_call( '/pressody_retailer/v1/compositions/' . $created_composition['hashid'], 'POST', $expected );
 
 		$this->assertArrayNotHasKey( 'code', $edited_composition );
 		$this->assertSame( $created_composition['id'], $edited_composition['id'] );
@@ -997,7 +997,7 @@ And here is a quote from a customer:
 		$expected           = [
 			'status' => 'bogus_status',
 		];
-		$edited_composition = local_rest_call( '/pixelgradelt_retailer/v1/compositions/' . $created_composition['hashid'], 'POST', $expected );
+		$edited_composition = local_rest_call( '/pressody_retailer/v1/compositions/' . $created_composition['hashid'], 'POST', $expected );
 
 		$this->assertArrayNotHasKey( 'code', $edited_composition );
 		$this->assertNotEquals( $expected['status'], $edited_composition['status'] );
@@ -1007,7 +1007,7 @@ And here is a quote from a customer:
 		\wp_set_current_user( self::$user_ids['manager1'] );
 		\wp_set_auth_cookie( self::$user_ids['manager1'], true, false );
 
-		$created_composition = local_rest_call( '/pixelgradelt_retailer/v1/compositions', 'POST', [
+		$created_composition = local_rest_call( '/pressody_retailer/v1/compositions', 'POST', [
 			'name'     => 'Created composition title2',
 			'keywords' => [ 'keyword531', 'keyword541', ],
 			'userids'  => [ self::$user_ids['customer1'], self::$user_ids['customer2'], ],
@@ -1034,7 +1034,7 @@ And here is a quote from a customer:
 				self::$purchased_solution_ids['customer2_portfolio'],
 			],
 		];
-		$edited_composition = local_rest_call( '/pixelgradelt_retailer/v1/compositions/' . $created_composition['hashid'], 'POST', $expected );
+		$edited_composition = local_rest_call( '/pressody_retailer/v1/compositions/' . $created_composition['hashid'], 'POST', $expected );
 
 		$this->assertArrayNotHasKey( 'code', $edited_composition );
 		$this->assertSame( $created_composition['id'], $edited_composition['id'] );
@@ -1056,7 +1056,7 @@ And here is a quote from a customer:
 		$expected           = [
 			'status' => 'some_status',
 		];
-		$edited_composition = local_rest_call( '/pixelgradelt_retailer/v1/compositions/' . $created_composition['hashid'], 'POST', $expected );
+		$edited_composition = local_rest_call( '/pressody_retailer/v1/compositions/' . $created_composition['hashid'], 'POST', $expected );
 
 		// Should receive error that only composition managers can modify the status.
 		$this->assertArrayHasKey( 'code', $edited_composition );
@@ -1064,13 +1064,13 @@ And here is a quote from a customer:
 		$this->assertArrayHasKey( 'data', $edited_composition );
 		$this->assertArrayHasKey( 'status', $edited_composition['data'] );
 		$this->assertSame( \rest_authorization_required_code(), $edited_composition['data']['status'] );
-		$this->assertSame( 'pixelgradelt_retailer_rest_cannot_edit', $edited_composition['code'] );
+		$this->assertSame( 'pressody_retailer_rest_cannot_edit', $edited_composition['code'] );
 
 		// Try to change the user IDs list.
 		$expected           = [
 			'userids' => [ self::$user_ids['customer1'], self::$user_ids['customer2'], self::$user_ids['customer4'], ],
 		];
-		$edited_composition = local_rest_call( '/pixelgradelt_retailer/v1/compositions/' . $created_composition['hashid'], 'POST', $expected );
+		$edited_composition = local_rest_call( '/pressody_retailer/v1/compositions/' . $created_composition['hashid'], 'POST', $expected );
 
 		// Should receive error that only composition authors can modify the user IDs list.
 		$this->assertArrayHasKey( 'code', $edited_composition );
@@ -1078,13 +1078,13 @@ And here is a quote from a customer:
 		$this->assertArrayHasKey( 'data', $edited_composition );
 		$this->assertArrayHasKey( 'status', $edited_composition['data'] );
 		$this->assertSame( \rest_authorization_required_code(), $edited_composition['data']['status'] );
-		$this->assertSame( 'pixelgradelt_retailer_rest_cannot_edit', $edited_composition['code'] );
+		$this->assertSame( 'pressody_retailer_rest_cannot_edit', $edited_composition['code'] );
 
 		// Try to change the author.
 		$expected           = [
 			'author' => self::$user_ids['customer4'],
 		];
-		$edited_composition = local_rest_call( '/pixelgradelt_retailer/v1/compositions/' . $created_composition['hashid'], 'POST', $expected );
+		$edited_composition = local_rest_call( '/pressody_retailer/v1/compositions/' . $created_composition['hashid'], 'POST', $expected );
 
 		// Should receive error that only composition authors can modify the user IDs list.
 		$this->assertArrayHasKey( 'code', $edited_composition );
@@ -1092,14 +1092,14 @@ And here is a quote from a customer:
 		$this->assertArrayHasKey( 'data', $edited_composition );
 		$this->assertArrayHasKey( 'status', $edited_composition['data'] );
 		$this->assertSame( \rest_authorization_required_code(), $edited_composition['data']['status'] );
-		$this->assertSame( 'pixelgradelt_retailer_rest_cannot_edit', $edited_composition['code'] );
+		$this->assertSame( 'pressody_retailer_rest_cannot_edit', $edited_composition['code'] );
 	}
 
 	public function test_edit_item_by_other_users() {
 		\wp_set_current_user( self::$user_ids['manager1'] );
 		\wp_set_auth_cookie( self::$user_ids['manager1'], true, false );
 
-		$created_composition = local_rest_call( '/pixelgradelt_retailer/v1/compositions', 'POST', [
+		$created_composition = local_rest_call( '/pressody_retailer/v1/compositions', 'POST', [
 			'name'     => 'Created composition title3',
 			'keywords' => [ 'keyword531', 'keyword541', ],
 			'userids'  => [ self::$user_ids['customer1'], self::$user_ids['customer2'], ],
@@ -1110,7 +1110,7 @@ And here is a quote from a customer:
 		$this->assertSame( self::$user_ids['manager1'], $created_composition['author'] );
 		$this->assertArrayHasKey( 'hashid', $created_composition );
 
-		// Edit the composition by a user that is an LT customer but not a composition user or author.
+		// Edit the composition by a user that is an PD customer but not a composition user or author.
 		\wp_set_current_user( self::$user_ids['customer3'] );
 		\wp_set_auth_cookie( self::$user_ids['customer3'], true, false );
 
@@ -1123,7 +1123,7 @@ And here is a quote from a customer:
 				self::$purchased_solution_ids['customer2_portfolio'],
 			],
 		];
-		$edited_composition = local_rest_call( '/pixelgradelt_retailer/v1/compositions/' . $created_composition['hashid'], 'POST', $expected );
+		$edited_composition = local_rest_call( '/pressody_retailer/v1/compositions/' . $created_composition['hashid'], 'POST', $expected );
 
 		// Should receive error.
 		$this->assertArrayHasKey( 'code', $edited_composition );
@@ -1131,7 +1131,7 @@ And here is a quote from a customer:
 		$this->assertArrayHasKey( 'data', $edited_composition );
 		$this->assertArrayHasKey( 'status', $edited_composition['data'] );
 		$this->assertSame( \rest_authorization_required_code(), $edited_composition['data']['status'] );
-		$this->assertSame( 'pixelgradelt_retailer_rest_cannot_edit', $edited_composition['code'] );
+		$this->assertSame( 'pressody_retailer_rest_cannot_edit', $edited_composition['code'] );
 	}
 
 	public function test_edit_item_general_failures() {
@@ -1142,7 +1142,7 @@ And here is a quote from a customer:
 		$expected           = [
 			'name' => 'Edited composition title',
 		];
-		$edited_composition = local_rest_call( '/pixelgradelt_retailer/v1/compositions/' . 'bogusHashid123', 'POST', $expected );
+		$edited_composition = local_rest_call( '/pressody_retailer/v1/compositions/' . 'bogusHashid123', 'POST', $expected );
 
 		// Should receive error.
 		$this->assertArrayHasKey( 'code', $edited_composition );
@@ -1150,13 +1150,13 @@ And here is a quote from a customer:
 		$this->assertArrayHasKey( 'data', $edited_composition );
 		$this->assertArrayHasKey( 'status', $edited_composition['data'] );
 		$this->assertSame( \rest_authorization_required_code(), $edited_composition['data']['status'] );
-		$this->assertSame( 'pixelgradelt_retailer_rest_cannot_edit', $edited_composition['code'] );
+		$this->assertSame( 'pressody_retailer_rest_cannot_edit', $edited_composition['code'] );
 
 		// Try to edit a composition with hashid that doesn't respect the pattern (`[A-Za-z0-9]*`).
 		$expected           = [
 			'name' => 'Edited composition title',
 		];
-		$edited_composition = local_rest_call( '/pixelgradelt_retailer/v1/compositions/' . 'bogus_hashid-123', 'POST', $expected );
+		$edited_composition = local_rest_call( '/pressody_retailer/v1/compositions/' . 'bogus_hashid-123', 'POST', $expected );
 
 		// Should receive error that the route is not found.
 		$this->assertArrayHasKey( 'code', $edited_composition );
@@ -1171,7 +1171,7 @@ And here is a quote from a customer:
 		\wp_set_current_user( self::$user_ids['manager1'] );
 		\wp_set_auth_cookie( self::$user_ids['manager1'], true, false );
 
-		$created_composition = local_rest_call( '/pixelgradelt_retailer/v1/compositions', 'POST', [
+		$created_composition = local_rest_call( '/pressody_retailer/v1/compositions', 'POST', [
 			'name'     => 'Composition3',
 			'keywords' => [ 'keyword53', 'keyword54', ],
 			'userids'  => [ self::$user_ids['customer1'], self::$user_ids['customer2'], ],
@@ -1183,7 +1183,7 @@ And here is a quote from a customer:
 		$this->assertArrayHasKey( 'hashid', $created_composition );
 
 		// Delete the newly created composition.
-		$deleted_composition_response = local_rest_call( '/pixelgradelt_retailer/v1/compositions/' . $created_composition['hashid'], 'DELETE', [] );
+		$deleted_composition_response = local_rest_call( '/pressody_retailer/v1/compositions/' . $created_composition['hashid'], 'DELETE', [] );
 
 		$this->assertArrayNotHasKey( 'code', $deleted_composition_response );
 		$this->assertSame( true, $deleted_composition_response['deleted'] );
@@ -1193,7 +1193,7 @@ And here is a quote from a customer:
 		$this->assertSame( 'trash', get_post_status( $created_composition['id'] ) );
 
 		// Try to delete it again.
-		$deleted_composition_response = local_rest_call( '/pixelgradelt_retailer/v1/compositions/' . $created_composition['hashid'], 'DELETE', [] );
+		$deleted_composition_response = local_rest_call( '/pressody_retailer/v1/compositions/' . $created_composition['hashid'], 'DELETE', [] );
 
 		// Should receive error.
 		$this->assertArrayHasKey( 'code', $deleted_composition_response );
@@ -1201,7 +1201,7 @@ And here is a quote from a customer:
 		$this->assertArrayHasKey( 'data', $deleted_composition_response );
 		$this->assertArrayHasKey( 'status', $deleted_composition_response['data'] );
 		$this->assertSame( \rest_authorization_required_code(), $deleted_composition_response['data']['status'] );
-		$this->assertSame( 'pixelgradelt_retailer_rest_cannot_delete', $deleted_composition_response['code'] );
+		$this->assertSame( 'pressody_retailer_rest_cannot_delete', $deleted_composition_response['code'] );
 
 	}
 
@@ -1209,7 +1209,7 @@ And here is a quote from a customer:
 		\wp_set_current_user( self::$user_ids['manager1'] );
 		\wp_set_auth_cookie( self::$user_ids['manager1'], true, false );
 
-		$created_composition = local_rest_call( '/pixelgradelt_retailer/v1/compositions', 'POST', [
+		$created_composition = local_rest_call( '/pressody_retailer/v1/compositions', 'POST', [
 			'name'     => 'Composition31',
 			'keywords' => [ 'keyword53', 'keyword54', ],
 			'userids'  => [ self::$user_ids['customer1'], self::$user_ids['customer2'], ],
@@ -1225,7 +1225,7 @@ And here is a quote from a customer:
 		\wp_set_auth_cookie( self::$user_ids['customer1'], true, false );
 
 		// Delete the newly created composition.
-		$deleted_composition_response = local_rest_call( '/pixelgradelt_retailer/v1/compositions/' . $created_composition['hashid'], 'DELETE', [] );
+		$deleted_composition_response = local_rest_call( '/pressody_retailer/v1/compositions/' . $created_composition['hashid'], 'DELETE', [] );
 
 		// The deletion should fail since only composition authors can delete a composition.
 		// Users/Owners can edit it, but not delete it.
@@ -1234,14 +1234,14 @@ And here is a quote from a customer:
 		$this->assertArrayHasKey( 'data', $deleted_composition_response );
 		$this->assertArrayHasKey( 'status', $deleted_composition_response['data'] );
 		$this->assertSame( \rest_authorization_required_code(), $deleted_composition_response['data']['status'] );
-		$this->assertSame( 'pixelgradelt_retailer_rest_cannot_delete', $deleted_composition_response['code'] );
+		$this->assertSame( 'pressody_retailer_rest_cannot_delete', $deleted_composition_response['code'] );
 	}
 
 	public function test_delete_item_by_other_users() {
 		\wp_set_current_user( self::$user_ids['manager1'] );
 		\wp_set_auth_cookie( self::$user_ids['manager1'], true, false );
 
-		$created_composition = local_rest_call( '/pixelgradelt_retailer/v1/compositions', 'POST', [
+		$created_composition = local_rest_call( '/pressody_retailer/v1/compositions', 'POST', [
 			'name'     => 'Composition32',
 			'keywords' => [ 'keyword53', 'keyword54', ],
 			'userids'  => [ self::$user_ids['customer1'], self::$user_ids['customer2'], ],
@@ -1257,7 +1257,7 @@ And here is a quote from a customer:
 		\wp_set_auth_cookie( self::$user_ids['customer3'], true, false );
 
 		// Delete the newly created composition.
-		$deleted_composition_response = local_rest_call( '/pixelgradelt_retailer/v1/compositions/' . $created_composition['hashid'], 'DELETE', [] );
+		$deleted_composition_response = local_rest_call( '/pressody_retailer/v1/compositions/' . $created_composition['hashid'], 'DELETE', [] );
 
 		// The deletion should fail since only composition authors can delete a composition.
 		// Users/Owners can edit it, but not delete it.
@@ -1266,15 +1266,15 @@ And here is a quote from a customer:
 		$this->assertArrayHasKey( 'data', $deleted_composition_response );
 		$this->assertArrayHasKey( 'status', $deleted_composition_response['data'] );
 		$this->assertSame( \rest_authorization_required_code(), $deleted_composition_response['data']['status'] );
-		$this->assertSame( 'pixelgradelt_retailer_rest_cannot_delete', $deleted_composition_response['code'] );
+		$this->assertSame( 'pressody_retailer_rest_cannot_delete', $deleted_composition_response['code'] );
 	}
 
-	public function test_encrypt_ltdetails_permissions() {
+	public function test_encrypt_pddetails_permissions() {
 		// No logged in user.
 		\wp_set_current_user( 0 );
 		\wp_clear_auth_cookie();
 
-		$response = local_rest_call( '/pixelgradelt_retailer/v1/compositions/encrypt_ltdetails', 'POST', [
+		$response = local_rest_call( '/pressody_retailer/v1/compositions/encrypt_pddetails', 'POST', [
 			'userids'       => [],
 			'compositionid' => 'bogushashid',
 		] );
@@ -1285,13 +1285,13 @@ And here is a quote from a customer:
 		$this->assertArrayHasKey( 'data', $response );
 		$this->assertArrayHasKey( 'status', $response['data'] );
 		$this->assertSame( \rest_authorization_required_code(), $response['data']['status'] );
-		$this->assertSame( 'pixelgradelt_retailer_rest_cannot_encrypt', $response['code'] );
+		$this->assertSame( 'pressody_retailer_rest_cannot_encrypt', $response['code'] );
 
 		// User without proper permissions.
 		\wp_set_current_user( self::$user_ids['subscriber'] );
 		\wp_set_auth_cookie( self::$user_ids['subscriber'], true, false );
 
-		$response = local_rest_call( '/pixelgradelt_retailer/v1/compositions/encrypt_ltdetails', 'POST', [
+		$response = local_rest_call( '/pressody_retailer/v1/compositions/encrypt_pddetails', 'POST', [
 			'userids'       => [],
 			'compositionid' => 'bogushashid',
 		] );
@@ -1302,68 +1302,68 @@ And here is a quote from a customer:
 		$this->assertArrayHasKey( 'data', $response );
 		$this->assertArrayHasKey( 'status', $response['data'] );
 		$this->assertSame( \rest_authorization_required_code(), $response['data']['status'] );
-		$this->assertSame( 'pixelgradelt_retailer_rest_cannot_encrypt', $response['code'] );
+		$this->assertSame( 'pressody_retailer_rest_cannot_encrypt', $response['code'] );
 
 		// User with minimum permissions.
 		\wp_set_current_user( self::$user_ids['client1'] );
 		\wp_set_auth_cookie( self::$user_ids['client1'], true, false );
 
-		$response = local_rest_call( '/pixelgradelt_retailer/v1/compositions/encrypt_ltdetails', 'POST', [
+		$response = local_rest_call( '/pressody_retailer/v1/compositions/encrypt_pddetails', 'POST', [
 			'userids'       => [],
 			'compositionid' => 'bogushashid',
 		] );
 
-		// Should return an error since the ltdetails are invalid, but not a permissions error.
+		// Should return an error since the pddetails are invalid, but not a permissions error.
 		$this->assertArrayHasKey( 'code', $response );
 		$this->assertArrayHasKey( 'message', $response );
 		$this->assertArrayHasKey( 'data', $response );
 		$this->assertArrayHasKey( 'status', $response['data'] );
 		$this->assertNotSame( \rest_authorization_required_code(), $response['data']['status'] );
-		$this->assertSame( 'pixelgradelt_retailer_rest_invalid_composition_ltdetails', $response['code'] );
+		$this->assertSame( 'pressody_retailer_rest_invalid_composition_pddetails', $response['code'] );
 
 		// User with customer permissions.
 		\wp_set_current_user( self::$user_ids['customer1'] );
 		\wp_set_auth_cookie( self::$user_ids['customer1'], true, false );
 
-		$response = local_rest_call( '/pixelgradelt_retailer/v1/compositions/encrypt_ltdetails', 'POST', [
+		$response = local_rest_call( '/pressody_retailer/v1/compositions/encrypt_pddetails', 'POST', [
 			'userids'       => [],
 			'compositionid' => 'bogushashid',
 		] );
 
-		// Should return an error since the ltdetails are invalid, but not a permissions error.
+		// Should return an error since the pddetails are invalid, but not a permissions error.
 		$this->assertArrayHasKey( 'code', $response );
 		$this->assertArrayHasKey( 'message', $response );
 		$this->assertArrayHasKey( 'data', $response );
 		$this->assertArrayHasKey( 'status', $response['data'] );
 		$this->assertNotSame( \rest_authorization_required_code(), $response['data']['status'] );
-		$this->assertSame( 'pixelgradelt_retailer_rest_invalid_composition_ltdetails', $response['code'] );
+		$this->assertSame( 'pressody_retailer_rest_invalid_composition_pddetails', $response['code'] );
 
 		// User with manager permissions.
 		\wp_set_current_user( self::$user_ids['manager1'] );
 		\wp_set_auth_cookie( self::$user_ids['manager1'], true, false );
 
-		$response = local_rest_call( '/pixelgradelt_retailer/v1/compositions/encrypt_ltdetails', 'POST', [
+		$response = local_rest_call( '/pressody_retailer/v1/compositions/encrypt_pddetails', 'POST', [
 			'userids'       => [],
 			'compositionid' => 'bogushashid',
 		] );
 
-		// Should return an error since the ltdetails are invalid, but not a permissions error.
+		// Should return an error since the pddetails are invalid, but not a permissions error.
 		$this->assertArrayHasKey( 'code', $response );
 		$this->assertArrayHasKey( 'message', $response );
 		$this->assertArrayHasKey( 'data', $response );
 		$this->assertArrayHasKey( 'status', $response['data'] );
 		$this->assertNotSame( \rest_authorization_required_code(), $response['data']['status'] );
-		$this->assertSame( 'pixelgradelt_retailer_rest_invalid_composition_ltdetails', $response['code'] );
+		$this->assertSame( 'pressody_retailer_rest_invalid_composition_pddetails', $response['code'] );
 	}
 
-	public function test_encrypt_ltdetails() {
+	public function test_encrypt_pddetails() {
 		// Log in a client.
 		\wp_set_current_user( self::$user_ids['client1'] );
 		\wp_set_auth_cookie( self::$user_ids['client1'], true, false );
 
 		$composition_data = self::$container['composition.manager']->get_composition_id_data( self::$composition_ids['second'] );
 
-		$response = local_rest_call( '/pixelgradelt_retailer/v1/compositions/encrypt_ltdetails', 'POST', [
+		$response = local_rest_call( '/pressody_retailer/v1/compositions/encrypt_pddetails', 'POST', [
 			'userids'       => array_values( \wp_list_pluck( $composition_data['users'], 'id' ) ),
 			'compositionid' => $composition_data['hashid'],
 			'extra'         => [
@@ -1374,14 +1374,14 @@ And here is a quote from a customer:
 		$this->assertIsString( $response );
 	}
 
-	public function test_encrypt_ltdetails_failure() {
+	public function test_encrypt_pddetails_failure() {
 		// Log in a client.
 		\wp_set_current_user( self::$user_ids['client1'] );
 		\wp_set_auth_cookie( self::$user_ids['client1'], true, false );
 
 		$composition_data = self::$container['composition.manager']->get_composition_id_data( self::$composition_ids['first'] );
 
-		$response = local_rest_call( '/pixelgradelt_retailer/v1/compositions/encrypt_ltdetails', 'POST', [
+		$response = local_rest_call( '/pressody_retailer/v1/compositions/encrypt_pddetails', 'POST', [
 			'userids'       => array_values( \wp_list_pluck( $composition_data['users'], 'id' ) ),
 			'compositionid' => $composition_data['hashid'],
 			'extra'         => [
@@ -1395,9 +1395,9 @@ And here is a quote from a customer:
 		$this->assertArrayHasKey( 'data', $response );
 		$this->assertArrayHasKey( 'status', $response['data'] );
 		$this->assertSame( HTTP::NOT_ACCEPTABLE, $response['data']['status'] );
-		$this->assertSame( 'pixelgradelt_retailer_rest_invalid_composition_ltdetails', $response['code'] );
+		$this->assertSame( 'pressody_retailer_rest_invalid_composition_pddetails', $response['code'] );
 
-		$response = local_rest_call( '/pixelgradelt_retailer/v1/compositions/encrypt_ltdetails', 'POST', [
+		$response = local_rest_call( '/pressody_retailer/v1/compositions/encrypt_pddetails', 'POST', [
 			'compositionid' => $composition_data['hashid'],
 			'extra'         => [
 				'users' => $composition_data['users'],
@@ -1409,7 +1409,7 @@ And here is a quote from a customer:
 		$this->assertSame( 'rest_missing_callback_param', $response['code'] );
 		$this->assertStringContainsString( 'userids', $response['message'] );
 
-		$response = local_rest_call( '/pixelgradelt_retailer/v1/compositions/encrypt_ltdetails', 'POST', [
+		$response = local_rest_call( '/pressody_retailer/v1/compositions/encrypt_pddetails', 'POST', [
 			'userids' => array_values( \wp_list_pluck( $composition_data['users'], 'id' ) ),
 			'extra'   => [
 				'users' => $composition_data['users'],
@@ -1434,7 +1434,7 @@ And here is a quote from a customer:
 			// Do nothing.
 		}
 
-		$response = local_rest_call( '/pixelgradelt_retailer/v1/compositions/encrypt_ltdetails', 'POST', [
+		$response = local_rest_call( '/pressody_retailer/v1/compositions/encrypt_pddetails', 'POST', [
 			'userids'       => array_values( \wp_list_pluck( $composition_data['users'], 'id' ) ),
 			'compositionid' => $composition_data['hashid'],
 			'extra'         => [
@@ -1448,7 +1448,7 @@ And here is a quote from a customer:
 		$this->assertArrayHasKey( 'data', $response );
 		$this->assertArrayHasKey( 'status', $response['data'] );
 		$this->assertSame( HTTP::INTERNAL_SERVER_ERROR, $response['data']['status'] );
-		$this->assertSame( 'pixelgradelt_retailer_rest_unable_to_encrypt', $response['code'] );
+		$this->assertSame( 'pressody_retailer_rest_unable_to_encrypt', $response['code'] );
 
 		// Put back the proper key.
 		try {
@@ -1458,13 +1458,13 @@ And here is a quote from a customer:
 		}
 	}
 
-	public function test_check_ltdetails_permissions() {
+	public function test_check_pddetails_permissions() {
 		// No logged in user.
 		\wp_set_current_user( 0 );
 		\wp_clear_auth_cookie();
 
-		$response = local_rest_call( '/pixelgradelt_retailer/v1/compositions/check_ltdetails', 'POST', [
-			'ltdetails' => '',
+		$response = local_rest_call( '/pressody_retailer/v1/compositions/check_pddetails', 'POST', [
+			'pddetails' => '',
 			'composer'  => [],
 		] );
 
@@ -1474,14 +1474,14 @@ And here is a quote from a customer:
 		$this->assertArrayHasKey( 'data', $response );
 		$this->assertArrayHasKey( 'status', $response['data'] );
 		$this->assertSame( \rest_authorization_required_code(), $response['data']['status'] );
-		$this->assertSame( 'pixelgradelt_retailer_rest_cannot_check', $response['code'] );
+		$this->assertSame( 'pressody_retailer_rest_cannot_check', $response['code'] );
 
 		// User without proper permissions.
 		\wp_set_current_user( self::$user_ids['subscriber'] );
 		\wp_set_auth_cookie( self::$user_ids['subscriber'], true, false );
 
-		$response = local_rest_call( '/pixelgradelt_retailer/v1/compositions/check_ltdetails', 'POST', [
-			'ltdetails' => '',
+		$response = local_rest_call( '/pressody_retailer/v1/compositions/check_pddetails', 'POST', [
+			'pddetails' => '',
 			'composer'  => [],
 		] );
 
@@ -1491,68 +1491,68 @@ And here is a quote from a customer:
 		$this->assertArrayHasKey( 'data', $response );
 		$this->assertArrayHasKey( 'status', $response['data'] );
 		$this->assertSame( \rest_authorization_required_code(), $response['data']['status'] );
-		$this->assertSame( 'pixelgradelt_retailer_rest_cannot_check', $response['code'] );
+		$this->assertSame( 'pressody_retailer_rest_cannot_check', $response['code'] );
 
 		// User with minimum permissions.
 		\wp_set_current_user( self::$user_ids['client1'] );
 		\wp_set_auth_cookie( self::$user_ids['client1'], true, false );
 
-		$response = local_rest_call( '/pixelgradelt_retailer/v1/compositions/check_ltdetails', 'POST', [
-			'ltdetails' => 'rsreytetrtet',
+		$response = local_rest_call( '/pressody_retailer/v1/compositions/check_pddetails', 'POST', [
+			'pddetails' => 'rsreytetrtet',
 			'composer'  => [],
 		] );
 
-		// Should return an error since the encrypted ltdetails are invalid, but not a permissions error.
+		// Should return an error since the encrypted pddetails are invalid, but not a permissions error.
 		$this->assertArrayHasKey( 'code', $response );
 		$this->assertArrayHasKey( 'message', $response );
 		$this->assertArrayHasKey( 'data', $response );
 		$this->assertArrayHasKey( 'status', $response['data'] );
 		$this->assertNotSame( \rest_authorization_required_code(), $response['data']['status'] );
-		$this->assertSame( 'pixelgradelt_retailer_rest_invalid_ltdetails', $response['code'] );
+		$this->assertSame( 'pressody_retailer_rest_invalid_pddetails', $response['code'] );
 
 		// User with customer permissions.
 		\wp_set_current_user( self::$user_ids['customer1'] );
 		\wp_set_auth_cookie( self::$user_ids['customer1'], true, false );
 
-		$response = local_rest_call( '/pixelgradelt_retailer/v1/compositions/check_ltdetails', 'POST', [
-			'ltdetails' => 'rsreytetrtet',
+		$response = local_rest_call( '/pressody_retailer/v1/compositions/check_pddetails', 'POST', [
+			'pddetails' => 'rsreytetrtet',
 			'composer'  => [],
 		] );
 
-		// Should return an error since the encrypted ltdetails are invalid, but not a permissions error.
+		// Should return an error since the encrypted pddetails are invalid, but not a permissions error.
 		$this->assertArrayHasKey( 'code', $response );
 		$this->assertArrayHasKey( 'message', $response );
 		$this->assertArrayHasKey( 'data', $response );
 		$this->assertArrayHasKey( 'status', $response['data'] );
 		$this->assertNotSame( \rest_authorization_required_code(), $response['data']['status'] );
-		$this->assertSame( 'pixelgradelt_retailer_rest_invalid_ltdetails', $response['code'] );
+		$this->assertSame( 'pressody_retailer_rest_invalid_pddetails', $response['code'] );
 
 		// User with manager permissions.
 		\wp_set_current_user( self::$user_ids['manager1'] );
 		\wp_set_auth_cookie( self::$user_ids['manager1'], true, false );
 
-		$response = local_rest_call( '/pixelgradelt_retailer/v1/compositions/check_ltdetails', 'POST', [
-			'ltdetails' => 'rsreytetrtet',
+		$response = local_rest_call( '/pressody_retailer/v1/compositions/check_pddetails', 'POST', [
+			'pddetails' => 'rsreytetrtet',
 			'composer'  => [],
 		] );
 
-		// Should return an error since the encrypted ltdetails are invalid, but not a permissions error.
+		// Should return an error since the encrypted pddetails are invalid, but not a permissions error.
 		$this->assertArrayHasKey( 'code', $response );
 		$this->assertArrayHasKey( 'message', $response );
 		$this->assertArrayHasKey( 'data', $response );
 		$this->assertArrayHasKey( 'status', $response['data'] );
 		$this->assertNotSame( \rest_authorization_required_code(), $response['data']['status'] );
-		$this->assertSame( 'pixelgradelt_retailer_rest_invalid_ltdetails', $response['code'] );
+		$this->assertSame( 'pressody_retailer_rest_invalid_pddetails', $response['code'] );
 	}
 
-	public function test_check_ltdetails() {
+	public function test_check_pddetails() {
 		// Log in a client.
 		\wp_set_current_user( self::$user_ids['client1'] );
 		\wp_set_auth_cookie( self::$user_ids['client1'], true, false );
 
 		$composition_data = self::$container['composition.manager']->get_composition_id_data( self::$composition_ids['second'] );
 
-		$encrypted_data = local_rest_call( '/pixelgradelt_retailer/v1/compositions/encrypt_ltdetails', 'POST', [
+		$encrypted_data = local_rest_call( '/pressody_retailer/v1/compositions/encrypt_pddetails', 'POST', [
 			'userids'       => array_values( \wp_list_pluck( $composition_data['users'], 'id' ) ),
 			'compositionid' => $composition_data['hashid'],
 			'extra'         => [
@@ -1562,21 +1562,21 @@ And here is a quote from a customer:
 
 		$this->assertIsString( $encrypted_data );
 
-		$response = local_rest_call( '/pixelgradelt_retailer/v1/compositions/check_ltdetails', 'POST', [
-			'ltdetails' => $encrypted_data,
+		$response = local_rest_call( '/pressody_retailer/v1/compositions/check_pddetails', 'POST', [
+			'pddetails' => $encrypted_data,
 			'composer'  => [],
 		] );
 
 		$this->assertSame( [], $response );
 	}
 
-	public function test_check_ltdetails_failure() {
+	public function test_check_pddetails_failure() {
 		// Log in a client.
 		\wp_set_current_user( self::$user_ids['client1'] );
 		\wp_set_auth_cookie( self::$user_ids['client1'], true, false );
 
-		$response = local_rest_call( '/pixelgradelt_retailer/v1/compositions/check_ltdetails', 'POST', [
-			'ltdetails' => 'sdfgsdqwerwer',
+		$response = local_rest_call( '/pressody_retailer/v1/compositions/check_pddetails', 'POST', [
+			'pddetails' => 'sdfgsdqwerwer',
 			'composer'  => [],
 		] );
 
@@ -1586,14 +1586,14 @@ And here is a quote from a customer:
 		$this->assertArrayHasKey( 'data', $response );
 		$this->assertArrayHasKey( 'status', $response['data'] );
 		$this->assertSame( HTTP::NOT_ACCEPTABLE, $response['data']['status'] );
-		$this->assertSame( 'pixelgradelt_retailer_rest_invalid_ltdetails', $response['code'] );
+		$this->assertSame( 'pressody_retailer_rest_invalid_pddetails', $response['code'] );
 
 		// Test a broken encryption setup.
 
 		// Get a good composition.
 		$composition_data = self::$container['composition.manager']->get_composition_id_data( self::$composition_ids['second'] );
 		// Encrypt it.
-		$encrypted_data = local_rest_call( '/pixelgradelt_retailer/v1/compositions/encrypt_ltdetails', 'POST', [
+		$encrypted_data = local_rest_call( '/pressody_retailer/v1/compositions/encrypt_pddetails', 'POST', [
 			'userids'       => array_values( \wp_list_pluck( $composition_data['users'], 'id' ) ),
 			'compositionid' => $composition_data['hashid'],
 			'extra'         => [
@@ -1611,8 +1611,8 @@ And here is a quote from a customer:
 			// Do nothing.
 		}
 
-		$response = local_rest_call( '/pixelgradelt_retailer/v1/compositions/check_ltdetails', 'POST', [
-			'ltdetails' => $encrypted_data,
+		$response = local_rest_call( '/pressody_retailer/v1/compositions/check_pddetails', 'POST', [
+			'pddetails' => $encrypted_data,
 			'composer'  => [],
 		] );
 
@@ -1622,7 +1622,7 @@ And here is a quote from a customer:
 		$this->assertArrayHasKey( 'data', $response );
 		$this->assertArrayHasKey( 'status', $response['data'] );
 		$this->assertSame( HTTP::INTERNAL_SERVER_ERROR, $response['data']['status'] );
-		$this->assertSame( 'pixelgradelt_retailer_rest_unable_to_encrypt', $response['code'] );
+		$this->assertSame( 'pressody_retailer_rest_unable_to_encrypt', $response['code'] );
 
 		// Put back the proper key.
 		try {
@@ -1637,7 +1637,7 @@ And here is a quote from a customer:
 		\wp_set_current_user( 0 );
 		\wp_clear_auth_cookie();
 
-		$response = local_rest_call( '/pixelgradelt_retailer/v1/compositions/instructions_to_update', 'POST', [
+		$response = local_rest_call( '/pressody_retailer/v1/compositions/instructions_to_update', 'POST', [
 			'composer' => [],
 		] );
 
@@ -1647,13 +1647,13 @@ And here is a quote from a customer:
 		$this->assertArrayHasKey( 'data', $response );
 		$this->assertArrayHasKey( 'status', $response['data'] );
 		$this->assertSame( \rest_authorization_required_code(), $response['data']['status'] );
-		$this->assertSame( 'pixelgradelt_retailer_rest_cannot_update', $response['code'] );
+		$this->assertSame( 'pressody_retailer_rest_cannot_update', $response['code'] );
 
 		// User without proper permissions.
 		\wp_set_current_user( self::$user_ids['subscriber'] );
 		\wp_set_auth_cookie( self::$user_ids['subscriber'], true, false );
 
-		$response = local_rest_call( '/pixelgradelt_retailer/v1/compositions/instructions_to_update', 'POST', [
+		$response = local_rest_call( '/pressody_retailer/v1/compositions/instructions_to_update', 'POST', [
 			'composer' => [],
 		] );
 
@@ -1663,13 +1663,13 @@ And here is a quote from a customer:
 		$this->assertArrayHasKey( 'data', $response );
 		$this->assertArrayHasKey( 'status', $response['data'] );
 		$this->assertSame( \rest_authorization_required_code(), $response['data']['status'] );
-		$this->assertSame( 'pixelgradelt_retailer_rest_cannot_update', $response['code'] );
+		$this->assertSame( 'pressody_retailer_rest_cannot_update', $response['code'] );
 
 		// User with minimum permissions.
 		\wp_set_current_user( self::$user_ids['client1'] );
 		\wp_set_auth_cookie( self::$user_ids['client1'], true, false );
 
-		$response = local_rest_call( '/pixelgradelt_retailer/v1/compositions/instructions_to_update', 'POST', [
+		$response = local_rest_call( '/pressody_retailer/v1/compositions/instructions_to_update', 'POST', [
 			'composer' => [],
 		] );
 
@@ -1679,13 +1679,13 @@ And here is a quote from a customer:
 		$this->assertArrayHasKey( 'data', $response );
 		$this->assertArrayHasKey( 'status', $response['data'] );
 		$this->assertNotSame( \rest_authorization_required_code(), $response['data']['status'] );
-		$this->assertSame( 'pixelgradelt_retailer_rest_missing_composition_ltdetails', $response['code'] );
+		$this->assertSame( 'pressody_retailer_rest_missing_composition_pddetails', $response['code'] );
 
 		// User with customer permissions.
 		\wp_set_current_user( self::$user_ids['customer1'] );
 		\wp_set_auth_cookie( self::$user_ids['customer1'], true, false );
 
-		$response = local_rest_call( '/pixelgradelt_retailer/v1/compositions/instructions_to_update', 'POST', [
+		$response = local_rest_call( '/pressody_retailer/v1/compositions/instructions_to_update', 'POST', [
 			'composer' => [],
 		] );
 
@@ -1695,13 +1695,13 @@ And here is a quote from a customer:
 		$this->assertArrayHasKey( 'data', $response );
 		$this->assertArrayHasKey( 'status', $response['data'] );
 		$this->assertNotSame( \rest_authorization_required_code(), $response['data']['status'] );
-		$this->assertSame( 'pixelgradelt_retailer_rest_missing_composition_ltdetails', $response['code'] );
+		$this->assertSame( 'pressody_retailer_rest_missing_composition_pddetails', $response['code'] );
 
 		// User with manager permissions.
 		\wp_set_current_user( self::$user_ids['manager1'] );
 		\wp_set_auth_cookie( self::$user_ids['manager1'], true, false );
 
-		$response = local_rest_call( '/pixelgradelt_retailer/v1/compositions/instructions_to_update', 'POST', [
+		$response = local_rest_call( '/pressody_retailer/v1/compositions/instructions_to_update', 'POST', [
 			'composer' => [],
 		] );
 
@@ -1711,7 +1711,7 @@ And here is a quote from a customer:
 		$this->assertArrayHasKey( 'data', $response );
 		$this->assertArrayHasKey( 'status', $response['data'] );
 		$this->assertNotSame( \rest_authorization_required_code(), $response['data']['status'] );
-		$this->assertSame( 'pixelgradelt_retailer_rest_missing_composition_ltdetails', $response['code'] );
+		$this->assertSame( 'pressody_retailer_rest_missing_composition_pddetails', $response['code'] );
 	}
 
 	public function test_instructions_to_update_composition() {
@@ -1721,7 +1721,7 @@ And here is a quote from a customer:
 
 		$composition_data = self::$container['composition.manager']->get_composition_id_data( self::$composition_ids['second'] );
 
-		$encrypted_data = local_rest_call( '/pixelgradelt_retailer/v1/compositions/encrypt_ltdetails', 'POST', [
+		$encrypted_data = local_rest_call( '/pressody_retailer/v1/compositions/encrypt_pddetails', 'POST', [
 			'userids'       => array_values( \wp_list_pluck( $composition_data['users'], 'id' ) ),
 			'compositionid' => $composition_data['hashid'],
 			'extra'         => [
@@ -1731,14 +1731,14 @@ And here is a quote from a customer:
 
 		$this->assertIsString( $encrypted_data );
 
-		// Use the starter composition from LT Records.
-		$response = local_rest_call( '/pixelgradelt_retailer/v1/compositions/instructions_to_update', 'POST', [
+		// Use the starter composition from PD Records.
+		$response = local_rest_call( '/pressody_retailer/v1/compositions/instructions_to_update', 'POST', [
 			'composer' => [
-				'name'              => 'pixelgradelt/site',
+				'name'              => 'pressody/site',
 				'type'              => 'project',
 				'license'           => 'MIT',
-				'description'       => 'A Pixelgrade LT WordPress site.',
-				'homepage'          => 'https://pixelgradelt.com',
+				'description'       => 'A Pressody WordPress site.',
+				'homepage'          => 'https://pressody.com',
 				'time'              => "2021-07-13T14:28:26+00:00",
 				'authors'           => [
 					[
@@ -1761,7 +1761,7 @@ And here is a quote from a customer:
 					],
 				],
 				'keywords'          => [
-					'pixelgradelt',
+					'pressody',
 					'bedrock',
 					'composer',
 					'roots',
@@ -1770,14 +1770,14 @@ And here is a quote from a customer:
 					'wp-config',
 				],
 				'support'           => [
-					'issues' => 'https://pixelgradelt.com',
-					'forum'  => 'https://pixelgradelt.com',
+					'issues' => 'https://pressody.com',
+					'forum'  => 'https://pressody.com',
 				],
 				'repositories'      => [
 					[
 						// Our very own Composer repo.
 						'type'    => 'composer',
-						'url'     => 'https://lt-records.local/ltpackagist/',
+						'url'     => 'https://pd-records.local/pdpackagist/',
 						'options' => [
 							'ssl' => [
 								'verify_peer' => false,
@@ -1786,7 +1786,7 @@ And here is a quote from a customer:
 					],
 					[
 						'type' => 'vcs',
-						'url'  => 'https://github.com/pixelgradelt/pixelgradelt-conductor',
+						'url'  => 'https://github.com/pressody/pressody-conductor',
 					],
 					[
 						// The Packagist repo.
@@ -1799,7 +1799,7 @@ And here is a quote from a customer:
 					'gordalina/cachetool'                 => '~6.3',
 					'php'                                 => '>=7.1',
 					'oscarotero/env'                      => '^2.1',
-					'pixelgradelt/pixelgradelt-conductor' => 'dev-main',
+					'pressody/pressody-conductor' => 'dev-main',
 					'roots/bedrock-autoloader'            => '^1.0',
 					'roots/wordpress'                     => '*',
 					'roots/wp-config'                     => '1.0.0',
@@ -1829,16 +1829,16 @@ And here is a quote from a customer:
 						'web/app/plugins/{$name}/'    => [ 'type:wordpress-plugin' ],
 						'web/app/themes/{$name}/'     => [ 'type:wordpress-theme' ],
 					],
-					'lt-composition'        => $encrypted_data,
+					'pd-composition'        => $encrypted_data,
 					// @see https://packagist.org/packages/roots/wordpress-core-installer
 					'wordpress-install-dir' => 'web/wp',
-					// LT Composition version
-					'lt-version'            => '1.1.0',
-					'lt-fingerprint'        => "somefingerprint",
+					// PD Composition version
+					'pd-version'            => '1.1.0',
+					'pd-fingerprint'        => "somefingerprint",
 				],
 				'scripts'           => [
 					'cache:schedule:clear'   => [
-						'PixelgradeLT\Conductor\Cache\CacheDispatcher::schedule_cache_clear',
+						'Pressody\Conductor\Cache\CacheDispatcher::schedule_cache_clear',
 					],
 					// CacheTool wrapper commands. See https://github.com/gordalina/cachetool
 					'cache:opcache:status'   => [
@@ -1852,22 +1852,22 @@ And here is a quote from a customer:
 					],
 					// Allow the CatchDispatcher to take action on package modifications.
 					'pre-package-install'    => [
-						'PixelgradeLT\Conductor\Cache\CacheDispatcher::handle_event',
+						'Pressody\Conductor\Cache\CacheDispatcher::handle_event',
 					],
 					'post-package-install'   => [
-						'PixelgradeLT\Conductor\Cache\CacheDispatcher::handle_event',
+						'Pressody\Conductor\Cache\CacheDispatcher::handle_event',
 					],
 					'pre-package-update'     => [
-						'PixelgradeLT\Conductor\Cache\CacheDispatcher::handle_event',
+						'Pressody\Conductor\Cache\CacheDispatcher::handle_event',
 					],
 					'post-package-update'    => [
-						'PixelgradeLT\Conductor\Cache\CacheDispatcher::handle_event',
+						'Pressody\Conductor\Cache\CacheDispatcher::handle_event',
 					],
 					'pre-package-uninstall'  => [
-						'PixelgradeLT\Conductor\Cache\CacheDispatcher::handle_event',
+						'Pressody\Conductor\Cache\CacheDispatcher::handle_event',
 					],
 					'post-package-uninstall' => [
-						'PixelgradeLT\Conductor\Cache\CacheDispatcher::handle_event',
+						'Pressody\Conductor\Cache\CacheDispatcher::handle_event',
 					],
 				],
 			],
@@ -1880,8 +1880,8 @@ And here is a quote from a customer:
 		$this->assertArrayHasKey( 'require', $response );
 		$this->assertCount( 2, $response['require'] );
 		$this->assertEqualSets( [
-			'pixelgradelt-records/part_test-test',
-			'pixelgradelt-records/part_yet-another',
+			'pressody-records/part_test-test',
+			'pressody-records/part_yet-another',
 		], array_values( \wp_list_pluck( $response['require'], 'name' ) ) );
 		$this->assertArrayHasKey( 'version', reset( $response['require'] ) );
 		$this->assertArrayHasKey( 'requiredBy', reset( $response['require'] ) );
@@ -1893,13 +1893,13 @@ And here is a quote from a customer:
 		\wp_set_auth_cookie( self::$user_ids['client1'], true, false );
 
 		// Pass Composer config that should not validate the schema (like a wrong entry value).
-		$response = local_rest_call( '/pixelgradelt_retailer/v1/compositions/instructions_to_update', 'POST', [
+		$response = local_rest_call( '/pressody_retailer/v1/compositions/instructions_to_update', 'POST', [
 			'composer' => [
 				'name'         => 'wrong_name',
 				'type'         => 'project',
 				'license'      => 'MIT',
-				'description'  => 'A Pixelgrade LT WordPress site.',
-				'homepage'     => 'https://pixelgradelt.com',
+				'description'  => 'A Pressody WordPress site.',
+				'homepage'     => 'https://pressody.com',
 				'time'         => "2021-07-13T14:28:26+00:00",
 				'authors'      => [
 					[
@@ -1913,7 +1913,7 @@ And here is a quote from a customer:
 					[
 						// Our very own Composer repo.
 						'type'    => 'composer',
-						'url'     => 'https://lt-records.local/ltpackagist/',
+						'url'     => 'https://pd-records.local/pdpackagist/',
 						'options' => [
 							'ssl' => [
 								'verify_peer' => false,
@@ -1922,7 +1922,7 @@ And here is a quote from a customer:
 					],
 					[
 						'type' => 'vcs',
-						'url'  => 'https://github.com/pixelgradelt/pixelgradelt-conductor',
+						'url'  => 'https://github.com/pressody/pressody-conductor',
 					],
 					[
 						// The Packagist repo.
@@ -1935,7 +1935,7 @@ And here is a quote from a customer:
 					'gordalina/cachetool'                 => '~6.3',
 					'php'                                 => '>=7.1',
 					'oscarotero/env'                      => '^2.1',
-					'pixelgradelt/pixelgradelt-conductor' => 'dev-main',
+					'pressody/pressody-conductor' => 'dev-main',
 					'roots/bedrock-autoloader'            => '^1.0',
 					'roots/wordpress'                     => '*',
 					'roots/wp-config'                     => '1.0.0',
@@ -1951,16 +1951,16 @@ And here is a quote from a customer:
 		$this->assertArrayHasKey( 'data', $response );
 		$this->assertArrayHasKey( 'status', $response['data'] );
 		$this->assertNotSame( \rest_authorization_required_code(), $response['data']['status'] );
-		$this->assertSame( 'pixelgradelt_retailer_rest_json_invalid', $response['code'] );
+		$this->assertSame( 'pressody_retailer_rest_json_invalid', $response['code'] );
 
-		// Pass Composer config with missing encrypted LT details in the `extra` root entry.
-		$response = local_rest_call( '/pixelgradelt_retailer/v1/compositions/instructions_to_update', 'POST', [
+		// Pass Composer config with missing encrypted PD details in the `extra` root entry.
+		$response = local_rest_call( '/pressody_retailer/v1/compositions/instructions_to_update', 'POST', [
 			'composer' => [
-				'name'         => 'pixelgradelt/site',
+				'name'         => 'pressody/site',
 				'type'         => 'project',
 				'license'      => 'MIT',
-				'description'  => 'A Pixelgrade LT WordPress site.',
-				'homepage'     => 'https://pixelgradelt.com',
+				'description'  => 'A Pressody WordPress site.',
+				'homepage'     => 'https://pressody.com',
 				'time'         => "2021-07-13T14:28:26+00:00",
 				'authors'      => [
 					[
@@ -1974,7 +1974,7 @@ And here is a quote from a customer:
 					[
 						// Our very own Composer repo.
 						'type'    => 'composer',
-						'url'     => 'https://lt-records.local/ltpackagist/',
+						'url'     => 'https://pd-records.local/pdpackagist/',
 						'options' => [
 							'ssl' => [
 								'verify_peer' => false,
@@ -1983,7 +1983,7 @@ And here is a quote from a customer:
 					],
 					[
 						'type' => 'vcs',
-						'url'  => 'https://github.com/pixelgradelt/pixelgradelt-conductor',
+						'url'  => 'https://github.com/pressody/pressody-conductor',
 					],
 					[
 						// The Packagist repo.
@@ -1996,7 +1996,7 @@ And here is a quote from a customer:
 					'gordalina/cachetool'                 => '~6.3',
 					'php'                                 => '>=7.1',
 					'oscarotero/env'                      => '^2.1',
-					'pixelgradelt/pixelgradelt-conductor' => 'dev-main',
+					'pressody/pressody-conductor' => 'dev-main',
 					'roots/bedrock-autoloader'            => '^1.0',
 					'roots/wordpress'                     => '*',
 					'roots/wp-config'                     => '1.0.0',
@@ -2012,16 +2012,16 @@ And here is a quote from a customer:
 		$this->assertArrayHasKey( 'data', $response );
 		$this->assertArrayHasKey( 'status', $response['data'] );
 		$this->assertNotSame( \rest_authorization_required_code(), $response['data']['status'] );
-		$this->assertSame( 'pixelgradelt_retailer_rest_missing_composition_ltdetails', $response['code'] );
+		$this->assertSame( 'pressody_retailer_rest_missing_composition_pddetails', $response['code'] );
 
-		// Pass Composer config with invalid encrypted LT details in the `extra` root entry.
-		$response = local_rest_call( '/pixelgradelt_retailer/v1/compositions/instructions_to_update', 'POST', [
+		// Pass Composer config with invalid encrypted PD details in the `extra` root entry.
+		$response = local_rest_call( '/pressody_retailer/v1/compositions/instructions_to_update', 'POST', [
 			'composer' => [
-				'name'         => 'pixelgradelt/site',
+				'name'         => 'pressody/site',
 				'type'         => 'project',
 				'license'      => 'MIT',
-				'description'  => 'A Pixelgrade LT WordPress site.',
-				'homepage'     => 'https://pixelgradelt.com',
+				'description'  => 'A Pressody WordPress site.',
+				'homepage'     => 'https://pressody.com',
 				'time'         => "2021-07-13T14:28:26+00:00",
 				'authors'      => [
 					[
@@ -2035,7 +2035,7 @@ And here is a quote from a customer:
 					[
 						// Our very own Composer repo.
 						'type'    => 'composer',
-						'url'     => 'https://lt-records.local/ltpackagist/',
+						'url'     => 'https://pd-records.local/pdpackagist/',
 						'options' => [
 							'ssl' => [
 								'verify_peer' => false,
@@ -2044,7 +2044,7 @@ And here is a quote from a customer:
 					],
 					[
 						'type' => 'vcs',
-						'url'  => 'https://github.com/pixelgradelt/pixelgradelt-conductor',
+						'url'  => 'https://github.com/pressody/pressody-conductor',
 					],
 					[
 						// The Packagist repo.
@@ -2057,7 +2057,7 @@ And here is a quote from a customer:
 					'gordalina/cachetool'                 => '~6.3',
 					'php'                                 => '>=7.1',
 					'oscarotero/env'                      => '^2.1',
-					'pixelgradelt/pixelgradelt-conductor' => 'dev-main',
+					'pressody/pressody-conductor' => 'dev-main',
 					'roots/bedrock-autoloader'            => '^1.0',
 					'roots/wordpress'                     => '*',
 					'roots/wp-config'                     => '1.0.0',
@@ -2074,12 +2074,12 @@ And here is a quote from a customer:
 						'web/app/plugins/{$name}/'    => [ 'type:wordpress-plugin' ],
 						'web/app/themes/{$name}/'     => [ 'type:wordpress-theme' ],
 					],
-					'lt-composition'        => 'afsdgwerwerwerwe',
+					'pd-composition'        => 'afsdgwerwerwerwe',
 					// @see https://packagist.org/packages/roots/wordpress-core-installer
 					'wordpress-install-dir' => 'web/wp',
-					// LT Composition version
-					'lt-version'            => '1.1.0',
-					'lt-fingerprint'        => "somefingerprint",
+					// PD Composition version
+					'pd-version'            => '1.1.0',
+					'pd-fingerprint'        => "somefingerprint",
 				],
 			],
 		] );
@@ -2090,6 +2090,6 @@ And here is a quote from a customer:
 		$this->assertArrayHasKey( 'data', $response );
 		$this->assertArrayHasKey( 'status', $response['data'] );
 		$this->assertNotSame( \rest_authorization_required_code(), $response['data']['status'] );
-		$this->assertSame( 'pixelgradelt_retailer_rest_invalid_composition_ltdetails', $response['code'] );
+		$this->assertSame( 'pressody_retailer_rest_invalid_composition_pddetails', $response['code'] );
 	}
 }

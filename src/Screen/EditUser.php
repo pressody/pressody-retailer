@@ -2,22 +2,22 @@
 /**
  * Edit User screen provider.
  *
- * @package PixelgradeLT
+ * @package Pressody
  * @license GPL-2.0-or-later
  * @since 0.1.0
  */
 
 declare ( strict_types = 1 );
 
-namespace PixelgradeLT\Retailer\Screen;
+namespace Pressody\Retailer\Screen;
 
 use Cedaro\WP\Plugin\AbstractHookProvider;
-use PixelgradeLT\Retailer\Authentication\ApiKey\ApiKeyRepository;
-use PixelgradeLT\Retailer\Capabilities;
+use Pressody\Retailer\Authentication\ApiKey\ApiKeyRepository;
+use Pressody\Retailer\Capabilities;
 use WP_User;
 
-use function PixelgradeLT\Retailer\get_edited_user_id;
-use function PixelgradeLT\Retailer\preload_rest_data;
+use function Pressody\Retailer\get_edited_user_id;
+use function Pressody\Retailer\preload_rest_data;
 
 /**
  * Edit User screen provider class.
@@ -75,14 +75,14 @@ class EditUser extends AbstractHookProvider {
 	 * @since 0.1.0
 	 */
 	public function enqueue_assets() {
-		wp_enqueue_script( 'pixelgradelt_retailer-admin' );
-		wp_enqueue_style( 'pixelgradelt_retailer-admin' );
+		wp_enqueue_script( 'pressody_retailer-admin' );
+		wp_enqueue_style( 'pressody_retailer-admin' );
 
-		wp_enqueue_script( 'pixelgradelt_retailer-access' );
+		wp_enqueue_script( 'pressody_retailer-access' );
 
 		wp_localize_script(
-			'pixelgradelt_retailer-access',
-			'_pixelgradeltRetailerAccessData',
+			'pressody_retailer-access',
+			'_pressodyRetailerAccessData',
 			[
 				'editedUserId' => get_edited_user_id(),
 			]
@@ -90,7 +90,7 @@ class EditUser extends AbstractHookProvider {
 
 		preload_rest_data(
 			[
-				'/pixelgradelt_retailer/v1/apikeys?user=' . get_edited_user_id(),
+				'/pressody_retailer/v1/apikeys?user=' . get_edited_user_id(),
 			]
 		);
 	}
@@ -101,14 +101,14 @@ class EditUser extends AbstractHookProvider {
 	 * @param WP_User $user WordPress user instance.
 	 */
 	public function render_api_keys_section( WP_User $user ) {
-		printf( '<h2>%s</h2>', esc_html__( 'PixelgradeLT Retailer API Keys', 'pixelgradelt_retailer' ) );
+		printf( '<h2>%s</h2>', esc_html__( 'Pressody Retailer API Keys', 'pressody_retailer' ) );
 
 		printf(
 			'<p><strong>%s</strong></p>',
-			/* translators: %s: <code>pixelgradelt_retailer</code> */
-			sprintf( esc_html__( 'The password for all API Keys is %s. Use the API key as the username.', 'pixelgradelt_retailer' ), '<code>pixelgradelt_retailer</code>' )
+			/* translators: %s: <code>pressody_retailer</code> */
+			sprintf( esc_html__( 'The password for all API Keys is %s. Use the API key as the username.', 'pressody_retailer' ), '<code>pressody_retailer</code>' )
 		);
 
-		echo '<div id="pixelgradelt_retailer-api-key-manager"></div>';
+		echo '<div id="pressody_retailer-api-key-manager"></div>';
 	}
 }

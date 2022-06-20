@@ -4,15 +4,15 @@ const {dispatch, createReduxStore, register, select} = data
 const {apiFetch, controls} = dataControls
 const {addQueryArgs} = url
 
-const STORE_KEY = 'pixelgradelt_retailer/composition'
+const STORE_KEY = 'pressody_retailer/composition'
 
-const DEFAULT_STATE = {
+const DEFAUPD_STATE = {
 	solutions: [],
 	parts: [],
 	composerJson: {},
 	postId: null,
 	hashId: null,
-	encryptedLTDetails: null,
+	encryptedPDDetails: null,
 	solutionIds: [],
 	solutionContexts: [],
 }
@@ -40,7 +40,7 @@ function* getSolutions () {
 	const solutionIds = select(STORE_KEY).getSolutionIds()
 	const solutionContexts = select(STORE_KEY).getSolutionContexts()
 	const solutions = yield apiFetch({
-		path: addQueryArgs('/pixelgradelt_retailer/v1/solutions/processed', {
+		path: addQueryArgs('/pressody_retailer/v1/solutions/processed', {
 			postId: solutionIds,
 			solutionsContext: solutionContexts,
 		}),
@@ -60,7 +60,7 @@ function* getParts () {
 	const solutionIds = select(STORE_KEY).getSolutionIds()
 	const solutionContexts = select(STORE_KEY).getSolutionContexts()
 	const parts = yield apiFetch({
-		path: addQueryArgs('/pixelgradelt_retailer/v1/solutions/parts', {
+		path: addQueryArgs('/pressody_retailer/v1/solutions/parts', {
 			postId: solutionIds,
 			solutionsContext: solutionContexts,
 		}),
@@ -71,30 +71,30 @@ function* getParts () {
 	// Since we need the parts to get a composer.json, do it here.
 	// I haven't managed to figure it out how to do resolvers in a cascade. This will do for now.
 
-	const encryptedLTDetails = select(STORE_KEY).getEncryptedLTDetails()
-	// If we don't have the encrypted LT data, the request will be rejected either way. So, best not to waste any time on it.
-	if (!encryptedLTDetails) {
+	const encryptedPDDetails = select(STORE_KEY).getEncryptedPDDetails()
+	// If we don't have the encrypted PD data, the request will be rejected either way. So, best not to waste any time on it.
+	if (!encryptedPDDetails) {
 		dispatch(STORE_KEY).setComposerJson({})
 	}
 
 	// noinspection JSUnresolvedVariable,JSHint
 	const {
-		ltrecordsCompositionsUrl,
-		ltrecordsApiKey,
-		ltrecordsApiPwd
-	} = _pixelgradeltRetailerEditCompositionData
+		pdrecordsCompositionsUrl,
+		pdrecordsApiKey,
+		pdrecordsApiPwd
+	} = _pressodyRetailerEditCompositionData
 
 	const composerJson = yield apiFetch({
-		url: ltrecordsCompositionsUrl,
+		url: pdrecordsCompositionsUrl,
 		method: 'POST',
 		headers: {
-			'Authorization': 'Basic ' + btoa(ltrecordsApiKey + ':' + ltrecordsApiPwd)
+			'Authorization': 'Basic ' + btoa(pdrecordsApiKey + ':' + pdrecordsApiPwd)
 		},
 		data: {
-			ltdetails: encryptedLTDetails,
+			pddetails: encryptedPDDetails,
 			require: parts,
 			composer: {
-				'name': 'pixelgradelt/' + select(STORE_KEY).getHashId().toLowerCase(),
+				'name': 'pressody/' + select(STORE_KEY).getHashId().toLowerCase(),
 			}
 		}
 	})
@@ -122,10 +122,10 @@ function setHashId (hashId) {
 	}
 }
 
-function setEncryptedLTDetails (encryptedLTDetails) {
+function setEncryptedPDDetails (encryptedPDDetails) {
 	return {
-		type: 'SET_ENCRYPTED_LTDETAILS',
-		encryptedLTDetails: encryptedLTDetails,
+		type: 'SET_ENCRYPTED_PDDETAILS',
+		encryptedPDDetails: encryptedPDDetails,
 	}
 }
 
@@ -144,7 +144,7 @@ function setSolutionContexts (solutionContexts) {
 }
 
 const store = createReduxStore(STORE_KEY, {
-	reducer (state = DEFAULT_STATE, action) {
+	reducer (state = DEFAUPD_STATE, action) {
 		switch (action.type) {
 			case 'SET_SOLUTIONS' :
 				return {
@@ -176,10 +176,10 @@ const store = createReduxStore(STORE_KEY, {
 					hashId: action.hashId,
 				}
 
-			case 'SET_ENCRYPTED_LTDETAILS' :
+			case 'SET_ENCRYPTED_PDDETAILS' :
 				return {
 					...state,
-					encryptedLTDetails: action.encryptedLTDetails,
+					encryptedPDDetails: action.encryptedPDDetails,
 				}
 
 			case 'SET_SOLUTION_IDS' :
@@ -203,7 +203,7 @@ const store = createReduxStore(STORE_KEY, {
 		setComposerJson,
 		setPostId,
 		setHashId,
-		setEncryptedLTDetails,
+		setEncryptedPDDetails,
 		setSolutionIds,
 		setSolutionContexts,
 	},
@@ -223,8 +223,8 @@ const store = createReduxStore(STORE_KEY, {
 		getHashId (state) {
 			return state.hashId || null
 		},
-		getEncryptedLTDetails (state) {
-			return state.encryptedLTDetails || ''
+		getEncryptedPDDetails (state) {
+			return state.encryptedPDDetails || ''
 		},
 		getSolutionIds (state) {
 			return state.solutionIds || []

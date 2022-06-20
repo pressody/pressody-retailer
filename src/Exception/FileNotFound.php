@@ -2,14 +2,14 @@
 /**
  * File not found exception.
  *
- * @package PixelgradeLT
+ * @package Pressody
  * @license GPL-2.0-or-later
  * @since 0.1.0
  */
 
 declare ( strict_types = 1 );
 
-namespace PixelgradeLT\Retailer\Exception;
+namespace Pressody\Retailer\Exception;
 
 use Throwable;
 
@@ -18,7 +18,7 @@ use Throwable;
  *
  * @since 0.1.0
  */
-class FileNotFound extends \RuntimeException implements PixelgradeltRetailerException {
+class FileNotFound extends \RuntimeException implements PressodyRetailerException {
 	/**
 	 * Create an exception for invalid checksum operations.
 	 *

@@ -7,8 +7,8 @@ const {__} = i18n
 function SolutionPlaceholder (props) {
 	return html`
 	  <${Placeholder}
-			  label=${__('No solution details', 'pixelgradelt_retailer')}
-			  instructions=${__('Probably you need to do some configuring first. Go on.. don\'t be shy..', 'pixelgradelt_retailer')}
+			  label=${__('No solution details', 'pressody_retailer')}
+			  instructions=${__('Probably you need to do some configuring first. Go on.. don\'t be shy..', 'pressody_retailer')}
 	  >
 	  </${Placeholder}>
 	`

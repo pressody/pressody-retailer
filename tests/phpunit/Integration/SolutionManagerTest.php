@@ -1,18 +1,18 @@
 <?php
 declare ( strict_types=1 );
 
-namespace PixelgradeLT\Retailer\Tests\Integration;
+namespace Pressody\Retailer\Tests\Integration;
 
-use PixelgradeLT\Retailer\Capabilities;
-use PixelgradeLT\Retailer\Repository\Solutions;
-use PixelgradeLT\Retailer\SolutionManager;
-use PixelgradeLT\Retailer\SolutionType\BaseSolution;
-use PixelgradeLT\Retailer\SolutionType\SolutionTypes;
-use PixelgradeLT\Retailer\Tests\Framework\PHPUnitUtil;
+use Pressody\Retailer\Capabilities;
+use Pressody\Retailer\Repository\Solutions;
+use Pressody\Retailer\SolutionManager;
+use Pressody\Retailer\SolutionType\BaseSolution;
+use Pressody\Retailer\SolutionType\SolutionTypes;
+use Pressody\Retailer\Tests\Framework\PHPUnitUtil;
 
 use Psr\Container\ContainerInterface;
-use function PixelgradeLT\Retailer\get_composer_vendor;
-use function PixelgradeLT\Retailer\plugin;
+use function Pressody\Retailer\get_composer_vendor;
+use function Pressody\Retailer\plugin;
 
 class SolutionManagerTest extends TestCase {
 	protected static $posts_data;
@@ -32,7 +32,7 @@ class SolutionManagerTest extends TestCase {
 		/** @var ContainerInterface $container */
 		self::$container = plugin()->get_container();
 
-		// Register ltsolution post type
+		// Register pdsolution post type
 		$register_post_type = PHPUnitUtil::getProtectedMethod( self::$container['hooks.solution_post_type'], 'register_post_type' );
 		$register_post_type->invoke( self::$container['hooks.solution_post_type'] );
 
@@ -95,7 +95,7 @@ And here is a quote from a customer:
 			],
 		];
 
-		// Create the test ltsolutions posts that will be dependencies to other posts that we test.
+		// Create the test pdsolutions posts that will be dependencies to other posts that we test.
 		foreach ( self::$dep_posts_data as $key => $data ) {
 			self::$post_ids[ $key ] = $factory->post->create_object( $data );
 		}
@@ -120,7 +120,7 @@ And here is a quote from a customer:
 <blockquote>Pure bliss, man!</blockquote>',
 				'_solution_details_homepage'                       => 'https://package.homepage',
 				'_solution_required_parts|||0|value'               => '_',
-				'_solution_required_parts|package_name|0|0|value'  => 'pixelgradelt-records/part_yet-another',
+				'_solution_required_parts|package_name|0|0|value'  => 'pressody-records/part_yet-another',
 				'_solution_required_parts|version_range|0|0|value' => '1.2.9',
 				'_solution_required_parts|stability|0|0|value'     => 'stable',
 				'_solution_required_solutions|||0|value'           => '_',
@@ -152,7 +152,7 @@ And here is a quote from a customer:
 <blockquote>Pure bliss, man!</blockquote>',
 				'_solution_details_homepage'                       => 'https://package.homepage',
 				'_solution_required_parts|||0|value'               => '_',
-				'_solution_required_parts|package_name|0|0|value'  => 'pixelgradelt-records/part_yet-another',
+				'_solution_required_parts|package_name|0|0|value'  => 'pressody-records/part_yet-another',
 				'_solution_required_parts|version_range|0|0|value' => '^1',
 				'_solution_required_parts|stability|0|0|value'     => 'stable',
 				'_solution_required_solutions|||0|value'           => '_',
@@ -185,10 +185,10 @@ And here is a quote from a customer:
 				'_solution_details_homepage'                       => 'https://package.homepage',
 				'_solution_required_parts|||0|value'               => '_',
 				'_solution_required_parts|||1|value'               => '_',
-				'_solution_required_parts|package_name|0|0|value'  => 'pixelgradelt-records/part_yet-another',
+				'_solution_required_parts|package_name|0|0|value'  => 'pressody-records/part_yet-another',
 				'_solution_required_parts|version_range|0|0|value' => '^2',
 				'_solution_required_parts|stability|0|0|value'     => 'stable',
-				'_solution_required_parts|package_name|1|0|value'  => 'pixelgradelt-records/part_test-test',
+				'_solution_required_parts|package_name|1|0|value'  => 'pressody-records/part_test-test',
 				'_solution_required_parts|version_range|1|0|value' => '^1.0',
 				'_solution_required_parts|stability|1|0|value'     => 'stable',
 				'_solution_required_solutions|||0|value'           => '_',
@@ -262,8 +262,8 @@ And here is a quote from a customer:
 		$this->assertEqualSets( ['keyword4', 'keyword7', 'keyword9', ], $solution_data['keywords'] );
 		$this->assertSame( self::$posts_data['portfolio']['meta_input']['_solution_details_description'], $solution_data['description'] );
 		$this->assertSame( self::$posts_data['portfolio']['meta_input']['_solution_details_homepage'], $solution_data['homepage'] );
-		$this->assertCount( 2, $solution_data['required_ltrecords_parts'] );
-		$this->assertEqualSets( [ 'pixelgradelt-records/part_yet-another', 'pixelgradelt-records/part_test-test', ], \wp_list_pluck( $solution_data['required_ltrecords_parts'], 'package_name' ) );
+		$this->assertCount( 2, $solution_data['required_pdrecords_parts'] );
+		$this->assertEqualSets( [ 'pressody-records/part_yet-another', 'pressody-records/part_test-test', ], \wp_list_pluck( $solution_data['required_pdrecords_parts'], 'package_name' ) );
 		$this->assertCount( 1, $solution_data['required_solutions'] );
 		$this->assertEqualSets( [ self::$post_ids['blog'], ], \wp_list_pluck( $solution_data['required_solutions'], 'managed_post_id' ) );
 		$this->assertCount( 1, $solution_data['excluded_solutions'] );
@@ -287,8 +287,8 @@ And here is a quote from a customer:
 		$this->assertEqualSets( ['keyword4', 'keyword7', 'keyword9', ], $solution_data['keywords'] );
 		$this->assertSame( self::$posts_data['portfolio']['meta_input']['_solution_details_description'], $solution_data['description'] );
 		$this->assertSame( self::$posts_data['portfolio']['meta_input']['_solution_details_homepage'], $solution_data['homepage'] );
-		$this->assertCount( 2, $solution_data['required_ltrecords_parts'] );
-		$this->assertEqualSets( [ 'pixelgradelt-records/part_yet-another', 'pixelgradelt-records/part_test-test', ], \wp_list_pluck( $solution_data['required_ltrecords_parts'], 'package_name' ) );
+		$this->assertCount( 2, $solution_data['required_pdrecords_parts'] );
+		$this->assertEqualSets( [ 'pressody-records/part_yet-another', 'pressody-records/part_test-test', ], \wp_list_pluck( $solution_data['required_pdrecords_parts'], 'package_name' ) );
 		$this->assertCount( 1, $solution_data['required_solutions'] );
 		$this->assertEqualSets( [ self::$post_ids['blog'], ], \wp_list_pluck( $solution_data['required_solutions'], 'managed_post_id' ) );
 		$this->assertCount( 1, $solution_data['excluded_solutions'] );
@@ -356,7 +356,7 @@ And here is a quote from a customer:
 		/** @var SolutionManager $solution_manager */
 		$solution_manager = self::$container['solution.manager'];
 
-		$this->assertEqualSets( [ 'pixelgradelt-records/part_yet-another', 'pixelgradelt-records/part_test-test', ], \wp_list_pluck( $solution_manager->get_post_solution_required_parts( self::$post_ids['portfolio'] ), 'package_name' ) );
+		$this->assertEqualSets( [ 'pressody-records/part_yet-another', 'pressody-records/part_test-test', ], \wp_list_pluck( $solution_manager->get_post_solution_required_parts( self::$post_ids['portfolio'] ), 'package_name' ) );
 	}
 
 	public function test_get_post_solution_composer_require() {

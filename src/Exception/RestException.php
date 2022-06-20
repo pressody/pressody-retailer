@@ -4,12 +4,12 @@
  *
  * @since   0.10.0
  * @license GPL-2.0-or-later
- * @package PixelgradeLT
+ * @package Pressody
  */
 
 declare ( strict_types=1 );
 
-namespace PixelgradeLT\Retailer\Exception;
+namespace Pressody\Retailer\Exception;
 
 use Throwable;
 use WP_Http as HTTP;
@@ -19,7 +19,7 @@ use WP_Http as HTTP;
  *
  * @since 0.10.0
  */
-class RestException extends \Exception implements PixelgradeltRetailerException {
+class RestException extends \Exception implements PressodyRetailerException {
 	/**
 	 * HTTP status code.
 	 *
@@ -44,13 +44,13 @@ class RestException extends \Exception implements PixelgradeltRetailerException 
 		Throwable $previous = null
 	) {
 		$this->status_code = $status_code;
-		$message           = $message ?: esc_html__( 'Internal Server Error', 'pixelgradelt_retailer' );
+		$message           = $message ?: esc_html__( 'Internal Server Error', 'pressody_retailer' );
 
 		parent::__construct( $message, $code, $previous );
 	}
 
 	/**
-	 * Create an exception for invalid composition LT details.
+	 * Create an exception for invalid composition PD details.
 	 *
 	 * @since 0.10.0
 	 *
@@ -60,20 +60,20 @@ class RestException extends \Exception implements PixelgradeltRetailerException 
 	 *
 	 * @return RestException
 	 */
-	public static function forInvalidCompositionLTDetails(
+	public static function forInvalidCompositionPDDetails(
 		string $message = '',
 		int $code = 0,
 		Throwable $previous = null
 	): RestException {
 		if ( empty( $message ) ) {
-			$message = esc_html__( 'The provided data has invalid composition LT details.', 'pixelgradelt_retailer' );
+			$message = esc_html__( 'The provided data has invalid composition PD details.', 'pressody_retailer' );
 		}
 
 		return new static( $message, HTTP::NOT_ACCEPTABLE, $code, $previous );
 	}
 
 	/**
-	 * Create an exception for missing composition LT details.
+	 * Create an exception for missing composition PD details.
 	 *
 	 * @since 0.10.0
 	 *
@@ -82,11 +82,11 @@ class RestException extends \Exception implements PixelgradeltRetailerException 
 	 *
 	 * @return RestException
 	 */
-	public static function forMissingCompositionLTDetails(
+	public static function forMissingCompositionPDDetails(
 		int $code = 0,
 		Throwable $previous = null
 	): RestException {
-		$message = esc_html__( 'The provided data is missing some composition LT details.', 'pixelgradelt_retailer' );
+		$message = esc_html__( 'The provided data is missing some composition PD details.', 'pressody_retailer' );
 
 		return new static( $message, HTTP::NOT_ACCEPTABLE, $code, $previous );
 	}
@@ -105,7 +105,7 @@ class RestException extends \Exception implements PixelgradeltRetailerException 
 		int $code = 0,
 		Throwable $previous = null
 	): RestException {
-		$message = esc_html__( 'Could not find a valid user with the provided ID(s).', 'pixelgradelt_retailer' );
+		$message = esc_html__( 'Could not find a valid user with the provided ID(s).', 'pressody_retailer' );
 
 		return new static( $message, HTTP::NOT_ACCEPTABLE, $code, $previous );
 	}
@@ -124,7 +124,7 @@ class RestException extends \Exception implements PixelgradeltRetailerException 
 		int $code = 0,
 		Throwable $previous = null
 	): RestException {
-		$message = esc_html__( 'Could not find a composition with the provided ID.', 'pixelgradelt_retailer' );
+		$message = esc_html__( 'Could not find a composition with the provided ID.', 'pressody_retailer' );
 
 		return new static( $message, HTTP::NOT_ACCEPTABLE, $code, $previous );
 	}
@@ -143,7 +143,7 @@ class RestException extends \Exception implements PixelgradeltRetailerException 
 		int $code = 0,
 		Throwable $previous = null
 	): RestException {
-		$message = esc_html__( 'We could not run encryption. Please contact the administrator and let them know that something is wrong. Thanks in advance!', 'pixelgradelt_retailer' );
+		$message = esc_html__( 'We could not run encryption. Please contact the administrator and let them know that something is wrong. Thanks in advance!', 'pressody_retailer' );
 
 		return new static( $message, HTTP::INTERNAL_SERVER_ERROR, $code, $previous );
 	}

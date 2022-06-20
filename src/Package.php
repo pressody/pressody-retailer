@@ -2,14 +2,14 @@
 /**
  * General package interface.
  *
- * @package PixelgradeLT
+ * @package Pressody
  * @license GPL-2.0-or-later
  * @since 0.1.0
  */
 
 declare ( strict_types = 1 );
 
-namespace PixelgradeLT\Retailer;
+namespace Pressody\Retailer;
 
 /**
  * Package interface.
@@ -128,22 +128,22 @@ interface Package {
 	public function get_visibility(): string;
 
 	/**
-	 * Retrieve the required LT Records Parts.
+	 * Retrieve the required PD Records Parts.
 	 *
 	 * @since 0.1.0
 	 *
 	 * @return array
 	 */
-	public function get_required_ltrecords_parts(): array;
+	public function get_required_pdrecords_parts(): array;
 
 	/**
-	 * Whether the solution has any required LT Records Parts.
+	 * Whether the solution has any required PD Records Parts.
 	 *
 	 * @since 0.1.0
 	 *
 	 * @return bool
 	 */
-	public function has_required_ltrecords_parts(): bool;
+	public function has_required_pdrecords_parts(): bool;
 
 	/**
 	 * Retrieve the Composer config `require` entry.

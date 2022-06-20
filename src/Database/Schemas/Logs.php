@@ -4,12 +4,12 @@
  *
  * @since   0.14.0
  * @license GPL-2.0-or-later
- * @package PixelgradeLT
+ * @package Pressody
  */
 
 declare ( strict_types = 1 );
 
-namespace PixelgradeLT\Retailer\Database\Schemas;
+namespace Pressody\Retailer\Database\Schemas;
 
 use BerlinDB\Database\Schema;
 

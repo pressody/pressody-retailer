@@ -2,18 +2,18 @@
 /**
  * API Key factory.
  *
- * @package PixelgradeLT
+ * @package Pressody
  * @license GPL-2.0-or-later
  * @since 0.1.0
  */
 
 declare ( strict_types = 1 );
 
-namespace PixelgradeLT\Retailer\Authentication\ApiKey;
+namespace Pressody\Retailer\Authentication\ApiKey;
 
 use WP_User;
 
-use function PixelgradeLT\Retailer\generate_random_string;
+use function Pressody\Retailer\generate_random_string;
 
 /**
  * API Key factory class.

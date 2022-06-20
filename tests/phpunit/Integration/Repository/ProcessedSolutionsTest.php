@@ -1,16 +1,16 @@
 <?php
 declare ( strict_types=1 );
 
-namespace PixelgradeLT\Retailer\Tests\Integration\Repository;
+namespace Pressody\Retailer\Tests\Integration\Repository;
 
-use PixelgradeLT\Retailer\Repository\ProcessedSolutions;
-use PixelgradeLT\Retailer\SolutionType\BaseSolution;
-use PixelgradeLT\Retailer\SolutionType\SolutionTypes;
-use PixelgradeLT\Retailer\Tests\Framework\PHPUnitUtil;
-use PixelgradeLT\Retailer\Tests\Integration\TestCase;
+use Pressody\Retailer\Repository\ProcessedSolutions;
+use Pressody\Retailer\SolutionType\BaseSolution;
+use Pressody\Retailer\SolutionType\SolutionTypes;
+use Pressody\Retailer\Tests\Framework\PHPUnitUtil;
+use Pressody\Retailer\Tests\Integration\TestCase;
 
 use Psr\Container\ContainerInterface;
-use function PixelgradeLT\Retailer\plugin;
+use function Pressody\Retailer\plugin;
 
 class ProcessedSolutionsTest extends TestCase {
 	protected static $posts_data;
@@ -27,7 +27,7 @@ class ProcessedSolutionsTest extends TestCase {
 		/** @var ContainerInterface $container */
 		self::$container = plugin()->get_container();
 
-		// Register ltsolution post type
+		// Register pdsolution post type
 		$register_post_type = PHPUnitUtil::getProtectedMethod( self::$container['hooks.solution_post_type'], 'register_post_type' );
 		$register_post_type->invoke( self::$container['hooks.solution_post_type'] );
 
@@ -88,7 +88,7 @@ And here is a quote from a customer:
 			],
 		];
 
-		// Create the test ltsolutions posts that will be dependencies to other posts that we test.
+		// Create the test pdsolutions posts that will be dependencies to other posts that we test.
 		$dep_post_ids = [];
 		foreach ( self::$dep_posts_data as $key => $data ) {
 			$dep_post_ids[ $key ] = $factory->post->create_object( $data );
@@ -116,7 +116,7 @@ And here is a quote from a customer:
 <blockquote>Pure bliss, man!</blockquote>',
 				'_solution_details_homepage'                       => 'https://package.homepage',
 				'_solution_required_parts|||0|value'               => '_',
-				'_solution_required_parts|package_name|0|0|value'  => 'pixelgradelt-records/part_yet-another',
+				'_solution_required_parts|package_name|0|0|value'  => 'pressody-records/part_yet-another',
 				'_solution_required_parts|version_range|0|0|value' => '1.2.9',
 				'_solution_required_parts|stability|0|0|value'     => 'stable',
 				'_solution_required_solutions|||0|value'           => '_',
@@ -147,7 +147,7 @@ And here is a quote from a customer:
 <blockquote>Pure bliss, man!</blockquote>',
 				'_solution_details_homepage'                       => 'https://package.homepage',
 				'_solution_required_parts|||0|value'               => '_',
-				'_solution_required_parts|package_name|0|0|value'  => 'pixelgradelt-records/part_yet-another',
+				'_solution_required_parts|package_name|0|0|value'  => 'pressody-records/part_yet-another',
 				'_solution_required_parts|version_range|0|0|value' => '1.2.9',
 				'_solution_required_parts|stability|0|0|value'     => 'stable',
 				'_solution_required_solutions|||0|value'           => '_',
@@ -164,7 +164,7 @@ And here is a quote from a customer:
 	}
 
 	public function test_exclusion() {
-		/** @var \PixelgradeLT\Retailer\Repository\Solutions $repository */
+		/** @var \Pressody\Retailer\Repository\Solutions $repository */
 		$repository = plugin()->get_container()['repository.solutions'];
 		$repository->reinitialize();
 
@@ -185,15 +185,15 @@ And here is a quote from a customer:
 		$processed_solutions  = $processed_repository->all();
 
 		// We expect to have the ecommerce and edd solutions, but not the blog one since it is excluded by ecommerce.
-		$this->assertNotEmpty( $processed_solutions['pixelgradelt-retailer/edd'] );
-		$this->assertInstanceOf( BaseSolution::class, $processed_solutions['pixelgradelt-retailer/edd'] );
-		$this->assertNotEmpty( $processed_solutions['pixelgradelt-retailer/ecommerce'] );
-		$this->assertInstanceOf( BaseSolution::class, $processed_solutions['pixelgradelt-retailer/ecommerce'] );
-		$this->assertNotContains( 'pixelgradelt-retailer/blog', array_keys( $processed_solutions ) );
+		$this->assertNotEmpty( $processed_solutions['pressody-retailer/edd'] );
+		$this->assertInstanceOf( BaseSolution::class, $processed_solutions['pressody-retailer/edd'] );
+		$this->assertNotEmpty( $processed_solutions['pressody-retailer/ecommerce'] );
+		$this->assertInstanceOf( BaseSolution::class, $processed_solutions['pressody-retailer/ecommerce'] );
+		$this->assertNotContains( 'pressody-retailer/blog', array_keys( $processed_solutions ) );
 	}
 
 	public function test_exclusion_with_context_order() {
-		/** @var \PixelgradeLT\Retailer\Repository\Solutions $repository */
+		/** @var \Pressody\Retailer\Repository\Solutions $repository */
 		$repository = plugin()->get_container()['repository.solutions'];
 		$repository->reinitialize();
 
@@ -210,13 +210,13 @@ And here is a quote from a customer:
 		);
 
 		$solutions_context = [
-			'pixelgradelt-retailer/ecommerce' => [
+			'pressody-retailer/ecommerce' => [
 				'timestamp' => 100,
 			],
-			'pixelgradelt-retailer/edd'       => [
+			'pressody-retailer/edd'       => [
 				'timestamp' => 200,
 			],
-			'pixelgradelt-retailer/blog'      => [
+			'pressody-retailer/blog'      => [
 				'timestamp' => 300,
 			],
 		];
@@ -226,21 +226,21 @@ And here is a quote from a customer:
 		$processed_solutions  = $processed_repository->all();
 
 		// We expect to have the ecommerce and edd solutions, but not the blog one since it is excluded by ecommerce.
-		$this->assertNotEmpty( $processed_solutions['pixelgradelt-retailer/edd'] );
-		$this->assertInstanceOf( BaseSolution::class, $processed_solutions['pixelgradelt-retailer/edd'] );
-		$this->assertNotEmpty( $processed_solutions['pixelgradelt-retailer/ecommerce'] );
-		$this->assertInstanceOf( BaseSolution::class, $processed_solutions['pixelgradelt-retailer/ecommerce'] );
-		$this->assertNotContains( 'pixelgradelt-retailer/blog', array_keys( $processed_solutions ) );
+		$this->assertNotEmpty( $processed_solutions['pressody-retailer/edd'] );
+		$this->assertInstanceOf( BaseSolution::class, $processed_solutions['pressody-retailer/edd'] );
+		$this->assertNotEmpty( $processed_solutions['pressody-retailer/ecommerce'] );
+		$this->assertInstanceOf( BaseSolution::class, $processed_solutions['pressody-retailer/ecommerce'] );
+		$this->assertNotContains( 'pressody-retailer/blog', array_keys( $processed_solutions ) );
 
 		// We also expect a certain order, alphabetically by the package name.
 		$this->assertSame( [
-			'pixelgradelt-retailer/ecommerce',
-			'pixelgradelt-retailer/edd',
+			'pressody-retailer/ecommerce',
+			'pressody-retailer/edd',
 		], array_keys( $processed_solutions ) );
 	}
 
 	public function test_multiple_exclusion_with_context_order() {
-		/** @var \PixelgradeLT\Retailer\Repository\Solutions $repository */
+		/** @var \Pressody\Retailer\Repository\Solutions $repository */
 		$repository = plugin()->get_container()['repository.solutions'];
 		$repository->reinitialize();
 
@@ -258,13 +258,13 @@ And here is a quote from a customer:
 
 		// The presentation solution should be the first to exclude, thus excluding the ecommerce solution.
 		$solutions_context = [
-			'pixelgradelt-retailer/presentation' => [
+			'pressody-retailer/presentation' => [
 				'timestamp' => 200,
 			],
-			'pixelgradelt-retailer/ecommerce'    => [
+			'pressody-retailer/ecommerce'    => [
 				'timestamp' => 100,
 			],
-			'pixelgradelt-retailer/blog'         => [
+			'pressody-retailer/blog'         => [
 				'timestamp' => 300,
 			],
 		];
@@ -273,17 +273,17 @@ And here is a quote from a customer:
 		$processed_repository = new ProcessedSolutions( $filtered_repo, $solutions_context, $repository->get_factory(), $repository->get_solution_manager() );
 		$processed_solutions  = $processed_repository->all();
 
-		$this->assertNotEmpty( $processed_solutions['pixelgradelt-retailer/blog'] );
-		$this->assertInstanceOf( BaseSolution::class, $processed_solutions['pixelgradelt-retailer/blog'] );
-		$this->assertNotEmpty( $processed_solutions['pixelgradelt-retailer/presentation'] );
-		$this->assertInstanceOf( BaseSolution::class, $processed_solutions['pixelgradelt-retailer/presentation'] );
-		$this->assertNotContains( 'pixelgradelt-retailer/ecommerce', array_keys( $processed_solutions ) );
-		$this->assertNotContains( 'pixelgradelt-retailer/edd', array_keys( $processed_solutions ) );
+		$this->assertNotEmpty( $processed_solutions['pressody-retailer/blog'] );
+		$this->assertInstanceOf( BaseSolution::class, $processed_solutions['pressody-retailer/blog'] );
+		$this->assertNotEmpty( $processed_solutions['pressody-retailer/presentation'] );
+		$this->assertInstanceOf( BaseSolution::class, $processed_solutions['pressody-retailer/presentation'] );
+		$this->assertNotContains( 'pressody-retailer/ecommerce', array_keys( $processed_solutions ) );
+		$this->assertNotContains( 'pressody-retailer/edd', array_keys( $processed_solutions ) );
 
 		// We also expect a certain order, alphabetically by the package name.
 		$this->assertSame( [
-			'pixelgradelt-retailer/blog',
-			'pixelgradelt-retailer/presentation',
+			'pressody-retailer/blog',
+			'pressody-retailer/presentation',
 		], array_keys( $processed_solutions ) );
 	}
 }
