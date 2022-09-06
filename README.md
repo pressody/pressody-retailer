@@ -70,3 +70,7 @@ composer run tests-integration
 ## Credits
 
 ...
+
+---
+
+Copyright (c) 2021, 2022 Vlad Olaru (vlad@thinkwritecode.com)
